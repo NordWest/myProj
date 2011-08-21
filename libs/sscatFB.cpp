@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "sscatFB.h"
 
 sscatFB::sscatFB() : fbStreamLine()

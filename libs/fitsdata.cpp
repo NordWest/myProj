@@ -693,7 +693,7 @@ void initRefraction(refractionParam *refParam)
 */
 int reductionMaker::make6const(marksGrid *refMarks, QVector<int> &rsindex, reductionParams params)
 {
-    qDebug() << "\n\nmake8const\n\n";
+    qDebug() << "\n\nmake6const\n\n";
     double errksi,erreta;
     double minErrKsi, minErrEta;
     //double ksi, eta, ka1;

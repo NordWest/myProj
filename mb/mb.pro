@@ -2,7 +2,7 @@ win32 {
  TARGET = ./../../libs/win32/mb
 }
 unix {
-TARGET = ./../libs/unix64/mb
+TARGET = ./../libs/unix/mb
 }
 TEMPLATE = lib
 SOURCES += mb.cpp

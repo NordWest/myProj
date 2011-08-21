@@ -1884,3 +1884,4 @@ int translit_dict(char *ru, char *tr)
         else if(streqv(ru, "Р–")) strcpy(tr, "ZH");
         else if(streqv(ru, "Р—")) strcpy(tr, "Z");
         else if(streqv(ru, "Р
+        */

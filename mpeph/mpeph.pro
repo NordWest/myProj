@@ -19,6 +19,6 @@ TARGET = mpeph
 QT += network
 CONFIG += console exceptions warn_off release
 win32:LIBS += ./../libs/cfitsio.lib
-unix:LIBS += ./../libs/libcfitsio.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
 unix:LIBS += ./../libs/unix/libmb.a
 win32:LIBS += ./../libs/win32/libmb.a

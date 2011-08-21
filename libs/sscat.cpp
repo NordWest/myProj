@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "sscat.h"
 
 sscat_rec::sscat_rec()

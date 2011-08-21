@@ -1,4 +1,4 @@
-#include "stdafx.h"
+//#include "stdafx.h"
 //#include "..\DAster\StdAfx.h"
 //#include "..\DAster\DAster.h"
 
