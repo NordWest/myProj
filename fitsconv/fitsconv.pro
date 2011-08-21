@@ -1,0 +1,10 @@
+TEMPLATE = app
+INCLUDEPATH =  C:\boost_1_33_1
+SOURCES +=main.cpp
+HEADERS +=./../libs/fitsio.h
+HEADERS += ./../libs/astro.h
+SOURCES += ./../libs/astro.cpp
+win32:LIBS += ./../libs/cfitsio.lib
+unix:LIBS +=  ./../libs/libcfitsio.a
+TARGET = fitsconv
+CONFIG += console qt warn_off release  
