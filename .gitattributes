@@ -238,6 +238,7 @@ libs/sscatFB.cpp -text
 libs/sscatFB.h -text
 libs/sscatbin.cpp -text
 libs/sscatbin.h -text
+libs/stdafx.h -text
 libs/time_a.cpp -text
 libs/time_a.h -text
 libs/vectGrid3D.cpp -text

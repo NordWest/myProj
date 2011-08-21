@@ -67,7 +67,7 @@ public:
         double Dx, Dy;          //[pix]
         double Dpixmag;         //[]
 */
-        //double ra_oc, dec_oc;		//Р№РќРќРџР”РҐРњР®Р РЁ РќРћР РҐР’Р•РЇР™РќР¦Рќ Р–Р•РњР РџР®
+        //double ra_oc, dec_oc;		//йННПДХМЮРШ НОРХВЕЯЙНЦН ЖЕМРПЮ
         double topDist;                 //[au]
         double muRaCosDe;                    //mu_ra*cos(dec) [mas/min]
         double muDe;                    //mu_de [mas/min]
@@ -92,7 +92,7 @@ public:
         ocRec& operator=(const ocRec &source);
 	
 	
-        int vers;                                       //Р РҐРћ РЇР РџРќР™РҐ.
+        int vers;                                       //РХО ЯРПНЙХ.
         //0 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
         //1 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|ra_oc|de_oc|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
 	
@@ -104,4 +104,777 @@ public:
 //MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|x|y|pixmag|Dx|Dy|Dpixmag|topDist|muRaCosDe|muDe|Vr|phase|elong|expTime|name|catName|catMagName|mesureTimeCode
 //2009 01 01.86517|07 58 32.9669|+56 55 15.006|13.883|   169.7|  -284.8|    -0.1|  640.2616|  727.4599|   1.122200e+05|  0.317784|  0.307834|        791.333| 0.032179483| -4032.00|  6960.00|  3.29|  35.130| 143.790|  30.000|        2008 EV5|   mpeph|    Vmag|20110118043313937
 /*
-    MJday               Р‘РџР•Р›РЄ РњР®РђРљР§Р”Р•РњРҐР
+    MJday               БПЕЛЪ МЮАКЧДЕМХИ
+    ra                  ОПЪЛНЕ БНЯУНФДЕМХЕ
+    de                  ЯЙКНМЕМХЕ
+    mag0                ГБ. БЕКХВХМЮ
+    ocRaCosDe           (O-C) ОН RA * cosDec [mas]
+    ocDe                (O-C) ОН Dec [mas]
+    ocMag               (O-C) ОН ГБ. БЕКХВХМЕ [mag]
+    x                   ХГЛЕПЕММЮЪ ЙННПДХМЮРЮ X [pix]
+    y                   ХГЛЕПЕММЮЪ ЙННПДХМЮРЮ Y [pix]
+    pixmag              ОХЙЯЕКЭМЮЪ ГБ. БЕКХВХМЮ
+    Dx,Dy, Dpixmag      НЬХАЙХ ХГЛЕПЕММШУ ЙННПДХМЮР [pix]
+    topDist             РНОНЖЕМРПХВЕЯЙНЕ ПЮЯЯРНЪМХЕ [AU]
+    muRaCosDec          БХДХЛЮЪ СЦКНБЮЪ ЯЙНПНЯРЭ ЮЯРЕПНХДЮ ОН Ra * cosDe [mas/min]
+    muDe                БХДХЛЮЪ СЦКНБЮЪ ЯЙНПНЯРЭ ЮЯРЕПНХДЮ ОН De [mas/min]
+    Vr                  КСВЕБЮЪ ЯЙНПНЯРЭ ЮЯРЕПНХДЮ [km/s]
+    phase               ТЮГЮ ЮЯРЕПНХДЮ [deg]
+    elong               ЩКНМЦЮЖХЪ [deg]
+    expTime             ДКХРЕКЭМНЯРЭ ЩЙЯОНГХЖХХ [sec]
+    name                ХЛЪ НАЗЕЙРЮ
+    catName             ХЛЪ ЙЮРЮКНЦЮ
+    catMagName          ХЛЪ ГБ БЕКХВХМШ Б ЙЮРЮКНЦЕ
+    mesureTimeCode      ЙНД ХГЛЕПЕМХЪ
+
+*/
+
+class colRec
+{
+public:
+	int colNum, num;
+        double mean, rmsMean, rmsOne;
+	
+	colRec();
+	colRec(QString str);
+	
+	void rec2s(QString *str);
+	void s2rec(QString str);
+	
+        colRec& operator=(const colRec &source);
+};
+
+class moveModelRec
+{
+public:
+        int nPosX, nPosY;
+	double Tm, xTm, yTm, uweX, uweY, rmsX, rmsY, Xdot, rmsXdot, XdotOC, Ydot, rmsYdot, YdotOC;
+	
+	moveModelRec();
+	moveModelRec(QString str);
+	
+	void rec2s(QString *str);
+	void s2rec(QString str);
+
+        int fp;         //positions format (0 - RA,DEC in HMS,DMS, 1 - relative positions in arcsec)
+        int ft;         //time format (0 - YYYY MM DD.DDDDDD)
+        int vflag;      //МЮКХВХЕ ЙНКНМНЙ Я ЩТЕЛЕПХДМШЛХ ГМЮВЕМХЪЛХ ЯЙНПНЯРХ ДБХФЕМХЪ НАЗЕЙРЮ.
+        int ndig;
+};
+
+//# Tm| X(Tm) | ВХЯКН ОНКНФЕМХИ| UWE - НЬХАЙЮ ЕДХМХЖШ БЕЯЮ|  яйн X(Tm)|XDOT|яйн XDOT|(O-C) ОН XDOT
+//# Tm| Y(Tm) | ВХЯКН ОНКНФЕМХИ| UWE - НЬХАЙЮ ЕДХМХЖШ БЕЯЮ|  яйн Y(Tm)|YDOT|яйн YDOT|(O-C) ОН YDOT
+
+//Tm|xTm|yTm|nPos|uweX|uweY|rmsX|rmsY|Xdot|rmsXdot|XdotOC|Ydot|rmsYdot|YdotOC
+//#2007 01 17.95120|08 16 58.1650|+10 45 29.429|  4| 231.2| 147.7| 113.6|   -607.97|  33.88|  73.9|    284.14|  22.04
+//Tm|xTm|yTm|nPosX|uweX|rmsX|Xdot|rmsXdot|XdotOC|nPosY|uweY|rmsY|Ydot|rmsYdot|YdotOC
+
+//RA [deg]    | DEC [deg]  | ksi      |eta       |mag  |       (O-C)         |   x      |   y      | pixmag   | Dx    | Dy    |Dpixmag  |u2R   |  J   |  H   |  Ks  |OCmag  |c|exptime
+//                          [arcsec]   [arcsec]           ksi    eta     mag         pix                          mpix                            mag                             sec
+//                                                            [mas]
+//345.14222346| 10.56331554| -588.3575| -588.9437|12.92|   38.6|  -34.5| 1.32| -634.2300|  601.6340|  2.312728|   39.6|   37.3|-0.144934|11.600|10.619|10.301|10.266|  1.334|0|  60.000
+
+
+class residualsRec
+{
+public:
+        double mJD;             //[day]
+        double ra, de;          //[deg]
+        double ksi, eta;        //[deg]
+        double mag;             //[mag]
+        double ksiOC, etaOC;    //[mas]
+        double magOC;           //[mag]
+        double x, y;            //[pix]
+        double pixmag;          //[]
+        double Dx, Dy;          //[pix]
+        double Dpixmag;         //[]
+        int isRefKsi, isRefEta, isRefMag;              //Star is used in reduction
+ //       double exptime;
+        QString catName, catMagName;        //name of catalog and name of magnitude param used
+        QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
+        QString mesParams;           //P[21]
+	
+	residualsRec();
+	residualsRec(QString str);
+	
+	void rec2s(QString *str);
+	void s2rec(QString str);
+
+        void copy(const residualsRec &source);
+
+        void setMesParams(double *P, int pSize);
+};
+
+
+//MJD|RAoc|DECoc|Xoc|Yoc|mesureTimeCode#Nx|Ax|CKO Ax|Bx|CKO Bx|Cx|CKO Cx|...#Ny|Ay|CKO Ay|By|CKO By|Cy|CKO Cy|...#Nm|UWEm|Am|яйн Am|Bm|яйн Bm|...|originName
+
+class plateConstRec
+{
+public:
+    int N;
+    double UWE;
+    QVector <double> params;
+    QVector <double> rms;
+
+    QString toString();
+    void fromString(QString source);
+    void clear();
+    void addParam(double val, double err);
+    void setNparams(int Num, double uwe, double *pVect, int pNum);
+    void set3params(int Num, double uwe, double A, double rmsA, double B, double rmsB, double C, double rmsC);
+    void set2params(int Num, double uwe, double A, double rmsA, double B, double rmsB);
+    void copy(const plateConstRec &source);
+};
+
+class errBudgetRec
+{
+public:
+        double MJD;
+        double RAoc, DEoc;                              //coords of optical center [deg]
+        double Xoc, Yoc;                                //coords of optical center [pix]
+        int redType;                                    //reduction type (0- 6const)
+        QString obsCode;                                //code of observatory
+        double exptime;                                 //exposure time [sec]
+
+        plateConstRec xParams, yParams, mParams;
+        QString mesureTimeCode;                         //time of measurements [YYYYMMDDHHMMSSSS]
+        QString originName;                             //name of reducted source
+	
+	errBudgetRec();
+	errBudgetRec(QString str);
+
+        void clear();
+	
+	void rec2s(QString *str);
+        void s2rec(QString str);
+
+        void copy(const errBudgetRec &source);
+};
+
+
+/*
+class ucac2Rec
+{
+    double ra, dec;             //Ra Dec [mas]
+
+
+    ucac2Rec();
+    ucac2Rec(QString str);
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+};
+*/
+
+class usnoRec   //usno-b1.0
+{
+public:
+    double r0;                      //_r	(F8.4)	Distance from center (RAJ2000=?, DEJ2000=?) at Epoch=J2000.0	[ucd=pos.angDistance]
+    double x0;
+    double y0;
+    QString usnoName;               //USNO-B1.0	(a12)       Designation of the object (1)	[ucd=meta.id;meta.main]
+    QString tychoName;              //Tycho-2	(a12)	Designation in the Tycho-2 Catalog <I/259>	[ucd=meta.id]
+    double ra;                             //RAJ2000	(F10.6)	Right Ascension at Eq=J2000, Ep=J2000 (2)	[ucd=pos.eq.ra;meta.main]
+    double de;                            //DEJ2000	(F10.6)	Declination at Eq=J2000, Ep=J2000 (2)	[ucd=pos.eq.dec;meta.main]
+    double e_Ra;                         //e_RAJ2000	(I3)	Mean error on RAdeg*cos(DEdeg) at Epoch	[ucd=stat.error;pos.eq.ra]
+    double e_De;                         //e_DEJ2000	(I3)	Mean error on DEdeg at Epoch	[ucd=stat.error;pos.eq.dec]
+    double Epoch;                     //Epoch	(F6.1)	Mean epoch of observation (2)	[ucd=time.epoch;obs]
+    double pmRA;                      //pmRA	(I6)	Proper motion in RA (relative to YS4.0)	[ucd=pos.pm;pos.eq.ra]
+    double pmDE;                      //pmDE	(I6)	Proper motion in DE (relative to YS4.0)	[ucd=pos.pm;pos.eq.dec]
+    double muPr;                       //muPr	(I1)	? Total Proper Motion probability (7)	[ucd=stat.probability]
+    double e_pmRA;                  //e_pmRA	(I3)	Mean error on pmRA	[ucd=stat.error;pos.pm;pos.eq.ra]
+    double e_pmDE;                  //e_pmDE	(I3)	Mean error on pmDE	[ucd=stat.error;pos.pm;pos.eq.dec]
+    double fit_RA;                     //fit_RA	(I1)	Mean error on RA fit	[ucd=stat.error]
+    double fit_DE;                     //fit_DE	(I1)	Mean error on DE fit	[ucd=stat.error]
+    int Ndet;                             //Ndet	(I1)	[0,5] Number of detections (7)	[ucd=meta.number]
+    QString Flags;                    //Flags	(A3)	[MsY.] Flags on object (3)	[ucd=meta.code]
+    double B1mag;                   //B1mag	(F5.2)	? First blue magnitude	[ucd=phot.mag;em.opt.B]
+    int B1C;                             //B1C	(I1)	? source of photometric calibration (4)	[ucd=instr.calib]
+    int B1S;                             //B1S	(I1)	? Survey number (see "\Acat{I/284\#sRM99.1}{Surveys}" section below)	[ucd=meta.id]
+    int B1f;                              //B1f	(I3)	? Field number in survey	[ucd=obs.field]
+    int B1s_g;                          //B1s/g	(I2)	? Star-galaxy separation (6)	[ucd=src.class.starGalaxy]
+    double B1xi;                      //B1xi	(F6.2)	? Residual in X direction (5)	[ucd=stat.fit.residual;pos.eq.ra;arith.diff]
+    double B1eta;                    //B1eta	(F6.2)	? Residual in Y direction (5)	[ucd=stat.fit.residual;pos.eq.dec;arith.diff]
+    double R1mag;                  //R1mag	(F5.2)	? First red magnitude	[ucd=phot.mag;em.opt.R]
+    int R1C;                            //R1C	(I1)	? source of photometric calibration (4)	[ucd=instr.calib]
+    int R1S;                            //R1S	(I1)	? Survey number (see "\Acat{I/284\#sRM99.1}{Surveys}" section below)	[ucd=meta.id]
+    int R1f;                             //R1f	(I3)	? Field number in survey	[ucd=obs.field]
+    int R1s_g;                         //R1s/g	(I2)	? Star-galaxy separation (6)	[ucd=src.class.starGalaxy]
+    double R1xi;                     //R1xi	(F6.2)	? Residual in X direction (5)	[ucd=stat.fit.residual;pos.eq.ra;arith.diff]
+    double R1eta;                   //R1eta	(F6.2)	? Residual in Y direction (5)	[ucd=stat.fit.residual;pos.eq.dec;arith.diff]
+    double B2mag;                 //B2mag	(F5.2)	? Second blue magnitude	[ucd=phot.mag;em.opt.B]
+    int B2C;                           //B2C	(I1)	? source of photometric calibration (4)	[ucd=instr.calib]
+    int B2S;                           //B2S	(I1)	? Survey number (see "\Acat{I/284\#sRM99.1}{Surveys}" section below)	[ucd=meta.id]
+    int B2f;                            //B2f	(I3)	? Field number in survey	[ucd=obs.field]
+    int B2s_g;                        //B2s/g	(I2)	? Star-galaxy separation (6)	[ucd=src.class.starGalaxy]
+    double B2xi;                     //B2xi	(F6.2)	? Residual in X direction (5)	[ucd=stat.fit.residual;pos.eq.ra;arith.diff]
+    double B2eta;                   //B2eta	(F6.2)	? Residual in Y direction (5)	[ucd=stat.fit.residual;pos.eq.dec;arith.diff]
+    double R2mag;                 //R2mag	(F5.2)	? Second red magnitude	[ucd=phot.mag;em.opt.R]
+    int R2C;                           //R2C	(I1)	? source of photometric calibration (4)	[ucd=instr.calib]
+    int R2S;                           //R2S	(I1)	? Survey number (see "\Acat{I/284\#sRM99.1}{Surveys}" section below)	[ucd=meta.id]
+    int R2f;                            //R2f	(I3)	? Field number in survey	[ucd=obs.field]
+    int R2s_g;                        //R2s/g	(I2)	? Star-galaxy separation (6)	[ucd=src.class.starGalaxy]
+    double R2xi;                    //R2xi	(F6.2)	? Residual in X direction (5)	[ucd=stat.fit.residual;pos.eq.ra;arith.diff]
+    double R2eta;                  //R2eta	(F6.2)	? Residual in Y direction (5)	[ucd=stat.fit.residual;pos.eq.dec;arith.diff]
+    double Imag;                   //Imag	(F5.2)	? Infrared (N) magnitude	[ucd=phot.mag;em.opt.I]
+    int IC;                             //IC	(I1)	? source of photometric calibration (4)	[ucd=instr.calib]
+    int IS;                             //IS	(I1)	? Survey number (see "\Acat{I/284\#sRM99.1}{Surveys}" section below)	[ucd=meta.id]
+    int If;                              //If	(I3)	? Field number in survey	[ucd=obs.field]
+    int Is_g;                          //Is/g	(I2)	? Star-galaxy separation (6)	[ucd=src.class.starGalaxy]
+    double Ixi;                     //Ixi	(F6.2)	? Residual in X direction (5)	[ucd=stat.fit.residual;pos.eq.ra;arith.diff]
+    double Ieta;                    //Ieta	(F6.2)	? Residual in Y direction (5)	[ucd=stat.fit.residual;pos.eq.dec;arith.diff]
+
+
+
+    usnoRec();
+    usnoRec(QString str);
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+
+    void copy(const usnoRec &source);
+};
+
+class ucac3Rec
+{
+ public:
+    double ra;              //right ascension at  epoch J2000.0 (ICRS); [ra]=deg
+    double dec;             //declination at  epoch J2000.0 (ICRS); [dec]=deg
+    double im1;             //UCAC fit model magnitude; [im1]=mag
+    double im2;             //UCAC aperture  magnitude; [im1]=mag
+    double sigmag;          //UCAC error on magnitude (larger of sc.mod); [sigmag]=mag
+    int objt;               //object type
+    int dsf;                //double star flag
+
+    double sigra;           //s.e. at central epoch in RA (*cos Dec); [mas]
+    double sigdc;           //s.e. at central epoch in Dec; [mas]
+    int na1;                //total # of CCD images of this star
+    int nu1;                //# of CCD images used for this star
+    int us1;                //# catalogs (epochs) used for proper motions
+    int cn1;                //total numb. catalogs (epochs) initial match
+
+    double cepra;           //central epoch for mean RA, minus 1900; [yr]
+    double cepdc;           //central epoch for mean Dec, minus 1900; [yr]
+    double pmrac;           //proper motion in RA*cos(Dec); [mas/yr]
+    double pmdc;            //proper motion in Dec; [mas/yr]
+    double sigpmr;          //s.e. of pmRA * cos Dec; [mas/yr]
+    double sigpmd;          //s.e. of pmDec; [mas/yr]
+
+    int id2m;               //2MASS pts_key star identifier
+    double jmag;            //2MASS J  magnitude; [mag]
+    double hmag;            //2MASS H  magnitude; [mag]
+    double kmag;            //2MASS K_s magnitude; [mag]
+    int icqflg;             //2MASS cc_flg*10 + phot.qual.flag
+    int e2mpho;             //2MASS error photom. (1/100 mag)
+
+    double smB;             //SuperCosmos Bmag; [mag]
+    double smR2;            //SC R2mag; [mag]
+    double smI;             //SC Imag; [mag]
+    int clbl;               //SC star/galaxy classif./quality flag
+    int qfB;                //SC quality flag Bmag
+    int qfR2;               //SC quality flag R2mag
+    int qfI;                //SC quality flag Imag
+
+    int catflg;             //mmf flag for 10 major catalogs matched
+    int g1;                 //Yale SPM object type (g-flag)
+    int c1;                 //Yale SPM input cat.  (c-flag)
+    int leda;               //LEDA galaxy match flag
+    int x2m;                //2MASS extend.source flag
+    int rn;                 //MPOS star number; identifies HPM stars
+
+
+
+    ucac3Rec();
+    ucac3Rec(QString str);
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+
+    void copy(const ucac3Rec &source);
+};
+
+//RA[HH:MM:SS.SSSSS]|DEC[signDD:MM:SS.SSSS]|top dist[a.u.]|Vmag|phase[deg]|elongation[deg]|RAmotion*CosDEC[mas/min]|DECmotion[mas/min]|Radial_Velocity[km/s]|MPCnumber
+
+struct mpephRec
+{
+    double ra, de;          //[deg]
+    double topDist;         //[au]
+    double Vmag;            //[mag]
+    double phase;           //[grad]
+    double elong;           //[grad]
+    double muRaCosDe, muDe;      //[mas/min]
+    double Vr;              //[km/s]
+
+    QString num, name;
+
+    int fromString(QString inStr);
+    void copyTo(mpephRec *targ);
+};
+
+//# Num, Name, RA(h), DE(deg), Class, Mv, Err(arcsec), d(arcsec), dRA(arcsec/h), dDEC(arcsec/h), Dg(ua), Dh(ua), Phase(deg), SunElong(deg), x(au), y(au), z(au), vx(au/d), vy(au/d), vz(au/d), Ref. Epoch(JD)
+
+struct skybotRec
+{
+    QString Num;            //Num
+    QString Name;           //Name
+    double RA;              //RA[deg]
+    double DE;              //DEC[deg]
+    QString Class;          //Class
+    double Mv;              //Mv
+    double Err;             //Err (arcsec)
+    double d;               //d(arcsec)
+    double dRA;             //dRA(arcsec/h)
+    double dDEC;            //dDEC(arcsec/h)
+    double Dg;              //Dg(ua)
+    double Dh;              //Dh(ua)
+    double Phase;           //Phase(deg)
+    double SunElong;        //SunElong(deg)
+    double x, y, z;         //x(au), y(au), z(au)
+    double vx, vy, vz;      //vx(au/d), vy(au/d), vz(au/d)
+    double Epoch;           //Epoch(JD)
+
+    int fromString(QString iStr);
+    void toString(QString *oStr);
+
+    void copy(const skybotRec &source);
+
+};
+
+/*
+1  	object number (blank if unnumbered)  	-  	x  	x  	x  	x
+2 	object name (official or preliminary designation) 	- 	x 	x 	x 	x
+3,4 	astrometric J2000 geocentric equatorial coordinates (?, ?) at the given epoch 	degree 	x 	x 	x 	x
+5 	class 	- 	x 	x 	x 	x
+6 	visual magnitude 	- 	x 	x 	x 	x
+7 	error on the position 	arcsec 	x 	x 	x 	x
+8 	body-to-center angular distance 	arcsec 	x 	x 	x 	x
+9,10 	motion on the celestial sphere (?'cos(?), ?') 	arcsec/h 	  	x 	x 	x
+11 	geocentric distance 	AU 	  	x 	x 	x
+12 	heliocentric distance 	AU 	  	x 	x 	x
+13 	Phase angle 	degree 	  	  	x 	x
+14 	Solar elongation 	degree 	  	  	x 	x
+15..20 	mean J2000 heliocentric vector position and motion at epoch T0 	AU and AU/d 	  	  	  	x
+21 	T0, epoch of the position vector 	Julien Day 	  	  	  	x
+*/
+
+struct objEphRec
+{
+    QString objName;
+    QString catName, magCatName;
+};
+
+class sstarRes
+{
+public:
+    double mJD;             //[day]
+    double ra, de;          //[deg]
+    double ksi, eta;
+    double mag;     //[mag]
+    double ksiOC, etaOC;    //[]
+    double magOC;           //[mag]
+    double x, y;            //[pix]
+    double pixmag;          //[]
+    double Dx, Dy;          //[pix]
+    double Dpixmag;         //[]
+    double exptime;
+    QString lspmName;                //LSPM star name (1)
+    QString catName, catMagName;     //name of catalog and name of magnitude param used
+    QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
+
+    sstarRes();
+    sstarRes(QString str);
+    ~sstarRes();
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+
+    void copy(const sstarRes &source);
+};
+
+class objResRec
+{
+public:
+    double mJD;                     //[dateobs]
+    double ra, de;                  //[hms gms]
+    double ksi, eta;                //[deg]
+    double mag;                     //[mag]
+    double ksiOC, etaOC;            //[mas]
+    double magOC;                   //[mag]
+    double x, y;                    //[pix]
+    double pixmag;                  //[]
+    double Dx, Dy;                  //[pix]
+    double Dpixmag;                 //[]
+    //double exptime;                 //[sec]
+    QString name;                   //obj name (1)
+    QString catName, catMagName;    //name of catalog and name of magnitude param used
+    QString mesureTimeCode;         //time of measurements [YYYYMMDDHHMMSSSS]
+    QString mesParams;              //P[21]
+
+    objResRec();
+    objResRec(QString str);
+    ~objResRec();
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+
+    void setMesParams(double *P, int pSize);
+
+    void copy(const objResRec &source);
+
+    void toOcRec(ocRec *rec);
+    void toSstarRes(sstarRes *rec);
+};
+
+////////////////////////////////////////////////////////////
+
+class eqFile
+{
+public:
+	QList <ocRec*> ocList;
+	QList <colRec*> colList;
+	moveModelRec* mmRec;
+	
+	int ndig, nfrac;
+        //ndig - ВХЯКН ГМЮВЮЫХУ ЖХТП Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+        //nfrac - ВХЯКН ГМЮВЮЫХУ ЖХТП ОНЯКЕ ГЮОЪРНИ Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+        //vflag - МЮКХВХЕ ЙНКНМНЙ Я ЩТЕЛЕПХДМШЛХ ГМЮВЕМХЪЛХ ЯЙНПНЯРХ ДБХФЕМХЪ НАЗЕЙРЮ.
+
+	
+	QString fName;
+	
+
+	eqFile();
+	~eqFile();
+	void init(const char *fname);
+	void initOld(const char *fname);
+        void save(int saveType = 0);
+        void saveAs(QString fName, int saveType = 0);
+        //void saveAsMpc(QString fName, QString obsName, int objNum);
+	void clear();
+
+        void sortOClist();
+	
+	int getColRecNum(int colNum);
+	int setColRec(colRec* cRec);
+	void sortColList();
+
+        colRec* getColNum(int cNum);
+
+        int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+        int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
+        void do3sigma(double proofP, double sigmaMul);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
+        int countMM(int fp = 0, int ft = 0, int vflag = 1);
+
+        void findSeries(QList <eqFile*> *eqList);
+	
+        void delMMrec();
+
+        //void getSeriesRec(eqSeriesRec *eqsRec);
+        void getSeriesRec(ocRec *eqsRec);
+
+        void removeMes(QString mesureTimeCode);
+};
+
+class sstarFile
+{
+public:
+    QList <sstarRes*> ocList;
+    QString fName;
+
+    QList <colRec*> colList;
+    //moveModelRec* mmRec;
+
+    int ndig, nfrac;
+    //ndig - ВХЯКН ГМЮВЮЫХУ ЖХТП Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+    //nfrac - ВХЯКН ГМЮВЮЫХУ ЖХТП ОНЯКЕ ГЮОЪРНИ Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+    //vflag - МЮКХВХЕ ЙНКНМНЙ Я ЩТЕЛЕПХДМШЛХ ГМЮВЕМХЪЛХ ЯЙНПНЯРХ ДБХФЕМХЪ НАЗЕЙРЮ.
+
+    sstarFile();
+    ~sstarFile();
+
+    int init(QString fileName);
+
+    void save();
+    void saveAs(QString fName);
+    void clear();
+
+    int getColRecNum(int colNum);
+    int setColRec(colRec* cRec);
+    void sortColList();
+
+    colRec* getColNum(int cNum);
+
+    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+    int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
+    void do3sigma(double proofP, double sigmaMul);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
+    //int countMM(int fp = 0, int ft = 0, int vflag = 1);
+
+    //void delMMrec();
+
+    void removeMes(QString mesureTimeCode);
+};
+
+class residualFile
+{
+public:
+	QList <residualsRec*> resList;
+	
+	QString fName;
+
+        double meanKsi, meanEta, rmsOneKsi, rmsOneEta, rmsMeanKsi, rmsMeanEta;
+
+	residualFile();
+	~residualFile();
+	void init(const char *fname);
+        //void initOld(const char *fname);
+	void clear();
+	void save();
+	void saveAs(QString fName);
+
+        void detStat();
+        void remSigma(double sg);
+
+        void removeMes(QString mesureTimeCode);
+};
+
+class objResidualFile
+{
+public:
+    QList <objResRec*> ocList;
+
+    QString fName;
+
+    objResidualFile();
+    ~objResidualFile();
+
+    void init(QString fname);
+
+    void clear();
+    void save();
+    void saveAs(QString fname);
+
+    void removeMes(QString mesureTimeCode);
+};
+
+class errBudgetFile
+{
+public:
+        QList <errBudgetRec*> errList;
+
+        QString fName;
+
+	errBudgetFile();
+	~errBudgetFile();
+	void init(const char *fname);
+
+        void save();
+        void saveAs(QString fName);
+
+        void removeMes(QString mesureTimeCode);
+};
+
+class reductionStat
+{
+public:
+    errBudgetFile *ebFile;
+    residualFile *resFile;
+    objResidualFile *objFile;
+    //eqFile *mpeFile;
+    //sstarFile *ssFile;
+
+    QList <measurementRec*> mesList;
+    QList <measurementStatRec*> statList;
+
+    reductionStat();
+    ~reductionStat();
+
+    int init(QString *ebFileName, QString *resFileName = NULL, QString *objFileName = NULL);
+
+    void findMeasurements();
+
+    measurementRec* getMeasurement(QString mesTimeCode);
+    measurementStatRec* getMeasurementStat(QString mesTimeCode);
+
+    void getMeasurementsList(QStringList mesCodeList, reductionStat *selRed);
+    void getMeasurementsList(QList <measurementRec*> mesList, reductionStat *selRed);
+
+    void saveMesList(QString ebFileName, QString resFileName, QString objFileName = "");
+
+    int removeMes(QString mesTimeCode);
+
+    //void fromMesList()
+};
+
+struct measurementRec
+{
+    QString mesureTimeCode;
+    errBudgetRec *errBud;
+    QList <residualsRec*> resList;
+    QList <objResRec*> objList;
+    //QList <ocRec*> mpeList;
+    //QList <sstarRes*> sstarList;
+
+    //QList <marksP*> u3MarksList;
+
+    void detStat(measurementStatRec *stRec);
+
+    //void detMarksList(QList <marksP*> u3List);
+};
+
+struct measurementStatRec
+{
+    QString mesureTimeCode;
+    QString originName;
+    double UWEx, UWEy, UWEm;
+    int Nx, Ny, Nm;
+    int ocNum;
+    double meanOCksi, meanOCeta;
+    double rmsMeanOCksi, rmsMeanOCeta;
+    double rmsOneOCksi, rmsOneOCeta;
+
+
+    void copy(measurementStatRec *source);
+};
+
+struct plateStatRec
+{
+    QString plateName;
+    QList <measurementStatRec*> mStatList;
+
+    void getMinUWE(measurementStatRec* minRec);
+    int getMinUWEpos();
+    int getVersNamePos(QString versName);
+
+};
+
+struct platesStat
+{
+    QList <plateStatRec*> platesList;
+
+    void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);
+    void initPlatesNamesFile(QString plnFileName);
+    int pushPlateName(QString plName);
+    void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* mesRec, int plNameType);
+
+    void saveReport0(QString r0name, int isMinUWE, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList = NULL);
+    void saveReport0Seq(QString r0name, QString versSeq, QStringList excMes, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList = NULL);
+};
+
+struct objStatRec
+{
+    QString objName;
+    platesStat *plStat;
+    QList <measurementStatRec*> mStatList;
+    void init(int plNameType);
+    void do3Sigma(reductionStat *rStat, double sigma, double pfc = 0.0);
+    void getMpList(reductionStat *rStat, QList <objResRec*> *ocList);
+    //void getSstarList(reductionStat *rStat, QList <sstarRes*> *sstarList);
+    void removeMes(QString mesTimeCode);
+    //void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);
+};
+
+struct objectsStat
+{
+   QList <objStatRec*> objList;
+   void init(reductionStat *redStat, int plNameType);
+
+};
+/*
+struct eqStatRec
+{
+    QString asterName;
+    platesStat *plStat;
+    QList <measurementStatRec*> mStatList;
+    void init(int plNameType);
+    //void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);
+};
+
+struct eqPlatesStat
+{
+   QList <eqStatRec*> asterList;
+   void init(reductionStat *redStat, int plNameType);
+
+};
+
+struct ssStatRec
+{
+    QString ssName;
+    platesStat *plStat;
+    QList <measurementStatRec*> mStatList;
+    void init();
+    //void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);
+};
+
+struct ssPlatesStat
+{
+   QList <ssStatRec*> ssList;
+   void init(reductionStat *redStat);
+};
+*/
+
+/*
+struct eqSeriesRec : public ocRec
+{
+    double epoch;
+    QString catEphName;                 //name of (O-C) ephemeride source
+   // QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
+
+ //   void rec2sS(QString *recStr);
+ //   void s2recS(QString recStr);
+
+    void rec2sBase(QString *recStr);
+    void s2recBase(QString recStr);
+
+    eqSeriesRec(QString str);
+
+    void copy(const eqSeriesRec &source);
+    eqSeriesRec& operator=(const eqSeriesRec &source);
+};
+/*
+class eqSeriesFile
+{
+public:
+        QList <eqSeriesRec*> ocList;
+        QList <colRec*> colList;
+        moveModelRec* mmRec;
+
+        int ndig, nfrac;
+        //ndig - ВХЯКН ГМЮВЮЫХУ ЖХТП Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+        //nfrac - ВХЯКН ГМЮВЮЫХУ ЖХТП ОНЯКЕ ГЮОЪРНИ Б БШБНДХЛНЛ ПЕГСКЭРЮРЕ.
+        //vflag - МЮКХВХЕ ЙНКНМНЙ Я ЩТЕЛЕПХДМШЛХ ГМЮВЕМХЪЛХ ЯЙНПНЯРХ ДБХФЕМХЪ НАЗЕЙРЮ.
+
+
+        QString fName;
+
+
+        eqSeriesFile();
+        ~eqSeriesFile();
+        void init(const char *fname);
+        void initOld(const char *fname);
+        void save();
+        void saveAs(QString fName);
+        void clear();
+
+        void sortOClist();
+
+        int getColRecNum(int colNum);
+        int setColRec(colRec* cRec);
+        void sortColList();
+
+        colRec* getColNum(int cNum);
+
+        int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+        int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
+        void do3sigma(double proofP, double sigmaMul);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
+        int countMM(int fp = 0, int ft = 0, int vflag = 1);
+
+        void findSeries(QList <eqFile*> *eqList);
+
+        void delMMrec();
+
+        void getSeriesRec(eqSeriesRec *eqsRec);
+};
+
+*/
+
+#endif
