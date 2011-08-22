@@ -113,7 +113,7 @@ QTextCodec::setCodecForCStrings(codec1);
 //  logs
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
-        QString logFolder = sett->value("logs/logFolder", "./logs").toString();
+        //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
 
 /*insSettings
         QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
@@ -173,8 +173,8 @@ QTextCodec::setCodecForCStrings(codec1);
         QDir resDir("./");
         if(resDir.mkpath(resFolder))qDebug() << "\nresFolder created\n";
         else qDebug() << "\nresFolder don't create\n";
-        if(resDir.mkpath(logFolder))qDebug() << "\nlogFolder created\n";
-        else qDebug() << "\nlogFolder don't create\n";
+        //if(resDir.mkpath(logFolder))qDebug() << "\nlogFolder created\n";
+        //else qDebug() << "\nlogFolder don't create\n";
 
         QFileInfo fi(fileName);
         QString filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
