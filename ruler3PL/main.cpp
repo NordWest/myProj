@@ -180,7 +180,8 @@ QTextCodec::setCodecForCStrings(codec1);
         QString filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
         if(filePath=="") filePath = QString("./");
         QString wcsFileName = QString("%1.wcs").arg(fileName);
-        QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
+        //QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
+        QString logFileName = QString("%1.log").arg(fi.absoluteFilePath());
 
         if(useLogLock&&QDir().exists(logFileName))
         {
