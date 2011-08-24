@@ -60,7 +60,7 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     Q_ASSERT( codec1 );
     QTextCodec::setCodecForCStrings(codec1);
 
-    QString logFileName = QString("tiff2fitsCut.log");
+    QString logFileName = QString("wcs2mks.log");
 
     QFile* logFile = new QFile(logFileName);
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered)) clog = new QDataStream(logFile);
@@ -71,20 +71,21 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     QStringList outerArguments;
     QString dateStr, timeStr, descS, oName;
     int oNum;
-
-//    QString tifFName = QString(argv[1]);
-    QString wcsFName = codec1->toUnicode(argv[1]);
-
- //   QString curDir = tifFName.left(tifFName.lastIndexOf("\\"));
- //   qDebug() << QString("curDir: %1\n").arg(curDir);
-
-    int currentCat, isMove2corner, i, sz, resRed;
-    double maxObjDisp;
-    catFinder *starCat;
+    int i, sz;
     QList <catFinder*> starCatList;
     QString filePath, pnStr;
     QString obsCode;
     QString uTime;
+
+//    QString tifFName = QString(argv[1]);
+    QString wcsFName = codec1->toUnicode(argv[1]);
+    QFileInfo fi(wcsFName);
+    filePath = fi.absoluteFilePath();
+
+ //   QString curDir = tifFName.left(tifFName.lastIndexOf("\\"));
+ //   qDebug() << QString("curDir: %1\n").arg(curDir);
+
+
     //BEGIN settings
     QSettings *sett = new QSettings("./wcs2mks.ini", QSettings::IniFormat);
 
@@ -94,6 +95,8 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     int plNameType = sett->value("general/plNameType", 0).toInt();
     int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
     double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
+    int saveCatMks = sett->value("general/saveCatMks", 0).toInt();
+    int saveObjMks = sett->value("general/saveObjMks", 0).toInt();
 
 //insSettings
     QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
@@ -312,6 +315,8 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
 
                     //////////
 
+                            fov = fitsd->detFov();
+
                             if(lspmFind)
                             {
                                 qDebug() << "lspmFind\n";
@@ -354,7 +359,7 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-    int sz0 = fitsd->catMarks->marks .size();
+    int sz0 = fitsd->catMarks->marks.size();
     for(i=0; i<sz0; i++)
     {
         fitsd->catMarks->marks.at(i)->P = new double[21];
@@ -362,7 +367,7 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
         fitsd->catMarks->marks.at(i)->P[3] = 0;
     }
 
-    fitsd->catMarks->saveTanImg(resName, mSep, mCol);
+    if(saveCatMks) fitsd->catMarks->saveTanImg(resName, mSep, mCol);
 
     sz0 = fitsd->objMarks->marks.size();
     qDebug() << QString("objSize= %1\n").arg(sz0);
@@ -373,7 +378,7 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
         fitsd->objMarks->marks.at(i)->P[3] = 0;
     }
 
-    fitsd->objMarks->saveTanImg(resName, mSep, mCol);
+    if(saveObjMks) fitsd->objMarks->saveTanImg(resName, mSep, mCol);
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////

@@ -3483,7 +3483,7 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
                             outerProcess.setWorkingDirectory(sCat->exePath);
                             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
                             outerProcess.setReadChannel(QProcess::StandardOutput);
-                            outerArguments << "USNO-B1.0" << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("b=%1").arg(fov/2.0);
+                            outerArguments << "USNO-B1.0" << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("b=%1").arg(fov);
                             qDebug() << sCat->exeName << outerArguments.join(" ");
                             outerProcess.start(sCat->exeName, outerArguments);
                             break;
@@ -8334,6 +8334,7 @@ void marksGrid::setMarksCenter(int x0, int y0)
 
 int marksGrid::saveTanImg(QString fName, QString mSep, QString mCol)
 {
+    qDebug() << QString("\nsaveTanImg: %1\n").arg(fName);
 	QString mLine;
 	int i, j, k, cSz, sz;
 	int maxCol = 0;

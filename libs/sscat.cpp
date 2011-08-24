@@ -79,10 +79,10 @@ void sscat_rec::copyTo(sscat_rec *nrec)
 int sscat_rec::fromString(char *str_in)
 {
 //    printf("str_in: %s", str_in);
-    printf("str_in len: %d <? %d", strlen(str_in), SSCAT_REC);
+//    printf("str_in len: %d <? %d", strlen(str_in), SSCAT_REC);
     if(strlen(str_in)<SSCAT_REC)
     {
-        printf("err string len");
+//        printf("err string len");
         return 1;
     }
     char *tstr;
