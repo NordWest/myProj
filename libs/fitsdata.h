@@ -71,7 +71,7 @@ double marksImgDist(marksP *m1, marksP *m2);
 bool getStimp(double *P, unsigned short *fd, int width, int height, double fpx, int x, int y, measureParam params);
 bool getStimp(double *P, unsigned short *fd, int width, int height, double fpx, int x, int y, int apr, int rr, int rw, int sg, int lb, int model, int& nofit, double delta);
 
-
+int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos);
 //
 void detOCgrid(marksGrid *mG, double *ra_oc, double *de_oc);
 //
@@ -86,7 +86,11 @@ void rsSelector4(marksGrid *refMarks, QVector<int> &rsindex, double muMax, int m
 void rsSelector5(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double dMax, double nMin, double nMax);
 void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int minRefStarsNum);
 
-
+struct procData
+{
+    QString name, folder;
+    int waitTime;
+};
 
 class catFinder
 {

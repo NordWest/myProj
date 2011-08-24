@@ -34,6 +34,41 @@ double comaCorr(double x, double mag, double c, double mag0)
 }
 */
 
+int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
+{
+    qDebug() << "initRefractParam\n";
+    if(refParam==NULL) return 1;
+    //refParam = new refractionParam;
+    refParam->utc = fitsd->MJD;
+
+    refParam->ra0 = fitsd->WCSdata[2];
+    refParam->de0 = fitsd->WCSdata[3];
+
+    if(obsPos!=NULL) refParam->Fi = obsPos->getFi();
+    else refParam->Fi = 0.0;
+    if(obsPos!=NULL) refParam->Long = obsPos->Long;
+    else refParam->Long = 0.0;
+    refParam->lam = 0.575;
+
+    QString kVal;
+    int p0, p1;
+    double temp;
+
+    if(!fitsd->headList.getKeyName("PRESSURE", &kVal))
+    {
+        qDebug() << QString("\nPRESSURE |%1|\n").arg(kVal);
+        refParam->press = kVal.toDouble();
+    }
+    else refParam->press = 760.0;
+    if(refParam->press<700.0)refParam->press = 760.0;
+    if(!fitsd->headList.getKeyName("TEMPERAT", &kVal))
+    {
+        qDebug() << QString("\nTEMPERAT |%1|\n").arg(kVal);
+        refParam->temp = kVal.toDouble();
+    }
+    else refParam->temp = 0.0;
+}
+
 void getAperture(unsigned short *fd, double *const ap, int cx, int cy, int rho, int width, int height)
 {
         int ulX = cx-rho;

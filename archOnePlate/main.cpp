@@ -133,7 +133,7 @@ int main(int argc, char *argv[])    //.exe scanPath
     //end Settings
 
     fitsdata *ftemp = new fitsdata;
-    ftemp->openEmptyFile();
+    //ftemp->openEmptyFile();
 
     plateDir plDir;
 

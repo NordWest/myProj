@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../../lab/scanArch/scanArch
+TARGET = ./../../lab/scanArch/scanArch
 CONFIG += console \
     qt \
     warn_off
@@ -49,7 +49,8 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/ap.h \
     ../libs/vectGrid3D.h \
     ../libs/ialglib.h
-win32:LIBS += ./../libs/cfitsio.lib  \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/libcfitsio.a
-LIBS += ../libs/libmb.a
+win32:LIBS += ./../libs/win32/cfitsio.lib  \
+            ../libs/ablas.dll  \
+            ../libs/win32/libmb.a
+unix:LIBS += ./../libs/unix/libcfitsio.a \
+            ../libs/unix/libmb.a

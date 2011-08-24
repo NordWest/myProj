@@ -48,10 +48,17 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
 {
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
-//    QTextCodec *codec1 = QTextCodec::codecForName("KOI8-R");
-    QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
+    setlocale(LC_NUMERIC, "C");
+            QString codecName;
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
 
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
     Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
 
     QString logFileName = QString("tiff2fitsCut.log");
 
@@ -76,22 +83,18 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     QString obsCode;
     QString uTime;
     //BEGIN settings
-    QSettings *sett = new QSettings("./conf/conf.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings("./wcs2mks.ini", QSettings::IniFormat);
 
-    QString telescopeFile = sett->value("telescope/telescopeFile", "./conf/telescopes.ini").toString();
-    int insNum = sett->value("telescope/instrNum", 2).toInt();
 
     //insSettings *instruments = new insSettings("./conf/telescopes.ini");
     //instruments->getNumIns(instruments->curInst);
 
-    int isConvertToUTC = sett->value("General/isConvertToUTC").toInt();
-    int isSpec = sett->value("General/isSpec").toInt();
     int expNum = sett->value("General/expNum").toInt();
-
     int apeSize = sett->value("General/aperture").toInt();
 
-    int mpeWaitTime = sett->value("General/mpeWaitTime", 100000).toInt();
-    int sbWaitTime = sett->value("General/sbWaitTime", 1000000).toInt();
+
+    //int mpeWaitTime = sett->value("General/mpeWaitTime", 100000).toInt();
+   //int sbWaitTime = sett->value("General/sbWaitTime", 1000000).toInt();
 
     int isRedRef = sett->value("general/isRedRef", 0).toInt();
 
@@ -100,80 +103,87 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     int lspmFind = sett->value("objectsFind/lspmFind").toInt();
     int skybotFind = sett->value("objectsFind/skybotFind").toInt();
     int tryMpeph = sett->value("objectsFind/tryMpeph").toInt();
+    int mpephType = sett->value("objects/mpephType", 0).toInt();
     double magObj0 = sett->value("objectsFind/mag0", 6.0).toDouble();
     double magObj1 = sett->value("objectsFind/mag1", 15.0).toDouble();
 
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac2/exeName").toString();
-    starCat->exePath = sett->value("ucac2/exePath").toString();
-    starCat->catType = sett->value("ucac2/catType").toInt();
-    starCat->catName = sett->value("ucac2/catName").toString();
-    starCat->catPath = sett->value("ucac2/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("usnob/exeName").toString();
-    starCat->exePath = sett->value("usnob/exePath").toString();
-    starCat->catType = sett->value("usnob/catType").toInt();
-    starCat->catName = sett->value("usnob/catName").toString();
-    starCat->catPath = sett->value("usnob/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac3/exeName").toString();
-    starCat->exePath = sett->value("ucac3/exePath").toString();
-    starCat->catType = sett->value("ucac3/catType").toInt();
-    starCat->catName = sett->value("ucac3/catName").toString();
-    starCat->catPath = sett->value("ucac3/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("lspm/exeName").toString();
-    starCat->exePath = sett->value("lspm/exePath").toString();
-    starCat->catType = sett->value("lspm/catType").toInt();
-    starCat->catName = sett->value("lspm/catName").toString();
-    starCat->catPath = sett->value("lspm/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("lspmFind/exeName").toString();
-    starCat->exePath = sett->value("lspmFind/exePath").toString();
-    starCat->catType = sett->value("lspmFind/catType").toInt();
-    starCat->catName = sett->value("lspmFind/catName").toString();
-    starCat->catPath = sett->value("lspmFind/catPath").toString();
-    starCatList << starCat;
-    //
-    //qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
-    QString ast_eph_prog = sett->value("processes/ast_eph_prog", "./mpeph.exe").toString();
-    QString ast_eph_prog_folder = sett->value("processes/ast_eph_prog_folder", "./").toString();
-    QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient.exe").toString();
-    QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
-    QString get_http_prog = sett->value("processes/get_http_prog", "./getHttpHeader.exe").toString();
-    QString get_http_prog_folder = sett->value("processes/get_http_prog_folder", "./").toString();
 
-
-    currentCat = sett->value("catalogs/currentCatalog", 0).toInt();
-    QString observatoryCat = sett->value("catalogs/observatoryCat", "./../../../data/cats/Obs.txt").toString();
-    isMove2corner = sett->value("marks/isMove2corner", 0).toInt();
+//  catalogs    /////
+    QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
+    int catNum = sett->value("catalogs/catNum", 0).toInt();
     double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
-    double mag1 = sett->value("catalogs/mag1", 15.0).toDouble();
+    double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
+    //
+//process
+        QString mpeph_prog = sett->value("processes/mpeph_prog", "./mpeph.exe").toString();
+        QString mpeph_prog_folder = sett->value("processes/mpeph_prog_folder", "./").toString();
+        int mpeph_wait_time = sett->value("processes/mpeph_wait_time", -1).toInt();
+        if(mpeph_wait_time>0) mpeph_wait_time *= 1000;
+        QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient.exe").toString();
+        QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
+        int skybot_wait_time = sett->value("processes/skybot_wait_time", -1).toInt();
+        if(skybot_wait_time>0) skybot_wait_time *= 1000;
+        QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader.exe").toString();
+        QString gethttp_prog_folder = sett->value("processes/gethttp_prog_folder", "./").toString();
+        int gethttp_wait_time = sett->value("processes/gethttp_wait_time", -1).toInt();
+        if(gethttp_wait_time>0) gethttp_wait_time *= 1000;
+        QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr.exe").toString();
+        QString utcorr_prog_folder = sett->value("processes/utcorr_prog_folder", "./").toString();
+        int utcorr_wait_time = sett->value("processes/utcorr_wait_time", -1).toInt();
+        if(utcorr_wait_time>0) utcorr_wait_time *= 1000;
 
-//celestial
-    //obsCode->clear();
-    obsCode = sett->value("celestial/obsName", "084").toString();
-    maxObjDisp = sett->value("celestial/maxObjDisp", 2).toDouble();
 
-    QString mSep = sett->value("marks/marksFileSep").toString();
-    QString mColumn = sett->value("marks/marksLoadFileColumn").toString();
+//observatory
+        QString observatoryCat = sett->value("observatory/observatoryCat", "./Obs.txt").toString();
+        obsCode = sett->value("observatory/obsCode", "084").toString();
 
-    observatory *obsList = new observatory;
-    obsList->init(observatoryCat.toAscii().data(), OBS_SIZE);
+//marks /////////////////
+
+        QString mSep = sett->value("marks/mSep", " ").toString();
+        QString mCol = sett->value("marks/mCol", "1,2,3,4,5").toString();
+        int detRect = sett->value("marks/detRect", 0).toInt();
+        double rectX0 = sett->value("marks/rectX0", 0.0).toDouble();
+        double rectY0 = sett->value("marks/rectY0", 0.0).toDouble();
+        double rectX1 = sett->value("marks/rectX1", 0.0).toDouble();
+        double rectY1 = sett->value("marks/rectY1", 0.0).toDouble();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     fitsdata *fitsd = new fitsdata();
-//    fitsd->fileName = fileName;
 
-    fitsd->initInst(telescopeFile, insNum);
 
+/////////////////////////////
+
+        initCatList(&starCatList, catIni);
+        qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
+
+/////////////////////////////
+
+        observatory *obsList = new observatory;
+        obsy *obsPos;
+        qDebug() << QString("Load observatory cat file: %1\n").arg(observatoryCat);
+        if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
+        {
+            qDebug() << QString("obsCat is not opened\n");
+            if(isRemLog)QDir().remove(logFileName);
+            return 1;
+        }
+
+        qDebug() << QString("observatory initiated\n");
+
+/////////////////////////////
+        if(obsList->getobsynumO(obsCode.toAscii().data()))
+        {
+            qDebug() << QString("obsCode is not found\n");
+            if(isRemLog)QDir().remove(logFileName);
+            return 1;
+        }
+        obsPos = obsList->record;
+        fitsd->initObsPos(obsList->record);
+
+
+/////////////////////////////
 
     QByteArray bpn;
 
@@ -256,9 +266,76 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
         QDir(filePath).remove(logFileName);
         return 1;
     }
-    obsList->getobsynumO(obsCode.toAscii().data());
-    if(isRedRef) fitsd->initRefractParam(obsList->record);
-    fitsd->setExposure(expNum);
+
+
+    /////////////////////////////
+
+            observatory *obsList = new observatory;
+            obsy *obsPos;
+            qDebug() << QString("Load observatory cat file: %1\n").arg(observatoryCat);
+            if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
+            {
+                qDebug() << QString("obsCat is not opened\n");
+                if(isRemLog)QDir().remove(logFileName);
+                return 1;
+            }
+
+            qDebug() << QString("observatory initiated\n");
+
+    /////////////////////////////
+
+    /////////
+refractionParam *refParam;
+            if(isRedRef)
+            {
+                qDebug() << "initRefractParam\n";
+                refParam = new refractionParam;
+                if(initPlateRefParam(refParam, fitsd, obsPos))refParam==NULL;
+    /*
+                refParam->utc = fitsd->MJD;
+
+                refParam->ra0 = fitsd->WCSdata[2];
+                refParam->de0 = fitsd->WCSdata[3];
+
+                if(obsPos!=NULL) refParam->Fi = obsPos->getFi();
+                else refParam->Fi = 0.0;
+                if(obsPos!=NULL) refParam->Long = obsPos->Long;
+                else refParam->Long = 0.0;
+                refParam->lam = 0.575;
+
+                QString kVal;
+                int p0, p1;
+                double temp;
+
+                if(!fitsd->headList.getKeyName("PRESSURE", &kVal))
+                {
+                    qDebug() << QString("\nPRESSURE |%1|\n").arg(kVal);
+                    refParam->press = kVal.toDouble();
+                }
+                else refParam->press = 760.0;
+                if(refParam->press<700.0)refParam->press = 760.0;
+                if(!fitsd->headList.getKeyName("TEMPERAT", &kVal))
+                {
+                    qDebug() << QString("\nTEMPERAT |%1|\n").arg(kVal);
+                    refParam->temp = kVal.toDouble();
+                }
+                else refParam->temp = 0.0;
+    */
+            }
+
+    ////////
+    //if(isRedRef) fitsd->initRefractParam(obsList->record);
+
+            /////////////////////////////
+
+                    ExposureList *expList = new ExposureList;
+                    ExposureRec *expRec = new ExposureRec;
+
+                    int expRes = initExpList(expList, fitsd->headList, obsList->record);
+                    expList->getExp(expRec, expNum);
+                    fitsd->setMJD(expRec->expTime);
+
+
     if(!fitsd->headList.getKeyName("U", &uTime)) fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
 
     //fitsd->setSpecTime(isConvertToUTC, isSpec, obsList->record->Long);
