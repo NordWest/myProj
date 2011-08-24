@@ -48,7 +48,8 @@ struct plateDir
     QStringList eMks, wMks, sMks, nMks;
 };
 
-void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, QString mksConf, int plNameType, int isWCS2MKS);
+//void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, QString mksConf, int plNameType, int isWCS2MKS);
+void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, int isWCS2MKS);
 void useLorNum(plateDir* plDir);
 void useLor(plateDir* plDir);
 
@@ -102,7 +103,6 @@ int main(int argc, char *argv[])    //.exe scanPath
     QString get_http_prog = sett->value("procs/get_http_prog", "getHttpHeader.exe").toString();
     QString get_http_prog_folder = sett->value("procs/get_http_prog_folder", "./").toString();
     int get_http_wait = sett->value("procs/getHttpWait", 100000).toInt();
-    QString instrName = sett->value("procs/instrName", "na").toString();
 
     QString wcs2mks_prog = sett->value("procs/wcs2mks_prog", "wcs2mks.exe").toString();
     QString wcs2mks_prog_folder = sett->value("procs/wcs2mks_prog_folder", "./").toString();
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])    //.exe scanPath
     QStringList fFilter;
     QDir fDir;
     QStringList fitsList;
-
+/*
     //
     if(workDir.lastIndexOf("/")==-1) plName = workDir.section("\\", -1, -1);
     else plName = workDir.section("/", -1, -1);
@@ -179,14 +179,14 @@ int main(int argc, char *argv[])    //.exe scanPath
     }
     ftemp->headList.getKeyName("N-EXP", &eNumStr);
     expNum = eNumStr.toInt();
-
+*/
     plDir.expNum = expNum;
-    plDir.plName = plName;
+    //plDir.plName = plName;
     plDir.plPath = workDir;
 
     //
 
-    if(isUseWCS) useWCS(&plDir, wcs2mks_prog, wcs2mks_prog_folder, mksConf, plNameType, isWCS2MKS);
+    if(isUseWCS) useWCS(&plDir, wcs2mks_prog, wcs2mks_prog_folder, isWCS2MKS);
 
     if(isUseLor) useLor(&plDir);
 
@@ -542,7 +542,7 @@ int main(int argc, char *argv[])    //.exe scanPath
 }
 
 
-void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, QString mksConf, int plNameType, int isWCS2MKS)
+void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, int isWCS2MKS)
 {
     qDebug() << "useWCS\n";
         int i, sz0, j, sz1;
@@ -579,7 +579,7 @@ void useWCS(plateDir* plDir, QString wcs2mks_prog, QString wcs2mks_prog_folder, 
                     mksProcess.setProcessChannelMode(QProcess::MergedChannels);
                     mksProcess.setReadChannel(QProcess::StandardOutput);
 
-                    outerArguments << mksConf << oName << QString("%1").arg(plNameType) << plDir->plName;
+                    outerArguments << oName;// << QString("%1").arg(plNameType) << plDir->plName;
                     qDebug() << wcs2mks_prog << " " << outerArguments.join(" ");
                     mksProcess.start(wcs2mks_prog, outerArguments);
                     resMks = mksProcess.waitForFinished(-1);
