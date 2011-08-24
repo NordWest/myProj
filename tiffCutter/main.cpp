@@ -1,7 +1,7 @@
 //test cvs
-#include <QApplication>
+#include <QCoreApplication>
 //#include <QLibrary>
-#include <QtGui>
+//#include <QtGui>
 //#include <QTranslator>
 #include <QString>
 #include <QByteArray>
@@ -91,7 +91,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 int main(int argc, char *argv[])        //.exe .tif .mks cutKey
 {  
      qInstallMsgHandler(customMessageHandler);
-	QApplication app(argc, argv);
+        QCoreApplication app(argc, argv);
         setlocale(LC_NUMERIC, "C");
         //QTextStream out_stream;
         //QFile fout("tiff2fits.log");
