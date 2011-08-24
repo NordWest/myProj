@@ -517,6 +517,7 @@ public:
 
 	int detResiduals();
         void detIpixWorkFrame();
+        void detCatWorkFrame();
         void setRpix();
 
         int loadHeaderFile(QString headFName);

@@ -2585,10 +2585,10 @@ int FileDynStr::init(char* fn, int sizestr)
 	strcpy(this->fn_tmp, fn);
 	strcat(this->fn_tmp, ".tmp");
 
-	FILE *FNN;
+        FILE *FNN = NULL;
 
 	FNN = fopen(this->fn, "r");
-
+        if(FNN==NULL) return 1;
 	while(fgets(this->str, this->sizestr, FNN)!=NULL)this->nstr++;
 	//this->sizestr = strlen(this->str);
 		

@@ -98,7 +98,7 @@ QTextCodec::setCodecForCStrings(codec1);
         Q_ASSERT( codec1 );
         QTextCodec::setCodecForCStrings(codec1);
 */
-        QString redparamIni = sett->value("general/redparamIni", "./conf/redParam.ini").toString();
+        QString redparamIni = sett->valueisRedRef("general/redparamIni", "./conf/redParam.ini").toString();
         int expNum = sett->value("general/expNum").toInt();
 
         int aper = sett->value("general/aperture", 20).toInt();
@@ -268,24 +268,11 @@ QTextCodec::setCodecForCStrings(codec1);
         {
 
             qDebug() << QString("argc= %1").arg(argc);
-            switch(plNameType)
-            {
-            case 0:
-                {
-                    if(argc==5)
-                    {
-                        pnStr = QString(argv[4]);
-                    }
-                    else
-                    {
-                        pnStr = filePath.section(QDir().separator(), -2, -2);
-                    }
-                }
-                break;
-            case 1:
-                   pnStr = fileName.section(QDir().separator(), -1, -1).section(".", 0, 0);
-               break;
-            }
+
+            if(argc==5) pnStr = QString(argv[4]);
+            else detPlateName(&pnStr, filePath, plNameType);
+
+
             qDebug() << QString("pnStr: %1\n").arg(pnStr);
 
 
@@ -361,6 +348,14 @@ QTextCodec::setCodecForCStrings(codec1);
 
 /////////
 
+        //refractionParam *refParam;
+        if(isRedRef)
+        {
+            qDebug() << "initRefractParam\n";
+            refParam = new refractionParam;
+            if(initPlateRefParam(refParam, fitsd, obsPos))refParam==NULL;
+        }
+/*
         if(isRedRef)
         {
             qDebug() << "initRefractParam\n";
@@ -395,7 +390,7 @@ QTextCodec::setCodecForCStrings(codec1);
             else refParam->temp = 0.0;
 
         }
-
+*/
 ////////
 
         if(fitsd->loadIpixMarks(fileName, mSep, mCol))

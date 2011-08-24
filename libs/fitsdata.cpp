@@ -3615,6 +3615,11 @@ void fitsdata::detIpixWorkFrame()
     if(ipixMarks!=NULL) ipixMarks->detRect(&workFrame);
 }
 
+void fitsdata::detCatWorkFrame()
+{
+    if(catMarks!=NULL) catMarks->detRect(&workFrame);
+}
+
 void fitsdata::setRpix()
 {
     WCSdata[0] = workFrame.center().x();

@@ -6,7 +6,7 @@
 
 QT       -= gui
 
-TARGET = ./../../../lab/scanArch/wcs2mks
+TARGET = wcs2mks
 CONFIG   += console \
     warn_off
 CONFIG   -= app_bundle
@@ -50,6 +50,6 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/ialglib.h
 
 win32:LIBS += ./../libs/cfitsio.lib
-unix:LIBS += ./../libs/libcfitsio.a
-win32:LIBS += ./../libs/libmb.a
-unix:LIBS += ./libmb.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
+win32:LIBS += ./../libs/win32/libmb.a
+unix:LIBS += ./../libs/unix/libmb.a

@@ -66,8 +66,11 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered)) clog = new QDataStream(logFile);
 
 
-    QString plateName;
-
+    //QString plateName;
+    QProcess outerProcess;
+    QStringList outerArguments;
+    QString dateStr, timeStr, descS, oName;
+    int oNum;
 
 //    QString tifFName = QString(argv[1]);
     QString wcsFName = codec1->toUnicode(argv[1]);
@@ -85,28 +88,24 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
     //BEGIN settings
     QSettings *sett = new QSettings("./wcs2mks.ini", QSettings::IniFormat);
 
-
-    //insSettings *instruments = new insSettings("./conf/telescopes.ini");
-    //instruments->getNumIns(instruments->curInst);
-
+//general
     int expNum = sett->value("General/expNum").toInt();
     int apeSize = sett->value("General/aperture").toInt();
-
-
-    //int mpeWaitTime = sett->value("General/mpeWaitTime", 100000).toInt();
-   //int sbWaitTime = sett->value("General/sbWaitTime", 1000000).toInt();
-
-    int isRedRef = sett->value("general/isRedRef", 0).toInt();
-
     int plNameType = sett->value("general/plNameType", 0).toInt();
+    int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
+    double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
 
-    int lspmFind = sett->value("objectsFind/lspmFind").toInt();
-    int skybotFind = sett->value("objectsFind/skybotFind").toInt();
-    int tryMpeph = sett->value("objectsFind/tryMpeph").toInt();
-    int mpephType = sett->value("objects/mpephType", 0).toInt();
-    double magObj0 = sett->value("objectsFind/mag0", 6.0).toDouble();
-    double magObj1 = sett->value("objectsFind/mag1", 15.0).toDouble();
+//insSettings
+    QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
+    int instrNum = sett->value("insSettings/instrNum", 0).toInt();
 
+//objects   ////
+        int lspmFind = sett->value("objects/lspmFind", 0).toInt();
+        int skybotFind = sett->value("objects/skybotFind", 0).toInt();
+        int tryMpeph = sett->value("objects/tryMpeph", 0).toInt();
+        int mpephType = sett->value("objects/mpephType", 0).toInt();
+        double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
+        double magObj1 = sett->value("objects/mag1", 15.0).toDouble();
 
 //  catalogs    /////
     QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
@@ -152,6 +151,11 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
 
     fitsdata *fitsd = new fitsdata();
 
+/////////////////////////////
+
+    insSettings instr(insSettFile);
+    instr.getNumIns(instrNum);
+    fitsd->setInstrSettings(instr);
 
 /////////////////////////////
 
@@ -166,7 +170,6 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
         if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
         {
             qDebug() << QString("obsCat is not opened\n");
-            if(isRemLog)QDir().remove(logFileName);
             return 1;
         }
 
@@ -176,7 +179,6 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
         if(obsList->getobsynumO(obsCode.toAscii().data()))
         {
             qDebug() << QString("obsCode is not found\n");
-            if(isRemLog)QDir().remove(logFileName);
             return 1;
         }
         obsPos = obsList->record;
@@ -187,144 +189,62 @@ int main(int argc, char *argv[])        //.exe n.lor.000.wcs [http|file]key plat
 
     QByteArray bpn;
 
-    QString a3 = codec1->toUnicode(argv[3]);
+    //QString a3 = codec1->toUnicode(argv[3]);
 
 //получить заголовок пластинки
-    if(atoi(argv[2]))   //0-http; 1-file
-    {
-        if(fitsd->loadHeaderFile(a3))
-        {
-            qDebug() << "\nloadHeaderFile error\n";
-            QDir(filePath).remove(logFileName);
-            return 1;
-        }
-    }
-    else
-    {
+    //get header
 
-        qDebug() << QString("argc= %1").arg(argc);
-
-        //bpn = codec1->fromUnicode(QString(argv[3]));
-        pnStr = a3;
-/*
-        switch(plNameType)
-        {
-        case 0:
+            int doWhat;
+            if(argc==4) doWhat = atoi(argv[2]);
+            else doWhat = 0;
+            if(doWhat)   //0-http; 1-file
             {
-                if(argc==4)
+                if(fitsd->loadHeaderFile(QString(argv[3])))
                 {
-                    bpn = codec1->fromUnicode(QString(argv[4]));
-                    //qDebug() << QString("bpn: %1\n").arg(bpn.constData());
-                //    pnStr = bpn.toPercentEncoding("-/._~=?&");
+                    qDebug() << "\nloadHeaderFile error\n";
+                    return 1;
                 }
-                else
-                {
-                    bpn = codec1->fromUnicode(filePath.section("\\", -2, -2));
-                //    pnStr = filePath.section("\\", -2, -2);
-                }
-                pnStr = bpn.toPercentEncoding("-/._~=?&");
             }
-            break;
-        case 1:
-               pnStr = fileName.section("\\", -1, -1).section(".", 0, 0);
-               //qDebug() << QString("pnStr0: %1\n").arg(pnStr);
-               pnStr = pnStr.right(pnStr.size()-2);
-           break;
-        }
-        qDebug() << QString("pnStr: %1\n").arg(pnStr);
-*/
+            else
+            {
 
-        QProcess outerProcess;
-        QStringList outerArguments;
-        outerArguments.clear();
-//           QString ucac2find_folder("");
-
-        outerProcess.setWorkingDirectory(get_http_prog_folder);
-        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-        outerProcess.setReadChannel(QProcess::StandardOutput);
-        //outerArguments << instruments->curName.toLower() << pnStr;
-        outerArguments << QString("na") << pnStr;
-        qDebug() << get_http_prog << outerArguments.join(" ");
-        outerProcess.start(get_http_prog, outerArguments);
-
-        outerProcess.waitForFinished(-1);
-        QTextStream catStream(outerProcess.readAllStandardOutput());
-
-        //QByteArray httpData = catStream.readAll();// http->readAll();//чтение данных (ответа)
+                qDebug() << QString("argc= %1").arg(argc);
+                if(argc==4) pnStr = QString(argv[3]);
+                else detPlateName(&pnStr, filePath, plNameType);
 
 
-        if(fitsd->readHttpHeader(catStream.readAll()))
-        {
-            qDebug() << "\nreadHttpHeader error\n";
-            QDir(filePath).remove(logFileName);
-            return 1;
-        }
-    }
-    if(fitsd->loadWCSFile(wcsFName))
-    {
-        qDebug() << "\nloadWCSFile error\n";
-        QDir(filePath).remove(logFileName);
-        return 1;
-    }
 
+                qDebug() << QString("pnStr: %1\n").arg(pnStr);
+
+
+
+                outerArguments.clear();
+                outerProcess.setWorkingDirectory(gethttp_prog_folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+                outerArguments << pnStr.toAscii().constData();
+                qDebug() << gethttp_prog << outerArguments.join(" ") << "\n";
+                outerProcess.start(gethttp_prog, outerArguments);
+
+                outerProcess.waitForFinished(gethttp_wait_time);
+                //QTextStream catStream(outerProcess.readAllStandardOutput());
+
+                //if(fitsd->readHttpHeader(catStream.readAll()))
+                if(fitsd->readHttpHeader(QString(outerProcess.readAllStandardOutput())))
+                {
+                    qDebug() << "\nreadHttpHeader error\n";
+                    return 1;
+                }
+            }
 
     /////////////////////////////
+            // load wcs
+                    if(fitsd->loadWCSFile(wcsFName))
+                    {
+                        qDebug() << "\nloadWCSFile error\n";
+                        return 1;
+                    }
 
-            observatory *obsList = new observatory;
-            obsy *obsPos;
-            qDebug() << QString("Load observatory cat file: %1\n").arg(observatoryCat);
-            if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
-            {
-                qDebug() << QString("obsCat is not opened\n");
-                if(isRemLog)QDir().remove(logFileName);
-                return 1;
-            }
-
-            qDebug() << QString("observatory initiated\n");
-
-    /////////////////////////////
-
-    /////////
-refractionParam *refParam;
-            if(isRedRef)
-            {
-                qDebug() << "initRefractParam\n";
-                refParam = new refractionParam;
-                if(initPlateRefParam(refParam, fitsd, obsPos))refParam==NULL;
-    /*
-                refParam->utc = fitsd->MJD;
-
-                refParam->ra0 = fitsd->WCSdata[2];
-                refParam->de0 = fitsd->WCSdata[3];
-
-                if(obsPos!=NULL) refParam->Fi = obsPos->getFi();
-                else refParam->Fi = 0.0;
-                if(obsPos!=NULL) refParam->Long = obsPos->Long;
-                else refParam->Long = 0.0;
-                refParam->lam = 0.575;
-
-                QString kVal;
-                int p0, p1;
-                double temp;
-
-                if(!fitsd->headList.getKeyName("PRESSURE", &kVal))
-                {
-                    qDebug() << QString("\nPRESSURE |%1|\n").arg(kVal);
-                    refParam->press = kVal.toDouble();
-                }
-                else refParam->press = 760.0;
-                if(refParam->press<700.0)refParam->press = 760.0;
-                if(!fitsd->headList.getKeyName("TEMPERAT", &kVal))
-                {
-                    qDebug() << QString("\nTEMPERAT |%1|\n").arg(kVal);
-                    refParam->temp = kVal.toDouble();
-                }
-                else refParam->temp = 0.0;
-    */
-            }
-
-    ////////
-    //if(isRedRef) fitsd->initRefractParam(obsList->record);
 
             /////////////////////////////
 
@@ -335,43 +255,93 @@ refractionParam *refParam;
                     expList->getExp(expRec, expNum);
                     fitsd->setMJD(expRec->expTime);
 
+            //  utcorr
 
-    if(!fitsd->headList.getKeyName("U", &uTime)) fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
 
+                    uTime = QString("0.0");
+
+                    if(useUtCorr)
+                    {
+                        fitsd->headList.getKeyName("DATE-OBS", &dateStr);
+                        fitsd->headList.getKeyName("TIME-OBS", &timeStr);
+
+                        outerArguments.clear();
+                        outerProcess.setWorkingDirectory(utcorr_prog_folder);
+                        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                        outerProcess.setReadChannel(QProcess::StandardOutput);
+                        qDebug() << QString("argc= %1\n").arg(argc);
+                        outerArguments  << dateStr << timeStr;
+                        qDebug() << utcorr_prog << outerArguments.join(" ");
+                        outerProcess.start(utcorr_prog, outerArguments);
+
+                        outerProcess.waitForFinished(utcorr_wait_time);
+                        QTextStream catStream(outerProcess.readAllStandardOutput());
+
+                        uTime = catStream.readAll().section("\n", -1, -1);
+                    }
+                    else
+                    {
+                        fitsd->headList.getKeyName("U", &uTime);
+                    }
+
+                    qDebug() << QString("uTimeCorr: %1\n").arg(uTime.trimmed().toDouble());
+                    fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
+
+            /////////
     //fitsd->setSpecTime(isConvertToUTC, isSpec, obsList->record->Long);
-//выставить параметры инструмента
-    //fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-    //fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-/*//открыть метки
-    fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
-    if(isMove2corner) fitsd->marksGIpix->moveToCorner();*/
-//из каталога
-    fitsd->marksG->clearMarks();
-    fitsd->getMarksGrid(starCatList.at(currentCat), fitsd->instr->fov, mag0, mag1, -1);//, fitsd->detNaxes()*60*fitsd->marksG->scales[0]);
-    fitsd->detNaxes(&fitsd->naxes[0], &fitsd->naxes[1]);
-    fitsd->detTan();
-//объект
-    fitsd->mpeWaitTime = mpeWaitTime;
-    fitsd->sbWaitTime = sbWaitTime;
-    if(lspmFind)
-    {
-        if(!(starCatList.size()<5)) fitsd->findLspmCat(starCatList[4]->exeName, starCatList[4]->exePath, starCatList[4]->catPath, fitsd->instr->fov, magObj0, magObj1);
-    }
-    if(skybotFind)
-    {
-        qDebug() << QString("skybotFindType\n");
-        QStringList objNames;
-        //tryMpeph = foDlg->ui_isUseExpNum->isChecked();
-        if(tryMpeph)
-        {
-            fitsd->findSkybotNamesList(&objNames, skybot_prog, skybot_prog_folder, fitsd->instr->fov, obsCode, magObj0, magObj1);
-            sz = objNames.size();
-            for(i=0; i<sz; i++)fitsd->getMpephName(objNames.at(i), ast_eph_prog, ast_eph_prog_folder, magObj0, magObj1);
-        }
-        else fitsd->findSkybot(skybot_prog, skybot_prog_folder, fitsd->instr->fov, obsCode, magObj0, magObj1);
-    //fitsd->findLspmCat(starCatList[4]->exeName, starCatList[4]->exePath, starCatList[4]->catPath, fovSpinBox->value());
-    }
-    fitsd->detTanObj();
+                    ////////
+/*
+                            if(fitsd->loadIpixMarks(fileName, mSep, mCol))
+                            {
+                                qDebug() << "Ipix marks load error\n";
+                                return 1;
+                            }
+
+                            if(detRect) fitsd->detIpixWorkFrame();
+                            else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
+*/
+                    /////////
+                            double fov = fovp*instr.fov;//->fitsd->detFov();
+
+                            fitsd->catMarks->clearMarks();
+                            getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
+                            fitsd->detTan();
+
+                            if(detRect) fitsd->detCatWorkFrame();
+                            else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
+
+                    //////////
+
+                            if(lspmFind)
+                            {
+                                qDebug() << "lspmFind\n";
+                                if(!(starCatList.size()<3)) findLspmCat(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, starCatList[2]->exeName, starCatList[2]->exePath, starCatList[2]->catPath, fov, magObj0, magObj1);
+                            }
+                            if(skybotFind)
+                            {
+                                qDebug() << QString("skybotFindType\n");
+                                QStringList objNames;
+
+                                if(tryMpeph)
+                                {
+                                    findSkybotNamesList(&objNames, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
+                                    sz = objNames.size();
+                                    for(i=0; i<sz; i++) getMpephName(fitsd->objMarks, fitsd->MJD, objNames.at(i), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                                }
+                                else findSkybot(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
+
+                            }
+                            else if(tryMpeph)
+                            {
+                                if(!fitsd->headList.getKeyName("OBJECT", &descS))
+                                {
+                                    desc2NumName(descS, &oNum, &oName);
+                                    if(mpephType) getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                                    else getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                                }
+                            }
+                            fitsd->detTanObj();
+                    ///////////
     fitsd->cleanObjects(apeSize);
 
     QString iniSuff = codec1->toUnicode(argv[1]);
@@ -384,15 +354,15 @@ refractionParam *refParam;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-    int sz0 = fitsd->marksG->marks .size();
+    int sz0 = fitsd->catMarks->marks .size();
     for(i=0; i<sz0; i++)
     {
-        fitsd->marksG->marks.at(i)->P = new double[21];
-        fitsd->marksG->marks.at(i)->P[19] = apeSize*apeSize;
-        fitsd->marksG->marks.at(i)->P[3] = 0;
+        fitsd->catMarks->marks.at(i)->P = new double[21];
+        fitsd->catMarks->marks.at(i)->P[19] = apeSize*apeSize;
+        fitsd->catMarks->marks.at(i)->P[3] = 0;
     }
 
-    fitsd->marksG->saveTanImg(resName, mSep, mColumn);
+    fitsd->catMarks->saveTanImg(resName, mSep, mCol);
 
     sz0 = fitsd->objMarks->marks.size();
     qDebug() << QString("objSize= %1\n").arg(sz0);
@@ -403,7 +373,7 @@ refractionParam *refParam;
         fitsd->objMarks->marks.at(i)->P[3] = 0;
     }
 
-    fitsd->objMarks->saveTanImg(resName, mSep, mColumn);
+    fitsd->objMarks->saveTanImg(resName, mSep, mCol);
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
