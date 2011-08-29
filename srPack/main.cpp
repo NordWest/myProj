@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     QString srTimeCode;
     detTimeCode(srTimeCode);
 
-    QString logFileName = QString("./logs/srPack%1.log").arg(srTimeCode);
+    QString logFileName = QString("./logs/srPack_%1.log").arg(srTimeCode);
     QFile* logFile = new QFile(logFileName);
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog = new QDataStream(logFile);
@@ -134,8 +134,7 @@ int main(int argc, char *argv[])
     qDebug() << QString("workDir: %1").arg(workDir);
     qDebug() << QString("scansoftDir: %1").arg(scansoftDir);
 
-    ExposureRec* expRec;
-    ExposureList* expList;
+    ExposureList expList;
     QProcess httpProcess;
     QProcess mesProcess;
     //QString dir_prog = QString("listDir.bat");
@@ -197,6 +196,9 @@ int main(int argc, char *argv[])
     //QDir tDir;
     QDir tDir1;
     int isLog;
+
+    //expList = new ExposureList;
+    //expRec = new ExposureRec;
 
     for(i=0; i<arjNum; i++)
     {
@@ -269,12 +271,13 @@ int main(int argc, char *argv[])
         else if((progType==QString("raw"))&&doRaw4)
         {
 
-            pnStr = curArj.section("/", -2, -2);
+
+            detPlateName(&pnStr, curArj);//curArj.section("/", -2, -2);
             qDebug() << QString("pnStr: %1\n").arg(pnStr);
 
             httpProcess.setWorkingDirectory(get_http_prog_folder);
             outerArguments.clear();
-            outerArguments << instrName << pnStr;
+            outerArguments << pnStr;
 
             qDebug() << get_http_prog << outerArguments.join("|");
             httpProcess.start(get_http_prog, outerArguments);
@@ -286,7 +289,6 @@ int main(int argc, char *argv[])
                 httpProcess.close();
                 continue;
             }
-
 
             //catStream.flush();
             QTextStream httpStream(httpProcess.readAllStandardOutput());
@@ -313,12 +315,11 @@ int main(int argc, char *argv[])
             //ftemp->headList.getKeyName("N-EXP", &eNumStr);
             //expNum = eNumStr.toInt();
 
-            expList = new ExposureList;
-            expRec = new ExposureRec;
+            expList.clear();
 
-            int expRes = initExpList(expList, ftemp->headList, NULL);
+            initExpList(&expList, ftemp->headList, NULL);
 
-            expNum = expList->exps.size();
+            expNum = expList.expNum();
 
             mesProcess.setWorkingDirectory(curDir);
             outerArguments.clear();

@@ -3,7 +3,6 @@
 //#include "./mesthread.h"
 #include "./../libs/fitsdata.h"
 
-/* РѕРџРќР¦РџР®Р›Р›Р® Р”РљРЄ РћРќРЇРљР•Р”РќР‘Р®Р Р•РљР­РњРќР¦Рќ РҐ Р›РњРќР¦РќРћРќР РќР’РњРќР¦Рќ РҐР“Р›Р•РџР•РњРҐРЄ РќР РЇР™Р®РњРҐРџРќР‘Р®РњРњРЁРЈ РћРљР®РЇР РҐРњРќР™ РЇ РћРќР›РќР«Р­Р§ measure*/
 
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -67,7 +66,10 @@ int main(int argc, char *argv[])
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
 
-    QString logFileName = QString("./mPack.log");
+    QString srTimeCode;
+    detTimeCode(srTimeCode);
+
+    QString logFileName = QString("./logs/mPack_%1.log").arg(srTimeCode);
     QFile* logFile = new QFile(logFileName);
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog = new QDataStream(logFile);
@@ -75,8 +77,17 @@ int main(int argc, char *argv[])
     QString lockFileName;// = QString("pack.lock");
 
 
-    QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
-    //QTextCodec *codec2 = QTextCodec::codecForName("Windows-1251");
+    QString codecName;
+
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
 
 
     QString cfgFile = QString("./conf/mPack.ini");
@@ -85,8 +96,8 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
     QString workDir;
 
-    if(argc==1) workDir = codec1->toUnicode(sett->value("general/workDir", "./").toByteArray());
-    else workDir = codec1->toUnicode(argv[1]);
+    if(argc==1) workDir = QString(sett->value("general/workDir", "./").toByteArray());
+    else workDir = QString(argv[1]);
 
     //QString workDir = sett->value("general/workDir", "./").toString();//QDir::currentPath();
     QString scansoftDir = sett->value("general/scansoftDir", "c:/scansoft").toString();
@@ -94,7 +105,6 @@ int main(int argc, char *argv[])
     QString get_http_prog = sett->value("general/get_http_prog", "getHttpHeader.exe").toString();
     QString get_http_prog_folder = sett->value("general/get_http_prog_folder", "c:/scansoft").toString();
     int getHttpWait = sett->value("general/getHttpWait", 100000).toInt();
-    QString instrName = sett->value("general/instrName", "na").toString();
 
     QString measure_prog = sett->value("general/measure_prog", "measure").toString();
     QString measure_prog_folder = sett->value("general/measure_prog_folder", "c:/scansoft").toString();
@@ -118,6 +128,8 @@ int main(int argc, char *argv[])
     QStringList tPath;
     QTextStream catStream;
     QString dirsStr;
+    //ExposureRec* expRec;
+    ExposureList expList;
 
 
     qDebug() << QString("workDir: %1").arg(workDir);
@@ -228,22 +240,18 @@ int main(int argc, char *argv[])
             continue;
         }
 
-
-
         QFile lockFile(lockFileName);
         lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
         lockFile.close();
 
-
-
-        pnStr = curDir.section("/", -1, -1);
+        detPlateName(&pnStr, curDir);//pnStr = curDir.section("/", -1, -1);
 
         //pnStr = curDir.section("/", -1, -1);
         qDebug() << QString("pnStr: %1\n").arg(pnStr);
 
         httpProcess.setWorkingDirectory(get_http_prog_folder);
         outerArguments.clear();
-        outerArguments << instrName << pnStr;
+        outerArguments << pnStr;
         qDebug() << get_http_prog << outerArguments.join(" ");
         httpProcess.start(get_http_prog, outerArguments);
 
@@ -259,7 +267,7 @@ int main(int argc, char *argv[])
         QTextStream httpStream(httpProcess.readAllStandardOutput());
 
         ftemp->clear();
-        ftemp->openEmptyFile();
+        //ftemp->openEmptyFile();
         if(ftemp->readHttpHeader(httpStream.readAll()))
         {
             qDebug() << "header not found\n";
@@ -281,7 +289,12 @@ int main(int argc, char *argv[])
         }
 
         //ftemp->headList.getKeyName("N-EXP", &eNumStr);
-        expNum = ftemp->expList->exps.size();//eNumStr.toInt();
+        expList.clear();
+
+        initExpList(&expList, ftemp->headList, NULL);
+
+        expNum = expList.expNum();
+
 
         mesProcess.setWorkingDirectory(QString(curDir+"/"));
         outerArguments.clear();
