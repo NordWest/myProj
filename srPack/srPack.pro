@@ -34,7 +34,6 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/ccdmeasurements.h \
     ../libs/astro.h \
     ../libs/comfunc.h \
-    ../libs/astro.hpp \
     ../libs/cmnk.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \

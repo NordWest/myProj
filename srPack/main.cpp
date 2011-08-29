@@ -4,7 +4,7 @@
 #include "./../libs/fitsdata.h"
 #include "./../libs/astro.h"
 
-/* РѕРџРќР¦РџР®Р›Р›Р® Р”РљРЄ РћРќРЇРљР•Р”РќР‘Р®Р Р•РљР­РњРќР¦Рќ РҐ Р›РњРќР¦РќРћРќР РќР’РњРќР¦Рќ РҐР“Р›Р•РџР•РњРҐРЄ РќР РЇР™Р®РњРҐРџРќР‘Р®РњРњРЁРЈ РћРљР®РЇР РҐРњРќР™ РЇ РћРќР›РќР«Р­Р§ measure*/
+/* РѕРџРќР¦РџР®Р›Р›Р® Р”РљРЄ РћРќРЇРљР•Р”РќР‘Р®Р Р•РљР­РњРќР¦Рќ РҐ Р›РњРќР¦РќРћРќР РќР’РњРќР¦Рќ РҐР“Р›Р•РџР•РњРҐРЄ РќР РЇР™Р®РњРҐРџРќР‘Р®РњРњРЁРЈ РћРљР®РЇР РҐРњРќР™ РЇ РћРќР›РќР«Р­Р§ measure*/
 
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -71,16 +71,24 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 
     QString srTimeCode;
-    getTimeCode(srTimeCode);
+    detTimeCode(srTimeCode);
 
-    QString logFileName = QString("./srPack%1.log").arg(srTimeCode);
+    QString logFileName = QString("./logs/srPack%1.log").arg(srTimeCode);
     QFile* logFile = new QFile(logFileName);
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog = new QDataStream(logFile);
 
-    QTextCodec *codec1 = QTextCodec::codecForName("KOI8-R");
-    //QTextCodec *codec2 = QTextCodec::codecForName("Windows-1251");
-    QTextCodec *codec2 = QTextCodec::codecForName("UTF-8");
+    QString codecName;
+
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
 
     QString cfgFile = QString("./conf/srPack.ini");
     if(argc==3) cfgFile = QString(argv[2]);
@@ -89,8 +97,8 @@ int main(int argc, char *argv[])
 
     QString workDir;
 
-    if(argc==1) workDir = codec2->toUnicode(sett->value("general/workDir", "./").toByteArray());
-    else workDir = codec2->toUnicode(argv[1]);
+    if(argc==1) workDir = QString(sett->value("general/workDir", "./").toByteArray());
+    else workDir = QString(argv[1]);
     //QString workDir = codec1->toUnicode(sett->value("general/workDir", "./").toByteArray());//QDir::currentPath();
     QString scansoftDir = sett->value("general/scansoftDir", "c:/scansoft").toString();
     //int procNum = sett->value("general/procNum", "1").toInt();
@@ -126,6 +134,8 @@ int main(int argc, char *argv[])
     qDebug() << QString("workDir: %1").arg(workDir);
     qDebug() << QString("scansoftDir: %1").arg(scansoftDir);
 
+    ExposureRec* expRec;
+    ExposureList* expList;
     QProcess httpProcess;
     QProcess mesProcess;
     //QString dir_prog = QString("listDir.bat");
@@ -284,7 +294,7 @@ int main(int argc, char *argv[])
             //qDebug() << QString("hOut:\n%1\n").arg(hOut);
 
             ftemp->clear();
-            ftemp->openEmptyFile();
+            //ftemp->openEmptyFile();
             if(ftemp->readHttpHeader(hOut))
             {
                 qDebug() << "header not found\n";
@@ -302,7 +312,13 @@ int main(int argc, char *argv[])
             }
             //ftemp->headList.getKeyName("N-EXP", &eNumStr);
             //expNum = eNumStr.toInt();
-            expNum = ftemp->expList->exps.size();
+
+            expList = new ExposureList;
+            expRec = new ExposureRec;
+
+            int expRes = initExpList(expList, ftemp->headList, NULL);
+
+            expNum = expList->exps.size();
 
             mesProcess.setWorkingDirectory(curDir);
             outerArguments.clear();
