@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
         lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
         lockFile.close();
 
-        detPlateName(&pnStr, curDir);//pnStr = curDir.section("/", -1, -1);
+        detPlateName(&pnStr, curDir+QDir().separator());//pnStr = curDir.section("/", -1, -1);
 
         //pnStr = curDir.section("/", -1, -1);
         qDebug() << QString("pnStr: %1\n").arg(pnStr);

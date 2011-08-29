@@ -4,8 +4,10 @@
 void detPlateName(QString *plateName, QString originName, int plNameType)
 {
     plateName->clear();
+
     QString pathSep = QString("\\");
     if(originName.indexOf(pathSep)==-1)pathSep = QString("/");
+
 
     switch(plNameType)
     {
@@ -2195,6 +2197,7 @@ void residualFile::clear()
 }
 
 void residualFile::init(const char *fname)
+
 {
 //	resList.clear();
     qDebug() << "\nresidualFile::init: " << fname << "\n";
