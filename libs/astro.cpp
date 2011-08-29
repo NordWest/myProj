@@ -1,6 +1,7 @@
 #include "astro.h"
 
 
+
 double mas_to_rad(double angle)
 {
   return acos(-1)*angle/(180*3600000);
@@ -1874,14 +1875,45 @@ int translit(char *str_rus, char *str_tr)
 
 int translit_dict(char *ru, char *tr)
 {
-        if(streqv(ru, "Рђ")) strcpy(tr, "A");
-        else if(streqv(ru, "Р‘")) strcpy(tr, "B");
-        else if(streqv(ru, "Р’")) strcpy(tr, "V");
-        else if(streqv(ru, "Р“")) strcpy(tr, "G");
-        else if(streqv(ru, "Р”")) strcpy(tr, "D");
-        else if(streqv(ru, "Р•")) strcpy(tr, "E");
-        else if(streqv(ru, "РЃ")) strcpy(tr, "JO");
-        else if(streqv(ru, "Р–")) strcpy(tr, "ZH");
-        else if(streqv(ru, "Р—")) strcpy(tr, "Z");
-        else if(streqv(ru, "Р
-        */
+        if(streqv(ru, "А")) strcpy(tr, "A");
+        else if(streqv(ru, "Б")) strcpy(tr, "B");
+        else if(streqv(ru, "В")) strcpy(tr, "V");
+        else if(streqv(ru, "Г")) strcpy(tr, "G");
+        else if(streqv(ru, "Д")) strcpy(tr, "D");
+        else if(streqv(ru, "Е")) strcpy(tr, "E");
+        else if(streqv(ru, "Ё")) strcpy(tr, "JO");
+        else if(streqv(ru, "Ж")) strcpy(tr, "ZH");
+        else if(streqv(ru, "З")) strcpy(tr, "Z");
+        else if(streqv(ru, "И")) strcpy(tr, "I");
+        else if(streqv(ru, "Й")) strcpy(tr, "J");
+        else if(streqv(ru, "К")) strcpy(tr, "K");
+        else if(streqv(ru, "Л")) strcpy(tr, "L");
+        else if(streqv(ru, "М")) strcpy(tr, "M");
+        else if(streqv(ru, "Н")) strcpy(tr, "N");
+        else if(streqv(ru, "О")) strcpy(tr, "O");
+        else if(streqv(ru, "П")) strcpy(tr, "P");
+        else if(streqv(ru, "Р")) strcpy(tr, "R");
+        else if(streqv(ru, "С")) strcpy(tr, "S");
+        else if(streqv(ru, "Т")) strcpy(tr, "T");
+        else if(streqv(ru, "У")) strcpy(tr, "U");
+        else if(streqv(ru, "Ф")) strcpy(tr, "F");
+        else if(streqv(ru, "Х")) strcpy(tr, "KH");
+        else if(streqv(ru, "Ц")) strcpy(tr, "C");
+        else if(streqv(ru, "Ч")) strcpy(tr, "CH");
+        else if(streqv(ru, "Ш")) strcpy(tr, "SH");
+        else if(streqv(ru, "Щ")) strcpy(tr, "SH");
+        else if(streqv(ru, "Ь")) strcpy(tr, "");
+        else if(streqv(ru, "Ы")) strcpy(tr, "Y");
+        else if(streqv(ru, "Ъ")) strcpy(tr, "");
+        else if(streqv(ru, "Э")) strcpy(tr, "E");
+        else if(streqv(ru, "Ю")) strcpy(tr, "JU");
+        else if(streqv(ru, "Я")) strcpy(tr, "YA");
+        else return 1;
+
+        return 0;
+}
+
+
+#endif
+*/
+

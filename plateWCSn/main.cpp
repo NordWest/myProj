@@ -51,11 +51,17 @@ int main(int argc, char *argv[])// plateWCSn conf.ini marks.txt pnType plateNum|
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
 
-    QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
-    Q_ASSERT( codec1 );
+    QString codecName;
 
-    QTextCodec *codec2 = QTextCodec::codecForName("IBM 866");
-    Q_ASSERT( codec2 );
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
 
     QString cfgFile = codec1->toUnicode(argv[1]);
     QString fileName = codec1->toUnicode(argv[2]);
@@ -63,43 +69,13 @@ int main(int argc, char *argv[])// plateWCSn conf.ini marks.txt pnType plateNum|
 
     QFileInfo fi(fileName);
     QString platePath = fi.absolutePath();
-    //QString platePath = fileName.left(fileName.lastIndexOf("\\")+1);
-    //if(platePath=="") platePath = fileName.left(fileName.lastIndexOf("/")+1);
-    //if(platePath=="") platePath = QString("");
 
     QDir curDir(platePath);
-    //qDebug() << QString("fileName: %1\n").arg(fileName);
-    //qDebug() << QString("platePath: %1\n").arg(platePath);
+
     QString wcsFileName = QString("%1.wcs").arg(fileName);
     QString wcsLockFile = QString("%1.lock").arg(fileName);
 
 
-    //if(curDir.exists(wcsLockFile)||curDir.exists(wcsFileName)) return 1;
-    if(QDir().exists(wcsLockFile)||QDir().exists(wcsFileName)) return 1;
-    else
-    {
-        QFile lockFile(wcsLockFile);
-        lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-        /*QTextStream errStream;
-        errStream.setDevice(&lockFile);
-        errStream << "";*/
-        lockFile.close();
-    }
-
-
-
-
-
-    QFile* logFile = new QFile(logFileName);
-    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
-        clog = new QDataStream(logFile);
-
-    if(argc!=5)
-    {
-        qDebug() << "argc= " << argc << "\n";
-        return 1;
-    }
-    qDebug() << QString("platePath: %1\n").arg(platePath);
 
     //QDir curDir(platePath);
     if(!curDir.exists(fi.fileName()))
@@ -107,114 +83,108 @@ int main(int argc, char *argv[])// plateWCSn conf.ini marks.txt pnType plateNum|
         qDebug() << QString("file %1 does not exist\n").arg(fi.fileName());
     }
 
-    int currentCat, isMove2corner, useProxy, proxyPort;
-    double maxObjDisp;
-    catFinder *starCat;
+
     QList <catFinder*> starCatList;
-    QString proxyHost, plateHostName, obsCode;
-    int sz, i, j;
-    ExposureRec* eRec;
-    QList <ExposureRec*> expList;
+    QString obsCode;
+    int sz, i, insNum;
 
-    int endObs = 0;
-    double tObs0, tObs1, time;
-    DATEOBS dateObs0, dateObs1;
-    HeadRecord *hRec;
-    QStringList tList;
     QString telName;
-
+    QProcess outerProcess;
+    QStringList outerArguments;
+    ExposureRec* expRec;
+    ExposureList* expList;
+    QString pnStr, uTime, dateStr, timeStr;
 
     QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
 
-    QStringList allSett;
-    allSett << sett->allKeys();
-    sz = allSett.size();
-    qDebug() << QString("\n\nconf.ini:\n");
-    for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
-    qDebug() << "\n\n";
 
-    QString telescopeFile = sett->value("telescope/telescopeFile", "./conf/telescopes.ini").toString();
-    int insNum = sett->value("telescope/instrNum", 2).toInt();
-    //insSettings *instruments = new insSettings(telescopeFile);
-
-    //QString ruler3File = sett->value("general/ruler3File", "./conf/ruler3.ini").toString();
+    //general
+    int expNum = sett->value("general/expNum", -1).toInt();
+    int plNameType = sett->value("general/plNameType", 0).toInt();
+    int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
+    int refindWCS = sett->value("general/refindWCS", 0).toInt();
+    double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
 
 
-    double apeSize = sett->value("general/aperture", 30).toDouble();
+    //insSettings
+        QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
 
-    int identType = sett->value("identify/identType", 0).toInt();
-    int targNum = sett->value("identify/targNum", 6).toInt();
-    int maxNum = sett->value("identify/maxNum", 100).toInt();
+
+    //identify  ///////
+        int identType = sett->value("identify/identType", 0).toInt();
+        int identNum = sett->value("identify/identNum", 6).toInt();
+        int maxNum = sett->value("identify/maxNum", 100).toInt();
 
 
     reductionParams wcsParams;
 
-    wcsParams.maxres = sett->value("wcs/maxres", 300).toDouble();
-    wcsParams.maxresMAG = sett->value("wcs/maxresMAG", 10).toDouble();
-    //wcsParams.minRefMag = sett->value("wcs/minRefMag", 8).toDouble();
-    //wcsParams.maxRefMag = sett->value("wcs/maxRefMag", 15).toDouble();
-    wcsParams.redType = sett->value("wcs/redType", 0).toInt();
-    wcsParams.sMax = sett->value("wcs/sMax", 500).toDouble();
-    wcsParams.weights = sett->value("wcs/weights", 0).toInt();
-    wcsParams.minRefStars = sett->value("wcs/minRefStars", 4).toInt();
-    wcsParams.sigma = sett->value("wcs/sigmaN", 3).toDouble();
-    int wcsN = sett->value("wcs/wcsN", 4).toInt();
+    wcsParams.redType = sett->value("reduction/redType", 0).toInt();
+    wcsParams.weights = sett->value("reduction/weights", 0).toDouble();
+    wcsParams.minRefStars = sett->value("reduction/minRefStars", 4).toDouble();
+    wcsParams.sMax = sett->value("reduction/sMax", 500).toDouble();
+    wcsParams.uweMax = sett->value("reduction/uweMax", 500).toDouble();
+    wcsParams.sigma = sett->value("reduction/sigma", 3).toDouble();
+    wcsParams.maxres = sett->value("reduction/maxres", 300).toDouble();
+    wcsParams.maxresMAG = sett->value("reduction/maxresMAG", 30).toDouble();
+    wcsParams.maxRefStars = sett->value("reduction/maxRefStars", -1).toInt();
 
-    int starsNum = sett->value("wcs/starsNum", 100).toInt();
 
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac2/exeName").toString();
-    starCat->exePath = sett->value("ucac2/exePath").toString();
-    starCat->catType = sett->value("ucac2/catType").toInt();
-    starCat->catName = sett->value("ucac2/catName").toString();
-    starCat->catPath = sett->value("ucac2/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("usnob/exeName").toString();
-    starCat->exePath = sett->value("usnob/exePath").toString();
-    starCat->catType = sett->value("usnob/catType").toInt();
-    starCat->catName = sett->value("usnob/catName").toString();
-    starCat->catPath = sett->value("usnob/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac3/exeName").toString();
-    starCat->exePath = sett->value("ucac3/exePath").toString();
-    starCat->catType = sett->value("ucac3/catType").toInt();
-    starCat->catName = sett->value("ucac3/catName").toString();
-    starCat->catPath = sett->value("ucac3/catPath").toString();
-    starCatList << starCat;
 
-    currentCat = sett->value("catalogs/currentCatalog", 0).toInt();
+//  catalogs    /////
+    QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
+    int catNum = sett->value("catalogs/catNum", 0).toInt();
     double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
-    double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
-    isMove2corner = sett->value("marks/isMove2corner", 0).toInt();
+    double mag1 = sett->value("catalogs/mag1", 15.0).toDouble();
 
 
- //   QString ast_eph_prog = sett->value("processes/ast_eph_prog", "./mpeph.exe").toString();
- //   QString ast_eph_prog_folder = sett->value("processes/ast_eph_prog_folder", "./").toString();
-    QString get_http_prog = sett->value("processes/get_http_prog", "./getHttpHeader.exe").toString();
-    QString get_http_prog_folder = sett->value("processes/get_http_prog_folder", "./").toString();
-//celestial
-    //obsCode->clear();
-    QString observatoryCat = sett->value("celestial/observatoryCat", "./../../../data/cats/Obs.txt").toString();
-    obsCode = sett->value("celestial/obsName", "084").toString();
-    maxObjDisp = sett->value("celestial/maxObjDisp", 2).toDouble();
+//process
 
-    QString mSep = sett->value("marks/marksFileSep").toString();
-    QString mColumn = sett->value("marks/marksLoadFileColumn").toString();
+    QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader.exe").toString();
+    QString gethttp_prog_folder = sett->value("processes/gethttp_prog_folder", "./").toString();
+    int gethttp_wait_time = sett->value("processes/gethttp_wait_time", -1).toInt();
+    QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr.exe").toString();
+    QString utcorr_prog_folder = sett->value("processes/utcorr_prog_folder", "./").toString();
+    int utcorr_wait_time = sett->value("processes/utcorr_wait_time", -1).toInt();
+
+//observatory
+    QString observatoryCat = sett->value("observatory/observatoryCat", "./../../../data/cats/Obs.txt").toString();
+    obsCode = sett->value("observatory/obsCode", "084").toString();
+
+//marks /////////////////
+    QString mSep = sett->value("marks/mSep", " ").toString();
+    QString mCol = sett->value("marks/mCol", "1,2,3,4,5").toString();
+    int detRect = sett->value("marks/detRect", 0).toInt();
+    double rectX0 = sett->value("marks/rectX0", 0.0).toDouble();
+    double rectY0 = sett->value("marks/rectY0", 0.0).toDouble();
+    double rectX1 = sett->value("marks/rectX1", 0.0).toDouble();
+    double rectY1 = sett->value("marks/rectY1", 0.0).toDouble();
+
+///////////////////////////////////////////////////////////
+
+    if(QDir().exists(wcsLockFile)||(QDir().exists(wcsFileName)&&!refindWCS)) return 1;
+    else
+    {
+        QFile lockFile(wcsLockFile);
+        lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+
+        lockFile.close();
+    }
 
 
-   // fitsdata *plate = new fitsdata();
-//codec1->fromUnicode(QString(argv[3]));
-  //  fileName = codec1->toUnicode(argv[1]);
-    //qDebug() << QString("bpn: %1\n").arg(bpn.constData());
-  //  fileName = bpn.toPercentEncoding("-/._~=?&");
-   // qDebug() << QString("pnStr: %1\n").arg(pnStr);
+    QFile* logFile = new QFile(logFileName);
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+        clog = new QDataStream(logFile);
+
+    qDebug() << QString("platePath: %1\n").arg(platePath);
+
+    QStringList allSett;
+    allSett << sett->allKeys();
+    sz = allSett.size();
+    qDebug() << QString("\n\n%1:\n").arg(cfgFile);
+    for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
+    qDebug() << "\n\n";
 
 
-    //fileName = QString(argv[1]);
 
 
     if(fileName.lastIndexOf("\\")==-1)telName = fileName.section("/", -1, -1).section(".", 0, 0);
@@ -225,192 +195,178 @@ int main(int argc, char *argv[])// plateWCSn conf.ini marks.txt pnType plateNum|
     if(telName.indexOf("e")==0) insNum = 1;
     if(telName.indexOf("s")==0) insNum = 2;
     if(telName.indexOf("w")==0) insNum = 3;
-    qDebug() << QString("instNum= %1\n").arg(insNum);
 
-    //instruments->getNumIns(instNum);
+/////////////////////////////
+
+    initCatList(&starCatList, catIni);
+    qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
+
+/////////////////////////////
 
     observatory *obsList = new observatory;
-    qDebug() << QString("observatoryCat: %1\n").arg(observatoryCat.toAscii().data());
-    int obsInitRes = obsList->init(observatoryCat.toAscii().data(), OBS_SIZE);
-    qDebug() << QString("obsInitRes: %1\n").arg(obsInitRes);
+    obsy *obsPos;
+    if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
+    {
+        qDebug() << QString("obsCat is not opened\n");
+        QDir().remove(wcsLockFile);
+        return 1;
+    }
+
+    qDebug() << QString("observatory initiated\n");
+
+/////////////////////////////
+
 
     fitsdata *fitsd = new fitsdata();
-    fitsd->openEmptyFile();
-    fitsd->initInst(telescopeFile, insNum);
 
-//РїВ·РїВІРїВ Рїв•‘Рїв–“Рїв•”Рїв•ђРїв•њ РївЊ Рїв•ќРїв••РїВІРїВ РїВІРїв–’РїВІРїв‰Ґ РїВ·РїВ Рїв•ќРїв•ћРїв•ђРїв•”РїВ°Рїв‰ҐРїв•”
-    QProcess outerProcess;
-    QStringList outerArguments;
+    insSettings instr(insSettFile);
+    instr.getNumIns(insNum);
+    fitsd->setInstrSettings(instr);
 
- //    codec1 = QTextCodec::codecForName("KOI8-R");
- //    Q_ASSERT( codec1 );
+    if(obsList->getobsynumO(obsCode.toAscii().data()))
+    {
+        qDebug() << QString("obsCode is not found\n");
+        QDir().remove(wcsLockFile);
+        return 1;
+    }
+    obsPos = obsList->record;
+    fitsd->initObsPos(obsList->record);
+
+
+/////////////////////////////
+
 
     qDebug() << "getHeader\n";
 
-    if(atoi(argv[3]))   //0-http; 1-file
+    int doWhat;
+    if(argc>3) doWhat = atoi(argv[3]);
+    else doWhat = 0;
+    if(doWhat)   //0-http; 1-file
     {
-        fitsd->loadHeaderFile(QString(argv[4]));
+        if(fitsd->loadHeaderFile(QString(argv[4])))
+        {
+            qDebug() << "\nloadHeaderFile error\n";
+            QDir().remove(wcsLockFile);
+            return 1;
+        }
     }
     else
     {
 
-        //QByteArray bpn = codec1->fromUnicode(codec1->toUnicode(argv[3]));
-        //qDebug() << QString("bpn: %1\n").arg(bpn.constData());
-        //QString pnStr = bpn.toPercentEncoding("-/._~=?&");
-        QString pnStr = codec1->toUnicode(argv[4]);
+        qDebug() << QString("argc= %1").arg(argc);
+        if(argc>4)
+        {
+            pnStr = QString(argv[4]);
+        }
+        else
+        {
+            detPlateName(&pnStr, fileName, plNameType);
+        }
         qDebug() << QString("pnStr: %1\n").arg(pnStr);
 
         outerArguments.clear();
-
-        outerProcess.setWorkingDirectory(get_http_prog_folder);
+        outerProcess.setWorkingDirectory(gethttp_prog_folder);
         outerProcess.setProcessChannelMode(QProcess::MergedChannels);
         outerProcess.setReadChannel(QProcess::StandardOutput);
-        //outerArguments << instruments->curName.toLower() << pnStr;
-        outerArguments << QString("na") << pnStr;
-        qDebug() << get_http_prog << outerArguments.join(" ");
-        outerProcess.start(get_http_prog, outerArguments);
+        outerArguments << pnStr.toAscii().constData();
+        qDebug() << gethttp_prog << outerArguments.join(" ");
+        outerProcess.start(gethttp_prog, outerArguments);
 
-        outerProcess.waitForFinished(-1);
+        outerProcess.waitForFinished(gethttp_wait_time);
         QTextStream catStream(outerProcess.readAllStandardOutput());
-
-        //QByteArray httpData = catStream.readAll();// http->readAll();//Рїв–“Рїв•ђРїв€™РїВ°Рїв•”Рїв€™ Рїв– Рїв•ќРїВ°РїВ°Рїв•—РїС‘ (РїВІРїв•ђРїв–’Рїв€™Рїв•ђРїв•ќ)
-
 
         if(fitsd->readHttpHeader(catStream.readAll()))
         {
             qDebug() << "\nreadHttpHeader error\n";
-            QDir(platePath).remove(wcsFileName);
+            QDir().remove(wcsLockFile);
+            return 1;
+        }
+    }
+
+/////////////////////////////
+/////////////////////////////
+
+        expList = new ExposureList;
+        expRec = new ExposureRec;
+
+        int expRes = initExpList(expList, fitsd->headList, obsList->record);
+        expList->getExp(expRec, expNum);
+        fitsd->setMJD(expRec->expTime);
+
+//  utcorr
+
+        uTime = QString("0.0");
+
+        if(useUtCorr)
+        {
+            fitsd->headList.getKeyName("DATE-OBS", &dateStr);
+            fitsd->headList.getKeyName("TIME-OBS", &timeStr);
+
+            outerArguments.clear();
+            outerProcess.setWorkingDirectory(utcorr_prog_folder);
+            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+            outerProcess.setReadChannel(QProcess::StandardOutput);
+            qDebug() << QString("argc= %1\n").arg(argc);
+            outerArguments  << dateStr << timeStr;
+            qDebug() << utcorr_prog << outerArguments.join(" ");
+            outerProcess.start(utcorr_prog, outerArguments);
+
+            outerProcess.waitForFinished(utcorr_wait_time);
+            QTextStream catStream(outerProcess.readAllStandardOutput());
+
+            uTime = catStream.readAll().section("\n", -1, -1);
+        }
+        else
+        {
+            fitsd->headList.getKeyName("U", &uTime);
+        }
+
+        qDebug() << QString("uTimeCorr: %1\n").arg(uTime.trimmed().toDouble());
+        fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
+
+/////////
+////////
+
+        if(fitsd->loadIpixMarks(fileName, mSep, mCol))
+        {
+            qDebug() << "Ipix marks load error\n";
             return 1;
         }
 
-    }
+        if(detRect) fitsd->detIpixWorkFrame();
+        else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
+        fitsd->setRpix();
 
-//Рїв–’Рїв•—Рїв•ћРїв•ђРїв•ќРїв–’Рїв•”Рїв•ђРїв•њ РїВ·Рїв•ќРїГ·Рїв•ќРївЊЎРїв€™Рїв•ђРїГ·Рїв•— Рїв•”РїВ°Рїв•ћРїв•ђРїГ·Рїв•‘РївЊЎРїв€™РїВ°Рїв•ђРїв•ќ
-    //fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-    //fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-//РїВІРїв•ђРїв‰ҐРїГ·Рїв•—Рїв•ђРїв•њ РївЊЎРїв€™Рїв•ђРїв‰ҐРїв•”
-    fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
-    if(isMove2corner) fitsd->marksGIpix->moveToCorner(fitsd->naxes);
+/////////
+        double fov = fovp*fitsd->detFov();
 
-//time
-    if(obsList->getobsynumO(obsCode.toAscii().data()))
-    {
-        qDebug() << "obs not found\n";
-        QDir().remove(wcsLockFile);
-        return 2;
-    }
-    //fitsd->setSpecTime(isConvertToUTC, isSpec, obsList->record->Long);
-    /*
-    double sJD, eJD, d_day, uTimeJD, utc, jd0, uTimeMJD;
-    if(expNum<0) expNum = expList.size()-1;
-    fitsd->MJD = getMJDfromStrFTN(expList.at(expNum)->expStr, 0);
-    jd0 = UT0JD(mjd2jd(fitsd->currentCatalogMJD), &sJD);
-    utc = sJD;
-    if(isConvertToUTC)
-    {
-        qDebug() << QString("obsNum %1\n").arg(obsCode);
-        if(obsList->getobsynumO(obsCode.toAscii().data()))
-        {
-            qDebug() << "obs not found\n";
-            QDir(platePath).remove(wcsFileName);
-            return 2;
-        }
+        fitsd->catMarks->clearMarks();
+        getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
+        fitsd->detTan();
 
+//////////
 
-        sJD2UT1(jd0, sJD, obsList->record->Long, &utc);
-        uTimeJD = jd0 + utc;
-        //s2UTC(mjd2jd(curF->MJD), obsList->record->Long, &uTimeJD);
-        //qDebug() << QString("jd= %1\tlong=%2\tJD=%3\n").arg(mjd2jd(getMJDfromStrFTN(dateObsLE->text(), 0))).arg(obsList->record->Long).arg(uTimeJD);
-        fitsd->MJD = uTimeMJD = jd2mjd(uTimeJD);
-
-
-    }
-    if(isSpec)
-    {
-        d_day=fitsd->MJD*2.0;
-        d_day-=chet(d_day);
-        eJD = ((double)(int)d_day)/2.0;
-        d_day = (fitsd->MJD - eJD) - 0.5;
-        qDebug() << QString("MJD= %1\teJD = %2\td_day = %3\n").arg(fitsd->MJD).arg(eJD).arg(d_day);
-        if(d_day>0.0&&d_day<0.2917)
-        {
-            //curF->MJD += 1.0;
-            jd0+=1.0;
-            //jd0 = UT0JD(mjd2jd(curF->MJD), &sJD);
-            sJD2UT1(jd0, sJD, obsList->record->Long, &utc);
-            //curF->MJD = jd2mjd(jd0 + utc);
-        }
-
-
-    }
-    QString uTimeLE;
-    fitsd->headList.getKeyName("U", &uTimeLE);
-    fitsd->MJD = jd2mjd(jd0 + utc);
-    //qDebug() << QString("uTime: %1\n").arg(uTimeLE->text().trimmed().toDouble());
-    fitsd->MJD += uTimeLE.trimmed().toDouble()/86400.0;
-
-    QString timeStr = QString(getStrFromDATEOBS(getDATEOBSfromMJD(fitsd->MJD), " ", 2, 4));
-    //expLineEdit->setText(expLE->text());
-    */
-//РївЊ Рїв•ќРїв••РїГ·Рїв•‘РївЊ Рїв•”Рїв•ђРїв•њ РївЊЎРїв€™Рїв•ђРїв‰ҐРїв•” Рїв‰ҐРїв•ќРїв•ђРїв•ќРїВ РїВІРїв••Рїв•ќ
-/*
-    QString comLine;
-    //fitsd->headList.getKeyName()
-    comLine = rdStr.trimmed();
-    QStringList operands = comLine.split(" ");
-    double ra_oc = hms_to_mas(operands[0] +" "+ operands[1] +" "+ operands[2]," ");
-    double de_oc = damas_to_mas(operands[3] +" "+ operands[4] +" "+ operands[5]," ");
-    /*QString str = operands[6];
-    mag_1 = str.toDouble();
-    str = operands[7];
-    mag_2 = str.toDouble();*/
-
-
-    //marksGrid *mGr = fitsd->marksG;
- /*   if(!fitsd->WCSdata[12])
-    {
-        fitsd->WCSdata[2] = mas_to_grad(ra_oc);
-        fitsd->WCSdata[3] = mas_to_grad(de_oc);
-    }*/
- //   fitsd->MJD = getMJDfromStrFTN(timeStr, 0);
-    qDebug() << "\nGetMarksGrid\n";
-    qDebug() << "\nWCS2\t" << fitsd->WCSdata[2] << "\t" << fitsd->WCSdata[3] << "\n";
-    fitsd->marksG->clearMarks();
-    fitsd->getMarksGrid(starCatList.at(currentCat), fitsd->instr->fov, mag0, mag1, starsNum);
-    fitsd->detTan();
-//find stars
- //   fitsd->findCloserStars(apeSize);
 //ident
     qDebug() << QString("refMarksSize= %1\n").arg(fitsd->refMarks->marks.size());
-    int resAuto = fitsd->identAuto(fitsd->refMarks, fitsd->instr->rang, targNum, identType, maxNum);
+    int resAuto = identAuto(fitsd->refMarks, fitsd->catMarks, fitsd->ipixMarks, &fitsd->WCSdata[0], identNum, identType, maxNum);
 
     if(resAuto)
     {
         qDebug() << "\nautoident fail\n";
-        //QMessageBox::information(0, "resAuto", "autoident fail");
         QDir().remove(wcsLockFile);
         return 3;
     }
-    qDebug() << "\nwcsSpinBox\n";
-    fitsd->sigmaN = wcsParams.sigma;
-
-
 
     if(fitsd->detWCS1(wcsParams))
     {
-        //slotSetCurFrame(imgLabel->frameIndex);
-        //mGr->clearMarks();
-//		mGrI->marks.clear();
-//		slotMarks();
         fitsd->detTan();
- //   mGr->marks.clear();
- //   mGrI->marks.clear();
-        fitsd->saveWCSFile(wcsFileName);//slotSaveWCS();
-
+        fitsd->saveWCSFile(wcsFileName);
     }
-else qDebug() << QString("detWCS fail\nSx = %1 mas\tSy = %2 mas").arg(grad_to_mas(fitsd->Sx)).arg(grad_to_mas(fitsd->Sy));
+    else
+    {
+        qDebug() << QString("detWCS fail\nSx = %1 mas\tSy = %2 mas").arg(grad_to_mas(fitsd->Sx)).arg(grad_to_mas(fitsd->Sy));
+    }
 
-    //QDir(platePath).remove(wcsLockFile);
     QDir().remove(wcsLockFile);
 
     delete clog;

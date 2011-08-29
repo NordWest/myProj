@@ -46,7 +46,8 @@ double tFunc(double ai)
 
     r0 = A0*cos(ai/P0 + Fi0);
     r1 = A1*cos(ai/P1 + Fi1);
-    return(r0+r1);
+    //return(r0+r1);
+    return(r0);
 }
 
 
@@ -94,11 +95,11 @@ int main(int argc, char *argv[])
     bool isOk;
     i=0;
     double t0, t1, tk, fk, tmin;
-    t0 = 8000;
-    tmin = t1 = 16000;
+    t0 = 10000;
+    tmin = t1 = 14000;
 
 
-    /*
+
     tlen = 5000;
     srand ( time(NULL) );
     for(i=0; i<tlen; i++)
@@ -109,12 +110,12 @@ int main(int argc, char *argv[])
         tVect << tk;
         fVect << fk;
     }
-    */
 
 
 
 
-    //
+
+    /*
     if(argc<2) return 1;
     QString fName = QString(argv[1]);
     QFile iFile(fName);
@@ -136,7 +137,8 @@ int main(int argc, char *argv[])
         }
     }
     iFile.close();
-    //
+
+*/
 
 
 

@@ -87,9 +87,6 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
 
     QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
 
-    //QString codecName = sett->value("general/codecName", "UTF-8").toString();
-
-
 //general
     int expNum = sett->value("general/expNum", -1).toInt();
     int plNameType = sett->value("general/plNameType", 0).toInt();
