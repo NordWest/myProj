@@ -1574,6 +1574,16 @@ ExposureList::~ExposureList()
     exps.clear();
 }
 
+void ExposureList::clear()
+{
+    exps.clear();
+}
+
+int ExposureList::expNum()
+{
+    return exps.size();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 fitsdata::fitsdata()

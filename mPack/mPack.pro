@@ -45,5 +45,5 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/ialglib.h
 win32:LIBS += ./../libs/cfitsio.lib  \
     ../libs/ablas.dll
-unix:LIBS += ./../libs/unix64/libcfitsio.a
-unix:LIBS += ../libs/unix64/libmb.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
+unix:LIBS += ../libs/unix/libmb.a

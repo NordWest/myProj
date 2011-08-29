@@ -401,6 +401,8 @@ struct ExposureList
     double getExpTime(int pos);
     double getExpVal(int pos);
     QString getExpTimeStr(int pos);
+    void clear();
+    int expNum();
     ~ExposureList();
 };
 
