@@ -57,10 +57,9 @@ void customMessageHandler(QtMsgType type, const char* msg)
 
 }
 
-int main(int argc, char *argv[])    //ruler3PL.exe cfg.ini file.mks [0|1] [plName|header file]
+int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cfg.ini] [plName=10000] [headerFile=./header.txt] [resFolder=./results]
     {  
         qInstallMsgHandler(customMessageHandler);
-        QString pnStr;
         QCoreApplication app(argc, argv);
         //QTextStream stream(stdout);
         setlocale(LC_NUMERIC, "C");
@@ -75,50 +74,74 @@ QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
 Q_ASSERT( codec1 );
 QTextCodec::setCodecForCStrings(codec1);
 
+int i, sz, resRed, oNum;
+QList <catFinder*> starCatList;
+QString obsCode;
+QString uTime;
+QString dateStr, timeStr, descS, oName;
+QProcess outerProcess;
+QStringList outerArguments;
+
+
+//command line  ///////////////////////////////////////
+    QString optName, optVal, optStr, pnStr, headerFileName;
+    QString resFolder;
+
+    QString cfgFileName = "ruler3PL.ini";
+    int doWhat = 0;                         //0-http; 1-file
+    int detPlName = 1;
+    int resdirDef=0;
+
+    for(i=1; i<argc; i++)
+    {
+        optStr = QString(argv[i]);
+        optName = optStr.section("=", 0, 0);
+        optVal = optStr.section("=", 1, 1);
+        if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+        {
+            cfgFileName = optVal;
+        }
+        else if(QString::compare(optName, "plName", Qt::CaseSensitive)==0)
+        {
+            detPlName = 0;
+            pnStr = optVal;
+        }
+        else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
+        {
+            detPlName = 0;
+            doWhat = 1;
+            headerFileName = optVal;
+        }
+        else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
+        {
+            resdirDef=1;
+            resFolder = optVal;
+        }
+    }
+
 ///////// 1. Reading settings ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        QString cfgFile = QString(argv[1]);
+        QString cfgFile = QString(cfgFileName);
 
         refractionParam *refParam = NULL;
 
         qDebug() << "started....\n";
-        int i, sz, resRed, oNum;
-        QList <catFinder*> starCatList;
-        QString obsCode;
-        QString uTime;
-        QString dateStr, timeStr, descS, oName;
-        QProcess outerProcess;
-        QStringList outerArguments;
-
 
         QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
-/*
-        QString codecName = sett->value("general/codecName", "UTF-8").toString();
-        QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
-        Q_ASSERT( codec1 );
-        QTextCodec::setCodecForCStrings(codec1);
-*/
-        QString redparamIni = sett->valueisRedRef("general/redparamIni", "./conf/redParam.ini").toString();
+
+        QString redparamIni = sett->value("general/redparamIni", "./conf/redParam.ini").toString();
         int expNum = sett->value("general/expNum").toInt();
-
         int aper = sett->value("general/aperture", 20).toInt();
-
         int isRedRef = sett->value("general/isRedRef", 0).toInt();
         int plNameType = sett->value("general/plNameType", 0).toInt();
         int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
-        QString resFolder = sett->value("general/resFolder", "./resDefault").toString();
+        if(!resdirDef) resFolder = sett->value("general/resFolder", "./results").toString();
         double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
-
 
 //  logs
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
         //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
-
-/*insSettings
-        QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
-        int instrNum = sett->value("insSettings/instrNum", 2).toInt();
-*/
 
 //objects   ////
         int lspmFind = sett->value("objects/lspmFind", 0).toInt();
@@ -168,7 +191,7 @@ QTextCodec::setCodecForCStrings(codec1);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        QString fileName =  QString(argv[2]);
+        QString fileName =  QString(argv[1]);
 
         QDir resDir("./");
         if(resDir.mkpath(resFolder))qDebug() << "\nresFolder created\n";
@@ -252,12 +275,9 @@ QTextCodec::setCodecForCStrings(codec1);
 
 //get header
 
-        int doWhat;
-        if(argc==5) doWhat = atoi(argv[3]);
-        else doWhat = 0;
         if(doWhat)   //0-http; 1-file
         {
-            if(fitsd->loadHeaderFile(QString(argv[4])))
+            if(fitsd->loadHeaderFile(headerFileName))
             {
                 qDebug() << "\nloadHeaderFile error\n";
                 if(isRemLog)QDir().remove(logFileName);
@@ -267,15 +287,7 @@ QTextCodec::setCodecForCStrings(codec1);
         else
         {
 
-            qDebug() << QString("argc= %1").arg(argc);
-
-            if(argc==5) pnStr = QString(argv[4]);
-            else detPlateName(&pnStr, filePath, plNameType);
-
-
-            qDebug() << QString("pnStr: %1\n").arg(pnStr);
-
-
+            if(detPlName) detPlateName(&pnStr, filePath, plNameType);
 
             outerArguments.clear();
             outerProcess.setWorkingDirectory(gethttp_prog_folder);
@@ -286,9 +298,6 @@ QTextCodec::setCodecForCStrings(codec1);
             outerProcess.start(gethttp_prog, outerArguments);
 
             outerProcess.waitForFinished(gethttp_wait_time);
-            //QTextStream catStream(outerProcess.readAllStandardOutput());
-
-            //if(fitsd->readHttpHeader(catStream.readAll()))
             if(fitsd->readHttpHeader(QString(outerProcess.readAllStandardOutput())))
             {
                 qDebug() << "\nreadHttpHeader error\n";
