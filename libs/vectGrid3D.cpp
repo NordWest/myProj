@@ -804,14 +804,14 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
         }
 
         slsm(2, mnum, Zx, Cx, xVect);
-        qDebug() << QString("Zx: %1\t%2\t%3\n").arg(Zx[0]).arg(Zx[1]).arg(Zx[2]);
+        //qDebug() << QString("Zx: %1\t%2\t%3\n").arg(Zx[0]).arg(Zx[1]).arg(Zx[2]);
         slsm(2, mnum, Zy, Cy, yVect);
-        qDebug() << QString("Zy: %1\t%2\t%3\n").arg(Zy[0]).arg(Zy[1]).arg(Zy[2]);
+        //qDebug() << QString("Zy: %1\t%2\t%3\n").arg(Zy[0]).arg(Zy[1]).arg(Zy[2]);
 
         *xint = Zx[0]*m + Zx[1];
         *yint = Zy[0]*m + Zy[1];
 
-        qDebug() << QString("xint= %1\tyint= %2\n").arg(*xint).arg(*yint);
+        //qDebug() << QString("xint= %1\tyint= %2\n").arg(*xint).arg(*yint);
 
 
 

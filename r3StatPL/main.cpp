@@ -91,7 +91,6 @@ struct report3data
     QString labelX, labelY, plotParam;*/
     int isDetCurv, curvDeg;
     int aveNum;
-    QString colSep;
     int mDegree;
     int doMcoef;
 };
@@ -129,6 +128,21 @@ int main(int argc, char *argv[])    //r3StatPL
 {
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
+
+
+    setlocale(LC_NUMERIC, "C");
+    QString codecName;
+    #if defined(Q_OS_LINUX)
+    codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+    codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
+
+
     QTextStream dataStream, dataStream1;
     //QFile rFile(argv[1]);
     //rFile.open(QIODevice::ReadOnly| QIODevice::Text);
@@ -287,6 +301,8 @@ int main(int argc, char *argv[])    //r3StatPL
     QString excMesFile = sett->value("general/excMesFile", "./excMes.txt").toString();
 
     double mgEqSigma = sett->value("general/mgEqSigma", 3.0).toDouble();
+    QString colSep = sett->value("general/colSep").toString();
+
 
     double objSigma = sett->value("reportObj/objSigma", 3.0).toDouble();
     double objAggSigma = sett->value("reportObj/objAggSigma", 0.0).toDouble();
@@ -326,7 +342,6 @@ int main(int argc, char *argv[])    //r3StatPL
     r3data.curvDeg = sett->value("report3/curvDeg", 2).toInt();
     r3data.aveNum = sett->value("report3/aveNum", 2).toInt();
     qDebug() << QString("aveNum= %1\n").arg(r3data.aveNum);
-    r3data.colSep = sett->value("report3/colSep").toString();
     r3data.mDegree = sett->value("report3/mDegree", 2).toInt();
     r3data.doMcoef = sett->value("report3/doMcoef", 0).toInt();
 
@@ -1046,7 +1061,7 @@ int main(int argc, char *argv[])    //r3StatPL
        dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->rmsMeanEta);
        dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->resList.size());
   //     dataStrL << QString("%1")
-       dataStream << dataStrL.join(r3data.colSep) << "\n";
+       dataStream << dataStrL.join(colSep) << "\n";
     }
 
     r1File.setFileName(reportDirName+"ocMagDisp.txt");
@@ -1245,7 +1260,7 @@ int main(int argc, char *argv[])    //r3StatPL
             dataStrL << QString("%1").arg(xCoeff[i], 10, 'e');
        }
 
-       dataStream2Xcoef << dataStrL.join(r3data.colSep) << "\n";
+       dataStream2Xcoef << dataStrL.join(colSep) << "\n";
 
        dataStrL.clear();
        dataStrL << QString("%1").arg((magEq.diaps[k]+magEq.diaps[k+1])/2.0);
@@ -1254,7 +1269,7 @@ int main(int argc, char *argv[])    //r3StatPL
             dataStrL << QString("%1").arg(yCoeff[i], 10, 'e');
        }
 
-       dataStream2Ycoef << dataStrL.join(r3data.colSep) << "\n";
+       dataStream2Ycoef << dataStrL.join(colSep) << "\n";
 /*
        for(i=0; i<szi; i++)
        {
@@ -1266,10 +1281,10 @@ int main(int argc, char *argv[])    //r3StatPL
 */
        for(i=0; i<dotNum; i++)
        {
-           dataStream1 << QString("%1 %4 %2 %4 %3\n").arg(mX[i], 5, 'f', 2).arg(dmX[i], 8, 'f', 2).arg(dmY[i], 8, 'f', 2).arg(r3data.colSep);
-           dataStream2X << QString("%1 %3 %2\n").arg(x[i]).arg(dx[i], 6, 'f', 3).arg(r3data.colSep);
-           dataStream2Y << QString("%1 %3 %2\n").arg(y[i]).arg(dy[i], 6, 'f', 3).arg(r3data.colSep);
-           dataStream3 << QString("%1 %3 %2\n").arg(mX[i]-dmX[i]).arg(dmX[i], 6, 'f', 3).arg(r3data.colSep);
+           dataStream1 << QString("%1 %4 %2 %4 %3\n").arg(mX[i], 5, 'f', 2).arg(dmX[i], 8, 'f', 2).arg(dmY[i], 8, 'f', 2).arg(colSep);
+           dataStream2X << QString("%1 %3 %2\n").arg(x[i]).arg(dx[i], 6, 'f', 3).arg(colSep);
+           dataStream2Y << QString("%1 %3 %2\n").arg(y[i]).arg(dy[i], 6, 'f', 3).arg(colSep);
+           dataStream3 << QString("%1 %3 %2\n").arg(mX[i]-dmX[i]).arg(dmX[i], 6, 'f', 3).arg(colSep);
        }
 
        r2FileX.close();
@@ -1289,8 +1304,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
        for(i=0; i<dotNum; i++)
        {
-           dataStream2X << QString("%1 %3 %2\n").arg(x[i]).arg(dx[i]-polyY(xCoeff, x[i], r3data.curvDeg), 6, 'f', 3).arg(r3data.colSep);
-           dataStream2Y << QString("%1 %3 %2\n").arg(y[i]).arg(dy[i]-polyY(yCoeff, y[i], r3data.curvDeg), 6, 'f', 3).arg(r3data.colSep);
+           dataStream2X << QString("%1 %3 %2\n").arg(x[i]).arg(dx[i]-polyY(xCoeff, x[i], r3data.curvDeg), 6, 'f', 3).arg(colSep);
+           dataStream2Y << QString("%1 %3 %2\n").arg(y[i]).arg(dy[i]-polyY(yCoeff, y[i], r3data.curvDeg), 6, 'f', 3).arg(colSep);
        }
 
        r2FileX.close();
@@ -1333,9 +1348,9 @@ int main(int argc, char *argv[])    //r3StatPL
     if(r3data.doMcoef)
     {
 
-        mCoefFunc(r3NameXcoef, QString(report3Dir+"/mCoefX.txt"), r3data.colSep, r3data.mDegree);
+        mCoefFunc(r3NameXcoef, QString(report3Dir+"/mCoefX.txt"), colSep, r3data.mDegree);
 
-        mCoefFunc(r3NameYcoef, QString(report3Dir+"/mCoefY.txt"), r3data.colSep, r3data.mDegree);
+        mCoefFunc(r3NameYcoef, QString(report3Dir+"/mCoefY.txt"), colSep, r3data.mDegree);
 
     }
 
@@ -2074,8 +2089,8 @@ int main(int argc, char *argv[])    //r3StatPL
                     dKsi = 0.0;
                     dEta = 0.0;
 
-                    if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
-                    //if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, r5data.rMax, r5data.nmin);
+                    //if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
+                    if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, r5data.rMax, r5data.nmin);
 
                     vect[0] = resRec->x - dKsi;
                     vect[1] = resRec->y - dEta;

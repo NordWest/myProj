@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
      szk = vectFdata0->ax[2];
 
      long pos[3];
-     long nums;
+     long nums, nums1;
      double px, py, pm, x, y, x0, y0, dx, dy;
 
      double *Cx, *Cy, *Lx, *Ly, *Dx, *Dy, *WeX, *WeY;
@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
 
      int pp;
 
-     QFile resFile, inFile, corrFile;
-     QTextStream resStm, inStm, corrStm;
+     QFile resFile, resFile1, inFile, corrFile;
+     QTextStream resStm, resStm1, inStm, corrStm;
      QString rFileName, inFileName, corrFileName;
 
      double *xLevels, *yLevels, *mLevels;
@@ -133,6 +133,9 @@ int main(int argc, char *argv[])
      vectFdata1->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
      vectGrid3D *vectFdata2 = new vectGrid3D();
      vectFdata2->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
+     vectGrid3D *vectFBC = new vectGrid3D();
+     vectFBC->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
+
 
      long numMax = vectFdata0->getNumMax();
      double *vectF = new double[3];
@@ -294,8 +297,8 @@ int main(int argc, char *argv[])
                  //x = zX[0]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
                  //y = zY[0]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
 
-                 //qDebug() << QString("x0: %1\ty0: %2\n").arg(x0).arg(y0);
-                 //qDebug() << QString("x: %1\ty: %2\n").arg(x).arg(y);
+                 qDebug() << QString("x0: %1\ty0: %2\n").arg(x0).arg(y0);
+                 qDebug() << QString("x: %1\ty: %2\n").arg(x).arg(y);
 
                  if(nums>0)
                  {
@@ -399,6 +402,66 @@ int main(int argc, char *argv[])
      vectFdata2->initVF();
      vectFdata2->saveVF("./resCombine.vf");
      vectFdata2->saveDotList("./", "|", "resCombine_");
+
+
+     QString bcFileName;
+
+     for(k=0; k<szk; k++)
+     {
+         pos[2] = k;
+
+         bcFileName = QString("resRad_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+
+         resFile.setFileName(bcFileName);
+         resFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm.setDevice(&resFile);
+
+         bcFileName = QString("resRadM_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+
+         resFile1.setFileName(bcFileName);
+         resFile1.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm1.setDevice(&resFile1);
+
+
+
+         for(j=0; j<szj; j++)
+         {
+             for(i=0; i<szi; i++)
+             {
+                 vectFdata2->getVect(i, j, k, &px, &py, &pm, &x0, &y0, &nums);
+
+                 vectFdata2->int2Drad(px, py, pm, &x, &y, 1500, 15);
+
+                 //if(nums>0)
+                 //{
+                     dx = x0-x;
+                     dy = y0-y;
+                 /*}
+                 else
+                 {
+                     dx = 0.0;
+                     dy = 0.0;
+                 }*/
+
+                 vectFBC->setPoint(vectF, dx, dy, 20);
+
+                 resStm << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+
+                 vectFdata2->int2DradM(px, py, pm, &x, &y, 1500, 15);
+                 dx = x0-x;
+                 dy = y0-y;
+
+                 resStm1 << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+             }
+
+
+         }
+
+         resFile.close();
+     }
+
+
+
 /*
      QStringList resListX, resListY;
 

@@ -22,6 +22,7 @@ struct klx
 	double Im;
 };
 
+
 class kompl
 {
 protected:
@@ -44,7 +45,11 @@ public:
 	double mod();
         friend kompl& operator+(kompl k1, kompl k2);
 	friend kompl& operator-(kompl k1, kompl k2);
-        friend kompl& operator*(kompl k1, kompl k2);
+        //friend kompl& operator*(const kompl &k1, const kompl &k2);
+        //friend kompl& operator*(kompl &k2);
+        //kompl& operator*(kompl *k2);
+        //friend kompl& operator*(const kompl k2);
+
         //kompl operator*(kompl k1);
 	friend kompl& operator*(kompl k1, double a);
 	friend kompl& operator*(double a, kompl k1);
@@ -63,6 +68,8 @@ public:
         kompl operator/=(double a);
         //friend void operator*=(kompl k1, kompl k2);
         //friend void operator*=(kompl k1, double k2);
-        void operator=(kompl &source);
+        void operator=(kompl source);
 	~kompl();
 };
+
+//kompl& operator*(const kompl &k1, const kompl &k2);

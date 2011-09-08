@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = improveVF
+TARGET = ./../../lab/improveVF/improveVF
 CONFIG   += console \
     warn_off
 CONFIG   -= app_bundle

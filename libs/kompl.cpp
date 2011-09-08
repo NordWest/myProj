@@ -104,21 +104,40 @@ kompl& operator-(kompl k1, kompl k2)
         return k;
 }
 
-void kompl::operator=(kompl &source)
+void kompl::operator=(kompl source)
 {
 //	copy( source.Re, source.Im);
         setRe(source.Re());
 	setIm(source.Im());
         //return *this;
 }
-
-kompl& operator*(kompl k1, kompl k2)
+/*
+kompl& kompl::operator*(const kompl &k1, const kompl &k2)
 {
     kompl k;
     k.setRe(k1.Re()*k2.Re() - k1.Im()*k2.Im());
     k.setIm(k1.Re()*k2.Im() + k1.Im()*k2.Re());
+    return &k;
+}
+*/
+/*
+kompl& kompl::operator*(kompl &k2)
+{
+    kompl k;
+    k.setRe(this->Re()*k2.Re() - this->Im()*k2.Im());
+    k.setIm(this->Re()*k2.Im() + this->Im()*k2.Re());
     return k;
 }
+
+kompl& kompl::operator*(kompl *k2)
+{
+    kompl k;
+    k.setRe(this->Re()*k2->Re() - this->Im()*k2->Im());
+    k.setIm(this->Re()*k2->Im() + this->Im()*k2->Re());
+    return k;
+}
+*/
+
 /*
 kompl kompl::operator*(kompl k2)
 {
@@ -193,10 +212,10 @@ kompl kompl::operator*=(kompl k2)
 {
     kompl k1(*this);
 
-    *this = k1*k2;
+    //*this = k1*k2;
 
-    //this->setRe(k1.Re()*k2.Re() - k1.Im()*k2.Im());
-    //this->setIm(k1.Re()*k2.Im() + k1.Im()*k2.Re());
+    this->setRe(k1.Re()*k2.Re() - k1.Im()*k2.Im());
+    this->setIm(k1.Re()*k2.Im() + k1.Im()*k2.Re());
 
     return *this;
 }
