@@ -10097,7 +10097,8 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 
 
     qDebug() << QString("object num: %1\n").arg(sz);
-    //qDebug() << "refMaker: " << refMaker << "\n";
+    qDebug() << "refMaker: " << refMaker << "\n";
+    qDebug() << "sysCorr: " << sysCorr << "\n";
     if(refMaker!=NULL)
     {
         refMaker->forvRef(&oc0, &oc1, oc0, oc1);
@@ -10137,8 +10138,11 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
         data[5]=mT->mTanImg[0];// - WCSdata[0];//measured pixel position X (O)
         data[6]=mT->mTanImg[1];// - WCSdata[1];//measured pixel position Y (1)
 
+        qDebug() << "sysCorr: " << sysCorr << "\n";
+
         if(sysCorr!=NULL)
         {
+             //qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
             if(sysCorr->isVfCorr0)
             {
                 if(!sysCorr->vfCorr0->detCorr(&dX, &dY, &ni, data[5], data[6], data[2]))
@@ -10148,12 +10152,15 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
                 }
             }
 
+            //qDebug() << "sysCorr->isMagEqCorr: " << sysCorr->isMagEqCorr << "\n";
 
             if(sysCorr->isMagEqCorr)
             {
                 data[5] -= sysCorr->magEqCorr->corrX(data[5], data[2]);//magEqCorr(mT->mEkv[2], mT->objdata[4], mCoefX, mCoefDeg);
                 data[6] -= sysCorr->magEqCorr->corrY(data[6], data[2]);//magEqCorr(mT->mEkv[2], mT->objdata[5], mCoefY, mCoefDeg);
             }
+
+            //qDebug() << "sysCorr->isVfCorr1: " << sysCorr->isVfCorr1 << "\n";
 
             if(sysCorr->isVfCorr1)
             {
@@ -10764,7 +10771,7 @@ int sysCorrParam::init(QString confName)
     for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
     qDebug() << "\n\n";
 
-    int isBC, nmin;
+    int isBC, nmin, isRadM;
     QString vfCorrFile;
     double rMax;
 
@@ -10804,8 +10811,9 @@ int sysCorrParam::init(QString confName)
             rMax = sett->value("vfCorr0/rMax", 0).toDouble();
             nmin = sett->value("vfCorr0/nmin", 0).toInt();
             isBC = sett->value("vfCorr0/isBC", 0).toInt();
+            isRadM = sett->value("vfCorr0/isRadM", 0).toInt();
 
-            isVfCorr0 = !vfCorr0->init(vfCorrFile, rMax, nmin, isBC);
+            isVfCorr0 = !vfCorr0->init(vfCorrFile, rMax, nmin, isBC, isRadM);
         }
 
         //vfCorr1
@@ -10816,8 +10824,9 @@ int sysCorrParam::init(QString confName)
             rMax = sett->value("vfCorr1/rMax", 0).toDouble();
             nmin = sett->value("vfCorr1/nmin", 0).toInt();
             isBC = sett->value("vfCorr1/isBC", 0).toInt();
+            isRadM = sett->value("vfCorr1/isRadM", 0).toInt();
 
-            isVfCorr1 = !vfCorr1->init(vfCorrFile, rMax, nmin, isBC);
+            isVfCorr1 = !vfCorr1->init(vfCorrFile, rMax, nmin, isBC, isRadM);
         }
 
         //mdCorr
@@ -10919,7 +10928,7 @@ void fitsdata::initComaCorr(double cKsi, double cEta, double cMag0)
     isComaCorr = 1;
 }
 */
-int vfCorrParam::init(QString vfFileName, double rmax, int nmin, int isbc)
+int vfCorrParam::init(QString vfFileName, double rmax, int nmin, int isbc, int isradm)
 {
     vectFcorr = new vectGrid3D;
     QByteArray tmp = vfFileName.toAscii();
@@ -10928,6 +10937,7 @@ int vfCorrParam::init(QString vfFileName, double rmax, int nmin, int isbc)
     rMax = rmax;
     nMin = nmin;
     isBC = isbc;
+    isRadM = isradm;
 
     return 0;
 }
@@ -10985,18 +10995,41 @@ int vfCorrParam::detCorr(double *dx, double *dy, long *ni, double x, double y, d
     }
     else
     {
-        if(!vectFcorr->int2Drad(x, y,magn, &dX, &dY, rMax, nMin))
+        if(isRadM)
         {
-            *dx = dX;
-            *dy = dY;
-//                mT->objdata[4]-= dX;
-//                mT->objdata[5]-= dY;
+            if(!vectFcorr->int2DradM(x, y,magn, &dX, &dY, rMax, nMin))
+            {
+                *dx = dX;
+                *dy = dY;
+                //qDebug() << QString("int2DradM: %1\t%2\n").arg(dX).arg(dY);
+    //                mT->objdata[4]-= dX;
+    //                mT->objdata[5]-= dY;
+            }
+            else
+            {
+                *dx = 0.0;
+                *dy = 0.0;
+                //qDebug() << QString("int2DradM: error\n");
+                return 1;
+            }
         }
         else
         {
-            *dx = 0.0;
-            *dy = 0.0;
-            return 1;
+            if(!vectFcorr->int2Drad(x, y,magn, &dX, &dY, rMax, nMin))
+            {
+                *dx = dX;
+                *dy = dY;
+                //qDebug() << QString("int2Drad: %1\t%2\n").arg(dX).arg(dY);
+    //                mT->objdata[4]-= dX;
+    //                mT->objdata[5]-= dY;
+            }
+            else
+            {
+                *dx = 0.0;
+                *dy = 0.0;
+                //qDebug() << QString("int2Drad: error\n");
+                return 1;
+            }
         }
     }
     return 0;

@@ -182,8 +182,8 @@ struct vfCorrParam
 {
     vectGrid3D *vectFcorr;
     double rMax;
-    int nMin, isBC;
-    int init(QString vfFileName, double rmax, int nmin, int isbc);
+    int nMin, isBC, isRadM;
+    int init(QString vfFileName, double rmax, int nmin, int isbc, int isradm);
     int detCorr(double *dx, double *dy, long *ni, double x, double y, double magn);
 };
 
