@@ -67,7 +67,7 @@ HEADERS += ../libs/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h \
+#    ../libs/ialglib.h \
     ../libs/mpccat.h \
     ../libs/orbcat.h \
     ../libs/sysCorr.h \

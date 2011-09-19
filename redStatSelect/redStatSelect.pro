@@ -28,11 +28,17 @@ SOURCES += main.cpp \
     ./../libs/cmnk.cpp  \
     ./../libs/ccdmeasurements.cpp \
     ../libs/fitstools.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
     ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp
+    ../libs/sysCorr.cpp
 
 HEADERS += ../libs/astro.h \
     ../libs/mb.h \
@@ -50,9 +56,18 @@ HEADERS += ../libs/astro.h \
     ../libs/longnam.h   \
     ./../libs/ccdmeasurements.h \
     ../libs/fitstools.h \
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h
 
 win32:LIBS += ./../libs/win/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
-win32:LIBS += ./../libs/cfitsio.lib \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/libcfitsio.a
+win32:LIBS += ./../libs/cfitsio.lib
+unix:LIBS += ./../libs/unix/libcfitsio.a
