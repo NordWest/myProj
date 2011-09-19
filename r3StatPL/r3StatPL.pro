@@ -24,13 +24,21 @@ SOURCES += main.cpp \
     ../libs/sscat.cpp \
     ../libs/fbStream.cpp \
     ../libs/fBuffer.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
     ../libs/vectGrid3D.cpp \
     ../libs/ialglib.cpp \
     ../libs/mpccat.cpp \
-    ../libs/orbcat.cpp
+    ../libs/orbcat.cpp \
+    ../libs/sysCorr.cpp \
+    ../libs/uneven.cpp
 
 HEADERS += ../libs/astro.h \
     ../libs/mb.h \
@@ -49,16 +57,25 @@ HEADERS += ../libs/astro.h \
     ../libs/sscat.h \
     ../libs/fbStream.h \
     ../libs/fBuffer.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
     ../libs/vectGrid3D.h \
     ../libs/ialglib.h \
     ../libs/mpccat.h \
-    ../libs/orbcat.h
+    ../libs/orbcat.h \
+    ../libs/sysCorr.h \
+    ../libs/uneven.h
 
-win32:LIBS += ./../libs/cfitsio.lib \
-    ../libs/ablas.dll
+win32:LIBS += ./../libs/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
 win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
+
+

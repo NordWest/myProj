@@ -31,6 +31,8 @@ class reductionMaker;
 #include "redStat.h"
 #endif
 
+#include "sysCorr.h"
+
 
 #include "fitsio.h"
 #include "longnam.h"
@@ -105,8 +107,7 @@ class catFinder
 
 int initCatList(QList <catFinder*> *starCatList, QString catiniFileName);
 
-double magEqCorr(double mag, double x, QList <double*> mCoefX, int mDeg);
-double comaCorr(double x, double mag, double c, double mag0);
+
 
 void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMaker, sysCorrParam *sysCorr);
 
@@ -159,77 +160,7 @@ void findSkybot(marksGrid *objMarks, double ra, double de, double MJD, QString p
 void findSkybotNamesList(QStringList *namesList, double ra, double de, double MJD, QString prog, QString progFolder, double fov, QString obsCode, double mag0, double mag1, int sbWaitTime=-1);
 ////////////////////////////////////////////
 
-//  syscorr ////////////////////////////
 
-struct magEqCorrParam
-{
-    QList <double*> mCoefX, mCoefY;
-    int mCoefDeg;
-
-    int init(QString xCoefFileName, QString yCoefFileName, QString dataSep);
-    double corrX(double x, double magn);
-    double corrY(double y, double magn);
-};
-
-struct comaCorrParam
-{
-    double cKsi, cEta, cMag0;
-    double dKsi(double ksi, double mag);
-    double dEta(double eta, double mag);
-};
-
-struct vfCorrParam
-{
-    vectGrid3D *vectFcorr;
-    double rMax;
-    int nMin, isBC, isRadM;
-    int init(QString vfFileName, double rmax, int nmin, int isbc, int isradm);
-    int detCorr(double *dx, double *dy, long *ni, double x, double y, double magn);
-};
-
-struct mdCorrParam
-{
-    QString mdCorrX, mdCorrY;
-    QString colSep;
-    int corrModel;
-    QList <double*> mdCoefX, mdCoefY;
-    int mdCoefXsz, mdCoefYsz, dCoefXsz, dCoefYsz;
-
-    int init(QString mdcorrx, QString mdcorry, QString colsep, int corrmodel);
-};
-
-struct reductionParams
-{
-    double maxres;
-    double maxresMAG;
-    double sigma;
-    int weights;
-    int minRefStars;
-    int redType;
-    double sMax;
-    double uweMax;
-    int maxRefStars;
- };
-
-class sysCorrParam
-{
-public:
-    int isMagEqCorr;
-    int isComaCorr;
-    int isVfCorr0;
-    int isVfCorr1;
-    int isMdCorr;
-
-
-    comaCorrParam *comaCorr;
-    magEqCorrParam *magEqCorr;
-    vfCorrParam *vfCorr0, *vfCorr1;
-    mdCorrParam *mdCorr;
-
-    sysCorrParam();
-    int init(QString confName);
-
-};
 
 //selectors //////////////////////////
 struct rsSelector0Sett
@@ -550,7 +481,7 @@ public:
         void initRaDeHeadList();
         void setMJD(double mjd);
 
-        int ruler3(QString iniFile, QString resFolder, refractionParam *refParam = NULL);
+        int ruler3(QString iniFile, QString resFolder, refractionParam *refParam = NULL, sysCorrParam *sysCorr = NULL);
 
         void setPos(double mJD, double ra, double de);
 

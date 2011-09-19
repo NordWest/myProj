@@ -5,12 +5,14 @@
 #include <QDataStream>
 #include <QFile>
 */
+#include "./../libs/uneven.h"
 #include "./../libs/redStat.h"
 #include "./../libs/observatory.h"
 #include "./../libs/vectGrid3D.h"
 #include "./../libs/fitsdata.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/mpccat.h"
+
 
 //#include <mgl/mgl_eps.h>
 
@@ -93,6 +95,14 @@ struct report3data
     int aveNum;
     int mDegree;
     int doMcoef;
+};
+
+struct report12data
+{
+    double x0, x1;
+    double y0, y1;
+    cleanParam cp;
+    int redDeg;
 };
 
 struct report4data
@@ -314,6 +324,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
     int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
     int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
+    int isDropObj = sett->value("report0/isDropObj", 0).toInt();
     QString versSeq = sett->value("report0/versSeq", "33|32|23|22|21").toString();
 
     int isReport0 = sett->value("reports/isReport0", 0).toInt();
@@ -336,6 +347,15 @@ int main(int argc, char *argv[])    //r3StatPL
 
     int r1aveNum = sett->value("report1/aveNum", 1).toInt();
 
+    report12data r12data;
+    r12data.x0 = sett->value("report12/x0", 0).toDouble();
+    r12data.x1 = sett->value("report12/x1", 20000).toDouble();
+    r12data.y0 = sett->value("report12/y0", 0).toDouble();
+    r12data.y1 = sett->value("report12/y1", 20000).toDouble();
+    r12data.cp.xi = sett->value("report12/Xi", 4).toInt();
+    r12data.cp.g = sett->value("report12/g", 0.95).toDouble();
+    r12data.cp.q = sett->value("report12/q", 0.1).toDouble();
+    r12data.redDeg = sett->value("report12/redDeg", 1).toInt();
 
     report3data r3data;
     r3data.isDetCurv = sett->value("report3/isDetCurv", 0).toInt();
@@ -344,6 +364,7 @@ int main(int argc, char *argv[])    //r3StatPL
     qDebug() << QString("aveNum= %1\n").arg(r3data.aveNum);
     r3data.mDegree = sett->value("report3/mDegree", 2).toInt();
     r3data.doMcoef = sett->value("report3/doMcoef", 0).toInt();
+
 
     report4data r4data;
     r4data.isFindDiap = sett->value("report4/isFindDiap").toInt();
@@ -405,6 +426,14 @@ int main(int argc, char *argv[])    //r3StatPL
     QString diapStr = sett->value("diaps/magDiaps").toString();
 /////////////////////////////////////////////////////////////////////////////
 
+    QTextStream excStm;
+    QFile excFile(excMesFile);
+    excFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    excStm.setDevice(&rFile);
+    QStringList excList;
+    excList = excStm.readAll().split("\n");
+    excFile.close();
+
 
     ebFileName = resFileName = objFileName = NULL;
 
@@ -434,6 +463,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
     //reductionStat rStat;
     rStat.init(ebFileName, resFileName, objFileName);
+    rStat.removeMesList(excList);
+
 
     //qDebug() << QString("ssFile->ocList.size= %1").arg(rStat.ssFile->ocList.size());
 
@@ -490,13 +521,7 @@ int main(int argc, char *argv[])    //r3StatPL
     //qDebug() << QString("ssFile->ocList.size= %1").arg(rStat.ssFile->ocList.size());
 
 
-    QTextStream excStm;
-    QFile excFile(excMesFile);
-    excFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-    excStm.setDevice(&rFile);
-    QStringList excList;
-    excList = excStm.readAll().split("\n");
-    excFile.close();
+
 
     reductionStat rStatSel;
 
@@ -935,8 +960,11 @@ int main(int argc, char *argv[])    //r3StatPL
             /*    break;
     }
 */
-    if(isVersSeq) plStat.saveReport0Seq(reportDirName+"report0.txt", versSeq, excList,  plNameType, &rStat, &mesList);
-    else plStat.saveReport0(reportDirName+"report0.txt", isMinUWE, plNameType, &rStat, &mesList);
+    if(isDropObj) plStat.dropObj(rStat);
+    if(isVersSeq) plStat.selVersSeq(versSeq.split("|"), &rStat, &mesList);
+    else  if(isMinUWE) plStat.selMinUWE(&rStat, &mesList);
+    //if(isVersSeq) plStat.saveReport0Seq(reportDirName+"report0.txt", versSeq, excList,  plNameType, &rStat, &mesList);
+    //else plStat.saveReport0(reportDirName+"report0.txt", isMinUWE, plNameType, &rStat, &mesList);
 
     rStat.getMeasurementsList(mesList, &rStatSel);
 
@@ -1604,13 +1632,32 @@ int main(int argc, char *argv[])    //r3StatPL
         rFileY.setFileName(reportDirName+"ocRefEta.txt");
         rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
         dataStreamY.setDevice(&rFileY);
-
+/*
         rFileM.setFileName(reportDirName+"ocRefMag.txt");
         rFileM.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
         dataStreamM.setDevice(&rFileM);
-
+*/
         szi = mesList.size();
 
+        QVector <double> tVectX;
+        QVector <double> fVectX;
+
+        QVector <double> tVectY;
+        QVector <double> fVectY;
+
+        double *fData, *tData, *rData;
+        int *nData;
+        int tlen, flen;
+        int len1, p, k, pos;
+        double s0, s1, dx;
+
+
+        QList <harmParam*> resList;
+
+
+        s0 = 0;
+        s1 = 0;
+        k=0;
 
         for(i=0; i<szi; i++)
         {
@@ -1622,18 +1669,257 @@ int main(int argc, char *argv[])    //r3StatPL
             for(j=0; j< szj; j++)
             {
                 resRec = mesRec->resList.at(j);
+
+                s0 +=resRec->Dx*resRec->Dx;
+                s1 +=resRec->Dy*resRec->Dy;
+                k++;
                 /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
                 if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
                 if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
                 if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
                 if(resRec->isRefEta) dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
-                if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
+                //if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
+
+                if((resRec->x>=r12data.x0)&&(resRec->x<=r12data.x1))
+                {
+                    tVectX << resRec->x;
+                    fVectX << resRec->Dx;
+                }
+
+                if((resRec->y>=r12data.y0)&&(resRec->y<=r12data.y1))
+                {
+                    tVectY << resRec->y;
+                    fVectY << resRec->Dy;
+                }
 
             }
         }
         rFileX.close();
         rFileY.close();
-        rFileM.close();
+
+        s0 = sqrt(s0)/k;
+        s1 = sqrt(s1)/k;
+
+        qDebug() << QString("prev: s0= %1\t s1= %2\n").arg(s0).arg(s1);
+
+
+
+        tlen = tVectX.size();
+        flen = fVectX.size();
+        if(tlen==flen)
+        {
+            tlen = r12data.redDeg;
+            qDebug() << QString("tlen: %1\n").arg(tlen);
+            fData = new double[tlen];
+            tData = new double[tlen];
+            rData = new double[tlen];
+            nData = new int[tlen];
+            dx = (r12data.x1-r12data.x0)/tlen;
+            qDebug() << QString("dx: %1\n").arg(dx);
+
+            for(i=0; i<tlen; i++) nData[i] = 0;
+
+            for(i=0; i<flen; i++)
+            {
+                pos = (tVectX.at(i)-r12data.x0)/dx;
+                tData[pos] += tVectX.at(i);
+                fData[pos] += fVectX.at(i);
+                nData[pos]++;
+            }
+
+            for(i=0; i<tlen; i++)
+            {
+                //qDebug() << QString("nData: %1\n").arg(nData[i]);
+                tData[i] /= nData[i];
+                fData[i] /= nData[i];
+                qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+            }
+
+            /*
+            if(r12data.redDeg>1)
+            {
+                sortTvect(tData, fData, tlen);
+                div_t divresult;
+                divresult = div(tlen, r12data.redDeg);
+                len1 = divresult.quot;
+                if(divresult.rem>0) len1++;
+
+                p=0;
+                k=0;
+                s1 = s0 = 0;
+
+                for(i=0; i<tlen; i++)
+                {
+                    s0 += tData[i];
+                    s1 += fData[i];
+                    p++;
+                    if((p==r12data.redDeg)||(i==(tlen-1)))
+                    {
+                        tData[k] = s0/(1.0*p);
+                        fData[k] = s1/(1.0*p);
+                        k++;
+                        p=0;
+                        s0=0;
+                        s1=0;
+                    }
+
+                }
+                tlen = k-1;
+
+            }
+*/
+            makeClean(tData, fData, tlen, r12data.cp, resList, 1);
+            qDebug() << QString("resX harm sz: %1\n").arg(resList.size());
+            for(i=0; i<resList.size(); i++) qDebug() << QString("resList[i]= %1*cos(2PIt/ %2 + %3)\n").arg(resList[i]->A).arg(resList[i]->P).arg(resList[i]->Fi);
+
+            //detHarm(tData[i], resList);
+
+            rFileX.setFileName(reportDirName+"ocRefKsi_corr.txt");
+            rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+            dataStreamX.setDevice(&rFileX);
+    /*
+            rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
+            rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+            dataStreamY.setDevice(&rFileY);
+      */
+            s0 = 0;
+            //s1 = 0;
+            k=0;
+            for(i=0; i<szi; i++)
+            {
+                mesRec = mesList.at(i);
+
+
+                szj = mesRec->resList.size();
+
+                for(j=0; j< szj; j++)
+                {
+                    resRec = mesRec->resList.at(j);
+                    s0 +=resRec->Dx*resRec->Dx;
+                    //s1 +=resRec->Dy*resRec->Dy;
+                    k++;
+                    if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx-detHarm(resRec->x, resList));
+                    //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+                }
+            }
+
+            rFileX.close();
+
+            delete [] fData;
+            delete [] tData;
+            delete [] rData;
+            delete [] nData;
+        }
+
+        s0 = sqrt(s0)/k;
+        //s1 = sqrt(s1)/k;
+
+        qDebug() << QString("resX: s0= %1\n").arg(s0);
+
+        resList.clear();
+
+        tlen = tVectY.size();
+        flen = fVectY.size();
+        if(tlen==flen)
+        {
+
+            tlen = r12data.redDeg;
+            fData = new double[tlen];
+            tData = new double[tlen];
+            rData = new double[tlen];
+            nData = new int[tlen];
+            dx = (r12data.y1-r12data.y0)/tlen;
+
+            for(i=0; i<tlen; i++) nData[i] = 0;
+
+            for(i=0; i<flen; i++)
+            {
+                pos = (tVectX.at(i)-r12data.y0)/dx;
+                tData[pos] += tVectY.at(i);
+                fData[pos] += fVectY.at(i);
+                nData[pos]++;
+            }
+
+            for(i=0; i<tlen; i++)
+            {
+                tData[i] /= nData[i];
+                fData[i] /= nData[i];
+                qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+            }
+
+
+/*
+            if(r12data.redDeg>1)
+            {
+                sortTvect(tData, fData, tlen);
+                div_t divresult;
+                divresult = div(tlen, r12data.redDeg);
+                len1 = divresult.quot;
+                if(divresult.rem>0) len1++;
+
+                p=0;
+                k=0;
+                s1 = s0 = 0;
+
+                for(i=0; i<tlen; i++)
+                {
+                    s0 += tData[i];
+                    s1 += fData[i];
+                    p++;
+                    if((p==r12data.redDeg)||(i==(tlen-1)))
+                    {
+                        tData[k] = s0/(1.0*p);
+                        fData[k] = s1/(1.0*p);
+                        k++;
+                        p=0;
+                        s0=0;
+                        s1=0;
+                    }
+
+                }
+                tlen = k-1;
+            }
+*/
+            makeClean(tData, fData, tlen, r12data.cp, resList, 1);
+
+            detHarm(tData[i], resList);
+
+            rFileX.setFileName(reportDirName+"ocRefEta_corr.txt");
+            rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+            dataStreamX.setDevice(&rFileX);
+    /*
+            rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
+            rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+            dataStreamY.setDevice(&rFileY);
+      */
+            s1 = 0;
+            k=0;
+            for(i=0; i<szi; i++)
+            {
+                mesRec = mesList.at(i);
+
+
+                szj = mesRec->resList.size();
+
+                for(j=0; j< szj; j++)
+                {
+                    resRec = mesRec->resList.at(j);
+                    s1 +=resRec->Dy*resRec->Dy;
+                    k++;
+                    if(resRec->isRefEta) dataStreamX << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy-detHarm(resRec->y, resList));
+                    //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+                }
+            }
+
+            rFileX.close();
+        }
+
+        s1 = sqrt(s1)/k;
+
+        qDebug() << QString("resY: s0= %1\n").arg(s1);
+
+
+  //      rFileM.close();
     }
 
     if(isReport13)

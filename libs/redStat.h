@@ -701,6 +701,7 @@ public:
     void saveMesList(QString ebFileName, QString resFileName, QString objFileName = "");
 
     int removeMes(QString mesTimeCode);
+    void removeMesList(QStringList mesList);
 
     //void fromMesList()
 };
@@ -747,6 +748,9 @@ struct plateStatRec
 
 };
 
+void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* mesRec, int plNameType);
+void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType);
+
 struct platesStat
 {
     QList <plateStatRec*> platesList;
@@ -754,7 +758,11 @@ struct platesStat
     void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);
     void initPlatesNamesFile(QString plnFileName);
     int pushPlateName(QString plName);
-    void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* mesRec, int plNameType);
+
+    void dropObj(reductionStat rStat);
+    void selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesList);
+    void selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList);
+
 
     void saveReport0(QString r0name, int isMinUWE, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList = NULL);
     void saveReport0Seq(QString r0name, QString versSeq, QStringList excMes, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList = NULL);

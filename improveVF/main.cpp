@@ -4,6 +4,7 @@
 #include "./../libs/mb.h"
 #include "./../libs/vectGrid3D.h"
 #include "./../libs/comfunc.h"
+#include "./../libs/sysCorr.h"
 
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -95,8 +96,8 @@ int main(int argc, char *argv[])
 
      int pp;
 
-     QFile resFile, resFile1, inFile, corrFile;
-     QTextStream resStm, resStm1, inStm, corrStm;
+     QFile resFile, resFile0, resFile1, resFile2, resFile3, resFile4, resFileT, inFile, corrFile;
+     QTextStream resStm, resStm0, resStm1, resStm2, resStm3, resStm4, resStmT, inStm, corrStm;
      QString rFileName, inFileName, corrFileName;
 
      double *xLevels, *yLevels, *mLevels;
@@ -129,12 +130,16 @@ int main(int argc, char *argv[])
          qDebug() << QString("yLevels[%1]= %2\n").arg(k).arg(yLevels[k]);
      }
 
+     double centX = (xLevels[0]+xLevels[xLevNum-1])/2.0;
+     double centY = (yLevels[0]+yLevels[yLevNum-1])/2.0;
+     qDebug() << QString("center: %1\t%2\n").arg(centX).arg(centY);
+
      vectGrid3D *vectFdata1 = new vectGrid3D();
      vectFdata1->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
      vectGrid3D *vectFdata2 = new vectGrid3D();
      vectFdata2->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
-     vectGrid3D *vectFBC = new vectGrid3D();
-     vectFBC->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
+     //vectGrid3D *vectFBC = new vectGrid3D();
+     //vectFBC->setLevels(xLevels, xLevNum, yLevels, yLevNum, mLevels, mLevNum);
 
 
      long numMax = vectFdata0->getNumMax();
@@ -157,6 +162,8 @@ int main(int argc, char *argv[])
      double *xT, *dxT, *dyT;
      double *mcX, *mcY;
      int numkMax;
+     double x1, y1;
+     double xt, yt;
 
      QStringList resListX, resListY;
 
@@ -227,27 +234,46 @@ int main(int argc, char *argv[])
 
          for(i=0; i<vfNums; i++)
          {
+             px = vfList[i]->px - centX;
+             py = vfList[i]->py - centY;
 
              //pp = k*szi*szj + j*szi+i;
              Lx[i] = vfList[i]->x;
              //Cx[i*deg] = vfList[i]->px*(vfList[i]->px*vfList[i]->px+vfList[i]->py*vfList[i]->py);
-             Cx[i*deg] = vfList[i]->px;
+ /*            Cx[i*deg] = vfList[i]->px;
              Cx[i*deg + 1] = vfList[i]->py;
              Cx[i*deg + 2] = vfList[i]->px*vfList[i]->px;
              Cx[i*deg + 3] = vfList[i]->px*vfList[i]->py;
              Cx[i*deg + 4] = vfList[i]->px*(vfList[i]->px*vfList[i]->px+vfList[i]->py*vfList[i]->py);
+*/
+
+              Cx[i*deg] = px;
+              Cx[i*deg + 1] = py;
+              Cx[i*deg + 2] = -(3.0*px*px+py*py);
+              Cx[i*deg + 3] = -(2.0*px*py);
+              Cx[i*deg + 4] = px*(px*px+py*py);
+              //Cx[i*deg + 4] = >px*(>px*>px+>py*>py);
+
+
              //Cx[pp*deg + 5] = pm;
              //Cx[pp*deg + 6] = pm*pm;
              //WeX[pp] = nums/(numMax*1.0);
              //WeX[pp] = 1.0*(nums>=20);
 
              Ly[i] = vfList[i]->y;
+
              //Cy[i*deg] = vfList[i]->py*(vfList[i]->px*vfList[i]->px+vfList[i]->py*vfList[i]->py);
-             Cy[i*deg] = vfList[i]->px;
+             /*Cy[i*deg] = vfList[i]->px;
              Cy[i*deg + 1] = vfList[i]->py;
              Cy[i*deg + 2] = vfList[i]->py*vfList[i]->py;
              Cy[i*deg + 3] = vfList[i]->px*vfList[i]->py;
              Cy[i*deg + 4] = vfList[i]->py*(vfList[i]->px*vfList[i]->px+vfList[i]->py*vfList[i]->py);
+*/
+             Cy[i*deg] = py;
+             Cy[i*deg + 1] = px;
+             Cy[i*deg + 2] = -(px*px+3.0*py*py);
+             Cy[i*deg + 3] = -2.0*px*py;
+             Cy[i*deg + 4] = px*(px*px+py*py);
              //Cy[pp*deg + 5] = pm;
              //Cy[pp*deg + 6] = pm*pm;
              //WeY[pp] = nums/(numMax*1.0);
@@ -288,17 +314,36 @@ int main(int argc, char *argv[])
              {
                  vectFdata0->getVect(i, j, k, &px, &py, &pm, &x0, &y0, &nums);
 
+//                 qDebug() << QString("px: %1\tpy: %2\n").arg(px).arg(py);
+                 px = px - centX;
+                 py = py - centY;
+                 //qDebug() << QString("px: %1\tpy: %2\n").arg(px).arg(py);
                  //qDebug() << QString("zX: %1\t%2\t%3\t%4\t%5\n").arg(zX[0]).arg(zX[1]).arg(zX[2]).arg(zX[3]).arg(zX[4]);
                  //qDebug() << QString("zY: %1\t%2\t%3\t%4\t%5\n").arg(zY[0]).arg(zY[1]).arg(zY[2]).arg(zY[3]).arg(zY[4]);
 
-                 x = zX[0]*px + zX[1]*py + zX[2]*px*px + zX[3]*px*py + zX[4]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
-                 y = zY[0]*px + zY[1]*py + zY[2]*py*py + zY[3]*px*py + zY[4]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
+                 //x = zX[0]*px + zX[1]*py + zX[2]*px*px + zX[3]*px*py + zX[4]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
+                 //y = zY[0]*px + zY[1]*py + zY[2]*py*py + zY[3]*px*py + zY[4]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
+                 //x = zX[2]*px*px + zX[3]*px*py + zX[4]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
+                 //y = zY[2]*py*py + zY[3]*px*py + zY[4]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
 
-                 //x = zX[0]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
-                 //y = zY[0]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
 
-                 qDebug() << QString("x0: %1\ty0: %2\n").arg(x0).arg(y0);
-                 qDebug() << QString("x: %1\ty: %2\n").arg(x).arg(y);
+
+                 x = zX[0]*px + zX[1]*py - zX[2]*(3.0*px*px+py*py) - zX[3]*2.0*px*py + zX[4]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
+                 y = zY[0]*py + zY[1]*px - zY[2]*(px*px+3.0*py*py) - zY[3]*2.0*px*py + zY[4]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
+                 //qDebug() << QString("x1: %1\ty1: %2\n").arg(x1).arg(y1);
+                 //x1 = px - x1;
+                 //y1 = py - y1;
+
+                 //qDebug() << QString("x1: %1\ty1: %2\n").arg(x1).arg(y1);
+
+                 //x = zX[4]*x1*(x1*x1+y1*y1);
+                 //y = zY[4]*y1*(x1*x1+y1*y1);
+
+                 //x = -zX[2]*(3.0*px*px+py*py) - zX[3]*2.0*px*py + zX[4]*px*(px*px+py*py);// + zX[5]*pm + zX[6]*pm*pm;
+                 //y = -zX[2]*(3.0*px*px+py*py) - zX[3]*2.0*px*py + zY[4]*py*(px*px+py*py);// + zY[5]*pm + zY[6]*pm*pm;
+
+                 //qDebug() << QString("x0: %1\ty0: %2\n").arg(x0).arg(y0);
+                 //qDebug() << QString("x: %1\ty: %2\n").arg(x).arg(y);
 
                  if(nums>0)
                  {
@@ -312,8 +357,8 @@ int main(int argc, char *argv[])
                  }
                  //qDebug() << QString("dx: %1\tdy: %2\n").arg(dx).arg(dy);
 
-                 vectF[0] = px;
-                 vectF[1] = py;
+                 vectF[0] = px+centX;
+                 vectF[1] = py+centY;
                  vectF[2] = pm;
                  vectFdata1->setPoint(vectF, x, y, 1);
                  if(nums>=20)
@@ -404,25 +449,57 @@ int main(int argc, char *argv[])
      vectFdata2->saveDotList("./", "|", "resCombine_");
 
 
-     QString bcFileName;
+     QString tFileName;
+     double pxk, pyk;
 
      for(k=0; k<szk; k++)
      {
          pos[2] = k;
 
-         bcFileName = QString("resRad_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+         tFileName = QString("res0_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
 
-         resFile.setFileName(bcFileName);
-         resFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-         resStm.setDevice(&resFile);
+         resFile0.setFileName(tFileName);
+         resFile0.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm0.setDevice(&resFile0);
 
-         bcFileName = QString("resRadM_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+         tFileName = QString("res1_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
 
-         resFile1.setFileName(bcFileName);
+         resFile1.setFileName(tFileName);
          resFile1.open(QIODevice::WriteOnly | QIODevice::Truncate);
          resStm1.setDevice(&resFile1);
 
+         tFileName = QString("res2_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
 
+         resFile2.setFileName(tFileName);
+         resFile2.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm2.setDevice(&resFile2);
+
+         tFileName = QString("res3_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+
+         resFile3.setFileName(tFileName);
+         resFile3.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm3.setDevice(&resFile3);
+
+         tFileName = QString("res4_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+
+         resFile4.setFileName(tFileName);
+         resFile4.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStm4.setDevice(&resFile4);
+/*
+         bcFileName = QString("resCombT_%1.txt").arg(k, 2, 10, QLatin1Char( '0' ) );
+
+         resFileT.setFileName(bcFileName);
+         resFileT.open(QIODevice::WriteOnly | QIODevice::Truncate);
+         resStmT.setDevice(&resFileT);
+*/
+         vfCorrParam vfCorr0, vfCorr1, vfCorr2, vfCorr3, vfCorr4;
+
+         double rMax = 1000;
+         vfCorr0.init("./resCombine.vf", rMax, 20, 0, 3);
+         vfCorr1.init("./resCombine.vf", rMax, 20, 1, 3);
+         vfCorr2.init("./resCombine.vf", rMax, 20, 2, 3);
+         vfCorr3.init("./resCombine.vf", rMax, 20, 3, 3);
+         vfCorr4.init("./resCombine.vf", rMax, 20, 4, 3);
 
          for(j=0; j<szj; j++)
          {
@@ -430,34 +507,87 @@ int main(int argc, char *argv[])
              {
                  vectFdata2->getVect(i, j, k, &px, &py, &pm, &x0, &y0, &nums);
 
-                 vectFdata2->int2Drad(px, py, pm, &x, &y, 1500, 15);
 
-                 //if(nums>0)
-                 //{
-                     dx = x0-x;
-                     dy = y0-y;
-                 /*}
-                 else
-                 {
-                     dx = 0.0;
-                     dy = 0.0;
-                 }*/
 
-                 vectFBC->setPoint(vectF, dx, dy, 20);
+                 pxk = vectFdata0->dims[0][i];
+                 pyk = vectFdata0->dims[1][j];
 
-                 resStm << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 //qDebug() << QString("init: %1\t%2\n").arg(x0).arg(y0);
 
-                 vectFdata2->int2DradM(px, py, pm, &x, &y, 1500, 15);
+
+                 vfCorr0.detCorr(&x, &y, &nums1, pxk, pyk, pm);
+                 //vectFdata2->int2D(px, py, pm, &x, &y, &nums);
+                 //qDebug() << QString("int2D: %1\t%2\n").arg(x).arg(y);
                  dx = x0-x;
                  dy = y0-y;
 
-                 resStm1 << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 //resStm2 << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 resStm0 << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 resStm0 << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+
+
+                 vfCorr1.detCorr(&x, &y, &nums1, pxk, pyk, pm);
+                 //vectFdata2->int2Drad(pxk, pyk, pm, &x, &y, 1500, 15);
+
+                 //qDebug() << QString("int2Drad: %1\t%2\n").arg(x).arg(y);
+
+                 dx = x0-x;
+                 dy = y0-y;
+
+                 resStm1 << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 resStm1 << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+                 vfCorr2.detCorr(&x, &y, &nums1, pxk, pyk, pm);
+                 //vectFdata2->intIDWrad(pxk, pyk, pm, &x, &y, 1500, 15);
+
+                 //qDebug() << QString("int2Drad: %1\t%2\n").arg(x).arg(y);
+
+                 dx = x0-x;
+                 dy = y0-y;
+
+                 resStm2 << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 resStm2 << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+                 //vectFBC->setPoint(vectF, dx, dy, 20);
+
+                 //resStm << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 //resStm << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 //resStm << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+                 vfCorr3.detCorr(&x, &y, &nums1, pxk, pyk, pm);
+                 //vectFdata2->int2DradM(px, py, pm, &x, &y, 1500, 15, 3);
+                 //qDebug() << QString("int2DradM: %1\t%2\n").arg(x).arg(y);
+                 dx = x0-x;
+                 dy = y0-y;
+
+                 //resStm1 << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 resStm3 << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 resStm3 << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+                 vfCorr4.detCorr(&x, &y, &nums1, pxk, pyk, pm);
+                 //vectFdata2->int2DradM(px, py, pm, &x, &y, 1500, 15, 3);
+                 //qDebug() << QString("int2DradM: %1\t%2\n").arg(x).arg(y);
+                 dx = x0-x;
+                 dy = y0-y;
+
+                 //resStm1 << QString("%1|%2|%3|%4|%5\n").arg(px).arg(py).arg(dx).arg(dy).arg(nums);
+                 resStm4 << QString("%1|%2|%3|%4|0\n").arg(px).arg(py).arg(x0).arg(y0);
+                 resStm4 << QString("%1|%2|%3|%4|1\n").arg(pxk).arg(pyk).arg(x).arg(y);
+
+
              }
 
 
          }
 
-         resFile.close();
+         //resFile.close();
+         resFile0.close();
+         resFile1.close();
+         resFile2.close();
+         resFile3.close();
+         resFile4.close();
+         //resFileT.close();
      }
 
 

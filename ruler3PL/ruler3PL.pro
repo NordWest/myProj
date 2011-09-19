@@ -12,24 +12,33 @@ SOURCES += main.cpp \
     ../libs/cmnk.cpp \
     ../libs/sscat.cpp \
     ../libs/fBuffer.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
     ../libs/vectGrid3D.cpp \
     ../libs/ialglib.cpp \
-    ../libs/fitstools.cpp
+    ../libs/fitstools.cpp\
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
+    ../libs/sysCorr.cpp
+
 
 win32:LIBS += ./../libs/win32/cfitsio.lib \
             ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a \
-            ../libs/ablas.dll
+            ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-TARGET = ./ruler3PL
-#unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
-#win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
+#TARGET = ./ruler3PL
+unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
+win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
+unix:target.path=./../../lab/ruler3PL.unix
+INSTALLS += target
 
 CONFIG += console \
     exceptions \
@@ -49,9 +58,18 @@ HEADERS += ../libs/astro.h \
     ../libs/cmnk.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
     ../libs/vectGrid3D.h \
     ../libs/ialglib.h \
-    ../libs/fitstools.h
+    ../libs/fitstools.h\
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h
+
+

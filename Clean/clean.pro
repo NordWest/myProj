@@ -16,9 +16,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    ../libs/kompl.cpp
+    ../libs/uneven.cpp \
+    ../libs/alglib/ap.cpp
 
 HEADERS +=  ../libs/mb.h \
-    ../libs/kompl.h
+    ../libs/uneven.h \
+    ../libs/alglib/ap.h
 win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
+
+
+
+

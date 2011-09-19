@@ -111,8 +111,8 @@ public:
     void setLimits(double xs0, double xs1, double ys0, double ys1);
     void setScLine(double scale);
 
-    void drawVectField(double *x, double *y, double*dx, double *dy, int num, int isAutoLimits = 0);
-    void drawVectFieldNums(double *x, double *y, double*dx, double *dy, int *nums, int num, int isAutoLimits = 0, int numsMin = 0);
+    void drawVectField(double *x, double *y, double*dx, double *dy, int num, int isAutoLimits = 0, int isColorList = 0, int *cols = NULL);
+    void drawVectFieldNums(double *x, double *y, double*dx, double *dy, int *nums, int num, int isAutoLimits = 0, int numsMin = 0, int isColorList = 0, int *cols = NULL);
     void drawDotPlot(double *x, double *y, int num, int isLines = 0, int isAutoLimits = 0, double*dx = NULL, double *dy = NULL, int *nums = NULL, int isColorList = 0);
 
     void savePlot(QString fileName, const char* picType);
@@ -216,6 +216,7 @@ int main(int argc, char *argv[])
         //построчно обрабатываем исходный файл и формируем массивы данных по X и Y
         QVector<double>X,Y, dX, dY;
         QVector<int> N;
+        QVector<int> Col;
         QTextStream tstream(ba);
         QString tline;
         int ni;
@@ -233,6 +234,7 @@ int main(int argc, char *argv[])
                         Y<<tline.section(colSep,cy,cy, QString::SectionSkipEmpty).toDouble();
                         dX<<tline.section(colSep,cdx,cdx, QString::SectionSkipEmpty).toDouble();
                         dY<<tline.section(colSep,cdy,cdy, QString::SectionSkipEmpty).toDouble();
+                        Col << tline.section(colSep,ccol,ccol, QString::SectionSkipEmpty).toDouble();
 
                         if(isNumsPlot) N<<ni;
                     }
@@ -258,7 +260,7 @@ int main(int argc, char *argv[])
         int i;
 
         double *x, *y, *dx, *dy;
-        int *nums;
+        int *nums, *cols;
         x = new double[dotNum];
         y = new double[dotNum];
         if((taskNum==0)||(taskNum==1&&isErrBars))
@@ -284,6 +286,13 @@ int main(int argc, char *argv[])
         }
         else nums = NULL;
 
+        if(isColorList)
+        {
+            cols = new int[dotNum];
+            cols = Col.data();
+        }
+        else cols = NULL;
+
 
         vfPlot plot;
         if(argc==5) plot.init(QString(argv[4]));
@@ -302,8 +311,8 @@ int main(int argc, char *argv[])
         {
         case 0:
             {
-                if(isNumsPlot) plot.drawVectFieldNums(x, y, dx, dy, nums, dotNum, isAutoLimits, numsMin);
-                else plot.drawVectField(x, y, dx, dy, dotNum, isAutoLimits);
+                if(isNumsPlot) plot.drawVectFieldNums(x, y, dx, dy, nums, dotNum, isAutoLimits, numsMin, isColorList, cols);
+                else plot.drawVectField(x, y, dx, dy, dotNum, isAutoLimits, isColorList, cols);
             }
             break;
         case 1:
@@ -538,8 +547,9 @@ void vfPlot::setScLine(double scale)
     scLine = scale;
 }
 
-void vfPlot::drawVectField(double *x, double *y, double*dx, double *dy, int num, int isAutoLimits)
+void vfPlot::drawVectField(double *x, double *y, double*dx, double *dy, int num, int isAutoLimits, int isColorList, int *cols)
 {
+    qDebug() << "vfPlot::drawVectField\n";
     int i;
     if(isAutoLimits) detLimits(x, y, num);
     detDLimits(dx, dy, num);
@@ -609,8 +619,32 @@ void vfPlot::drawVectField(double *x, double *y, double*dx, double *dy, int num,
     int pixX, pixY;
     int pixX0, pixY0;
 
+    qDebug() << "cols: " << cols << "\n";
+
     for(i=0; i<num; i++)
     {
+        if(isColorList&&cols!=NULL)
+        {
+
+            if(cols[i]<colorList.size())
+            {
+                qDebug() << QString("nums= %1\tcolor= %2\n").arg(cols[i]).arg(colorList.at(cols[i]));
+                pointPen.setColor(QColor(colorList.at(cols[i])));
+                pointBrush.setColor(QColor(colorList.at(cols[i])));
+                trendPen.setColor(QColor(colorList.at(cols[i])));
+            }
+            else
+            {
+                pointPen.setColor(Qt::black);
+                pointBrush.setColor(Qt::black);
+                trendPen.setColor(Qt::black);
+            }
+            //painter.setPen(pointPen);
+            //painter.setBrush(pointBrush);
+            //painter.drawEllipse(pPos, pointSize, pointSize);
+        }
+
+
         painter.setPen(pointPen);
         data2pix(x[i], y[i], &pixX, &pixY);
         pPos.setX(pixX);
@@ -646,8 +680,9 @@ void vfPlot::drawVectField(double *x, double *y, double*dx, double *dy, int num,
     painter.end();
 }
 
-void vfPlot::drawVectFieldNums(double *x, double *y, double*dx, double *dy, int *nums, int num, int isAutoLimits, int numsMin)
+void vfPlot::drawVectFieldNums(double *x, double *y, double*dx, double *dy, int *nums, int num, int isAutoLimits, int numsMin, int isColorList, int *cols)
 {
+    qDebug() << "vfPlot::drawVectFieldNums\n";
     int i;
     if(isAutoLimits) detLimits(x, y, num);
     detDLimits(dx, dy, num);
@@ -722,6 +757,33 @@ void vfPlot::drawVectFieldNums(double *x, double *y, double*dx, double *dy, int 
     for(i=0; i<num; i++)
     {
         if(nums[i]<numsMin) continue;
+
+        if(isColorList&&cols!=NULL)
+        {
+
+            if(cols[i]<colorList.size())
+            {
+                qDebug() << QString("nums= %1\tcolor= %2\n").arg(cols[i]).arg(colorList.at(cols[i]));
+                pointPen.setColor(QColor(colorList.at(cols[i])));
+                pointBrush.setColor(QColor(colorList.at(cols[i])));
+                trendPen.setColor(QColor(colorList.at(cols[i])));
+            }
+            else
+            {
+                pointPen.setColor(Qt::black);
+                pointBrush.setColor(Qt::black);
+                trendPen.setColor(Qt::black);
+            }
+            //painter.setPen(pointPen);
+            //painter.setBrush(pointBrush);
+            //painter.drawEllipse(pPos, pointSize, pointSize);
+        }
+    /*    else
+        {
+            tempRect.setRect(pixX-40, pixY-20, 80, 40);
+            painter.drawText(tempRect, QString("%1").arg(nums[i]), xAxeLabelOpt);
+        }*/
+
         painter.setPen(pointPen);
         data2pix(x[i], y[i], &pixX, &pixY);
         pPos.setX(pixX);
@@ -763,6 +825,7 @@ void vfPlot::drawVectFieldNums(double *x, double *y, double*dx, double *dy, int 
 
 void vfPlot::drawDotPlot(double *x, double *y, int num, int isLines, int isAutoLimits, double *dx, double *dy, int *nums, int isColorList)
 {
+    qDebug() << "vfPlot::drawDotPlot\n";
     int i;
     if(isAutoLimits) detLimits(x, y, num);
     //detDLimits(dx, dy, num);
@@ -870,7 +933,7 @@ void vfPlot::drawDotPlot(double *x, double *y, int num, int isLines, int isAutoL
 
                 if(nums[i]<colorList.size())
                 {
-                //    qDebug() << QString("nums= %1\tcolor= %2\n").arg(nums[i]).arg(colorList.at(nums[i]));
+                    qDebug() << QString("nums= %1\tcolor= %2\n").arg(nums[i]).arg(colorList.at(nums[i]));
                     pointPen.setColor(colorList.at(nums[i]));
                     pointBrush.setColor(colorList.at(nums[i]));
                 }

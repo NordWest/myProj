@@ -3225,6 +3225,11 @@ int reductionStat::removeMes(QString mesTimeCode)
     //ssFile->removeMes(mesTimeCode);
 }
 
+void reductionStat::removeMesList(QStringList mesList)
+{
+    for(int i=0; i<mesList.size();i++) removeMes(mesList.at(i));
+}
+
 void reductionStat::findMeasurements()
 {
     qDebug() << "\nreductionStat::findMeasurements\n";
@@ -3579,7 +3584,7 @@ int plateStatRec::getVersNamePos(QString versName)
     return -1;
 }
 
-void platesStat::appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* mesRec, int plNameType)
+void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* mesRec, int plNameType)
 {
     QString versName, plateName;
     int year, mth;
@@ -3721,6 +3726,218 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
 
     }
     rFile.close();
+}
+/*
+void platesStat::excludeMes(QStringList excMes)
+{
+    szi = platesList.size();
+    for(i=0; i<szi; i++)
+    {
+        //msRec = NULL;
+        qDebug() << "msRec: " << msRec << "\n";
+        plSz=platesList.at(i)->mStatList.size();
+        qDebug() << QString("plSz: %1").arg(plSz);
+        if(plSz==0)
+        {
+            dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
+            dataStream << dataStr;
+        }
+        else
+        {
+
+        //plStat.platesList.at(i)->getMinUWE(msRec);
+            //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+
+
+            for(j=0; j<versNum; j++)
+            {
+                pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
+                //if(pMin!=-1) break;
+
+                qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
+
+
+                if(pMin!=-1)
+                //qDebug() << "msRec: " << msRec << "\n";
+                //if(msRec!=NULL)
+                {
+                    msRec = platesList.at(i)->mStatList.at(pMin);
+
+                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    if(excMes.contains(msRec->mesureTimeCode, Qt::CaseSensitive))
+                    {
+                        qDebug() << QString("excluded\n");
+                        pMin = -1;
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+}
+*/
+
+void platesStat::dropObj(reductionStat rStat)
+{
+    qDebug() << "dropObj\n";
+    int i, j, szi, plSz;
+    szi = platesList.size();
+    measurementStatRec* msRec;
+    measurementRec* mRec;
+    for(i=0; i<szi; i++)
+    {
+        plSz=platesList.at(i)->mStatList.size();
+        qDebug() << QString("plSz: %1").arg(plSz);
+        for(j=plSz-1; j>0; j--)
+        {
+            msRec = platesList.at(i)->mStatList.at(j);
+            mRec = rStat.getMeasurement(msRec->mesureTimeCode);
+            if(mRec->objList.size()<1)platesList.at(i)->mStatList.removeAt(j);
+        }
+    }
+}
+
+void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesList)
+{
+    qDebug() << QString("selMinUWE\n");
+    int pMin, i, j, k, szi, szj, szRes;
+    measurementStatRec* msRec;
+    measurementRec* mesRec;
+    QFile rFile;
+    QTextStream dataStream;
+    QString dataStr;
+
+    int plSz;
+
+
+    szi = platesList.size();
+    for(i=0; i<szi; i++)
+    {
+        //msRec = NULL;
+        qDebug() << "msRec: " << msRec << "\n";
+        plSz=platesList.at(i)->mStatList.size();
+        qDebug() << QString("plSz: %1").arg(plSz);
+
+
+        //plStat.platesList.at(i)->getMinUWE(msRec);
+
+            pMin = platesList.at(i)->getMinUWEpos();
+                if(pMin!=-1)
+                //qDebug() << "msRec: " << msRec << "\n";
+                //if(msRec!=NULL)
+                {
+                    msRec = platesList.at(i)->mStatList.at(pMin);
+
+                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
+                    qDebug() << "mesRec: " << mesRec << "\n";
+                    if(mesList!=NULL) mesList->append(mesRec);
+
+
+                }
+
+
+
+
+
+
+    }
+}
+
+
+
+void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList)
+{
+    qDebug() << QString("findVersSeq\n");
+    int pMin, i, j, szi;
+    measurementStatRec* msRec;
+    measurementRec* mesRec;
+
+    int plSz;
+
+    //QStringList versSeqList = versSeq.split("|");
+    int versNum = versSeqList.size();
+
+    szi = platesList.size();
+    for(i=0; i<szi; i++)
+    {
+        //msRec = NULL;
+        qDebug() << "msRec: " << msRec << "\n";
+        plSz=platesList.at(i)->mStatList.size();
+        qDebug() << QString("plSz: %1").arg(plSz);
+        if(plSz==0)
+        {
+        //    dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
+        //    dataStream << dataStr;
+        }
+        else
+        {
+
+        //plStat.platesList.at(i)->getMinUWE(msRec);
+            //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+
+
+            for(j=0; j<versNum; j++)
+            {
+                pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
+                //if(pMin!=-1) break;
+
+                qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
+
+
+                if(pMin!=-1)
+                //qDebug() << "msRec: " << msRec << "\n";
+                //if(msRec!=NULL)
+                {
+                    msRec = platesList.at(i)->mStatList.at(pMin);
+
+                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+
+                    mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
+                    qDebug() << "mesRec: " << mesRec << "\n";
+                    //if(detObj&&(mesRec->objList.size()==0)) break;
+                    if(mesList!=NULL) mesList->append(mesRec);
+
+                    break;
+
+                }
+
+            }
+//            if(pMin==-1) dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
+
+        }
+
+
+    }
+}
+
+void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType)
+{
+    qDebug() << QString("saveReport0\n");
+    int pMin, i, j, k, szi, szj, szRes;
+    measurementStatRec* msRec;
+    measurementRec* mesRec;
+    QFile rFile;
+    QTextStream dataStream;
+    QString dataStr;
+
+    rFile.setFileName(r0name);
+    rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStream.setDevice(&rFile);
+
+    msRec = new measurementStatRec;
+
+    szi = mesList.size();
+    for(i=0; i<szi; i++)
+    {
+        mesRec = mesList[i];
+        mesRec->detStat(msRec);
+        appendRep0Rec(&dataStr, msRec, mesRec, plNameType);
+    }
+    dataStream << dataStr;
+
+    rFile.close();
+
 }
 
 void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList excMes, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList)

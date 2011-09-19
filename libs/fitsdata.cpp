@@ -5,34 +5,6 @@
 //#include "..\libs\astro.h"
 //#include "./../libs/mb.h"
 using namespace std;
-/*
-double magEqCorr(double mag, double x, QList <double*> mCoefX, int mDeg)
-{
-    int i, j;
-    int xDeg = mCoefX.size();
-    double *Zx = new double[xDeg];
-    double res;
-
-    res = 0;
-    for(i=0; i<xDeg; i++)
-    {
-        Zx[i] = 0;
-        for(j=0; j<mDeg; j++)
-        {
-            Zx[i] += mCoefX[i][j]*pow(mag, j);
-        }
-        res += Zx[i]*pow(x, i);
-    }
-    qDebug() << QString("magEqCorr res: %1\n").arg(res, 12, 'g');
-    return res;
-}
-
-
-double comaCorr(double x, double mag, double c, double mag0)
-{
-    return(c*x*(mag-mag0));
-}
-*/
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -9306,7 +9278,7 @@ void marksP::createP()
 
 
 
-int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refParam)
+int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refParam, sysCorrParam *sysCorr)
 {
         qDebug() << QString("\nruler3\n\n");
 
@@ -9342,10 +9314,10 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
         redParam.uweMax = settings->value("reduction/uweMax", 500).toDouble();
         redParam.maxRefStars = settings->value("reduction/maxRefStars", -1).toInt();
 
-//  syscorr
+/*  syscorr
         QString syscorIni = settings->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
         int useSysCorr = settings->value("syscorr/useSysCorr", 0).toInt();
-
+*/
         qDebug() << QString("\nredParam.redType: %1\n").arg(redParam.redType);
         qDebug() << QString("redParam.maxres: %1\n").arg(redParam.maxres);
         qDebug() << QString("redParam.maxresMAG: %1\n").arg(redParam.maxresMAG);
@@ -9439,12 +9411,7 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
 
     if(refParam!=NULL) refMaker = new refractionMaker(*refParam);
 
-    sysCorrParam *sysCorr = NULL;
-    if(useSysCorr)
-    {
-        sysCorr = new sysCorrParam;
-        sysCorr->init(syscorIni);
-    }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -10055,32 +10022,7 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     //qDebug() << QString("starCatList count: %1\n").arg(starCatList->count());
 }
 
-double magEqCorr(double mag, double x, QList <double*> mCoefX, int mDeg)
-{
-    int i, j;
-    int xDeg = mCoefX.size();
-    double *Zx = new double[xDeg];
-    double res;
 
-    res = 0;
-    for(i=0; i<xDeg; i++)
-    {
-        Zx[i] = 0;
-        for(j=0; j<mDeg; j++)
-        {
-            Zx[i] += mCoefX[i][j]*pow(mag, j);
-        }
-        res += Zx[i]*pow(x, i);
-    }
-    //qDebug() << QString("magEqCorr res: %1\n").arg(res, 12, 'g');
-    return res;
-}
-
-
-double comaCorr(double x, double mag, double c, double mag0)
-{
-    return(c*x*(mag-mag0));
-}
 
 void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMaker, sysCorrParam *sysCorr)
 {
@@ -10142,7 +10084,7 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 
         if(sysCorr!=NULL)
         {
-             //qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
+            qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
             if(sysCorr->isVfCorr0)
             {
                 if(!sysCorr->vfCorr0->detCorr(&dX, &dY, &ni, data[5], data[6], data[2]))
@@ -10746,306 +10688,8 @@ void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int m
 
 //////////////////////////////////////////
 
-//  syscorr
 
-sysCorrParam::sysCorrParam()
-{
-    isMagEqCorr = isComaCorr = isVfCorr0 = isVfCorr1 = isMdCorr = 0;
-    comaCorr = NULL;
-    magEqCorr = NULL;
-    vfCorr0 = NULL;
-    vfCorr1 = NULL;
-    mdCorr = NULL;
-}
-
-int sysCorrParam::init(QString confName)
-{
-    qDebug() << "syscorr init\n";
-    QSettings *sett = new QSettings(confName, QSettings::IniFormat);
-
-    int i;
-    QStringList allSett;
-    allSett << sett->allKeys();
-    int sz = allSett.size();
-    qDebug() << QString("\n\nconf.ini: %1\n").arg(confName);
-    for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
-    qDebug() << "\n\n";
-
-    int isBC, nmin, isRadM;
-    QString vfCorrFile;
-    double rMax;
-
-
-
-    //syscorr
-        isMagEqCorr = sett->value("general/isMagEqCorr", 0).toInt();
-        isComaCorr = sett->value("general/isComaCorr", 0).toInt();
-        isVfCorr0 = sett->value("general/isVfCorr0", 0).toInt();
-        isMdCorr = sett->value("general/isMdCorr", 0).toInt();
-        isVfCorr1 = sett->value("general/isVfCorr1", 0).toInt();
-
-        //comaCorr
-        if(isComaCorr)
-        {
-            comaCorr = new comaCorrParam;
-            comaCorr->cKsi = mas_to_grad((sett->value("comaCorr/cKsi", 0).toDouble()));
-            comaCorr->cEta = mas_to_grad((sett->value("comaCorr/cEta", 0).toDouble()));
-            comaCorr->cMag0 = (sett->value("comaCorr/cMag0", 0).toDouble());
-        }
-
-        //magEqCorr
-        if(isMagEqCorr)
-        {
-            magEqCorr = new magEqCorrParam;
-            QString dataSep = sett->value("magEqCorr/dataSep").toString();
-            QString xCoefFileName = sett->value("magEqCorr/xCoefFileName").toString();
-            QString yCoefFileName = sett->value("magEqCorr/yCoefFileName").toString();
-            isMagEqCorr = !magEqCorr->init(xCoefFileName, yCoefFileName, dataSep);
-        }
-
-        //vfCorr0
-        if(isVfCorr0)
-        {
-            vfCorr0 = new vfCorrParam;
-            vfCorrFile = sett->value("vfCorr0/vfCorrFile", "vf.txt").toString();
-            rMax = sett->value("vfCorr0/rMax", 0).toDouble();
-            nmin = sett->value("vfCorr0/nmin", 0).toInt();
-            isBC = sett->value("vfCorr0/isBC", 0).toInt();
-            isRadM = sett->value("vfCorr0/isRadM", 0).toInt();
-
-            isVfCorr0 = !vfCorr0->init(vfCorrFile, rMax, nmin, isBC, isRadM);
-        }
-
-        //vfCorr1
-        if(isVfCorr1)
-        {
-            vfCorr1 = new vfCorrParam;
-            vfCorrFile = sett->value("vfCorr1/vfCorrFile", "vf.txt").toString();
-            rMax = sett->value("vfCorr1/rMax", 0).toDouble();
-            nmin = sett->value("vfCorr1/nmin", 0).toInt();
-            isBC = sett->value("vfCorr1/isBC", 0).toInt();
-            isRadM = sett->value("vfCorr1/isRadM", 0).toInt();
-
-            isVfCorr1 = !vfCorr1->init(vfCorrFile, rMax, nmin, isBC, isRadM);
-        }
-
-        //mdCorr
-        if(isMdCorr)
-        {
-            mdCorr = new mdCorrParam;
-            QString mdCorrX = sett->value("mdCorr/mdCorrX", "./mdCorrX.txt").toString();
-            QString mdCorrY = sett->value("mdCorr/mdCorrY", "./mdCorrY.txt").toString();
-            QString colSep = sett->value("mdCorr/colSep",  "|").toString();
-            int corrModel = sett->value("mdCorr/corrModel", 0).toInt();
-            isMdCorr = !mdCorr->init(mdCorrX, mdCorrY, colSep, corrModel);
-        }
-
-        return 0;
-
-}
-//////////////////////////
-
-int magEqCorrParam::init(QString xCoefFileName, QString yCoefFileName, QString dataSep)
-{
-    qDebug() << "\nmagEqCorrParam::init\n";
-    int i, j, szi;
-    int dNum;
-    double *x;
-
-    QString dataStr;
-    QStringList dataStrL, opers;
-
-    QFile rFile;
-    QTextStream dataStream;
-
-    rFile.setFileName(xCoefFileName);
-    if(!rFile.open(QIODevice::ReadOnly| QIODevice::Text))
-    {
-        qDebug() << "\nCoefX File not open\n";
-        return 1;
-    }
-    dataStream.setDevice(&rFile);
-
-    mCoefX.clear();
-    while(!dataStream.atEnd())
-    {
-        dataStr = dataStream.readLine();
-        opers = dataStr.split(dataSep);
-        mCoefDeg = opers.size();
-        x = new double[mCoefDeg];
-        for(i=0; i<mCoefDeg;i++) x[i] = opers.at(i).toDouble();
-        mCoefX << x;
-    }
-    rFile.close();
-
-    rFile.setFileName(yCoefFileName);
-    if(!rFile.open(QIODevice::ReadOnly| QIODevice::Text))
-    {
-        qDebug() << "\nCoefY File not open\n";
-        return 1;
-    }
-    dataStream.setDevice(&rFile);
-
-    mCoefY.clear();
-    while(!dataStream.atEnd())
-    {
-        dataStr = dataStream.readLine();
-        opers = dataStr.split(dataSep);
-        mCoefDeg = opers.size();
-        x = new double[mCoefDeg];
-        for(i=0; i<mCoefDeg;i++) x[i] = opers.at(i).toDouble();
-        mCoefY << x;
-    }
-    rFile.close();
-
-    QStringList dsList;
-    szi = mCoefX.size();
-    for(i=0; i<szi; i++)
-    {
-        dsList.clear();
-        for(j=0; j<mCoefDeg; j++) dsList << QString("%1").arg(mCoefX[i][j], 12, 'e');
-        qDebug() << QString("mCoefX[%1]: %2\n").arg(i).arg(dsList.join("|"));
-    }
-
-    szi = mCoefY.size();
-    for(i=0; i<szi; i++)
-    {
-        dsList.clear();
-        for(j=0; j<mCoefDeg; j++) dsList << QString("%1").arg(mCoefY[i][j], 12, 'e');
-        qDebug() << QString("mCoefY[%1]: %2\n").arg(i).arg(dsList.join("|"));
-    }
-
-    return 0;
-
-}
-/*
-void fitsdata::initComaCorr(double cKsi, double cEta, double cMag0)
-{
-    comaKsi = cKsi;
-    comaEta = cEta;
-    comaMag0 = cMag0;
-
-    isComaCorr = 1;
-}
-*/
-int vfCorrParam::init(QString vfFileName, double rmax, int nmin, int isbc, int isradm)
-{
-    vectFcorr = new vectGrid3D;
-    QByteArray tmp = vfFileName.toAscii();
-    if(vectFcorr->init(tmp.data())) return 1;
-    vectFcorr->initVF();
-    rMax = rmax;
-    nMin = nmin;
-    isBC = isbc;
-    isRadM = isradm;
-
-    return 0;
-}
-
-int mdCorrParam::init(QString mdcorrx, QString mdcorry, QString colsep, int corrmodel)
-{
-//    mdcParam = new mdCorr;
-    colSep = QString(colsep);
-    corrModel = corrmodel;
-    mdCorrX = QString(mdcorrx);
-    mdCorrY = QString(mdcorry);
-
-    if(initMdCoef(mdCorrX, &mdCoefX, &mdCoefXsz, colSep)) return 1;
-    if(initMdCoef(mdCorrY, &mdCoefY, &mdCoefYsz, colSep)) return 1;
-
-    dCoefXsz = mdCoefX.size();
-    dCoefYsz = mdCoefY.size();
-
-    return 0;
-}
-
-double comaCorrParam::dKsi(double ksi, double mag)
-{
-    return(cKsi*ksi*(mag-cMag0));
-}
-
-double comaCorrParam::dEta(double eta, double mag)
-{
-    return(cEta*eta*(mag-cMag0));
-}
-
-int vfCorrParam::detCorr(double *dx, double *dy, long *ni, double x, double y, double magn)
-{
-    double dX, dY;
-    long nI;
-    if(isBC)
-    {
-        //if(!vectFcorr->int2Drad(mT->sdata[4], mT->sdata[5], mT->mEkv[2], &dX, &dY, vfRmax, nMin))
-        if(!vectFcorr->int2D(x, y, magn, &dX, &dY, &nI))
-        {
-            *dx = dX;
-            *dy = dY;
-            *ni = nI;
-
-//                mT->objdata[4]-= dX;
-//                mT->objdata[5]-= dY;
-        }
-        else
-        {
-            *dx = 0.0;
-            *dy = 0.0;
-            *ni = nI;
-            return 1;
-        }
-    }
-    else
-    {
-        if(isRadM)
-        {
-            if(!vectFcorr->int2DradM(x, y,magn, &dX, &dY, rMax, nMin))
-            {
-                *dx = dX;
-                *dy = dY;
-                //qDebug() << QString("int2DradM: %1\t%2\n").arg(dX).arg(dY);
-    //                mT->objdata[4]-= dX;
-    //                mT->objdata[5]-= dY;
-            }
-            else
-            {
-                *dx = 0.0;
-                *dy = 0.0;
-                //qDebug() << QString("int2DradM: error\n");
-                return 1;
-            }
-        }
-        else
-        {
-            if(!vectFcorr->int2Drad(x, y,magn, &dX, &dY, rMax, nMin))
-            {
-                *dx = dX;
-                *dy = dY;
-                //qDebug() << QString("int2Drad: %1\t%2\n").arg(dX).arg(dY);
-    //                mT->objdata[4]-= dX;
-    //                mT->objdata[5]-= dY;
-            }
-            else
-            {
-                *dx = 0.0;
-                *dy = 0.0;
-                //qDebug() << QString("int2Drad: error\n");
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-double magEqCorrParam::corrX(double x, double magn)
-{
-    return(magEqCorr(magn, x, mCoefX, mCoefDeg));
-}
-
-double magEqCorrParam::corrY(double y, double magn)
-{
-    return(magEqCorr(magn, y, mCoefY, mCoefDeg));
-}
-
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 
 int initExpList(ExposureList *expList, HeadList headList, obsy *obsPos)
 {

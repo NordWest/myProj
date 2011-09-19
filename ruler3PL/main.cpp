@@ -86,11 +86,13 @@ QStringList outerArguments;
 //command line  ///////////////////////////////////////
     QString optName, optVal, optStr, pnStr, headerFileName;
     QString resFolder;
-
+    sysCorrParam *sysCorr = NULL;
     QString cfgFileName = "ruler3PL.ini";
     int doWhat = 0;                         //0-http; 1-file
     int detPlName = 1;
     int resdirDef=0;
+    QString scFile;
+    int isSc = 0;
 
     for(i=1; i<argc; i++)
     {
@@ -116,6 +118,12 @@ QStringList outerArguments;
         {
             resdirDef=1;
             resFolder = optVal;
+        }
+        else if(QString::compare(optName, "syscorr", Qt::CaseSensitive)==0)
+        {
+            isSc = 1;
+            scFile = optVal;
+
         }
     }
 
@@ -236,6 +244,11 @@ QStringList outerArguments;
         qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
 
 /////////////////////////////
+        if(isSc)
+        {
+            sysCorr = new sysCorrParam;
+            sysCorr->init(scFile);
+        }
 
         observatory *obsList = new observatory;
         obsy *obsPos;
@@ -455,7 +468,7 @@ QStringList outerArguments;
     fitsd->findCloserObjects(aper);
     fitsd->findCloserStars(aper);
 
-    resRed = fitsd->ruler3(redparamIni, resFolder, refParam);
+    resRed = fitsd->ruler3(redparamIni, resFolder, refParam, sysCorr);
 
     qDebug() << QString("resRed: %1\n").arg(resRed);
 
