@@ -150,6 +150,9 @@ QStringList outerArguments;
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
         //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
+ //       syscorr
+        QString syscorIni = settings->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
+        int useSysCorr = settings->value("syscorr/useSysCorr", 0).toInt();
 
 //objects   ////
         int lspmFind = sett->value("objects/lspmFind", 0).toInt();
@@ -244,10 +247,11 @@ QStringList outerArguments;
         qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
 
 /////////////////////////////
-        if(isSc)
+        if(useSysCorr)
         {
             sysCorr = new sysCorrParam;
-            sysCorr->init(scFile);
+            if(isSc) sysCorr->init(scFile);
+            else  sysCorr->init(syscorIni);
         }
 
         observatory *obsList = new observatory;
