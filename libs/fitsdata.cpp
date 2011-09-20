@@ -9639,6 +9639,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
 //////////////////////
 
     qDebug() << QString("objType: %1\n").arg(mObj->objType);
+    qDebug() << QString("orRec OMC: %1\t%2\n").arg(orRec.ksiOC).arg(orRec.etaOC);
 
 
 
@@ -9657,6 +9658,8 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
             orRec.toOcRec(oc);
 
             //qDebug() << "toOcRec\n";
+            qDebug() << QString("eqRec OMC: %1\t%2\n").arg(oc.ksiOC).arg(oc.etaOC);
+
 
             oc->expTime = ebRec->exptime;
 
