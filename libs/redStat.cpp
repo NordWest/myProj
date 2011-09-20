@@ -3928,6 +3928,7 @@ void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType
     msRec = new measurementStatRec;
 
     szi = mesList.size();
+    qDebug() << QString("mesList size: %1\n").arg(szi);
     for(i=0; i<szi; i++)
     {
         mesRec = mesList[i];
