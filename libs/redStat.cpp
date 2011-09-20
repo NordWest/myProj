@@ -3848,7 +3848,7 @@ void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesLis
 
 void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList)
 {
-    qDebug() << QString("findVersSeq\n");
+    qDebug() << QString("selVersSeq\n");
     int pMin, i, j, szi;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -3862,9 +3862,9 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        qDebug() << "msRec: " << msRec << "\n";
+        //qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        //qDebug() << QString("plSz: %1").arg(plSz);
         if(plSz==0)
         {
         //    dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
@@ -3894,7 +3894,7 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
                     qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
 
                     mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                    qDebug() << "mesRec: " << mesRec << "\n";
+                    //qDebug() << "mesRec: " << mesRec << "\n";
                     //if(detObj&&(mesRec->objList.size()==0)) break;
                     if(mesList!=NULL) mesList->append(mesRec);
 
@@ -3934,8 +3934,9 @@ void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType
         mesRec = mesList[i];
         mesRec->detStat(msRec);
         appendRep0Rec(&dataStr, msRec, mesRec, plNameType);
+        dataStream << dataStr;
     }
-    dataStream << dataStr;
+
 
     rFile.close();
 
