@@ -965,12 +965,13 @@ int main(int argc, char *argv[])    //r3StatPL
     else  if(isMinUWE) plStat.selMinUWE(&rStat, &mesList);
     //if(isVersSeq) plStat.saveReport0Seq(reportDirName+"report0.txt", versSeq, excList,  plNameType, &rStat, &mesList);
     //else plStat.saveReport0(reportDirName+"report0.txt", isMinUWE, plNameType, &rStat, &mesList);
+    if(isReport0) saveReport0(reportDirName+"report0.txt", mesList, plNameType);
 
     rStat.getMeasurementsList(mesList, &rStatSel);
 
     magEq.initMesList(mesList);
 
-    if(isReport0) rFile.close();
+    //if(isReport0) rFile.close();
     //r1File.close();
 
 
