@@ -1648,8 +1648,11 @@ int main(int argc, char *argv[])    //r3StatPL
         double *fData, *tData, *rData;
         int *nData;
         int tlen, flen;
-        int len1, p, k, pos;
-        double s0, s1, dx;
+        int len1, p, k, k0, k1, pos;
+        double s0, s1, dx, corrVal;
+        int polyDeg = 3;
+        double *polyCoefX, *polyCoefY;
+        QStringList tStrL;
 
 
         QList <harmParam*> resList;
@@ -1657,7 +1660,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
         s0 = 0;
         s1 = 0;
-        k=0;
+        k0=0;
+        k1=0;
 
         for(i=0; i<szi; i++)
         {
@@ -1670,14 +1674,23 @@ int main(int argc, char *argv[])    //r3StatPL
             {
                 resRec = mesRec->resList.at(j);
 
-                s0 +=resRec->Dx*resRec->Dx;
-                s1 +=resRec->Dy*resRec->Dy;
-                k++;
+
+
                 /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
                 if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
                 if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
-                if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
-                if(resRec->isRefEta) dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+                if(resRec->isRefKsi)
+                {
+                    dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
+                    s0 +=resRec->Dx*resRec->Dx;
+                    k0++;
+                }
+                if(resRec->isRefEta)
+                {
+                    dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+                    s1 +=resRec->Dy*resRec->Dy;
+                    k1++;
+                }
                 //if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
 
                 if((resRec->x>=r12data.x0)&&(resRec->x<=r12data.x1))
@@ -1697,8 +1710,8 @@ int main(int argc, char *argv[])    //r3StatPL
         rFileX.close();
         rFileY.close();
 
-        s0 = sqrt(s0)/k;
-        s1 = sqrt(s1)/k;
+        s0 = sqrt(s0)/k0;
+        s1 = sqrt(s1)/k1;
 
         qDebug() << QString("prev: s0= %1\t s1= %2\n").arg(s0).arg(s1);
 
@@ -1712,28 +1725,75 @@ int main(int argc, char *argv[])    //r3StatPL
             qDebug() << QString("tlen: %1\n").arg(tlen);
             fData = new double[tlen];
             tData = new double[tlen];
-            rData = new double[tlen];
+            //rData = new double[tlen];
             nData = new int[tlen];
             dx = (r12data.x1-r12data.x0)/tlen;
             qDebug() << QString("dx: %1\n").arg(dx);
 
-            for(i=0; i<tlen; i++) nData[i] = 0;
+            for(i=0; i<tlen; i++)
+            {
+                tData[i] = 0.0;
+                fData[i] = 0.0;
+                nData[i] = 0;
+            }
 
             for(i=0; i<flen; i++)
             {
                 pos = (tVectX.at(i)-r12data.x0)/dx;
+                if(pos<0||pos>=tlen)qDebug() << QString("pos: %1").arg(pos);
                 tData[pos] += tVectX.at(i);
                 fData[pos] += fVectX.at(i);
                 nData[pos]++;
             }
 
+            tVectX.clear();
+            fVectX.clear();
+
             for(i=0; i<tlen; i++)
             {
-                //qDebug() << QString("nData: %1\n").arg(nData[i]);
-                tData[i] /= nData[i];
-                fData[i] /= nData[i];
-                qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+
+                if(nData[i]>=20)
+                {//qDebug() << QString("nData: %1\n").arg(nData[i]);
+                tVectX << (tData[i] / nData[i]);
+                fVectX << (fData[i] / nData[i]);
+                }
+                //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
             }
+
+                tlen = tVectX.size();
+
+                delete [] fData;
+                delete [] tData;
+
+                fData = new double[tlen];
+                tData = new double[tlen];
+
+                for(i=0; i<tlen; i++)
+                {
+                    tData[i] = tVectX[i];
+                    fData[i] = fVectX[i];
+                    //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+                }
+                polyCoefX = new double[polyDeg];
+                makePoly(tData, fData, tlen, polyCoefX, polyDeg);
+                tStrL.clear();
+                for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefX[i]).arg(i);
+                qDebug() << QString("polyCoefX: %1\n").arg(tStrL.join(" + "));
+
+                s0 = 0;
+                //s1 = 0;
+                k0=0;
+
+                for(i=0; i<tlen; i++)
+                {
+                    fData[i] = fData[i] - detPoly(tData[i], polyCoefX, polyDeg);
+                    s0 += fData[i]*fData[i];
+                    k0++;
+                }
+
+                s0 = sqrt(s0)/k0;
+                qDebug() << QString("resX poly: s0= %1\n").arg(s0);
+
 
             /*
             if(r12data.redDeg>1)
@@ -1784,7 +1844,7 @@ int main(int argc, char *argv[])    //r3StatPL
       */
             s0 = 0;
             //s1 = 0;
-            k=0;
+            k0=0;
             for(i=0; i<szi; i++)
             {
                 mesRec = mesList.at(i);
@@ -1795,10 +1855,15 @@ int main(int argc, char *argv[])    //r3StatPL
                 for(j=0; j< szj; j++)
                 {
                     resRec = mesRec->resList.at(j);
-                    s0 +=resRec->Dx*resRec->Dx;
-                    //s1 +=resRec->Dy*resRec->Dy;
-                    k++;
-                    if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx-detHarm(resRec->x, resList));
+                    corrVal = resRec->Dx-detHarm(resRec->x, resList);
+
+                    if(resRec->isRefKsi)
+                    {
+                        s0 +=corrVal*corrVal;
+                        //s1 +=resRec->Dy*resRec->Dy;
+                        k0++;
+                        dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(corrVal);
+                    }
                     //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
                 }
             }
@@ -1807,11 +1872,11 @@ int main(int argc, char *argv[])    //r3StatPL
 
             delete [] fData;
             delete [] tData;
-            delete [] rData;
+            //delete [] rData;
             delete [] nData;
         }
 
-        s0 = sqrt(s0)/k;
+        s0 = sqrt(s0)/k0;
         //s1 = sqrt(s1)/k;
 
         qDebug() << QString("resX: s0= %1\n").arg(s0);
@@ -1830,23 +1895,67 @@ int main(int argc, char *argv[])    //r3StatPL
             nData = new int[tlen];
             dx = (r12data.y1-r12data.y0)/tlen;
 
-            for(i=0; i<tlen; i++) nData[i] = 0;
+            for(i=0; i<tlen; i++)
+            {
+                tData[i] = 0.0;
+                fData[i] = 0.0;
+                nData[i] = 0;
+            }
 
             for(i=0; i<flen; i++)
             {
-                pos = (tVectX.at(i)-r12data.y0)/dx;
+                pos = (tVectY.at(i)-r12data.y0)/dx;
                 tData[pos] += tVectY.at(i);
                 fData[pos] += fVectY.at(i);
                 nData[pos]++;
             }
 
+            tVectY.clear();
+            fVectY.clear();
+
             for(i=0; i<tlen; i++)
             {
-                tData[i] /= nData[i];
-                fData[i] /= nData[i];
-                qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+                //qDebug() << QString("nData: %1\n").arg(nData[i]);
+                if(nData[i]>=20)
+                {
+                tVectY << (tData[i] / nData[i]);
+                fVectY << (fData[i] / nData[i]);
+                }
+                //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
             }
 
+                tlen = tVectY.size();
+
+                delete [] fData;
+                delete [] tData;
+
+                fData = new double[tlen];
+                tData = new double[tlen];
+
+                for(i=0; i<tlen; i++)
+                {
+                    tData[i] = tVectY[i];
+                    fData[i] = fVectY[i];
+                }
+                polyCoefY = new double[polyDeg];
+                makePoly(tData, fData, tlen, polyCoefY, polyDeg);
+                tStrL.clear();
+                for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefY[i]).arg(i);
+                qDebug() << QString("polyCoefY: %1\n").arg(tStrL.join(" + "));
+
+                s0 = 0;
+                //s1 = 0;
+                k0=0;
+
+                for(i=0; i<tlen; i++)
+                {
+                    fData[i] = fData[i] - detPoly(tData[i], polyCoefY, polyDeg);
+                    s0 += fData[i]*fData[i];
+                    k0++;
+                }
+
+                s0 = sqrt(s0)/k0;
+                qDebug() << QString("resY poly: s0= %1\n").arg(s0);
 
 /*
             if(r12data.redDeg>1)
@@ -1893,7 +2002,7 @@ int main(int argc, char *argv[])    //r3StatPL
             dataStreamY.setDevice(&rFileY);
       */
             s1 = 0;
-            k=0;
+            k1=0;
             for(i=0; i<szi; i++)
             {
                 mesRec = mesList.at(i);
@@ -1904,9 +2013,14 @@ int main(int argc, char *argv[])    //r3StatPL
                 for(j=0; j< szj; j++)
                 {
                     resRec = mesRec->resList.at(j);
-                    s1 +=resRec->Dy*resRec->Dy;
-                    k++;
-                    if(resRec->isRefEta) dataStreamX << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy-detHarm(resRec->y, resList));
+                    corrVal = resRec->Dy-detHarm(resRec->y, resList);
+
+                    if(resRec->isRefEta)
+                    {
+                        dataStreamX << QString("%1\t%2\n").arg(resRec->y).arg(corrVal);
+                        s1 +=corrVal*corrVal;
+                        k1++;
+                    }
                     //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
                 }
             }
@@ -1914,7 +2028,7 @@ int main(int argc, char *argv[])    //r3StatPL
             rFileX.close();
         }
 
-        s1 = sqrt(s1)/k;
+        s1 = sqrt(s1)/k1;
 
         qDebug() << QString("resY: s0= %1\n").arg(s1);
 

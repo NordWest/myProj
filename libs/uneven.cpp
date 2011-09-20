@@ -50,7 +50,41 @@ void sortTvect(double* tVect, double* fVect, int szi)
     }
 }
 
+int makePoly(double *f_time, double *F, int N, double* resCoef, int polDeg, int isLog)
+{
+    int i, j;
+    double *xj = new double[polDeg];
+    double *bj = new double[N];
 
+    double *aij = new double[N*polDeg];
+
+    for(i=0; i<N; i++)
+    {
+            //aij.set(i, 0, f_time[i]);
+            //aij.set(i, 1, 1.0);
+        for(j=0; j<polDeg; j++) aij[i*polDeg+j] = pow(f_time[i], j);
+            //aij[i*w+0] = f_time[i];
+            //aij[i*w+1] = 1.0;
+
+        bj[i] = F[i];
+    }
+
+    slsm(polDeg, N, xj, aij, bj);
+
+    for(j=0; j<polDeg; j++) resCoef[j] = xj[j];
+
+    return 0;
+}
+
+double detPoly(double x, double* coefV, int polDeg)
+{
+    int j;
+    double res = 0.0;
+    for(j=0; j<polDeg; j++) res += coefV[j]*pow(x, j);
+    return res;
+}
+
+using namespace std;
 int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*> &resList, int isLog)
 {
         FILE *FI, *FC, *FT, *FNT, *DF, *DFO, *CF, *BF, *WF, *SF, *XF, *FRF, *FNRF;
@@ -119,10 +153,35 @@ int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*
             FNRF = fopen(str, "w");
         }
 
+        sgR = 0.0;
+
+        for(i=0; i<N; i++)
+        {
+               //trend = xj[0]*f_time[i] + xj[1];
+                //fprintf(FT, "%17.15e %9.6f 1\n", F[i], f_time[i]);
+                //fprintf(FT, "%17.15e %9.6f 2\n", trend, f_time[i]);
+                //if(isLog) fprintf(FT, "%09.6f %17.15e %17.15e\n", f_time[i], F[i], trend);
+                //F[i] = F[i] - trend;
+                //fini[i] = complex<double>(F[i], 0.0);
+
+                sgR += F[i]*F[i];
+                //fprintf(FNT, "%17.15e %9.6f 1\n", F[i], f_time[i]);
+                if(isLog) fprintf(FI, "%09.6f %17.15e\n", f_time[i], F[i]);
+        }
+
+        sgR /= N-1;
+
+        if(isLog) cout << QString("sgR= %1\n").arg(sgR);
+        if(isLog) resStm << QString("sgR= %1\n").arg(sgR);
+
+
+        if(isLog) fclose(FI);
+        //if(isLog) fclose(FNT);
+
         //nfile++;
 
 //centrovka//////////////////////////////////////////////
- /*       double MNF, MXF, Dcentr;
+/*        double MNF, MXF, Dcentr;
         MNF = F[0];
         MXF = F[0];
         for(i=0; i<N; i++)
@@ -149,9 +208,9 @@ int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*
                 //fprintf(FC, "%f %9.6f 1\n", F[i], f_time[i]);
                 if(isLog) fprintf(FC, "%9.6f %17.15e\n", f_time[i], F[i]);
         }
-*/
+
 //trend///////////////////////////////////////////////////////////
-/*
+
         //vector xj(2);
         int w = 2;
         double *xj = new double[w];
@@ -201,9 +260,9 @@ int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*
         //Lsys(&ckj, &bj, &xj);
         slsm(w, 2, xj, ckj, bj);
 
-        complex<double> *fini;
-        fini = new complex<double>[N];
-        double sgR;
+        //complex<double> *fini;
+        //fini = new complex<double>[N];
+        //double sgR;
 
         sgR = 0.0;
 
@@ -212,23 +271,23 @@ int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*
                 trend = xj[0]*f_time[i] + xj[1];
                 //fprintf(FT, "%17.15e %9.6f 1\n", F[i], f_time[i]);
                 //fprintf(FT, "%17.15e %9.6f 2\n", trend, f_time[i]);
-                fprintf(FT, "%09.6f %17.15e %17.15e\n", f_time[i], F[i], trend);
+                if(isLog) fprintf(FT, "%09.6f %17.15e %17.15e\n", f_time[i], F[i], trend);
                 F[i] = F[i] - trend;
                 fini[i] = complex<double>(F[i], 0.0);
 
                 sgR += F[i]*F[i];
                 //fprintf(FNT, "%17.15e %9.6f 1\n", F[i], f_time[i]);
-                fprintf(FNT, "%09.6f %17.15e\n", f_time[i], F[i]);
+                if(isLog) fprintf(FNT, "%09.6f %17.15e\n", f_time[i], F[i]);
         }
 
         sgR /= N-1;
 
-        cout << QString("sgR= %1\n").arg(sgR);
-        resStm << QString("sgR= %1\n").arg(sgR);
+        if(isLog) cout << QString("sgR= %1\n").arg(sgR);
+        if(isLog) resStm << QString("sgR= %1\n").arg(sgR);
 
 
-        fclose(FT);
-        fclose(FNT);
+        if(isLog) fclose(FT);
+        if(isLog) fclose(FNT);
 */
 //	control params	//
 

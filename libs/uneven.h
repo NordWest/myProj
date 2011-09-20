@@ -11,6 +11,8 @@
 
 //#include "./alglib/ap.h"
 
+#include "./mb.h"
+
 #define STRLEN 1024
 #define PI atan(1)*4
 
@@ -34,6 +36,9 @@ struct cleanParam
 
 
 void sortTvect(double* tVect, double* fVect, int szi);
+
+int makePoly(double *f_time, double *F, int N, double* resCoef, int polDeg, int isLog = 0);
+double detPoly(double x, double* coefV, int polDeg);
 
 int makeClean(double *f_time, double *F, int N, cleanParam cp, QList <harmParam*> &resList, int isLog = 0);
 
