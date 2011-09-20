@@ -151,8 +151,8 @@ QStringList outerArguments;
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
         //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
  //       syscorr
-        QString syscorIni = settings->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
-        int useSysCorr = settings->value("syscorr/useSysCorr", 0).toInt();
+        QString syscorIni = sett->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
+        int useSysCorr = sett->value("syscorr/useSysCorr", 0).toInt();
 
 //objects   ////
         int lspmFind = sett->value("objects/lspmFind", 0).toInt();
