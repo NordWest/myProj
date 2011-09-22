@@ -710,6 +710,7 @@ int vectGrid3D::intIDW(double x, double y, double m, double *xint, double *yint)
 
 int vectGrid3D::printCoefs()
 {
+    qDebug() << "printCoefs\n";
 	int i, j, sz;
 	sz = coefXM.size();
         //printf("coefXM.size()= %d\n", sz);
@@ -1305,6 +1306,7 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
 
 int vectGrid3D::saveVF(QString fName)
 {
+    qDebug() << "saveVF\n";
     int i, j, k;
     QStringList xDiap;
     QFile resFile;
@@ -1371,6 +1373,7 @@ int vectGrid3D::saveVF(QString fName)
 
 int vectGrid3D::saveDotList(QString resDir, QString colSep, QString prefStr, double mult, double nmin)
 {
+    qDebug() << "saveDotList\n";
     int i, j, k;
     //QStringList xDiap;
     QFile resFile;

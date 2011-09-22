@@ -618,6 +618,7 @@ class residualFile
 {
 public:
 	QList <residualsRec*> resList;
+        QList <colRec*> colList;
 	
 	QString fName;
 
@@ -635,6 +636,8 @@ public:
         void remSigma(double sg);
 
         void removeMes(QString mesureTimeCode);
+
+
 };
 
 class objResidualFile
@@ -654,6 +657,17 @@ public:
     void saveAs(QString fname);
 
     void removeMes(QString mesureTimeCode);
+
+    /*
+    int getColRecNum(int colNum);
+    int setColRec(colRec* cRec);
+    void sortColList();
+
+    colRec* getColNum(int cNum);
+
+    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+    int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
+    */
 };
 
 class errBudgetFile
@@ -762,6 +776,8 @@ struct platesStat
     void dropObj(reductionStat rStat);
     void selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesList);
     void selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList);
+    void selMesList(reductionStat *rStat, QList <measurementRec*> *mesList);
+
 
 
     void saveReport0(QString r0name, int isMinUWE, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList = NULL);
@@ -770,12 +786,12 @@ struct platesStat
 
 struct objStatRec
 {
-    QString objName;
+    QString objName, catName;
     platesStat *plStat;
     QList <measurementStatRec*> mStatList;
     void init(int plNameType);
     void do3Sigma(reductionStat *rStat, double sigma, double pfc = 0.0);
-    void getMpList(reductionStat *rStat, QList <objResRec*> *ocList);
+    void getOCList(reductionStat *rStat, QList <objResRec*> *ocList);
     //void getSstarList(reductionStat *rStat, QList <sstarRes*> *sstarList);
     void removeMes(QString mesTimeCode);
     //void init(QList <measurementStatRec*> mesStatList, int plNameType = 0);

@@ -132,6 +132,8 @@ struct report50data
     int corrModel;
 };
 
+void report12(report12data r12data, QList <measurementRec*> &mesList, QString reportDirName);
+void report13(QList<measurementRec*> &mesList, QString reportDirName);
 
 
 int main(int argc, char *argv[])    //r3StatPL
@@ -314,19 +316,9 @@ int main(int argc, char *argv[])    //r3StatPL
     QString colSep = sett->value("general/colSep").toString();
 
 
-    double objSigma = sett->value("reportObj/objSigma", 3.0).toDouble();
-    double objAggSigma = sett->value("reportObj/objAggSigma", 0.0).toDouble();
-    int saveEq = sett->value("reportObj/saveEq", 0).toInt();
-    int cCols = sett->value("reportObj/cCols", 0).toInt();
-    int saveMpc = sett->value("reportObj/saveMpc", 0).toInt();
-    int saveAgg = sett->value("reportObj/saveAgg", 0).toInt();
-    QString mpcOrbCat = sett->value("reportObj/mpcOrbCat", "").toString();
 
-    int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
-    int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
-    int isDropObj = sett->value("report0/isDropObj", 0).toInt();
-    QString versSeq = sett->value("report0/versSeq", "33|32|23|22|21").toString();
 
+    int isReportObj = sett->value("reports/isReportObj", 0).toInt();
     int isReport0 = sett->value("reports/isReport0", 0).toInt();
     int isReport1 = sett->value("reports/isReport1", 0).toInt();
     int isReport11 = sett->value("reports/isReport11", 0).toInt();
@@ -344,6 +336,21 @@ int main(int argc, char *argv[])    //r3StatPL
 
     int isMeasurementsTxt = sett->value("reports/isMeasurementsTxt", 1).toInt();
     int isMesReports = sett->value("reports/isMesReports", 1).toInt();
+
+
+    double objSigma = sett->value("reportObj/objSigma", 3.0).toDouble();
+    double objAggSigma = sett->value("reportObj/objAggSigma", 0.0).toDouble();
+    int saveEq = sett->value("reportObj/saveEq", 0).toInt();
+    int cCols = sett->value("reportObj/cCols", 0).toInt();
+    int saveMpc = sett->value("reportObj/saveMpc", 0).toInt();
+    int saveAgg = sett->value("reportObj/saveAgg", 0).toInt();
+    QString mpcOrbCat = sett->value("reportObj/mpcOrbCat", "").toString();
+
+    int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
+    int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
+    int isDropObj = sett->value("report0/isDropObj", 0).toInt();
+    QString versSeq = sett->value("report0/versSeq", "33|32|23|22|21").toString();
+
 
     int r1aveNum = sett->value("report1/aveNum", 1).toInt();
 
@@ -963,6 +970,7 @@ int main(int argc, char *argv[])    //r3StatPL
     if(isDropObj) plStat.dropObj(rStat);
     if(isVersSeq) plStat.selVersSeq(versSeq.split("|"), &rStat, &mesList);
     else  if(isMinUWE) plStat.selMinUWE(&rStat, &mesList);
+    else plStat.selMesList(&rStat, &mesList);
     //if(isVersSeq) plStat.saveReport0Seq(reportDirName+"report0.txt", versSeq, excList,  plNameType, &rStat, &mesList);
     //else plStat.saveReport0(reportDirName+"report0.txt", isMinUWE, plNameType, &rStat, &mesList);
     if(isReport0) saveReport0(reportDirName+"report0.txt", mesList, plNameType);
@@ -1057,7 +1065,10 @@ int main(int argc, char *argv[])    //r3StatPL
     }
 */
 
+
     if(isMeasurementsTxt) rFile.close();
+
+
 
 /////////
 
@@ -1103,6 +1114,143 @@ int main(int argc, char *argv[])    //r3StatPL
 
 
 
+
+
+    if(isReportObj)
+    {
+        QString reportObjDir = reportDir.absolutePath() + reportDir.separator() + "objStat";
+        reportDir.mkdir(reportObjDir);
+        objResidualFile objTemp;// = new objResidualFile;
+        objResidualFile objAggTemp;// = new objResidualFile;
+
+        eqFile eqTemp;// = new objResidualFile;
+        eqFile aggTemp;// = new objResidualFile;
+
+        objectsStat objStat;
+        objStat.init(&rStat, plNameType);
+        szi = objStat.objList.size();
+        qDebug() << QString("obj num: %1\n").arg(szi);
+
+        QFile mpcAggFile, mpcFile;
+        QTextStream mpcAggStm, mpcStm;
+        QString tfName, objName, tstr, catName;
+
+        ///eqFile eqF;
+        int objNum;
+
+        ocRec *ocrec;
+
+
+
+        mpccat mpoCat;
+        if(saveMpc)
+        {
+            if(mpoCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
+
+            mpcAggFile.setFileName(reportObjDir+"/mpc.txt");
+            mpcAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            mpcAggStm.setDevice(&mpcAggFile);
+        }
+
+            for(i=0; i<szi; i++)
+            {
+                objTemp.clear();
+                //ssF.clear();
+                //szj = objPStat.objList.at(i);
+                qDebug() << QString("objName: %1\n").arg(objStat.objList.at(i)->objName);
+                if(objSigma>0.0) objStat.objList.at(i)->do3Sigma(&rStat, objSigma);
+                objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
+
+
+                qDebug() << QString("eq size: %1\n").arg(objTemp.ocList.size());
+                objName = objStat.objList.at(i)->objName.simplified();
+                catName = objStat.objList.at(i)->catName.simplified();
+                tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
+                szj = objTemp.ocList.size();
+                if(szj>0)
+                {
+                    objTemp.saveAs(tfName+"_or.txt");
+                    if(QString().compare(catName, "mpeph")==0)
+                    {
+                        eqTemp.clear();
+                        for(j=0; j<szj; j++)
+                        {
+                            ocrec = new ocRec;
+                            objTemp.ocList.at(j)->toOcRec(ocrec);
+                            eqTemp.ocList << ocrec;
+                        }
+                        objAggTemp.ocList << objTemp.ocList;
+
+                        if(cCols)eqTemp.countCols("4,5,6");
+                        if(saveEq)
+                        {
+                            eqTemp.saveAs(tfName+"_eq.txt");
+                            if(saveAgg) aggTemp.ocList << eqTemp.ocList;
+                        }
+                        if(saveMpc)
+                        {
+                            mpcFile.setFileName(tfName+"_mpc.txt");
+                            mpcFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+                            mpcStm.setDevice(&mpcFile);
+
+                            if(mpoCat.GetRecName(objName.toAscii().data()))
+                            {
+                                qDebug() << QString("objName is not found\n");
+                                objNum = 0;
+                            }
+                            else
+                            {
+                                objNum = mpoCat.record->getNum();
+                                qDebug() << QString("objNum: %1\n").arg(objNum);
+                                //qDebug() << QString("number: %1\n").arg(mpoCat.record->number);
+                            }
+
+                            szj = eqTemp.ocList.size();
+                            for(j=0; j<szj; j++)
+                            {
+                                eqTemp.ocList.at(j)->rec2MPC(&tstr, "084", objNum);
+                                mpcStm << tstr << "\n";
+                                if(saveAgg) mpcAggStm << tstr << "\n";
+                            }
+
+                            mpcFile.close();
+                        }
+                    }
+                }
+
+            }
+
+        if(saveAgg)
+        {
+            qDebug() << "saveAgg\n";
+            objAggTemp.saveAs(reportObjDir+"/objRes.txt");
+            if(saveEq)
+            {
+                qDebug() << "saveEq\n";
+                if(cCols)aggTemp.countCols("4,5,6");
+
+                aggTemp.saveAs(reportObjDir+"/eq.txt");
+            }
+            /*
+            if(objAggSigma>0.0)
+            {
+                qDebug() << "aggSsF.do3sigma\n";
+                aggSsF.do3sigma(0.0, objSigma);
+            }
+            if(cCols)
+            {
+                qDebug() << "cCols\n";
+                aggSsF.countCols("6,7,8");
+            }
+
+            aggSsF.saveAs(reportObjDir+"/agg_sstar.txt");*/
+        }
+
+        if(saveMpc) mpcAggFile.close();
+
+
+
+    }
 
 
 
@@ -1625,458 +1773,13 @@ int main(int argc, char *argv[])    //r3StatPL
 
     if(isReport12)
     {
+        report12(r12data, mesList, reportDirName);
 
-        rFileX.setFileName(reportDirName+"ocRefKsi.txt");
-        rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamX.setDevice(&rFileX);
-
-        rFileY.setFileName(reportDirName+"ocRefEta.txt");
-        rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamY.setDevice(&rFileY);
-/*
-        rFileM.setFileName(reportDirName+"ocRefMag.txt");
-        rFileM.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamM.setDevice(&rFileM);
-*/
-        szi = mesList.size();
-
-        QVector <double> tVectX;
-        QVector <double> fVectX;
-
-        QVector <double> tVectY;
-        QVector <double> fVectY;
-
-        double *fData, *tData, *rData;
-        int *nData;
-        int tlen, flen;
-        int len1, p, k, k0, k1, pos;
-        double s0, s1, dx, corrVal;
-        int polyDeg = 3;
-        double *polyCoefX, *polyCoefY;
-        QStringList tStrL;
-
-
-        QList <harmParam*> resList;
-
-
-        s0 = 0;
-        s1 = 0;
-        k0=0;
-        k1=0;
-
-        for(i=0; i<szi; i++)
-        {
-            mesRec = mesList.at(i);
-
-
-            szj = mesRec->resList.size();
-
-            for(j=0; j< szj; j++)
-            {
-                resRec = mesRec->resList.at(j);
-
-
-
-                /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
-                if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
-                if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
-                if(resRec->isRefKsi)
-                {
-                    dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
-                    s0 +=resRec->Dx*resRec->Dx;
-                    k0++;
-                }
-                if(resRec->isRefEta)
-                {
-                    dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
-                    s1 +=resRec->Dy*resRec->Dy;
-                    k1++;
-                }
-                //if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
-
-                if((resRec->x>=r12data.x0)&&(resRec->x<=r12data.x1))
-                {
-                    tVectX << resRec->x;
-                    fVectX << resRec->Dx;
-                }
-
-                if((resRec->y>=r12data.y0)&&(resRec->y<=r12data.y1))
-                {
-                    tVectY << resRec->y;
-                    fVectY << resRec->Dy;
-                }
-
-            }
-        }
-        rFileX.close();
-        rFileY.close();
-
-        s0 = sqrt(s0)/k0;
-        s1 = sqrt(s1)/k1;
-
-        qDebug() << QString("prev: s0= %1\t s1= %2\n").arg(s0).arg(s1);
-
-
-
-        tlen = tVectX.size();
-        flen = fVectX.size();
-        if(tlen==flen)
-        {
-            tlen = r12data.redDeg;
-            qDebug() << QString("tlen: %1\n").arg(tlen);
-            fData = new double[tlen];
-            tData = new double[tlen];
-            //rData = new double[tlen];
-            nData = new int[tlen];
-            dx = (r12data.x1-r12data.x0)/tlen;
-            qDebug() << QString("dx: %1\n").arg(dx);
-
-            for(i=0; i<tlen; i++)
-            {
-                tData[i] = 0.0;
-                fData[i] = 0.0;
-                nData[i] = 0;
-            }
-
-            for(i=0; i<flen; i++)
-            {
-                pos = (tVectX.at(i)-r12data.x0)/dx;
-                if(pos<0||pos>=tlen)qDebug() << QString("pos: %1").arg(pos);
-                tData[pos] += tVectX.at(i);
-                fData[pos] += fVectX.at(i);
-                nData[pos]++;
-            }
-
-            tVectX.clear();
-            fVectX.clear();
-
-            for(i=0; i<tlen; i++)
-            {
-
-                if(nData[i]>=20)
-                {//qDebug() << QString("nData: %1\n").arg(nData[i]);
-                tVectX << (tData[i] / nData[i]);
-                fVectX << (fData[i] / nData[i]);
-                }
-                //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
-            }
-
-                tlen = tVectX.size();
-
-                delete [] fData;
-                delete [] tData;
-
-                fData = new double[tlen];
-                tData = new double[tlen];
-
-                for(i=0; i<tlen; i++)
-                {
-                    tData[i] = tVectX[i];
-                    fData[i] = fVectX[i];
-                    //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
-                }
-                polyCoefX = new double[polyDeg];
-                makePoly(tData, fData, tlen, polyCoefX, polyDeg);
-                tStrL.clear();
-                for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefX[i]).arg(i);
-                qDebug() << QString("polyCoefX: %1\n").arg(tStrL.join(" + "));
-
-                s0 = 0;
-                //s1 = 0;
-                k0=0;
-
-                for(i=0; i<tlen; i++)
-                {
-                    fData[i] = fData[i] - detPoly(tData[i], polyCoefX, polyDeg);
-                    s0 += fData[i]*fData[i];
-                    k0++;
-                }
-
-                s0 = sqrt(s0)/k0;
-                qDebug() << QString("resX poly: s0= %1\n").arg(s0);
-
-
-            /*
-            if(r12data.redDeg>1)
-            {
-                sortTvect(tData, fData, tlen);
-                div_t divresult;
-                divresult = div(tlen, r12data.redDeg);
-                len1 = divresult.quot;
-                if(divresult.rem>0) len1++;
-
-                p=0;
-                k=0;
-                s1 = s0 = 0;
-
-                for(i=0; i<tlen; i++)
-                {
-                    s0 += tData[i];
-                    s1 += fData[i];
-                    p++;
-                    if((p==r12data.redDeg)||(i==(tlen-1)))
-                    {
-                        tData[k] = s0/(1.0*p);
-                        fData[k] = s1/(1.0*p);
-                        k++;
-                        p=0;
-                        s0=0;
-                        s1=0;
-                    }
-
-                }
-                tlen = k-1;
-
-            }
-*/
-            makeClean(tData, fData, tlen, r12data.cp, resList, 1);
-            qDebug() << QString("resX harm sz: %1\n").arg(resList.size());
-            for(i=0; i<resList.size(); i++) qDebug() << QString("resList[i]= %1*cos(2PIt/ %2 + %3)\n").arg(resList[i]->A).arg(resList[i]->P).arg(resList[i]->Fi);
-
-            //detHarm(tData[i], resList);
-
-            rFileX.setFileName(reportDirName+"ocRefKsi_corr.txt");
-            rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-            dataStreamX.setDevice(&rFileX);
-    /*
-            rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
-            rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-            dataStreamY.setDevice(&rFileY);
-      */
-            s0 = 0;
-            //s1 = 0;
-            k0=0;
-            for(i=0; i<szi; i++)
-            {
-                mesRec = mesList.at(i);
-
-
-                szj = mesRec->resList.size();
-
-                for(j=0; j< szj; j++)
-                {
-                    resRec = mesRec->resList.at(j);
-                    corrVal = resRec->Dx-detHarm(resRec->x, resList);
-
-                    if(resRec->isRefKsi)
-                    {
-                        s0 +=corrVal*corrVal;
-                        //s1 +=resRec->Dy*resRec->Dy;
-                        k0++;
-                        dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(corrVal);
-                    }
-                    //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
-                }
-            }
-
-            rFileX.close();
-
-            delete [] fData;
-            delete [] tData;
-            //delete [] rData;
-            delete [] nData;
-        }
-
-        s0 = sqrt(s0)/k0;
-        //s1 = sqrt(s1)/k;
-
-        qDebug() << QString("resX: s0= %1\n").arg(s0);
-
-        resList.clear();
-
-        tlen = tVectY.size();
-        flen = fVectY.size();
-        if(tlen==flen)
-        {
-
-            tlen = r12data.redDeg;
-            fData = new double[tlen];
-            tData = new double[tlen];
-            rData = new double[tlen];
-            nData = new int[tlen];
-            dx = (r12data.y1-r12data.y0)/tlen;
-
-            for(i=0; i<tlen; i++)
-            {
-                tData[i] = 0.0;
-                fData[i] = 0.0;
-                nData[i] = 0;
-            }
-
-            for(i=0; i<flen; i++)
-            {
-                pos = (tVectY.at(i)-r12data.y0)/dx;
-                tData[pos] += tVectY.at(i);
-                fData[pos] += fVectY.at(i);
-                nData[pos]++;
-            }
-
-            tVectY.clear();
-            fVectY.clear();
-
-            for(i=0; i<tlen; i++)
-            {
-                //qDebug() << QString("nData: %1\n").arg(nData[i]);
-                if(nData[i]>=20)
-                {
-                tVectY << (tData[i] / nData[i]);
-                fVectY << (fData[i] / nData[i]);
-                }
-                //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
-            }
-
-                tlen = tVectY.size();
-
-                delete [] fData;
-                delete [] tData;
-
-                fData = new double[tlen];
-                tData = new double[tlen];
-
-                for(i=0; i<tlen; i++)
-                {
-                    tData[i] = tVectY[i];
-                    fData[i] = fVectY[i];
-                }
-                polyCoefY = new double[polyDeg];
-                makePoly(tData, fData, tlen, polyCoefY, polyDeg);
-                tStrL.clear();
-                for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefY[i]).arg(i);
-                qDebug() << QString("polyCoefY: %1\n").arg(tStrL.join(" + "));
-
-                s0 = 0;
-                //s1 = 0;
-                k0=0;
-
-                for(i=0; i<tlen; i++)
-                {
-                    fData[i] = fData[i] - detPoly(tData[i], polyCoefY, polyDeg);
-                    s0 += fData[i]*fData[i];
-                    k0++;
-                }
-
-                s0 = sqrt(s0)/k0;
-                qDebug() << QString("resY poly: s0= %1\n").arg(s0);
-
-/*
-            if(r12data.redDeg>1)
-            {
-                sortTvect(tData, fData, tlen);
-                div_t divresult;
-                divresult = div(tlen, r12data.redDeg);
-                len1 = divresult.quot;
-                if(divresult.rem>0) len1++;
-
-                p=0;
-                k=0;
-                s1 = s0 = 0;
-
-                for(i=0; i<tlen; i++)
-                {
-                    s0 += tData[i];
-                    s1 += fData[i];
-                    p++;
-                    if((p==r12data.redDeg)||(i==(tlen-1)))
-                    {
-                        tData[k] = s0/(1.0*p);
-                        fData[k] = s1/(1.0*p);
-                        k++;
-                        p=0;
-                        s0=0;
-                        s1=0;
-                    }
-
-                }
-                tlen = k-1;
-            }
-*/
-            makeClean(tData, fData, tlen, r12data.cp, resList, 1);
-
-            detHarm(tData[i], resList);
-
-            rFileX.setFileName(reportDirName+"ocRefEta_corr.txt");
-            rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-            dataStreamX.setDevice(&rFileX);
-    /*
-            rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
-            rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-            dataStreamY.setDevice(&rFileY);
-      */
-            s1 = 0;
-            k1=0;
-            for(i=0; i<szi; i++)
-            {
-                mesRec = mesList.at(i);
-
-
-                szj = mesRec->resList.size();
-
-                for(j=0; j< szj; j++)
-                {
-                    resRec = mesRec->resList.at(j);
-                    corrVal = resRec->Dy-detHarm(resRec->y, resList);
-
-                    if(resRec->isRefEta)
-                    {
-                        dataStreamX << QString("%1\t%2\n").arg(resRec->y).arg(corrVal);
-                        s1 +=corrVal*corrVal;
-                        k1++;
-                    }
-                    //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
-                }
-            }
-
-            rFileX.close();
-        }
-
-        s1 = sqrt(s1)/k1;
-
-        qDebug() << QString("resY: s0= %1\n").arg(s1);
-
-
-  //      rFileM.close();
     }
 
     if(isReport13)
     {
-
-        rFileX.setFileName(reportDirName+"ocMagRefKsi.txt");
-        rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamX.setDevice(&rFileX);
-
-        rFileY.setFileName(reportDirName+"ocMagRefEta.txt");
-        rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamY.setDevice(&rFileY);
-
-        rFileM.setFileName(reportDirName+"ocMagRefMag.txt");
-        rFileM.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStreamM.setDevice(&rFileM);
-
-        szi = mesList.size();
-
-
-        for(i=0; i<szi; i++)
-        {
-            mesRec = mesList.at(i);
-
-
-            szj = mesRec->resList.size();
-
-            for(j=0; j< szj; j++)
-            {
-                resRec = mesRec->resList.at(j);
-                /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
-                if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
-                if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
-                if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
-                if(resRec->isRefEta) dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
-                if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
-
-            }
-        }
-        rFileX.close();
-        rFileY.close();
-        rFileM.close();
+        report13(mesList, reportDirName);
     }
 
 //report4
@@ -2296,6 +1999,8 @@ int main(int argc, char *argv[])    //r3StatPL
     if(isReport5)
     {
 
+        qDebug() << "report5\n";
+
         report5Dir = reportDirName + "report5";
         reportDir.mkdir("report5");
 
@@ -2388,7 +2093,7 @@ int main(int argc, char *argv[])    //r3StatPL
                                         {
                                             naxeX[1] = naxeX[0] = resRec->x;
                                             naxeY[1] = naxeY[0] = resRec->y;
-                                            qDebug() << QString("dini naxes: %1 - %2 | %3 - %4\n").arg(naxeX[0]).arg(naxeX[1]).arg(naxeY[0]).arg(naxeY[1]);
+                                            //qDebug() << QString("dini naxes: %1 - %2 | %3 - %4\n").arg(naxeX[0]).arg(naxeX[1]).arg(naxeY[0]).arg(naxeY[1]);
                                             diniKey = 0;
                                         }
                                         else
@@ -2471,7 +2176,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
 
         //double *vect = new double[3];
-        long nint;
+        //long nint;
 
         qDebug() << QString("di= %1\n").arg(di);
 
@@ -2511,6 +2216,7 @@ int main(int argc, char *argv[])    //r3StatPL
         vectF5data->saveDotList(report5Dir, "|", "", 2000, 20);
 
 
+        qDebug() << "\nreport5 end\n";
     }
 
 
@@ -3579,3 +3285,690 @@ void diapResiduals::initMesList(QList <measurementRec*> mesList)
     }
 }
 
+
+void report12(report12data r12data, QList <measurementRec*> &mesList, QString reportDirName)
+{
+    int i, j, szi, szj;
+    QFile rFileX, rFileY;
+    QTextStream dataStreamX, dataStreamY;
+    measurementRec *mesRec;
+    residualsRec *resRec;
+
+    rFileX.setFileName(reportDirName+"ocRefKsi.txt");
+    rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamX.setDevice(&rFileX);
+
+    rFileY.setFileName(reportDirName+"ocRefEta.txt");
+    rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamY.setDevice(&rFileY);
+/*
+    rFileM.setFileName(reportDirName+"ocRefMag.txt");
+    rFileM.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamM.setDevice(&rFileM);
+*/
+    szi = mesList.size();
+
+    QVector <double> tVectX;
+    QVector <double> fVectX;
+
+    QVector <double> tVectY;
+    QVector <double> fVectY;
+
+    double *fData, *tData, *rData;
+    int *nData;
+    int tlen, flen;
+    int len1, p, k, k0, k1, pos;
+    double s0, s1, dx, corrVal;
+    int polyDeg = 3;
+    double *polyCoefX, *polyCoefY;
+    QStringList tStrL;
+
+
+    QList <harmParam*> resList;
+
+
+    s0 = 0;
+    s1 = 0;
+    k0=0;
+    k1=0;
+
+    for(i=0; i<szi; i++)
+    {
+        mesRec = mesList.at(i);
+
+
+        szj = mesRec->resList.size();
+
+        for(j=0; j< szj; j++)
+        {
+            resRec = mesRec->resList.at(j);
+
+
+
+            /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
+            if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
+            if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
+            if(resRec->isRefKsi)
+            {
+                dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
+                s0 +=resRec->Dx*resRec->Dx;
+                k0++;
+            }
+            if(resRec->isRefEta)
+            {
+                dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+                s1 +=resRec->Dy*resRec->Dy;
+                k1++;
+            }
+            //if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
+
+            if((resRec->x>=r12data.x0)&&(resRec->x<=r12data.x1))
+            {
+                tVectX << resRec->x;
+                fVectX << resRec->Dx;
+            }
+
+            if((resRec->y>=r12data.y0)&&(resRec->y<=r12data.y1))
+            {
+                tVectY << resRec->y;
+                fVectY << resRec->Dy;
+            }
+
+        }
+    }
+    rFileX.close();
+    rFileY.close();
+
+    s0 = sqrt(s0)/k0;
+    s1 = sqrt(s1)/k1;
+
+    qDebug() << QString("prev: s0= %1\t s1= %2\n").arg(s0).arg(s1);
+
+
+
+    tlen = tVectX.size();
+    flen = fVectX.size();
+    if(tlen==flen)
+    {
+        tlen = r12data.redDeg;
+        qDebug() << QString("tlen: %1\n").arg(tlen);
+        fData = new double[tlen];
+        tData = new double[tlen];
+        //rData = new double[tlen];
+        nData = new int[tlen];
+        dx = (r12data.x1-r12data.x0)/tlen;
+        qDebug() << QString("dx: %1\n").arg(dx);
+
+        for(i=0; i<tlen; i++)
+        {
+            tData[i] = 0.0;
+            fData[i] = 0.0;
+            nData[i] = 0;
+        }
+
+        for(i=0; i<flen; i++)
+        {
+            pos = (tVectX.at(i)-r12data.x0)/dx;
+            if(pos<0||pos>=tlen)qDebug() << QString("pos: %1").arg(pos);
+            tData[pos] += tVectX.at(i);
+            fData[pos] += fVectX.at(i);
+            nData[pos]++;
+        }
+
+        tVectX.clear();
+        fVectX.clear();
+
+        for(i=0; i<tlen; i++)
+        {
+
+            if(nData[i]>=20)
+            {//qDebug() << QString("nData: %1\n").arg(nData[i]);
+            tVectX << (tData[i] / nData[i]);
+            fVectX << (fData[i] / nData[i]);
+            }
+            //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+        }
+
+            tlen = tVectX.size();
+
+            delete [] fData;
+            delete [] tData;
+
+            fData = new double[tlen];
+            tData = new double[tlen];
+
+            for(i=0; i<tlen; i++)
+            {
+                tData[i] = tVectX[i];
+                fData[i] = fVectX[i];
+                //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+            }
+            polyCoefX = new double[polyDeg];
+            makePoly(tData, fData, tlen, polyCoefX, polyDeg);
+            tStrL.clear();
+            for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefX[i]).arg(i);
+            qDebug() << QString("polyCoefX: %1\n").arg(tStrL.join(" + "));
+
+            s0 = 0;
+            //s1 = 0;
+            k0=0;
+
+            for(i=0; i<tlen; i++)
+            {
+                fData[i] = fData[i] - detPoly(tData[i], polyCoefX, polyDeg);
+                s0 += fData[i]*fData[i];
+                k0++;
+            }
+
+            s0 = sqrt(s0)/k0;
+            qDebug() << QString("resX poly: s0= %1\n").arg(s0);
+
+
+        /*
+        if(r12data.redDeg>1)
+        {
+            sortTvect(tData, fData, tlen);
+            div_t divresult;
+            divresult = div(tlen, r12data.redDeg);
+            len1 = divresult.quot;
+            if(divresult.rem>0) len1++;
+
+            p=0;
+            k=0;
+            s1 = s0 = 0;
+
+            for(i=0; i<tlen; i++)
+            {
+                s0 += tData[i];
+                s1 += fData[i];
+                p++;
+                if((p==r12data.redDeg)||(i==(tlen-1)))
+                {
+                    tData[k] = s0/(1.0*p);
+                    fData[k] = s1/(1.0*p);
+                    k++;
+                    p=0;
+                    s0=0;
+                    s1=0;
+                }
+
+            }
+            tlen = k-1;
+
+        }
+*/
+        makeClean(tData, fData, tlen, r12data.cp, resList, 1);
+        qDebug() << QString("resX harm sz: %1\n").arg(resList.size());
+        for(i=0; i<resList.size(); i++) qDebug() << QString("resList[i]= %1*cos(2PIt/ %2 + %3)\n").arg(resList[i]->A).arg(resList[i]->P).arg(resList[i]->Fi);
+
+        //detHarm(tData[i], resList);
+
+        rFileX.setFileName(reportDirName+"ocRefKsi_corr.txt");
+        rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+        dataStreamX.setDevice(&rFileX);
+/*
+        rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
+        rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+        dataStreamY.setDevice(&rFileY);
+  */
+        s0 = 0;
+        //s1 = 0;
+        k0=0;
+        for(i=0; i<szi; i++)
+        {
+            mesRec = mesList.at(i);
+
+
+            szj = mesRec->resList.size();
+
+            for(j=0; j< szj; j++)
+            {
+                resRec = mesRec->resList.at(j);
+                corrVal = resRec->Dx-detHarm(resRec->x, resList);
+
+                if(resRec->isRefKsi)
+                {
+                    s0 +=corrVal*corrVal;
+                    //s1 +=resRec->Dy*resRec->Dy;
+                    k0++;
+                    dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(corrVal);
+                }
+                //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+            }
+        }
+
+        rFileX.close();
+
+        delete [] fData;
+        delete [] tData;
+        //delete [] rData;
+        delete [] nData;
+    }
+
+    s0 = sqrt(s0)/k0;
+    //s1 = sqrt(s1)/k;
+
+    qDebug() << QString("resX: s0= %1\n").arg(s0);
+
+    resList.clear();
+
+    tlen = tVectY.size();
+    flen = fVectY.size();
+    if(tlen==flen)
+    {
+
+        tlen = r12data.redDeg;
+        fData = new double[tlen];
+        tData = new double[tlen];
+        rData = new double[tlen];
+        nData = new int[tlen];
+        dx = (r12data.y1-r12data.y0)/tlen;
+
+        for(i=0; i<tlen; i++)
+        {
+            tData[i] = 0.0;
+            fData[i] = 0.0;
+            nData[i] = 0;
+        }
+
+        for(i=0; i<flen; i++)
+        {
+            pos = (tVectY.at(i)-r12data.y0)/dx;
+            tData[pos] += tVectY.at(i);
+            fData[pos] += fVectY.at(i);
+            nData[pos]++;
+        }
+
+        tVectY.clear();
+        fVectY.clear();
+
+        for(i=0; i<tlen; i++)
+        {
+            //qDebug() << QString("nData: %1\n").arg(nData[i]);
+            if(nData[i]>=20)
+            {
+            tVectY << (tData[i] / nData[i]);
+            fVectY << (fData[i] / nData[i]);
+            }
+            //qDebug() << QString("vect[%1]: %2\t%3\n").arg(i).arg(tData[i]).arg(fData[i]);
+        }
+
+            tlen = tVectY.size();
+
+            delete [] fData;
+            delete [] tData;
+
+            fData = new double[tlen];
+            tData = new double[tlen];
+
+            for(i=0; i<tlen; i++)
+            {
+                tData[i] = tVectY[i];
+                fData[i] = fVectY[i];
+            }
+            polyCoefY = new double[polyDeg];
+            makePoly(tData, fData, tlen, polyCoefY, polyDeg);
+            tStrL.clear();
+            for(i=0; i<polyDeg; i++) tStrL << QString("%1*x^%2").arg(polyCoefY[i]).arg(i);
+            qDebug() << QString("polyCoefY: %1\n").arg(tStrL.join(" + "));
+
+            s0 = 0;
+            //s1 = 0;
+            k0=0;
+
+            for(i=0; i<tlen; i++)
+            {
+                fData[i] = fData[i] - detPoly(tData[i], polyCoefY, polyDeg);
+                s0 += fData[i]*fData[i];
+                k0++;
+            }
+
+            s0 = sqrt(s0)/k0;
+            qDebug() << QString("resY poly: s0= %1\n").arg(s0);
+
+/*
+        if(r12data.redDeg>1)
+        {
+            sortTvect(tData, fData, tlen);
+            div_t divresult;
+            divresult = div(tlen, r12data.redDeg);
+            len1 = divresult.quot;
+            if(divresult.rem>0) len1++;
+
+            p=0;
+            k=0;
+            s1 = s0 = 0;
+
+            for(i=0; i<tlen; i++)
+            {
+                s0 += tData[i];
+                s1 += fData[i];
+                p++;
+                if((p==r12data.redDeg)||(i==(tlen-1)))
+                {
+                    tData[k] = s0/(1.0*p);
+                    fData[k] = s1/(1.0*p);
+                    k++;
+                    p=0;
+                    s0=0;
+                    s1=0;
+                }
+
+            }
+            tlen = k-1;
+        }
+*/
+        makeClean(tData, fData, tlen, r12data.cp, resList, 1);
+
+        detHarm(tData[i], resList);
+
+        rFileX.setFileName(reportDirName+"ocRefEta_corr.txt");
+        rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+        dataStreamX.setDevice(&rFileX);
+/*
+        rFileY.setFileName(reportDirName+"ocRefEta_corr.txt");
+        rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+        dataStreamY.setDevice(&rFileY);
+  */
+        s1 = 0;
+        k1=0;
+        for(i=0; i<szi; i++)
+        {
+            mesRec = mesList.at(i);
+
+
+            szj = mesRec->resList.size();
+
+            for(j=0; j< szj; j++)
+            {
+                resRec = mesRec->resList.at(j);
+                corrVal = resRec->Dy-detHarm(resRec->y, resList);
+
+                if(resRec->isRefEta)
+                {
+                    dataStreamX << QString("%1\t%2\n").arg(resRec->y).arg(corrVal);
+                    s1 +=corrVal*corrVal;
+                    k1++;
+                }
+                //dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+            }
+        }
+
+        rFileX.close();
+    }
+
+    s1 = sqrt(s1)/k1;
+
+    qDebug() << QString("resY: s0= %1\n").arg(s1);
+
+
+//      rFileM.close();
+}
+
+void report13(QList<measurementRec*> &mesList, QString reportDirName)
+{
+    int i, j, szi, szj;
+    QFile rFileX, rFileY, rFileM;
+    QTextStream dataStreamX, dataStreamY, dataStreamM;
+    measurementRec *mesRec;
+    residualsRec *resRec;
+
+    rFileX.setFileName(reportDirName+"ocMagRefKsi.txt");
+    rFileX.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamX.setDevice(&rFileX);
+
+    rFileY.setFileName(reportDirName+"ocMagRefEta.txt");
+    rFileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamY.setDevice(&rFileY);
+
+    rFileM.setFileName(reportDirName+"ocMagRefMag.txt");
+    rFileM.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+    dataStreamM.setDevice(&rFileM);
+
+    szi = mesList.size();
+
+
+    for(i=0; i<szi; i++)
+    {
+        mesRec = mesList.at(i);
+
+
+        szj = mesRec->resList.size();
+
+        for(j=0; j< szj; j++)
+        {
+            resRec = mesRec->resList.at(j);
+            /*if(resRec->isRefKsi) dataStreamX << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->ksiOC);
+            if(resRec->isRefEta) dataStreamY << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->etaOC);
+            if(resRec->isRefMag) dataStreamM << QString("%1|%2\n").arg(resRec->mag-resRec->magOC).arg(resRec->magOC);*/
+            if(resRec->isRefKsi) dataStreamX << QString("%1\t%2\n").arg(resRec->x).arg(resRec->Dx);
+            if(resRec->isRefEta) dataStreamY << QString("%1\t%2\n").arg(resRec->y).arg(resRec->Dy);
+            if(resRec->isRefMag) dataStreamM << QString("%1\t%2\n").arg(resRec->pixmag).arg(resRec->Dpixmag);
+
+        }
+    }
+    rFileX.close();
+    rFileY.close();
+    rFileM.close();
+}
+/*
+void report4(report4data r4data, QDir reportDir)
+{
+    QString report4Dir;
+    vectGrid3D *vectF;
+    int rNum, di, diniKey, i, j;
+    double dKsi, dEta, axd;
+    double naxeX[2];
+    double naxeY[2];
+    double *mLevels;
+    double *xLevels;
+    double *yLevels;
+
+    report4Dir = reportDir.absolutePath() + QDir().separator() + "report4";
+    reportDir.mkdir("report4");
+
+
+    if(r4data.isSysCorr)
+    {
+            vectF = new vectGrid3D;
+            tmp = r4data.sysCorrFile.toAscii();
+            vectF->init(tmp.data());
+            vectF->printCoefs();
+    }
+
+    di = mesList.size();
+    qDebug() << QString("mesList size = %1\n").arg(di);
+/*
+    if(r4data.isSysCorr)
+    {
+        di = mesList.size();
+        //qDebug() << QString("mesList size= %1\n").arg(di);
+            for(i=0; i<di; i++)
+            {
+                mesRec = mesList.at(i);
+
+                rNum = mesRec->resList.size();
+
+                for(j=0; j<rNum; j++)
+                {
+                    resRec = mesList.at(i)->resList.at(j);
+           /*         if(!vectF->int2D(resRec->ksi, resRec->eta, resRec->mag, &dKsi, &dEta, &ni))
+                    {
+       //                 dDec = -0.5082077*resRec->de + 18.1648793;
+                            dDec = 0.0;
+                            resRec->ksiOC-= dKsi;
+                            resRec->etaOC-= (dEta+dDec);
+
+                            resRec->ksi-= mas_to_grad(dKsi);
+                            resRec->eta-= mas_to_grad(dEta+dDec);
+                    }
+                }
+                /
+                    if(!vectF->int2Drad(resRec->ksi, resRec->eta, resRec->mag, &dKsi, &dEta, r4data.rMax, r4data.nmin))
+                    {
+       //                 dDec = -0.5082077*resRec->de + 18.1648793;
+                            dDec = 0.0;
+                            resRec->ksiOC-= dKsi;
+                            resRec->etaOC-= (dEta+dDec);
+
+                            resRec->ksi-= mas_to_grad(dKsi);
+                            resRec->eta-= mas_to_grad(dEta+dDec);
+                    }
+                }
+            }
+    }
+/
+    qDebug() << QString("isFindDiap = %1\n").arg(r4data.isFindDiap);
+
+
+    if(r4data.isFindDiap)
+    {
+        diniKey = 1;
+        di = mesList.size();
+        //qDebug() << QString("mesList size= %1\n").arg(di);
+            for(i=0; i<di; i++)
+            {
+                    //printf("\nfindDiap: %f\%\n", (double)i*100.0/(double)di);
+
+                    mesRec = mesList.at(i);
+
+                    rNum = mesRec->resList.size();
+                    //qDebug() << QString("rNum= %1\n").arg(rNum);
+                    for(j=0; j<rNum; j++)
+                    {
+
+                            resRec = mesList.at(i)->resList.at(j);
+
+                           // if(mesRec->errBud->exptime<expMin) continue;
+                            dKsi = 0.0;
+                            dEta = 0.0;
+
+                            if(r4data.isSysCorr)vectF->int2Drad(resRec->ksi, resRec->eta, resRec->mag, &dKsi, &dEta, r4data.rMax, r4data.nmin);
+                      //      if((fabs(resRec->ksiOC)<maxEta)&&(fabs(resRec->etaOC)<maxEta))
+                      //      {
+                                    if(diniKey)
+                                    {
+                                            naxeX[1] = naxeX[0] = resRec->ksi - dKsi;
+                                            naxeY[1] = naxeY[0] = resRec->eta - dEta;
+                                            diniKey = 0;
+                                    }
+                                    else
+                                    {
+                                            if(naxeX[0]>(resRec->ksi - dKsi)) naxeX[0] = resRec->ksi - dKsi;
+                                            if(naxeX[1]<(resRec->ksi - dKsi)) naxeX[1] = resRec->ksi - dKsi;
+                                            if(naxeY[0]>(resRec->eta - dEta)) naxeY[0] = resRec->eta - dEta;
+                                            if(naxeY[1]<(resRec->eta - dEta)) naxeY[1] = resRec->eta - dEta;
+                                    }
+                        //    }
+                    }
+            }
+            if(fabs(naxeX[0])>fabs(naxeX[1])) axd = fabs(naxeX[1]);
+            else axd = fabs(naxeX[0]);
+            naxeX[0] = -axd;
+            naxeX[1] = axd;
+
+            if(fabs(naxeY[0])>fabs(naxeY[1])) axd = fabs(naxeY[1]);
+            else axd = fabs(naxeY[0]);
+            naxeY[0] = -axd;
+            naxeY[1] = axd;
+    }
+    else
+    {
+            naxeX[0] = r4data.x0/3600.0;
+            naxeX[1] = r4data.x1/3600.0;
+            naxeY[0] = r4data.y0/3600.0;
+            naxeY[1] = r4data.y1/3600.0;
+    }
+
+    qDebug() << "naxeX= " << naxeX[0] << " - " << naxeX[1] << "\n";
+    qDebug() << "naxeY= " << naxeY[0] << " - " << naxeY[1] << "\n";
+
+
+
+
+
+    diapNum = magEq.resListDiap.size();
+
+    qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r4data.xLevNum).arg(r4data.yLevNum);
+
+    mLevels = new double[mLevNum];
+    xLevels = new double[r4data.xLevNum];
+    yLevels = new double[r4data.yLevNum];
+
+    dX = fabs(naxeX[1] - naxeX[0])/(double)(r4data.xLevNum-1);
+    qDebug() << "dX= " << dX << "\n";
+    qDebug() << "xLevels: ";
+    for(i=0; i<r4data.xLevNum; i++)
+    {
+        xLevels[i] = naxeX[0] + dX*i;
+        qDebug() << xLevels[i] << " ";
+    }
+    qDebug() << "\n";
+
+    dY = fabs(naxeY[1] - naxeY[0])/(double)(r4data.yLevNum-1);
+    qDebug() << "dY= " << dX << "\n";
+    qDebug() << "yLevels: ";
+    for(i=0; i<r4data.yLevNum; i++)
+    {
+        yLevels[i] = naxeY[0] + dY*i;
+        qDebug() << yLevels[i] << " ";
+    }
+    qDebug() << "\n";
+
+    /*mLevels[0] = 0.0;
+    for(i=1; i<mLevNum-1; i++) mLevels[i] = (mLevNumBeg+i-1)*1.0;
+    mLevels[mLevNum-1] = 20.0;/
+    qDebug() << "mLevels: ";
+    for(i=0; i<mLevNum; i++)
+    {
+        mLevels[i] = mdList.at(i).toDouble();
+        qDebug() << mLevels[i] << " ";
+    }
+    qDebug() << "\n";
+
+    qDebug() << "\nvectFdata\n";
+
+    vectGrid3D *vectFdata = new vectGrid3D();
+
+    vectFdata->setLevels(xLevels, r4data.xLevNum, yLevels, r4data.yLevNum, mLevels, mLevNum);
+
+
+
+
+
+    for(i=0; i<di; i++)
+    {
+            printf("\nsetPoint: %f\%\n", (double)i*100.0/(double)di);
+
+            mesRec = mesList.at(i);
+
+            rNum = mesRec->resList.size();
+            for(j=0; j<rNum; j++)
+            {
+
+                resRec = mesList.at(i)->resList.at(j);
+
+                dKsi = 0.0;
+                dEta = 0.0;
+
+                if(r4data.isSysCorr)vectF->int2Drad(resRec->ksi, resRec->eta, resRec->mag, &dKsi, &dEta, r4data.rMax, r4data.nmin);
+
+                vect[0] = resRec->ksi - dKsi;
+                vect[1] = resRec->eta - dEta;
+                vect[2] = resRec->mag;
+                vectFdata->addPoint(vect, resRec->ksiOC - dKsi, resRec->etaOC - dEta);
+            }
+    }
+    vectFdata->detMean();
+    if(r4data.doWeght) vectFdata->doWeght();
+    vectFdata->initVF();
+
+    vectFdata->printCoefs();
+
+    vectFdata->saveVF(report4Dir+"/res.vf");
+
+    vectFdata->saveDotList(report4Dir, "|");
+
+
+}
+*/

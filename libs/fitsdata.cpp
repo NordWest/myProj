@@ -10083,11 +10083,11 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
         data[5]=mT->mTanImg[0];// - WCSdata[0];//measured pixel position X (O)
         data[6]=mT->mTanImg[1];// - WCSdata[1];//measured pixel position Y (1)
 
-        qDebug() << "sysCorr: " << sysCorr << "\n";
+        //qDebug() << "sysCorr: " << sysCorr << "\n";
 
         if(sysCorr!=NULL)
         {
-            qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
+            //qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
             if(sysCorr->isVfCorr0)
             {
                 if(!sysCorr->vfCorr0->detCorr(&dX, &dY, &ni, data[5], data[6], data[2]))
