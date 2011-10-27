@@ -64,8 +64,11 @@ class reductionMaker;
 #define USNOB_CAT_NUM 0
 #define UCAC3_CAT_NUM 1
 #define LSPMFIND_CAT_NUM 2
+#define PPMXL_CAT_NUM 2
 
-
+#define CDSFIND_PROG_TYPE 0
+#define UCAC3FIND_PROG_TYPE 1
+#define LSPMFIND_PROG_TYPE 2
 
 void getCatName(QString *cname, int ctype);
 void marksDist(marksP *m1, marksP *m2, marksP *mRes);
@@ -78,7 +81,6 @@ int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos);
 void detOCgrid(marksGrid *mG, double *ra_oc, double *de_oc);
 //
 bool findStars(img2d *imgArr, QVector<double>& cmX, QVector<double>&cmY, QVector<double>& flux, int rho, int bsize);
-
 
 void rsSelector0(marksGrid *refMarks, QVector<int> &rsindex, rsSelector0Sett rss0sett);
 void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect wFrame, double xc, double yc);
@@ -363,7 +365,8 @@ public:
 int makeReduction(QString iniFile, QString resFolder);
 int initExpList(ExposureList *expList, HeadList headList, obsy *obsPos);
 
-void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc, double deOc, double fov, double minM, double maxM, int sNum);
+int detCtype(QString catName);
+int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double mjd, double raOc, double deOc, double fov, double minM, double maxM, int sNum);
 int identAuto(marksGrid *resGrid, marksGrid *ekvGr, marksGrid *ipixGr, double *WCSdata, int targNum = 6, int pType = 0, int maxNum = 100);
 void copyGrid(marksGrid *mgSource, marksGrid *mgRes);
 void copyImgGrid(marksGrid *mgSource, marksGrid *mgRes);
@@ -594,6 +597,7 @@ public:
         sscat_rec *sstar;       //2
         skybotRec *sbot;        //3
         usnoRec *usnobRec;   //4
+        ppmxl_rec *ppmxlRec;   //5
 
 //work
         double *data;

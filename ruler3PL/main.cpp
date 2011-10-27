@@ -164,7 +164,7 @@ QStringList outerArguments;
 
 //  catalogs    /////
         QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
-        int catNum = sett->value("catalogs/catNum", 0).toInt();
+        int catProgType = sett->value("catalogs/catProgType", 0).toInt();
         double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
         double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
@@ -381,47 +381,13 @@ QStringList outerArguments;
             refParam = new refractionParam;
             if(initPlateRefParam(refParam, fitsd, obsPos))refParam==NULL;
         }
-/*
-        if(isRedRef)
-        {
-            qDebug() << "initRefractParam\n";
-            refParam = new refractionParam;
-            refParam->utc = fitsd->MJD;
 
-            refParam->ra0 = fitsd->WCSdata[2];
-            refParam->de0 = fitsd->WCSdata[3];
-
-            if(obsPos!=NULL) refParam->Fi = obsPos->getFi();
-            else refParam->Fi = 0.0;
-            if(obsPos!=NULL) refParam->Long = obsPos->Long;
-            else refParam->Long = 0.0;
-            refParam->lam = 0.575;
-
-            QString kVal;
-            int p0, p1;
-            double temp;
-
-            if(!fitsd->headList.getKeyName("PRESSURE", &kVal))
-            {
-                qDebug() << QString("\nPRESSURE |%1|\n").arg(kVal);
-                refParam->press = kVal.toDouble();
-            }
-            else refParam->press = 760.0;
-            if(refParam->press<700.0)refParam->press = 760.0;
-            if(!fitsd->headList.getKeyName("TEMPERAT", &kVal))
-            {
-                qDebug() << QString("\nTEMPERAT |%1|\n").arg(kVal);
-                refParam->temp = kVal.toDouble();
-            }
-            else refParam->temp = 0.0;
-
-        }
-*/
 ////////
 
         if(fitsd->loadIpixMarks(fileName, mSep, mCol))
         {
             qDebug() << "Ipix marks load error\n";
+            if(isRemLog) QDir().remove(logFileName);
             return 1;
         }
 
@@ -432,7 +398,12 @@ QStringList outerArguments;
         double fov = fovp*fitsd->detFov();
 
         fitsd->catMarks->clearMarks();
-        getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
+        if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
+        {
+            qDebug() << QString("getMarksGrid error\n");
+            if(isRemLog) QDir().remove(logFileName);
+            return 2;
+        }
         fitsd->detTan();
 
 //////////

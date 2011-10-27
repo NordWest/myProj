@@ -5,7 +5,10 @@
 
 int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 {
+
     QCoreApplication a(argc, argv);
+
+    setlocale(LC_NUMERIC, "C");
 
     mpcs mpc0, mpc1, mpcres;
 
@@ -35,6 +38,8 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
     sz0 = mpc0.nstr;
     sz1 = mpc1.nstr;
+
+    qDebug() << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
 
 
     //DATEOBS dobs;
@@ -69,12 +74,15 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
             mpc1.getmpc(j);
             rec1 = mpc1.record;
 
+            //qDebug() << QString("|%1:\t%2\n").arg(rec0->eJD).arg(rec1->eJD);
+
             if((fabs(rec0->eJD-rec1->eJD)<dtime)&&(rec0->num==rec1->num)&&(rec0->numOfObservatory==rec1->numOfObservatory))
             //if(fabs(rec0->eJD-rec1->eJD)<dtime)
             {
                 recr = new mpc;
                 recr->set_mpc(rec1);
                 mpcres.addmpc(recr);
+                qDebug() << QString("dr: %1\n").arg(fabs(rec0->eJD-rec1->eJD));
                 //getDATEOBSfromMJD(&dobs, jd2mjd(recr->eJD));
             }
         }

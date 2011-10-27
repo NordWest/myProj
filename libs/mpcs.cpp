@@ -413,6 +413,8 @@ void mpcs::s2rec(char *arec)
 	slovoG(arec, slo, 20, 22);
 	mth = atoi(slo);
 
+        //printf("%d %d\n", year, mth);
+
 	switch(this->sizestr)
 	{
 	case 81:

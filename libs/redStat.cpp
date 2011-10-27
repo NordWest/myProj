@@ -1194,6 +1194,241 @@ void ucac3Rec::s2rec(QString str)
     rn = opers.at(37).toInt();
 }
 
+void ucac3Rec::s2recCDS(QString strNames, QString strVal)
+{
+    //qDebug() << QString("catStr: %1\n").arg(str);
+    QStringList oNames = strNames.split("|");
+    QStringList oVal = strVal.split("|");
+    //qDebug() << QString("opers num = %1\n").arg(opers.size());
+    int i, oSize;
+    QString cStr;
+    oSize = oVal.size();
+    for(i=0; i<oSize; i++)
+    {
+        cStr = oNames.at(i);
+
+        if(QString().compare(cStr, "RAJ2000")==0)
+        {
+            ra = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "DEJ2000")==0)
+        {
+            dec = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "f.mag")==0)
+        {
+            im1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "a.mag")==0)
+        {
+            im2 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_a.mag")==0)
+        {
+            sigmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "ot")==0)
+        {
+            objt = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "db")==0)
+        {
+            dsf = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_RAJ2000")==0)
+        {
+            sigra = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_DEJ2000")==0)
+        {
+            sigdc = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Na")==0)
+        {
+            na1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Nu")==0)
+        {
+            nu1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Cu")==0)
+        {
+            us1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Ca")==0)
+        {
+            cn1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "EpRA")==0)
+        {
+            cepra = oVal.at(i).toDouble() - 1900;
+            continue;
+        }
+
+        if(QString().compare(cStr, "EpDE")==0)
+        {
+            cepdc = oVal.at(i).toDouble() - 1900;
+            continue;
+        }
+
+        if(QString().compare(cStr, "pmRA")==0)
+        {
+            pmrac = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "pmDE")==0)
+        {
+            pmdc = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_pmRA")==0)
+        {
+            sigpmr = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_pmDE")==0)
+        {
+            sigpmd = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "2Mkey")==0)
+        {
+            id2m = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Jmag")==0)
+        {
+            jmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Hmag")==0)
+        {
+            hmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Kmag")==0)
+        {
+            kmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        //icqflg = opers.at(23).toInt();
+        //e2mpho = opers.at(24).toInt();
+
+        if(QString().compare(cStr, "Bmag")==0)
+        {
+            smB = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "R2mag")==0)
+        {
+            smR2 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "smI")==0)
+        {
+            smI = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "sc")==0)
+        {
+            clbl = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "q_Bmag")==0)
+        {
+            qfB = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "q_R2mag")==0)
+        {
+            qfR2 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "q_Imag")==0)
+        {
+            qfI = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "catflg")==0)
+        {
+            catflg = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "g")==0)
+        {
+            g1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "c")==0)
+        {
+            c1 = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "LEDA")==0)
+        {
+            leda = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "2MX")==0)
+        {
+            x2m = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "MPOS")==0)
+        {
+            rn = oVal.at(i).toDouble();
+            continue;
+        }
+
+    }
+}
+
 void ucac3Rec::copy(const ucac3Rec &source)
 {
     ra = source.ra;
@@ -1234,6 +1469,323 @@ void ucac3Rec::copy(const ucac3Rec &source)
     leda = source.leda;
     x2m = source.x2m;
     rn = source.rn;
+}
+
+/////////////////////////////////////////////////////////////////////
+
+////////////////////        ppmxl_rec   /////////////////////////////
+
+ppmxl_rec::ppmxl_rec()
+{
+    ppmxl_id = "";
+    ra = 0;
+    de = 0;
+    pmRA = 0.0;
+    pmDE = 0.0;
+    epRA = 0.0;
+    epDE = 0.0;
+    e_RA = 0.0;
+    e_DE = 0.0;
+    e_pmRA = 0.0;
+    e_pmDE = 0.0;
+    Jmag = 0.0;
+    e_Jmag = 0.0;
+    Hmag = 0.0;
+    e_Hmag = 0.0;
+    Kmag = 0.0;
+    e_Kmag = 0.0;
+    b1mag = 0.0;
+    b2mag = 0.0;
+    r1mag = 0.0;
+    r2mag = 0.0;
+    imag = 0.0;
+    Smags = "";
+    No = 0;
+    fl = 0;
+    d2m = "";
+    Nomad = "";
+}
+
+ppmxl_rec::ppmxl_rec(QString str)
+{
+    ucac3Rec();
+    s2rec(str);
+}
+
+void ppmxl_rec::rec2s(QString *str)
+{
+    QStringList sL;
+    if(str==NULL) return;
+    str->clear();
+    sL << QString("%1").arg(ppmxl_id);
+    sL << QString("%1").arg(ra, 10, 'f', 6);
+    sL << QString("%1").arg(de, 10, 'f', 6);
+    sL << QString("%1").arg(pmRA, 8, 'f', 1);
+    sL << QString("%1").arg(pmDE, 8, 'f', 1);
+    sL << QString("%1").arg(e_pmRA, 4, 'f', 1);
+    sL << QString("%1").arg(e_pmDE, 4, 'f', 1);
+    sL << QString("%1").arg(Jmag, 6, 'f', 3);
+    sL << QString("%1").arg(e_Jmag, 6, 'f', 3);
+    sL << QString("%1").arg(Hmag, 6, 'f', 3);
+    sL << QString("%1").arg(e_Hmag, 6, 'f', 3);
+    sL << QString("%1").arg(Kmag, 6, 'f', 3);
+    sL << QString("%1").arg(e_Kmag, 6, 'f', 3);
+    sL << QString("%1").arg(b1mag, 5, 'f', 2);
+    sL << QString("%1").arg(b2mag, 5, 'f', 2);
+    sL << QString("%1").arg(r1mag, 5, 'f', 2);
+    sL << QString("%1").arg(r2mag, 5, 'f', 2);
+    sL << QString("%1").arg(imag, 5, 'f', 2);
+    sL << QString("%1").arg(Smags, 5);
+    sL << QString("%1").arg(No, 2);
+    sL << QString("%1").arg(fl, 2);
+    sL << QString("%1").arg(d2m, 2);
+    sL << QString("%1").arg(Nomad, 5);
+    str->append(sL.join("|"));
+}
+
+void ppmxl_rec::s2rec(QString str)
+{
+    QStringList opers = str.split("|");
+    if(opers.size()<26) return;
+    ////qDebug() << QString("opers num = %1\n").arg(opers.size());
+    ppmxl_id = opers.at(0);
+    ra = opers.at(1).toDouble();
+    de = opers.at(2).toDouble();
+    pmRA = opers.at(3).toDouble();
+    pmDE = opers.at(4).toDouble();
+    epRA = opers.at(5).toDouble();
+    epDE = opers.at(6).toDouble();
+    e_RA = opers.at(7).toDouble();
+    e_DE = opers.at(8).toDouble();
+    e_pmRA = opers.at(9).toDouble();
+    e_pmDE = opers.at(10).toDouble();
+    Jmag = opers.at(11).toDouble();
+    e_Jmag = opers.at(12).toDouble();
+    Hmag = opers.at(13).toDouble();
+    e_Hmag = opers.at(14).toDouble();
+    Kmag = opers.at(15).toDouble();
+    e_Kmag = opers.at(16).toDouble();
+    b1mag = opers.at(17).toDouble();
+    b2mag = opers.at(18).toDouble();
+    r1mag = opers.at(19).toDouble();
+    r2mag = opers.at(20).toDouble();
+    imag = opers.at(21).toDouble();
+    Smags = opers.at(22);
+    No = opers.at(23).toInt();
+    fl = opers.at(24).toInt();
+    d2m = opers.at(25);
+    Nomad = opers.at(26);
+}
+
+void ppmxl_rec::s2recCDS(QString strNames, QString strVal)
+{
+    //qDebug() << QString("catStr: %1\n").arg(str);
+    QStringList oNames = strNames.split("|");
+    QStringList oVal = strVal.split("|");
+    //qDebug() << QString("opers num = %1\n").arg(opers.size());
+
+    int i, oSize;
+    QString cStr;
+    oSize = oVal.size();
+    for(i=0; i<oSize; i++)
+    {
+        cStr = oNames.at(i);
+
+        if(QString().compare(cStr, "PPMXL")==0)
+        {
+            ppmxl_id = oVal.at(i);
+            continue;
+        }
+
+        if(QString().compare(cStr, "RAJ2000")==0)
+        {
+            ra = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "DEJ2000")==0)
+        {
+            de = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "pmRA")==0)
+        {
+            pmRA = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "pmDE")==0)
+        {
+            pmDE = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "epRA")==0)
+        {
+            epRA = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "epDE")==0)
+        {
+            epDE = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_RAJ2000")==0)
+        {
+            e_RA = oVal.at(i).toDouble();
+            continue;
+        }
+
+
+        if(QString().compare(cStr, "e_DEJ2000")==0)
+        {
+            e_DE = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_pmRA")==0)
+        {
+            e_pmRA = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_pmDE")==0)
+        {
+            e_pmDE = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Jmag")==0)
+        {
+            Jmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_Jmag")==0)
+        {
+            e_Jmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Hmag")==0)
+        {
+            Hmag = oVal.at(i).toDouble() - 1900;
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_Hmag")==0)
+        {
+            e_Hmag = oVal.at(i).toDouble() - 1900;
+            continue;
+        }
+
+        if(QString().compare(cStr, "Kmag")==0)
+        {
+            Kmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "e_Kmag")==0)
+        {
+            e_Kmag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "b1mag")==0)
+        {
+            b1mag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "b2mag")==0)
+        {
+            b2mag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "r1mag")==0)
+        {
+            r1mag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "r2mag")==0)
+        {
+            r2mag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "imag")==0)
+        {
+            imag = oVal.at(i).toDouble();
+            continue;
+        }
+
+        if(QString().compare(cStr, "Smags")==0)
+        {
+            Smags = oVal.at(i);
+            continue;
+        }
+
+        if(QString().compare(cStr, "No")==0)
+        {
+            No = oVal.at(i).toInt();
+            continue;
+        }
+
+        if(QString().compare(cStr, "fl")==0)
+        {
+            fl = oVal.at(i).toInt();
+            continue;
+        }
+
+        if(QString().compare(cStr, "2M")==0)
+        {
+            d2m = oVal.at(i);
+            continue;
+        }
+
+        if(QString().compare(cStr, "NOMAD")==0)
+        {
+            Nomad = oVal.at(i);
+            continue;
+        }
+
+    }
+}
+
+void ppmxl_rec::copy(const ppmxl_rec &source)
+{
+    ppmxl_id = source.ppmxl_id;
+    ra = source.ra;
+    de = source.de;
+    pmRA = source.pmRA;
+    pmDE = source.pmDE;
+    epRA = source.epRA;
+    epDE = source.epDE;
+    e_RA = source.e_RA;
+    e_DE = source.e_DE;
+    e_pmRA = source.e_pmRA ;
+    e_pmDE = source.e_pmDE;
+    Jmag = source.Jmag;
+    e_Jmag = source.e_Jmag;
+    Hmag = source.Hmag;
+    e_Hmag = source.e_Hmag;
+    Kmag = source.Kmag;
+    e_Kmag = source.e_Kmag;
+    b1mag = source.b1mag;
+    b2mag = source.b2mag;
+    r1mag = source.r1mag;
+    r2mag = source.r2mag;
+    imag = source.imag;
+    Smags = source.Smags;
+    No = source.No;
+    fl = source.fl;
+    d2m = source.d2m;
+    Nomad = source.Nomad;
 }
 
 /////////////////////////////////////////////////////////////////////

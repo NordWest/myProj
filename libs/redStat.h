@@ -21,6 +21,7 @@
 #define OBJ_TYPE_SSTAR 2
 #define OBJ_TYPE_SKYBOT 3
 #define OBJ_TYPE_USNOB 4
+#define OBJ_TYPE_PPMXL 5
 
 class ocRec;
 class colRec;
@@ -389,9 +390,52 @@ class ucac3Rec
 
     void rec2s(QString *str);
     void s2rec(QString str);
+    void s2recCDS(QString strNames, QString strVal);
 
     void copy(const ucac3Rec &source);
 };
+
+class ppmxl_rec
+{
+public:
+    QString ppmxl_id;       //PPMXL	(a19)	Identifier (5)	[ucd=meta.id;meta.main]
+    double ra;              //RAJ2000	(F10.6)	Right Ascension J2000.0, epoch 2000.0	[ucd=pos.eq.ra;meta.main]
+    double de;              //DEJ2000	(F10.6)	Declination J2000.0, epoch 2000.0	[ucd=pos.eq.dec;meta.main]
+    double pmRA;            //pmRA	(F8.1)	Proper Motion in RA*cos(DEdeg)	[ucd=pos.pm;pos.eq.ra]
+    double pmDE;            //pmDE	(F8.1)	Proper Motion in Dec	[ucd=pos.pm;pos.eq.dec]
+    double epRA;            //epRA	(F7.2)	Mean Epoch (RA)	[ucd=time.epoch]
+    double epDE;            //epDE	(F7.2)	Mean Epoch (Dec)	[ucd=time.epoch]
+    double e_RA;            //e_RAJ2000	(I3)	Mean error in RA*cos(DEdeg) at mean epoch (6)	[ucd=stat.error;pos.eq.ra]
+    double e_DE;            //e_DEJ2000	(I3)	Mean error in Dec at mean epoch (6)	[ucd=stat.error;pos.eq.dec]
+    double e_pmRA;          //e_pmRA	(F4.1)	Mean error in pmRA*cos(DEdeg)	[ucd=stat.error;pos.pm;pos.eq.ra]
+    double e_pmDE;          //e_pmDE	(F4.1)	Mean error in pmDec	[ucd=stat.error;pos.pm;pos.eq.dec]
+    double Jmag;            //Jmag	(F6.3)	? J magnitude from 2MASS (Cat. II/246)	[ucd=phot.mag;em.IR.J]
+    double e_Jmag;          //e_Jmag	(F6.3)	? J total magnitude uncertainty	[ucd=stat.error;phot.mag;em.IR.J]
+    double Hmag;            //Hmag	(F6.3)	? H magnitude from 2MASS (Cat. II/246)	[ucd=phot.mag;em.IR.H]
+    double e_Hmag;          //e_Hmag	(F6.3)	? H total magnitude uncertainty	[ucd=stat.error;phot.mag;em.IR.H]
+    double Kmag;            //Kmag	(F6.3)	? Ks magnitude from 2MASS (Cat. II/246)	[ucd=phot.mag;em.IR.K]
+    double e_Kmag;          //e_Kmag	(F6.3)	? Ks total magnitude uncertainty	[ucd=stat.error;phot.mag;em.IR.K]
+    double b1mag;           //b1mag	(F5.2)	? B mag from USNO-B, first epoch \ifnum\Vphase>3{\em(in color when the magnitude has a special meaning, see flags)}\fi (1)	[ucd=phot.mag;em.opt.B]
+    double b2mag;           //b2mag	(F5.2)	? B mag from USNO-B, second epoch \ifnum\Vphase>3{\em(in color when the magnitude has a special meaning, see flags)}\fi (1)	[ucd=phot.mag;em.opt.B]
+    double r1mag;           //r1mag	(F5.2)	? R mag from USNO-B, first epoch \ifnum\Vphase>3{\em(in color when the magnitude has a special meaning, see flags)}\fi (1)	[ucd=phot.mag;em.opt.R]
+    double r2mag;           //r2mag	(F5.2)	? R mag from USNO-B, second epoch \ifnum\Vphase>3{\em(in color when the magnitude has a special meaning, see flags)}\fi (1)	[ucd=phot.mag;em.opt.R]
+    double imag;            //imag	(F5.2)	? I mag from USNO-B \ifnum\Vphase>3{\em(in color when the magnitude has a special meaning, see flags)}\fi (1)	[ucd=phot.mag;em.opt.I]
+    QString Smags;          //Smags	(a5)	[0-8-] Surveys used for USNO-B magnitudes (2)	[ucd=meta.id]
+    int No;                 //No	(I2)	? Number of observations used (4)	[ucd=meta.number]
+    int fl;                 //fl	(I2)	Flags (3)	[ucd=meta.note]
+    QString d2m;            //2M	(A2)	Display the 2MASS data (Cutri et al. 2003, Cat. II/246)	[ucd=meta.ref.url]
+    QString Nomad;          //NOMAD	(a5)	Display the NOMAD data (Zacharias et al. 2005, Cat. I/297)	[ucd=meta.ref.url]
+
+    ppmxl_rec();
+    ppmxl_rec(QString str);
+
+    void rec2s(QString *str);
+    void s2rec(QString str);
+    void s2recCDS(QString strNames, QString strVal);
+
+    void copy(const ppmxl_rec &source);
+};
+
 
 //RA[HH:MM:SS.SSSSS]|DEC[signDD:MM:SS.SSSS]|top dist[a.u.]|Vmag|phase[deg]|elongation[deg]|RAmotion*CosDEC[mas/min]|DECmotion[mas/min]|Radial_Velocity[km/s]|MPCnumber
 

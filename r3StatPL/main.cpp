@@ -1124,7 +1124,10 @@ int main(int argc, char *argv[])    //r3StatPL
         objResidualFile objAggTemp;// = new objResidualFile;
 
         eqFile eqTemp;// = new objResidualFile;
-        eqFile aggTemp;// = new objResidualFile;
+        eqFile aggEqTemp;// = new objResidualFile;
+
+        sstarFile ssTemp;
+        sstarFile aggSsTemp;
 
         objectsStat objStat;
         objStat.init(&rStat, plNameType);
@@ -1132,13 +1135,15 @@ int main(int argc, char *argv[])    //r3StatPL
         qDebug() << QString("obj num: %1\n").arg(szi);
 
         QFile mpcAggFile, mpcFile;
-        QTextStream mpcAggStm, mpcStm;
+        QFile ssAggFile, ssFile;
+        QTextStream mpcAggStm, mpcStm, ssAggStm;
         QString tfName, objName, tstr, catName;
 
         ///eqFile eqF;
         int objNum;
 
         ocRec *ocrec;
+        sstarRes *ssrec;
 
 
 
@@ -1150,6 +1155,10 @@ int main(int argc, char *argv[])    //r3StatPL
             mpcAggFile.setFileName(reportObjDir+"/mpc.txt");
             mpcAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             mpcAggStm.setDevice(&mpcAggFile);
+
+            ssAggFile.setFileName(reportObjDir+"/sstar.txt");
+            ssAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            ssAggStm.setDevice(&ssAggFile);
         }
 
             for(i=0; i<szi; i++)
@@ -1160,7 +1169,6 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << QString("objName: %1\n").arg(objStat.objList.at(i)->objName);
                 if(objSigma>0.0) objStat.objList.at(i)->do3Sigma(&rStat, objSigma);
                 objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
-
 
                 qDebug() << QString("eq size: %1\n").arg(objTemp.ocList.size());
                 objName = objStat.objList.at(i)->objName.simplified();
@@ -1185,7 +1193,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         if(saveEq)
                         {
                             eqTemp.saveAs(tfName+"_eq.txt");
-                            if(saveAgg) aggTemp.ocList << eqTemp.ocList;
+                            if(saveAgg) aggEqTemp.ocList << eqTemp.ocList;
                         }
                         if(saveMpc)
                         {
@@ -1216,6 +1224,25 @@ int main(int argc, char *argv[])    //r3StatPL
                             mpcFile.close();
                         }
                     }
+                    if(QString().compare(catName, "LSPM")==0)
+                    {
+                        ssTemp.clear();
+                        for(j=0; j<szj; j++)
+                        {
+                            ssrec = new sstarRes;
+                            objTemp.ocList.at(j)->toSstarRes(ssrec);
+                            ssTemp.ocList << ssrec;
+                        }
+                        objAggTemp.ocList << objTemp.ocList;
+
+                        if(cCols)ssTemp.countCols("6,7,8");
+                        if(saveEq)
+                        {
+                            ssTemp.saveAs(tfName+"_sstar.txt");
+                            if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
+                        }
+
+                    }
                 }
 
             }
@@ -1227,9 +1254,12 @@ int main(int argc, char *argv[])    //r3StatPL
             if(saveEq)
             {
                 qDebug() << "saveEq\n";
-                if(cCols)aggTemp.countCols("4,5,6");
+                if(cCols)aggEqTemp.countCols("4,5,6");
 
-                aggTemp.saveAs(reportObjDir+"/eq.txt");
+                aggEqTemp.saveAs(reportObjDir+"/eq.txt");
+
+                aggSsTemp.countCols("6,7,8");
+                aggSsTemp.saveAs(reportObjDir+"/sstar.txt");
             }
             /*
             if(objAggSigma>0.0)
@@ -1723,6 +1753,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << QString("s= %1\tFi= %2\n").arg(s).arg(Fi);
 
                 P1 = sin(dec0)*sin(Fi) + cos(dec0)*cos(Fi)*cos(t);
+
                 P2 = cos(dec0)*sin(t);
                 P3 = -sin(dec0)*cos(Fi) + cos(dec0)*sin(Fi)*cos(t);
                 Az = atan2(P2, P3);

@@ -47,7 +47,7 @@ cdsfind::cdsfind(QCoreApplication *app)
     //begin forming request
     QString vGeom = app->arguments()[4].section("=",0,0);
     QString vSize=app->arguments()[4].section("=",1,1);
-    qDebug() << QString("vGeom= %1\tvSize= %2\n").arg(vGeom).arg(vSize);
+    if (eventMessages) stream << QString("vGeom= %1\tvSize= %2\n").arg(vGeom).arg(vSize);
 
     //requestStr = "/cgi-bin/asu-tsv?";
     //requestStr = "/viz-bin/asu-tsv?";

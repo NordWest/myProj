@@ -3430,7 +3430,16 @@ void fitsdata::getMarksGrid(catFinder *sCat, double fovp, double minM, double ma
 
 }
 */
-void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc, double deOc, double fov, double minM, double maxM, int sNum)
+
+int detCtype(QString catName)
+{
+    if(QString().compare(catName, "usno-b1.0", Qt::CaseInsensitive)==0) return USNOB_CAT_NUM;
+    else if(QString().compare(catName, "ucac3", Qt::CaseInsensitive)==0) return UCAC3_CAT_NUM;
+    else if(QString().compare(catName, "ppmxl", Qt::CaseInsensitive)==0) return PPMXL_CAT_NUM;
+    return -1;
+}
+
+int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double mjd, double raOc, double deOc, double fov, double minM, double maxM, int sNum)
 {
     /*
       fov - field of view max dim in arcmin
@@ -3440,13 +3449,19 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
         double ra, de, pmra, pmde, magn;
 
 
-        QString catLine;
+
+        QString catLine, headLine;
         marksP *mkTemp;
         int hlCount = 0;
 
 
         qDebug() << QString("catName: %1\n").arg(sCat->catName);
-
+        int catType = detCtype(sCat->catName);
+        if(catType==-1)
+        {
+            qDebug() << QString("Error: Unsupported cat name\n");
+            return 1;
+        }
         qDebug() << "\nra: " << mas_to_hms(grad_to_mas(raOc), ":", 3) << "\nde: " << mas_to_damas(grad_to_mas(deOc),":",2) << "\n";
 
                 marksGrid *mGr;
@@ -3454,22 +3469,22 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
 
                 qDebug() << "\nMJD\t" << mjd << "\n";
 
-                    mGr->ctype = sCat->catType;
+                    mGr->ctype = catType;
                     QProcess outerProcess;
                     QStringList outerArguments;
                     outerArguments.clear();
 
-                    switch(mGr->ctype)
+                    switch(catProgType)
                     {
-                    case USNOB_CAT_NUM://usno-b1
+                    case CDSFIND_PROG_TYPE://usno-b1
                             outerProcess.setWorkingDirectory(sCat->exePath);
                             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
                             outerProcess.setReadChannel(QProcess::StandardOutput);
-                            outerArguments << "USNO-B1.0" << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("b=%1").arg(fov);
+                            outerArguments << sCat->catName << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("b=%1").arg(fov);//"USNO-B1.0"
                             qDebug() << sCat->exeName << outerArguments.join(" ");
                             outerProcess.start(sCat->exeName, outerArguments);
                             break;
-                    case UCAC3_CAT_NUM://ucac3
+                    case UCAC3FIND_PROG_TYPE://ucac3
                             outerProcess.setWorkingDirectory(sCat->exePath);
                             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
                             outerProcess.setReadChannel(QProcess::StandardOutput);
@@ -3486,6 +3501,8 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
                     while (!catStream.atEnd())
                     {
                             catLine = catStream.readLine();
+
+
 
                             switch(mGr->ctype)
                             {
@@ -3512,12 +3529,18 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
                                             pmra = mkTemp->usnobRec->pmRA;
                                             pmde = mkTemp->usnobRec->pmDE;
 
-                                            if(sCat->catMagName=="B1mag") magn = mkTemp->usnobRec->B1mag;
-                                            else if(sCat->catMagName=="B2mag") magn = mkTemp->usnobRec->B2mag;
-                                            else if(sCat->catMagName=="R1mag") magn = mkTemp->usnobRec->R1mag;
-                                            else if(sCat->catMagName=="R2mag") magn = mkTemp->usnobRec->R2mag;
-                                            else if(sCat->catMagName=="Imag") magn = mkTemp->usnobRec->Imag;
-                                            else magn = mkTemp->usnobRec->Imag;
+                                            mkTemp->catMagName = sCat->catMagName;
+                                            if(mkTemp->catMagName=="B1mag") magn = mkTemp->usnobRec->B1mag;
+                                            else if(mkTemp->catMagName=="B2mag") magn = mkTemp->usnobRec->B2mag;
+                                            else if(mkTemp->catMagName=="R1mag") magn = mkTemp->usnobRec->R1mag;
+                                            else if(mkTemp->catMagName=="R2mag") magn = mkTemp->usnobRec->R2mag;
+                                            else if(mkTemp->catMagName=="Imag") magn = mkTemp->usnobRec->Imag;
+                                            else
+                                            {
+                                                qDebug() << QString("Wrong catMagName, it changed to Imag\n");
+                                                magn = mkTemp->usnobRec->Imag;
+                                                mkTemp->catMagName = QString("Imag");
+                                            }
 
                                             //qDebug() << QString("magn: %1\n").arg(magn);
 
@@ -3538,6 +3561,12 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
                                         }
                                     case UCAC3_CAT_NUM://ucac3
                                         {
+                                            if(catLine.indexOf('#')==0) continue;
+                                            else if(catLine.size()==0) continue;
+
+                                            switch(catProgType)
+                                            {
+                                            case 1:
 
                                             if(catLine.size()<26)
                                             {
@@ -3545,22 +3574,46 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
                                                 continue;
                                             }
 
+
                                             mkTemp = new marksP(OBJ_TYPE_UCAC3);
                                             mkTemp->u3Rec->s2rec(catLine);
+
+                                                break;
+                                            case 0:
+
+                                                if(hlCount<3)
+                                                {
+                                                    if(hlCount<1)headLine = catLine;
+                                                    hlCount++;
+                                                    continue;
+                                                }
+
+
+                                                mkTemp = new marksP(OBJ_TYPE_UCAC3);
+                                                mkTemp->u3Rec->s2recCDS(headLine, catLine);
+
+                                                break;
+                                            }
 
                                             ra = mkTemp->u3Rec->ra;
                                             de = mkTemp->u3Rec->dec;
                                             pmra = mkTemp->u3Rec->pmrac;
                                             pmde = mkTemp->u3Rec->pmdc;
-                                            if(sCat->catMagName.toLower()=="im1") magn = mkTemp->u3Rec->im1;
-                                            else if(sCat->catMagName.toLower()=="im2") magn = mkTemp->u3Rec->im2;
-                                            else if(sCat->catMagName.toLower()=="jmag") magn = mkTemp->u3Rec->jmag;
-                                            else if(sCat->catMagName.toLower()=="kmag") magn = mkTemp->u3Rec->kmag;
-                                            else if(sCat->catMagName.toLower()=="hmag") magn = mkTemp->u3Rec->hmag;
-                                            else if(sCat->catMagName.toLower()=="smb") magn = mkTemp->u3Rec->smB;
-                                            else if(sCat->catMagName.toLower()=="smr2") magn = mkTemp->u3Rec->smR2;
-                                            else if(sCat->catMagName.toLower()=="smi") magn = mkTemp->u3Rec->smI;
-                                            else magn = mkTemp->u3Rec->im1;
+                                            mkTemp->catMagName = sCat->catMagName;
+                                            if(mkTemp->catMagName.toLower()=="im1") magn = mkTemp->u3Rec->im1;
+                                            else if(mkTemp->catMagName.toLower()=="im2") magn = mkTemp->u3Rec->im2;
+                                            else if(mkTemp->catMagName.toLower()=="jmag") magn = mkTemp->u3Rec->jmag;
+                                            else if(mkTemp->catMagName.toLower()=="kmag") magn = mkTemp->u3Rec->kmag;
+                                            else if(mkTemp->catMagName.toLower()=="hmag") magn = mkTemp->u3Rec->hmag;
+                                            else if(mkTemp->catMagName.toLower()=="smb") magn = mkTemp->u3Rec->smB;
+                                            else if(mkTemp->catMagName.toLower()=="smr2") magn = mkTemp->u3Rec->smR2;
+                                            else if(mkTemp->catMagName.toLower()=="smi") magn = mkTemp->u3Rec->smI;
+                                            else
+                                            {
+                                                qDebug() << QString("Wrong catMagName, it changed to im1\n");
+                                                magn = mkTemp->u3Rec->im1;
+                                                mkTemp->catMagName = QString("im1");
+                                            }
 
                                             //mkTemp->u3Rec->
 
@@ -3571,13 +3624,70 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
 
                                             mkTemp->mEkv[2] = magn;
 
-                                            mkTemp->catMagName = QString("im1");
-                                            mkTemp->catName = QString("ucac3");
+                                            //mkTemp->catMagName = QString("im1");
+                                            mkTemp->catName = sCat->catName;
 
                                             mGr->addMark(mkTemp);
 
                                             break;
                                         }
+                            case PPMXL_CAT_NUM://ppmxl
+                                {
+                                    if(catLine.indexOf('#')==0) continue;
+                                    else if(catLine.size()==0) continue;
+
+
+                                    if(hlCount<3)
+                                    {
+                                        if(hlCount<1)headLine = catLine;
+                                        hlCount++;
+                                        continue;
+                                    }
+
+                                    mkTemp = new marksP(OBJ_TYPE_PPMXL);
+                                    //mkTemp->u3Rec = new ucac3Rec;
+
+
+
+                                    mkTemp->ppmxlRec->s2recCDS(headLine, catLine);
+
+                                    ra = mkTemp->ppmxlRec->ra;
+                                    de = mkTemp->ppmxlRec->de;
+                                    //qDebug() << QString("ra= %1\tdec= %2\tmagn= %3\tminM= %4\tmaxM= %5\n").arg(ra).arg(de).arg(magn).arg(minM).arg(maxM);
+                                    pmra = mkTemp->ppmxlRec->pmRA;
+                                    pmde = mkTemp->ppmxlRec->pmDE;
+
+                                    mkTemp->catMagName = sCat->catMagName;
+                                    if(mkTemp->catMagName=="Jmag") magn = mkTemp->ppmxlRec->Jmag;
+                                    else if(mkTemp->catMagName=="Hmag") magn = mkTemp->ppmxlRec->Hmag;
+                                    else if(mkTemp->catMagName=="Kmag") magn = mkTemp->ppmxlRec->Kmag;
+                                    else if(mkTemp->catMagName=="b1mag") magn = mkTemp->ppmxlRec->b1mag;
+                                    else if(mkTemp->catMagName=="b2mag") magn = mkTemp->ppmxlRec->b2mag;
+                                    else if(mkTemp->catMagName=="imag") magn = mkTemp->ppmxlRec->imag;
+                                    else
+                                    {
+                                        qDebug() << QString("Wrong catMagName, it changed to imag\n");
+                                        magn = mkTemp->ppmxlRec->imag;
+                                        mkTemp->catMagName = QString("imag");
+                                    }
+
+                                    //qDebug() << QString("magn: %1\n").arg(magn);
+
+                                    if((magn<minM)||(magn>maxM)) break;
+                                    //qDebug() << QString("deb2\n");
+                                    //mkTemp = new marksP;
+                                    //qDebug() << QString("getYearFromMJD(MJD)-2000: %1\n").arg(getYearFromMJD(MJD)-2000);
+                                    mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000)/cos(grad_to_rad(de)));//taking proper motion into account
+                                    mkTemp->mEkv[1] = de + mas_to_grad(pmde*(getYearFromMJD(mjd)-2000));//taking proper motion into account
+
+                                    mkTemp->mEkv[2] = magn;
+                                    mkTemp->catMagName = sCat->catMagName;
+                                    mkTemp->catName = sCat->catName;
+
+                                    mGr->addMark(mkTemp);
+
+                                    break;
+                                }
                             }
                     }
 
@@ -3589,6 +3699,7 @@ void getMarksGrid(marksGrid *catMarks, catFinder *sCat, double mjd, double raOc,
             catMarks->copy(mGr);
             qDebug() << QString("catMarks.size= %1\n").arg(catMarks->marks.size());
 
+            return 0;
             //delete mGr;
 }
 
@@ -7489,6 +7600,7 @@ void fitsdata::setSpecTime(int isConvertToUTC, int isSpec, double Long)
     qDebug() << QString("utc= %1\n").arg(utc);
     qDebug() << QString("uTimeJD= %1\n").arg(uTimeJD);
     if(isSpec)
+
     {
         d_day=MJD*2.0;
         d_day-=chet(d_day);
@@ -9004,6 +9116,7 @@ marksP::marksP()
         sstar = NULL;
         ssResRec = NULL;
         sbot = NULL;
+        ppmxlRec = NULL;
         /*
         mPpix = new imgAperture();
         objdata = new double[18];
@@ -9032,6 +9145,7 @@ marksP::marksP(int oType)
     objType = oType;
     sbot = NULL;
     ssResRec = NULL;
+    ppmxlRec = NULL;
     switch(objType)
     {
     case OBJ_TYPE_UCAC3:
@@ -9048,6 +9162,9 @@ marksP::marksP(int oType)
         break;
     case OBJ_TYPE_USNOB:
         usnobRec = new usnoRec;
+        break;
+    case OBJ_TYPE_PPMXL:
+        ppmxlRec = new ppmxl_rec;
         break;
     }
 }
@@ -9200,6 +9317,12 @@ void marksP::copy(const marksP *source)
         if(usnobRec==NULL) usnobRec = new usnoRec;
         usnobRec->copy(*source->usnobRec);
     }
+
+    if(source->ppmxlRec!=NULL)
+    {
+        if(ppmxlRec==NULL) ppmxlRec = new ppmxl_rec;
+        ppmxlRec->copy(*source->ppmxlRec);
+    }
 }
 /*
 void marksP::copyImg(const marksP &source)
@@ -9257,6 +9380,7 @@ marksP::~marksP()
         //qDebug() << QString("mpcObj ") << mpcObj << "\n";
         //if(mpcObj!=NULL) delete mpcObj;
         if(usnobRec!=NULL) delete usnobRec;
+        if(ppmxlRec!=NULL) delete ppmxlRec;
 
         objType = -1;
 }
@@ -9987,18 +10111,18 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCatList->append(starCat);
     */
     starCat = new catFinder;
-    starCat->exeName = sett->value("usnob/exeName").toString();
-    starCat->exePath = sett->value("usnob/exePath").toString();
-    starCat->catType = sett->value("usnob/catType").toInt();
-    starCat->catName = sett->value("usnob/catName").toString();
-    starCat->catMagName = sett->value("usnob/catMagName").toString();
-    starCat->catPath = sett->value("usnob/catPath").toString();
+    starCat->exeName = sett->value("cdsfind/exeName").toString();
+    starCat->exePath = sett->value("cdsfind/exePath").toString();
+    //starCat->catType = sett->value("cdsfind/catType").toInt();
+    starCat->catName = sett->value("cdsfind/catName").toString();
+    starCat->catMagName = sett->value("cdsfind/catMagName").toString();
+    starCat->catPath = sett->value("cdsfind/catPath").toString();
     starCatList->append(starCat);
     //
     starCat = new catFinder;
     starCat->exeName = sett->value("ucac3/exeName").toString();
     starCat->exePath = sett->value("ucac3/exePath").toString();
-    starCat->catType = sett->value("ucac3/catType").toInt();
+    //starCat->catType = sett->value("ucac3/catType").toInt();
     starCat->catName = sett->value("ucac3/catName").toString();
     starCat->catMagName = sett->value("ucac3/catMagName").toString();
     starCat->catPath = sett->value("ucac3/catPath").toString();
@@ -10016,7 +10140,7 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCat = new catFinder;
     starCat->exeName = sett->value("lspmFind/exeName").toString();
     starCat->exePath = sett->value("lspmFind/exePath").toString();
-    starCat->catType = sett->value("lspmFind/catType").toInt();
+    //starCat->catType = sett->value("lspmFind/catType").toInt();
     starCat->catName = sett->value("lspmFind/catName").toString();
     starCat->catMagName = sett->value("lspmFind/catMagName").toString();
     starCat->catPath = sett->value("lspmFind/catPath").toString();

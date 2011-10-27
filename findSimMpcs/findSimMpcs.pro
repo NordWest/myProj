@@ -29,5 +29,5 @@ HEADERS += ../libs/mb.h \
     ../libs/DynArr.h \
     ../libs/astro.h
 
-win32:LIBS += ./../libs/win/libmb.a
+win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
