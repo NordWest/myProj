@@ -28,6 +28,9 @@ cdsfind/cdsfind.pro -text
 cdsfind/main.cpp -text
 convert405/convert405.pro -text
 convert405/main.cpp -text
+dMuBin/dMuBin.pro -text
+dMuBin/dMuBin.pro.user -text
+dMuBin/main.cpp -text
 damDistCorr/damDistCorr.pro -text
 damDistCorr/main.cpp -text
 damPack/damPack.pro -text
