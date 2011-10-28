@@ -64,32 +64,32 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         //QTextStream stream(stdout);
         setlocale(LC_NUMERIC, "C");
         QString codecName;
-#if defined(Q_OS_LINUX)
-    codecName = "UTF-8";
-#elif defined(Q_OS_WIN)
-    codecName = "CP1251";
-#endif
 
-QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
-Q_ASSERT( codec1 );
-QTextCodec::setCodecForCStrings(codec1);
+        #if defined(Q_OS_LINUX)
+            codecName = "UTF-8";
+        #elif defined(Q_OS_WIN)
+            codecName = "CP1251";
+        #endif
 
-int i, sz, resRed, oNum;
-QList <catFinder*> starCatList;
-QString obsCode;
-QString uTime;
-QString dateStr, timeStr, descS, oName;
-QProcess outerProcess;
-QStringList outerArguments;
+        QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+        Q_ASSERT( codec1 );
+        QTextCodec::setCodecForCStrings(codec1);
+
+        int i, sz, resRed, oNum;
+        QList <catFinder*> starCatList;
+        QString obsCode;
+        QString uTime;
+        QString dateStr, timeStr, descS, oName;
+        QProcess outerProcess;
+        QStringList outerArguments;
 
 
 //command line  ///////////////////////////////////////
     QString optName, optVal, optStr, pnStr, headerFileName;
     QString resFolder;
     sysCorrParam *sysCorr = NULL;
-    QString cfgFileName = "ruler3PL.ini";
-    int doWhat = 0;                         //0-http; 1-file
-    int detPlName = 1;
+    QString cfgFileName = "ruler3.ini";
+
     int resdirDef=0;
     QString scFile;
     int isSc = 0;
@@ -102,17 +102,6 @@ QStringList outerArguments;
         if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
         {
             cfgFileName = optVal;
-        }
-        else if(QString::compare(optName, "plName", Qt::CaseSensitive)==0)
-        {
-            detPlName = 0;
-            pnStr = optVal;
-        }
-        else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
-        {
-            detPlName = 0;
-            doWhat = 1;
-            headerFileName = optVal;
         }
         else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
         {
@@ -161,6 +150,7 @@ QStringList outerArguments;
         int mpephType = sett->value("objects/mpephType", 0).toInt();
         double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
         double magObj1 = sett->value("objects/mag1", 15.0).toDouble();
+        QString headObjName = sett->value("objects/headObjName", "OBJECT").toString();
 
 //  catalogs    /////
         QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
@@ -429,7 +419,7 @@ QStringList outerArguments;
         }
         else if(tryMpeph)
         {
-            if(!fitsd->headList.getKeyName("OBJECT", &descS))
+            if(!fitsd->headList.getKeyName(headObjName, &descS))
             {
                 desc2NumName(descS, &oNum, &oName);
                 if(mpephType) getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);

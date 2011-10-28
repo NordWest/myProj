@@ -2122,8 +2122,9 @@ double wcsV;
     qDebug() << "\ndetNaxes\n";*/
 
     workFrame.setCoords(0, 0, imgArr->naxes[0], imgArr->naxes[1]);
-    WCSdata[0] = workFrame.center().x();
-    WCSdata[1] = workFrame.center().y();
+    setRpix();
+    /*WCSdata[0] = workFrame.center().x();
+    WCSdata[1] = workFrame.center().y();*/
 
     //detNaxes();
 
@@ -7411,7 +7412,7 @@ void fitsdata::findCloserObjects(double dMax)
         //qDebug() << QString("mgIP->marks.removeAt(i)\n");
 
     }
-    if(!is_empty) ipixMarks->clearMarks();
+    //if(!is_empty) ipixMarks->clearMarks();
 
     qDebug() << QString("\nfindCloserObjects result: %1 objects remain\n").arg(objMarks->marks.size());
 }
@@ -9679,6 +9680,8 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
 
 
             };
+
+            qDebug() << "\n\nEnd of ruler3\n\n";
 
     return 0;
 }

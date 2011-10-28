@@ -323,8 +323,8 @@ void Dialog::MakeFits()
 		return;
 	}
 
-	int Width; // РІС‹С…РѕРґРЅРѕР№ РїР°СЂР°РјРµС‚СЂ вЂ“ С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
-    int Height; // РІС‹С…РѕРґРЅРѕР№ РїР°СЂР°РјРµС‚СЂ вЂ“ РІС‹СЃРѕС‚Р° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+	int Width; // выходной параметр – ширина изображения
+    int Height; // выходной параметр – высота изображения
     char ch1,ch2;
     fread(&ch1, 1, 1, dt);//dt.Read(&ch1,1);
     fread(&ch2, 1, 1, dt);//dt.Read(&ch2,1);
@@ -333,7 +333,7 @@ void Dialog::MakeFits()
 		QMessageBox msgBox(QMessageBox::Warning, tr("Wrong .tiff file"), "Mentioned .tiff file is unsuitable", 0, this);
 		msgBox.addButton(QMessageBox::Ok);
 		msgBox.exec();
-        return;//СЌС‚Рѕ РЅРµ tif
+        return;//это не tif
     };
     unsigned short vg;
     fread(&vg, 2, 1, dt);//dt.Read(&vg,2);
@@ -342,12 +342,12 @@ void Dialog::MakeFits()
 		QMessageBox msgBox(QMessageBox::Warning, tr("Wrong .tiff file"), "Mentioned .tiff file has wrong type", 0, this);
 		msgBox.addButton(QMessageBox::Ok);
 		msgBox.exec();
-        return;// РЅРµ РёР·РІРµСЃС‚РЅР°СЏ СЂР°Р·РЅРѕРІРёРґРЅРѕСЃС‚СЊ tif-Р°
+        return;// не известная разновидность tif-а
     };
     
 	int der;
     fread(&der, 4, 1, dt);//dt.Read(&der,4);
-    fseek(dt, der, SEEK_SET);//dt.Seek(der,CFile::begin);// СЃРґРІРёРіР°РµРјСЃСЏ РІ С„Р°Р№Р»Рµ Рє РЅР°С‡Р°Р»Сѓ С€Р°РїРєРё
+    fseek(dt, der, SEEK_SET);//dt.Seek(der,CFile::begin);// сдвигаемся в файле к началу шапки
     unsigned short vg2;
     fread(&vg2, 2, 1, dt);//dt.Read(&vg2,2);
 	out_stream << "vg2 " << vg2 << endl;
@@ -381,23 +381,23 @@ void Dialog::MakeFits()
 			QMessageBox msgBox(QMessageBox::Warning, tr("Wrong .tiff file"), "Mentioned .tiff file is not 16bit", 0, this);
 			msgBox.addButton(QMessageBox::Ok);
 			msgBox.exec();
-			return;// tif РЅРµ 16-С‚Рё Р±РёС‚РЅС‹Р№
+			return;// tif не 16-ти битный
         }
 	}
 	out_stream << "Width " << Width << "\tHeight" << Height << endl;
 	fseek(dt, 0, SEEK_END);
-    unsigned int df2 = (unsigned int) ftell(dt);//dt.GetLength();// РїРѕР»СѓС‡Р°РµРј РґР»РёРЅСѓ С„Р°Р№Р»Р°
+    unsigned int df2 = (unsigned int) ftell(dt);//dt.GetLength();// получаем длину файла
     unsigned int df1=((unsigned int)(Width))*((unsigned int)(Height));
 	out_stream << "df1 " << df1 << endl;
 	out_stream << "df2 " << df2 << endl;
     df2=df2-df1*2;
 	out_stream << "df2 " << df2 << endl;
-    fseek(dt, df2, SEEK_SET);//dt.Seek(df2,CFile::begin);//СЃРґРІРёРіР°РµРј Рє РЅР°С‡Р°Р»Сѓ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+    fseek(dt, df2, SEEK_SET);//dt.Seek(df2,CFile::begin);//сдвигаем к началу изображения
 	unsigned short *img, *uimg;
-    img = new unsigned short [Width];//РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
-	uimg = new unsigned short [Width];//РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ РѕР±СЂР°С‰Р°РµРјРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ
+    img = new unsigned short [Width];//выделяем память под изображение
+	uimg = new unsigned short [Width];//выделяем память под обращаемое изображение
 	
-	unsigned short minI, maxI, tim;		//РјРёРЅРёРјР°Р»СЊРЅС‹Р№ Рё РјР°РєСЃРёРјР°Р»СЊРЅС‹Р№ РѕС‚СЃС‡РµС‚ РґР»СЏ РёРЅРІРµСЂС‚РёСЂРѕРІР°РЅРёСЏ
+	unsigned short minI, maxI, tim;		//минимальный и максимальный отсчет для инвертирования
 	
 	int is_inv = IsInv->checkState()==Qt::Checked;
 	
@@ -530,7 +530,7 @@ void Dialog::MakeFits()
 	for(i=0; i<naxes[1];i++)
     {
 //		if(flV) fseek(dt, Width*(i+1), SEEK_END);
-		fread(img, sizeof(unsigned short), naxes[0], dt);	//С‡РёС‚Р°РµРј РїРѕСЃС‚СЂРѕС‡РЅРѕ
+		fread(img, sizeof(unsigned short), naxes[0], dt);	//читаем построчно
 		if(flH)
 		{
 //			out_stream << "Inverting" << endl;

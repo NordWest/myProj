@@ -493,6 +493,7 @@ public:
         void cleanObjects(int aper);
         void cleanEkvMarks(int aper);
 
+//find stars
         int findHstars(int apeDiam, int targNum);
 
         int updateHist();

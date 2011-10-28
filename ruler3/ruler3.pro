@@ -1,7 +1,7 @@
 TEMPLATE = app
 INCLUDEPATH += ./../libs
 SOURCES += main.cpp \
-    ../libs/astro.cpp \
+#    ../libs/astro.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscat.cpp \
     ../libs/redStat.cpp \
@@ -12,16 +12,24 @@ SOURCES += main.cpp \
     ../libs/ccdmeasurements.cpp \
     ../libs/identify.cpp \
     ../libs/cmnk.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
     ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp
-win32:LIBS += ./../libs/cfitsio.lib  \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/unix/libcfitsio.a
-win32:LIBS += ./../libs/win32/libmb.a
-unix:LIBS += ./../libs/unix/libmb.a
+    ../libs/fitstools.cpp\
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
+    ../libs/sysCorr.cpp
+win32:LIBS += ./../libs/win32/cfitsio.lib \
+            ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libcfitsio.a \
+            ./../libs/unix/libmb.a \
+            ./../libs/unix/libastro.a
 
 win32:TARGET = ./../../../lab/ruler3/ruler3
 unix:TARGET = ./../../lab/ruler3/ruler3
@@ -43,8 +51,15 @@ HEADERS += ../libs/mb.hpp \
     ../libs/mb.h \
     ../libs/identify.h \
     ../libs/cmnk.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
+    ../libs/fitstools.h\
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h
