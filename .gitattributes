@@ -306,6 +306,9 @@ mpeph/mpeph.h -text
 mpeph/mpeph.pro -text
 objSearchPL/main.cpp -text
 objSearchPL/objSearchPL.pro -text
+oclTest/main.cpp -text
+oclTest/oclTest.pro -text
+oclTest/oclTest.pro.user -text
 phaseRed/main.cpp -text
 phaseRed/phaseRed.pro -text
 pics2fits/main.cpp -text
