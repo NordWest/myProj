@@ -37,8 +37,7 @@ unix:TARGET = ./../../lab/ruler3/ruler3
 CONFIG += console \
     exceptions \
     warn_off
-HEADERS += ../libs/mb.hpp \
-    ../libs/astro.h \
+HEADERS += ../libs/astro.h \
     ../libs/comfunc.h \
     ../libs/sscat.h \
     ../libs/redStat.h \

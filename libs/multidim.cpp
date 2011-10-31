@@ -2897,8 +2897,9 @@ int img2d::updateHist()
     }
     histD->meanv = histD->meanv/histD->nelements;
     histD->hsize = (long)(histD->maxv-histD->minv+1);//calculation of size of the image histogramm array
-    if(histD->hD!=NULL) delete [] histD->hD;
-    histD->hD = new long[histD->hsize];//allocate buffer for histogramm data
+    if(histD->hD!=NULL) free(histD->hD);
+    //histD->hD = new long[histD->hsize];//allocate buffer for histogramm data
+    histD->hD = (long*)malloc(sizeof(long)*histD->hsize);
     for(int k=0;k<histD->hsize;k++) histD->hD[k]=0;//set zero for each pixel value in histogramm
     for(long i=0;i<histD->nelements;i++) histD->hD[(long)(getPos(i)-histD->minv)]++;//construction of the histogramm
     long fpn=0;//variable to store value of the most frequent pixel value
@@ -2924,6 +2925,7 @@ int img2d::updateHist()
     if(histD->minp<histD->minv)histD->minp=histD->minv;
     histD->st = 2*histD->hw/25;
     //END histogramm
+    qDebug() << "\nEND histogramm\n";
     return 0;
 }
 
@@ -3032,7 +3034,7 @@ histogramData::histogramData()
 
 histogramData::~histogramData()
 {
-    if(hD!=NULL) delete [] hD;
+    //if(hD!=NULL) delete [] hD;
     hD = NULL;
     hsize = 0;
     maxv = minv = meanv = fpix = maxp = minp = st = hw = 0.0;

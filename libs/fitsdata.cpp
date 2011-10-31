@@ -2128,6 +2128,7 @@ double wcsV;
 
     //detNaxes();
 
+    qDebug() << "\nEND Open fits\n";
     return 0;
 }
 
@@ -2324,7 +2325,7 @@ void fitsdata::detTan()
 
 void fitsdata::detPpix(marksGrid *mGr, int apeSize)
 {
-    qDebug() << "fitsdata::detPpix\n";
+    //qDebug() << "fitsdata::detPpix\n";
     if(!is_empty)
     {
 	int i, num;
@@ -2335,8 +2336,8 @@ void fitsdata::detPpix(marksGrid *mGr, int apeSize)
         //imgAperture* poinT;
 	num = mGr->marks.size();
         //segment *sg0 = new segment(apeSize, apeSize);
-        qDebug() << QString("marks size: %1\n").arg(num);
-        qDebug() << QString("apeSize: %1\n").arg(apeSize);
+        //qDebug() << QString("marks size: %1\n").arg(num);
+        //qDebug() << QString("apeSize: %1\n").arg(apeSize);
 	
 	for(i=num-1; i>=0; i--)
 	{
@@ -2362,7 +2363,7 @@ void fitsdata::detPpix(marksGrid *mGr, int apeSize)
         }*/
         //delete sg0;
     }
-    qDebug() << "end fitsdata::detPpix\n";
+    //qDebug() << "end fitsdata::detPpix\n";
 }
 
 int detMarkPpix(img2d *imgArr, marksP *mP, int apeSize)
@@ -4418,7 +4419,7 @@ int identAuto(marksGrid *resGrid, marksGrid *ekvGr, marksGrid *ipixGr, double *W
         int isMatched;
         double xscale, yscale;
 
-        qDebug() << QString("ekvGr size: %1\tekvGr size: %2\n").arg(ekvGr->marks.size()).arg(ipixGr->marks.size());
+        qDebug() << QString("ekvGr size: %1\tipixGr size: %2\n").arg(ekvGr->marks.size()).arg(ipixGr->marks.size());
 
         if(ekvGr->marks.size()<targNum)
         {
@@ -8136,11 +8137,22 @@ int fitsdata::findHstars(int apeDiam, int targNum)
     int i, sz;
     //qDebug() << QString("naxes: %1\t%2\n").arg(naxes[0]).arg(naxes[1]);
 
+    cmX.clear();
+    cmY.clear();
+    flux.clear();
     findStars(imgArr, cmX, cmY, flux, apeDiam, 50);
 
     sz = cmX.size();
-    if(sz<targNum) findStars(imgArr, cmX, cmY, flux, apeDiam, 100);
-    //if(sz<targNum) return 1;
+    qDebug() << QString("first run res: %1\n").arg(sz);
+    if(sz<targNum)
+    {
+        cmX.clear();
+        cmY.clear();
+        flux.clear();
+        findStars(imgArr, cmX, cmY, flux, apeDiam, 100);
+    }
+    qDebug() << QString("second run res: %1\n").arg(sz);
+    if(sz<targNum) return 1;
 
     for(i=0; i<sz; i++)
     {
@@ -8995,11 +9007,11 @@ bool findStars(img2d *imgArr, QVector<double>& cmX, QVector<double>&cmY, QVector
         //getAperture(fd,fda, (int)cmX[i], (int)cmY[i], rho, naxes);
         //centerofmass(cmass,fda,rho);
         cmass = CenterOfMas(iApe);
-        qDebug() << QString("cmX= %1\tcmY= %2\ncmass.X= %3\tcmass.Y= %4\n").arg(cmX[i]).arg(cmY[i]).arg(cmass.X).arg(cmass.Y);
+        //qDebug() << QString("cmX= %1\tcmY= %2\ncmass.X= %3\tcmass.Y= %4\n").arg(cmX[i]).arg(cmY[i]).arg(cmass.X).arg(cmass.Y);
         //cmX[i] = (int)cmX[i]+cmass.X-rho;cmY[i] = (int)cmY[i]+cmass.Y-rho;
         cmX[i] = cmass.X;
         cmY[i] = cmass.Y;
-        qDebug() << QString("cmX= %1\tcmY= %2\trho= %3\n").arg(cmX[i]).arg(cmY[i]).arg(rho);
+        //qDebug() << QString("cmX= %1\tcmY= %2\trho= %3\n").arg(cmX[i]).arg(cmY[i]).arg(rho);
         //
         flu = 0;
         s=0;for(int j=0;j<nel;j++) if(iApe->buffer[j].I!=-10E-9){flu+=iApe->buffer[j].I;s++;}
@@ -9026,9 +9038,9 @@ bool findStars(img2d *imgArr, QVector<double>& cmX, QVector<double>&cmY, QVector
     {
         for(n=m-1; n>=0; n--)
         {
-            qDebug() << QString("m= %1\tn= %2\n").arg(m).arg(n);
+            //qDebug() << QString("m= %1\tn= %2\n").arg(m).arg(n);
             r=sqrt((cmX[m]-cmX[n])*(cmX[m]-cmX[n])+(cmY[m]-cmY[n])*(cmY[m]-cmY[n]));
-            qDebug() << QString("r= %1\n").arg(r);
+            //qDebug() << QString("r= %1\n").arg(r);
             if((m!=n)&&(r<(bsize/4))){cmX[m]=(cmX[m]+cmX[n])/2; cmY[m]=(cmY[n]+cmY[m])/2;cmX.remove(n);cmY.remove(n);flux.remove(n);break;}
         }
         sz0 = cmX.count();
