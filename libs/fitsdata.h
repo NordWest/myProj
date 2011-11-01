@@ -377,7 +377,7 @@ void findCloserMarks(marksGrid *mg0, marksGrid *mg1, marksGrid *mgRes, double dM
 int measureMark(img2d *imgArr, marksP *mP, measureParam params);                //0-bad; 1-good
 int markMassCenter(img2d *imgArr, marksP *mP, int aperture);                    //0-bad; 1-good
 int detMarkPpix(img2d *imgArr, marksP *mP, int apeSize);                        //0-bad; 1-good
-
+int detHeadType(HeadList hList);
 
 
 class fitsdata//: public QObject

@@ -236,6 +236,18 @@ double detKa(double lam, double vi, double t, double press)
     return(Ka);
 }
 
+int detHeadType(HeadList hList)
+{
+    QString origName;
+    if(!hList.getKeyName("ORIGIN", &origName))
+    {
+        if(QString().compare(origName, "Pulkovo Normal astrograph")==0) return 0;
+        if(QString().compare(origName, "SDSS    ")==0) return 1;
+    }
+    return -1;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 refractionMaker::refractionMaker(refractionParam refParam)
 {
     qDebug() << "\nrefractionMaker init\n";
@@ -1936,6 +1948,11 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     QString taiStr;
     double dtai;
     qDebug() << QString("headType: %1\n").arg(headType);
+    if(headType==-1)
+    {
+        headType = detHeadType(headList);
+        qDebug() << QString("detHeadType: %1\n").arg(headType);
+    }
     switch(headType)
     {
     case 0:
@@ -1966,11 +1983,14 @@ int fitsdata::openFile(QString fitsFileName, int headType)
             MJD -= dtai/86400.0;
         }
         break;
+    default:
+        qDebug() << QString("\nWARN: unknown header type\n");
+        break;
     }
 
     ////////////////////////////////////////////////////////
     fits_read_key(fptr, TSTRING, "CTYPE1", strkey, NULL, &status);// try to read first WCS tag
-double wcsV;
+    double wcsV;
     if(!status)//if WCS is present
     {
         qDebug() << "\nWCS is present\n";
