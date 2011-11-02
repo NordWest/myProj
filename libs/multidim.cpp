@@ -2613,7 +2613,7 @@ int img2d::getAperture(imgAperture *iApe, int Xc, int Yc, int ro)//ro - aperture
 
 bool img2d::getStimp(double *P, int width, int height, double fpx, int x, int y, measureParam params)
 {
-    return(getStimp(P, width, height, fpx, x, y, params.aperture, params.ringradius, params.ringwidth, params.sg, params.lb, params.model, params.nofit, params.delta));
+    return(getStimp(P, width, height, fpx, x, y, params.apRadius, params.ringradius, params.ringwidth, params.sg, params.lb, params.model, params.nofit, params.delta));
 }
 
 
@@ -2642,7 +2642,7 @@ delta - order of the model (see description of psffit function)
         getRing(ringdata->data, x, y,rr , rr + rw, width, height);
         //double *apdata = new double[4*apr*apr];
         segment *apdata;
-        apdata = new segment(2*apr*apr, 2*apr*apr);
+        apdata = new segment(2*(apr+1), 2*(apr+1));
         getSgt(apdata, x, y, 2*apr, 2*apr);
         //getAperture(ia, x, y,apr);
         //END get data arrays
@@ -2683,10 +2683,7 @@ void img2d::getRing(double *const ap, int cx, int cy, int rho1, int rho2, int wi
                 }
 }
 
-
-
 double img2d::getImgPix(int i, int j)
-
 {
 
 	if(!isin(i, j)) return 0.0;

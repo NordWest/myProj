@@ -173,7 +173,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         mesPar.ringwidth = sett->value("psf/ringwidth", 6).toInt();
         mesPar.lb = sett->value("psf/lb", 1).toInt();
         mesPar.sg = sett->value("psf/subgrad", 1).toInt();
-        mesPar.aperture = sett->value("psf/aperture", 10).toInt();
+        mesPar.apRadius = sett->value("psf/apRadius", 10).toInt();
 
         //objects   ////
                 int lspmFind = sett->value("objects/lspmFind", 0).toInt();
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
         fitsd->findHstars(aper, identNum);
         //fitsd->copyImgGrid(fitsd->catMarks, fitsd->ipixMarks);
-        fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.aperture);
+        fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
         qDebug() << QString("premeasured stars num: %1\n").arg(fitsd->ipixMarks->marks.size());
         fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
         //fitsd->detTan();
@@ -363,7 +363,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
     fitsd->ipixMarks->clearMarks();
     copyImgGrid(fitsd->catMarks, fitsd->ipixMarks);
-    fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.aperture);
+    fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
     fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
 //
     //////////

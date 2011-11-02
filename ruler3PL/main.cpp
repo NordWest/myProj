@@ -332,7 +332,6 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
 //  utcorr
 
-
         uTime = QString("0.0");
 
         if(useUtCorr)

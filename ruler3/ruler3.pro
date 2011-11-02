@@ -2,6 +2,7 @@ TEMPLATE = app
 INCLUDEPATH += ./../libs
 SOURCES += main.cpp \
 #    ../libs/astro.cpp \
+#    ../libs/mb.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscat.cpp \
     ../libs/redStat.cpp \

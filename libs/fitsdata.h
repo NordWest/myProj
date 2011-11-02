@@ -241,8 +241,11 @@ public:
 class reductionMaker
 {
 public:
-    double *KSI, *ETA, *MAG, *WEksi, *WEeta, *Cke, *Cksi, *Ceta, *CMAG;
-    int *EXCLINDKSI, *EXCLINDETA, *EXCLINDMAG;
+    double *KSI, *ETA, *MAG, *WEksi, *WEeta, *Cke, *Cksi, *Ceta, *CMAG, *BVect, *CVect, *ZVect, *WE, *DVect;
+    int *EXCLINDKSI, *EXCLINDETA, *EXCLINDMAG, *EXCLIND;
+
+    double UWE;
+    int RN;
     double *ZKSI;
     double *DKSI;
     double UWEKSI;
@@ -500,9 +503,9 @@ public:
 
     ////////
 
-        void detPpix(marksGrid *mGr, int apeSize);
+        void detPpix(marksGrid *mGr, int apeDiam);
         void moveCenter(marksGrid *mGr);
-        void moveMassCenter(marksGrid *mk, int aperture);
+        void moveMassCenter(marksGrid *mk, int apeDiam);
 
         void measureMarksGrid(marksGrid *mgr, measureParam params);
 //        int measureMark(marksP *mP, measureParam params);//0-bad; 1-good

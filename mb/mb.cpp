@@ -710,6 +710,7 @@ bool lorenzianFit(double *const p, const double* fd, int rho, int nit, double mi
     //initial conditions
     double cm[2];
     centerofmass(cm,fd,rho);
+    if((cm[0]<0)||(cm[0]>2.0*rho)||(cm[1]<0)||(cm[1]>2.0*rho)) return false;
     p[0]=cm[0];p[1]=cm[1];
     int k=0;
     double d,J;

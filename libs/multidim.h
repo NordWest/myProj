@@ -49,7 +49,7 @@ struct measureParam
     int ringwidth;
     int lb;
     int sg;
-    int aperture;
+    int apRadius;   //aperture radius
 };
 
 

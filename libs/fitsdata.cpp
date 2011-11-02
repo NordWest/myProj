@@ -74,7 +74,7 @@ void getRing(unsigned short *fd, double *const ap, int cx, int cy, int rho1, int
 
 bool getStimp(double *P, unsigned short *fd, int width, int height, double fpx, int x, int y, measureParam params)
 {
-    return(getStimp(P, fd, width, height, fpx, x, y, params.aperture, params.ringradius, params.ringwidth, params.sg, params.lb, params.model, params.nofit, params.delta));
+    return(getStimp(P, fd, width, height, fpx, x, y, params.apRadius, params.ringradius, params.ringwidth, params.sg, params.lb, params.model, params.nofit, params.delta));
 }
 
 
@@ -242,7 +242,7 @@ int detHeadType(HeadList hList)
     if(!hList.getKeyName("ORIGIN", &origName))
     {
         if(QString().compare(origName, "Pulkovo Normal astrograph")==0) return 0;
-        if(QString().compare(origName, "SDSS    ")==0) return 1;
+        if(QString().compare(origName, " 'SDSS    '")==0) return 1;
     }
     return -1;
 }
@@ -1135,14 +1135,19 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
     double errksi,erreta;
     double minErrKsi, minErrEta;
     //double ksi, eta, ka1;
-    int i, p;
+    int i, j, p;
     int recount = 1;
     double *data;
     marksP *mT;
     qDebug() << QString("params.minRefStars= %1").arg(params.minRefStars);
     int rsSize;
-    int redDeg = 5;
+    int redDeg = 8;
+    int i0, j0, i1, j1;
 
+    BVect = NULL;
+    CVect = NULL;
+    ZVect = NULL;
+    EXCLIND = NULL;
     ZKSI = NULL;
     DKSI = NULL;
     ZETA = NULL;
@@ -1154,6 +1159,7 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
     MAG = NULL;
     WEksi = NULL;
     WEeta = NULL;
+    WE = NULL;
     Cksi = NULL;
     Ceta = NULL;
     CMAG = NULL;
@@ -1165,33 +1171,26 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
     qDebug() << QString("rsindex.count: %1\n").arg(rsSize);
     do
     {
-        if(ZKSI!=NULL) delete [] ZKSI;
-        if(DKSI!=NULL) delete [] DKSI;
-        if(ZETA!=NULL) delete [] ZETA;
-        if(DETA!=NULL) delete [] DETA;
+        if(BVect!=NULL) delete [] BVect;
+        if(CVect!=NULL) delete [] CVect;
+        if(ZVect!=NULL) delete [] ZVect;
         if(ZMAG!=NULL) delete [] ZMAG;
         if(DMAG!=NULL) delete [] DMAG;
         if(KSI!=NULL) delete [] KSI;
         if(ETA!=NULL) delete [] ETA;
         if(MAG!=NULL) delete [] MAG;
-        if(WEksi!=NULL) delete [] WEksi;
-        if(WEeta!=NULL) delete [] WEeta;
-        if(Cksi!=NULL) delete [] Cksi;
-        if(Ceta!=NULL) delete [] Ceta;
-        if(CMAG!=NULL) delete [] CMAG;
-        if(EXCLINDKSI!=NULL) delete [] EXCLINDKSI;
-        if(EXCLINDETA!=NULL) delete [] EXCLINDETA;
-        if(EXCLINDMAG!=NULL) delete [] EXCLINDMAG;
+        if(WE!=NULL) delete [] WE;
+
         //clear();
         recount = 0;
         minErrEta=minErrKsi=1000;
+        BVect = new double [rsSize*2];
+        CVect = new double [rsSize*2*redDeg];
+        //ZVect = new double [redDeg];
         KSI = new double [rsSize];
         ETA = new double [rsSize];
         MAG = new double [rsSize];
-        WEksi  = new double [rsSize];
-        WEeta  = new double [rsSize];
-        Cksi = new double [rsSize*redDeg];
-        Ceta = new double [rsSize*redDeg];
+        WE  = new double [rsSize*2];
         CMAG = new double [rsSize*2];
 
     //////////////////////////////////////
@@ -1224,6 +1223,33 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
                 //ksi = data[3];
                 //eta = data[4];
 
+            BVect[i] = data[3];
+            BVect[i+rsSize] = data[4];
+
+            CVect[i*redDeg+0] = data[5];
+            CVect[i*redDeg+1] = data[6];
+            CVect[i*redDeg+2] = 1;
+            CVect[i*redDeg+3] = 0.0;
+            CVect[i*redDeg+4] = 0.0;
+            CVect[i*redDeg+5] = 0.0;
+            CVect[i*redDeg+6] = data[5]*data[5];
+            CVect[i*redDeg+7] = data[5]*data[6];
+
+            CVect[(i+rsSize)*redDeg+0] = 0.0;
+            CVect[(i+rsSize)*redDeg+1] = 0.0;
+            CVect[(i+rsSize)*redDeg+2] = 0.0;
+            CVect[(i+rsSize)*redDeg+3] = data[5];
+            CVect[(i+rsSize)*redDeg+4] = data[6];
+            CVect[(i+rsSize)*redDeg+5] = 1;
+            CVect[(i+rsSize)*redDeg+6] = data[5]*data[6];
+            CVect[(i+rsSize)*redDeg+7] = data[6]*data[6];
+
+            KSI[i] = data[3];
+            ETA[i] = data[4];
+            MAG[i] = data[2];
+      /*
+            CVect[i+0] =
+
             KSI[i] = data[3];
             ETA[i] = data[4];
             MAG[i] = data[2];
@@ -1238,7 +1264,7 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
             Ceta[i*redDeg+2] = 1;
             Ceta[i*redDeg+3] = data[5]*data[6];
             Ceta[i*redDeg+4] = data[6]*data[6];
-
+        */
 
             if(isfinite(data[7]))
             {
@@ -1253,33 +1279,94 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
 
             if(params.weights)
             {
-                WEksi[i]=pow(minErrKsi/errksi,2);
-                WEeta[i]=pow(minErrEta/erreta,2);
+                WE[i]=pow(minErrKsi/errksi,2);
+                WE[i+rsSize]=pow(minErrEta/erreta,2);
             }
             else
             {
-                WEksi[i]=1;
-                WEeta[i]=1;
+                WE[i]=1;
+                WE[i+rsSize]=1;
             }
         }
-        EXCLINDKSI = new int[rsSize];
-        ZKSI=new double[redDeg];
-        DKSI=new double[redDeg*redDeg];
-        RNKSI=0;
-        iLSM(redDeg, rsSize, mas_to_grad(params.maxres), EXCLINDKSI, ZKSI, Cksi, KSI, UWEKSI, DKSI, params.sigma, RNKSI, WEksi);
-        qDebug() << QString("Zx: %1\t%2\t%3\t%4\t%5\n").arg(ZKSI[0]).arg(ZKSI[1]).arg(ZKSI[2]).arg(ZKSI[3]).arg(ZKSI[4]);
+        EXCLIND = new int[rsSize*2];
+        ZVect=new double[redDeg];
+        DVect=new double[redDeg*redDeg];
+        RN=0;
+        iLSM(redDeg, rsSize*2, mas_to_grad(params.maxres), EXCLIND, ZVect, CVect, BVect, UWE, DVect, params.sigma, RN, WE);
+        qDebug() << QString("ZVect: %1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(ZVect[0]).arg(ZVect[1]).arg(ZVect[2]).arg(ZVect[3]).arg(ZVect[4]).arg(ZVect[5]).arg(ZVect[6]).arg(ZVect[7]);
+        qDebug() << QString("RN: %1\n").arg(RN);
+
+        /*
         ZETA=new double[redDeg];
         DETA=new double[redDeg*redDeg];
         EXCLINDETA = new int [rsSize];
         RNETA=0;
         iLSM(redDeg, rsSize, mas_to_grad(params.maxres), EXCLINDETA, ZETA, Ceta, ETA, UWEETA, DETA, params.sigma, RNETA, WEeta);
-        qDebug() << QString("Zy: %1\t%2\t%3\t%4\t%5\n").arg(ZETA[0]).arg(ZETA[1]).arg(ZETA[2]).arg(ZETA[3]).arg(ZETA[4]);
+        qDebug() << QString("Zy: %1\t%2\t%3\t%4\t%5\n").arg(ZETA[0]).arg(ZETA[1]).arg(ZETA[2]).arg(ZETA[3]).arg(ZETA[4]);*/
         ZMAG=new double[2];
         DMAG=new double[2*2];
         EXCLINDMAG = new int [rsSize];
         RNMAG=0;
         iLSM(2, p, params.maxresMAG, EXCLINDMAG, ZMAG, CMAG, MAG, UWEMAG, DMAG, params.sigma, RNMAG);
         qDebug() << QString("Zm: %1\t%2\n").arg(ZMAG[0]).arg(ZMAG[1]);
+
+
+        ZKSI=new double[5];
+        DKSI=new double[5*5];
+        EXCLINDKSI = new int [rsSize];
+        RNKSI=0;
+        ZETA=new double[5];
+        DETA=new double[5*5];
+        EXCLINDETA = new int [rsSize];
+        RNETA=0;
+
+        ZKSI[0] = ZVect[0];
+        ZKSI[1] = ZVect[1];
+        ZKSI[2] = ZVect[2];
+        ZKSI[3] = ZVect[6];
+        ZKSI[4] = ZVect[7];
+
+        ZETA[0] = ZVect[3];
+        ZETA[1] = ZVect[4];
+        ZETA[2] = ZVect[5];
+        ZETA[3] = ZVect[6];
+        ZETA[4] = ZVect[7];
+
+
+        for(i=0; i<5; i++)
+        {
+            for(j=0; j<5; j++)
+            {
+                if(i<3&&j<3)
+                {
+                    i0 = i;
+                    j0 = j;
+                }
+                if(j>=3) j0 = j+3;
+                if(i>=3) i0 = i+3;
+
+                i1 = i+3;
+                j1 = j+3;
+
+                    DKSI[j+i*5] = DVect[j0+i0*redDeg];
+                    DETA[j+i*5] = DVect[j1+i1*redDeg];
+            }
+        }
+
+
+        RNKSI = 0; RNETA = 0;
+
+        for(i=0;i<rsSize;i++)
+        {
+            EXCLINDKSI[i] = EXCLIND[i];
+            EXCLINDETA[i] = EXCLIND[i+rsSize];
+            if(EXCLINDKSI[i]>=0) RNKSI+=1;
+            if(EXCLINDETA[i]>=0) RNETA+=1;
+        }
+
+        UWEKSI = UWEETA = UWE;
+
+
 
         detSmax8const(rsindex);
         qDebug() << QString("Sx= %1\tSy= %2\tsMax= %3\n").arg(grad_to_mas(Sx)).arg(grad_to_mas(Sy)).arg(params.sMax);
@@ -1304,6 +1391,9 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
         rsSize = rsindex.count();
 
     }while((rsSize>=params.minRefStars)&&recount);
+
+
+
     return 0;
 }
 
@@ -1410,7 +1500,7 @@ void reductionMaker::detSmax8const(QVector<int> &rsindex)
     {
         j = rsindex.at(i);
         //qDebug() << QString("x: %1\ty: %2\n").arg(Cksi[i*3+0]).arg(Cksi[i*3+1]);
-        detTan8const(&pixKsi, &pixEta, Cksi[i*5+0], Cksi[i*5+1]);
+        detTan8const(&pixKsi, &pixEta, CVect[i*8+0], CVect[i*8+1]);
         //pixKsi = ZKSI[0]*C[i*3+0]+ZKSI[1]*C[i*3+1]+ZKSI[2];
         //pixEta = ZETA[0]*C[i*3+0]+ZETA[1]*C[i*3+1]+ZETA[2];
 
@@ -2343,7 +2433,7 @@ void fitsdata::detTan()
         catMarks->detTan(&WCSdata[0]);
 }
 
-void fitsdata::detPpix(marksGrid *mGr, int apeSize)
+void fitsdata::detPpix(marksGrid *mGr, int apeDiam)
 {
     //qDebug() << "fitsdata::detPpix\n";
     if(!is_empty)
@@ -2363,8 +2453,8 @@ void fitsdata::detPpix(marksGrid *mGr, int apeSize)
 	{
 		mPos = mGr->marks.at(i);
                 if(mPos->mPpix!=NULL) delete mPos->mPpix;
-                mPos->mPpix = new imgAperture(apeSize*apeSize);
-                if(imgArr->getAperture(mPos->mPpix, mPos->mTanImg[0], mPos->mTanImg[1], apeSize/2+1))
+                mPos->mPpix = new imgAperture(apeDiam*apeDiam);
+                if(imgArr->getAperture(mPos->mPpix, mPos->mTanImg[0], mPos->mTanImg[1], apeDiam/2+1))
 		{
 //			delete &mPos;
                         mGr->remMark(i);
@@ -2408,7 +2498,7 @@ void fitsdata::moveCenter(marksGrid *mGr)
 	}
 }
 
-void fitsdata::moveMassCenter(marksGrid *mk, int aperture)
+void fitsdata::moveMassCenter(marksGrid *mk, int apeDiam)
 {
     qDebug() << "\nfitsdata::moveMassCenter\n\n";
 	int i, num;
@@ -2422,7 +2512,7 @@ void fitsdata::moveMassCenter(marksGrid *mk, int aperture)
         {
             summ0 = summ1;
 
-            detPpix(mk, aperture);
+            detPpix(mk, apeDiam);
 
             summ1 = 0;
             num = mk->marks.size();
@@ -4696,7 +4786,7 @@ void fitsdata::measureMarksGrid(marksGrid *mgr, measureParam params)
     if(gaussianRadioButton->isChecked()) model = 1;
     if(moffatRadioButton->isChecked()) model = 2;*/
     int i, t;
-    qDebug() << QString("\nmeasureParams:\nmodel: %1\nnofit: %2\ndelta: %3\naperture: %4\nsubgrad: %5\nringradius: %6\nringwidth: %7\nlb: %8\n").arg(params.model).arg(params.nofit).arg(params.delta).arg(params.aperture).arg(params.sg).arg(params.ringradius).arg(params.ringwidth).arg(params.lb);
+    qDebug() << QString("\nmeasureParams:\nmodel: %1\nnofit: %2\ndelta: %3\napRadius: %4\nsubgrad: %5\nringradius: %6\nringwidth: %7\nlb: %8\n").arg(params.model).arg(params.nofit).arg(params.delta).arg(params.apRadius).arg(params.sg).arg(params.ringradius).arg(params.ringwidth).arg(params.lb);
 
     if(params.model!=3)
     {
@@ -4716,8 +4806,8 @@ void fitsdata::measureMarksGrid(marksGrid *mgr, measureParam params)
     else
     {
         qDebug() << "centre of Mass";
-        detPpix(mgr, params.aperture);
-        moveMassCenter(mgr, params.aperture);
+        detPpix(mgr, params.apRadius*2);
+        moveMassCenter(mgr, params.apRadius*2);
   //      slotCenterMass(mgr);
     }
 
@@ -4999,6 +5089,7 @@ qDebug() << QString("\nruler3\n\n");
                                 double *P = new double[21];
                                 if(getStimp(P, fits_buff, naxes[0], naxes[1], (double) fpv, (int) xy[0], (int) xy[1],
                                                  aperture, ringradius, ringwidth, subgrad, lb, model, nofit, delta))
+
                                 {/
 
                                     sdata = new double[14];
@@ -6114,6 +6205,7 @@ void fitsdata::prepRefStars()
                 if(mT->P!=NULL) mT->sdata[12] = mT->P[9];//standard error of pixel coordinate X
                 else mT->sdata[12] = 0.0;
                 if(mT->P!=NULL) mT->sdata[13] = mT->P[10];//standard error of pixel coordinate Y
+
                 else mT->sdata[13] = 0.0;
                 break;
             }
@@ -9672,8 +9764,8 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
                 }
 */
 
-                    qDebug() << QString("mTimeCode: %1").arg(mTimeCode);
-                    redMake->makeErrorBudget(refMarks->ebRec);
+                qDebug() << QString("mTimeCode: %1").arg(mTimeCode);
+                redMake->makeErrorBudget(refMarks->ebRec);
 
 
    /////////////////////////////////////////////////////////
@@ -9754,7 +9846,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
     qDebug() << QString("obj: mag= %1\tobjdata[8]= %2\n").arg(mag).arg(data[2]);
 
     //if(!((fabs(mag-objdata[8])<=maxOCMAG)&&(grad_to_mas(fabs(ksi-objdata[2]))<=maxOCRA)&&                        (grad_to_mas(fabs(eta-objdata[3]))<=maxOCDE)))
-    if(!((grad_to_mas(fabs(ksi-data[3]))<=outLim.maxOCRA)&&(grad_to_mas(fabs(eta-data[4]))<=outLim.maxOCDE)&&(fabs(mag-data[2])<=outLim.maxOCMAG)))
+    if(!((grad_to_mas(fabs(ksi-data[3]))<=outLim.maxOCRA)&&(grad_to_mas(fabs(eta-data[4]))<=outLim.maxOCDE)&&((fabs(mag-data[2])<=outLim.maxOCMAG)||!isfinite(mag)||!isfinite(data[2]))))
     {
         qDebug() << QString("objError too big\n");
         //objMarks->remMark(ko);
