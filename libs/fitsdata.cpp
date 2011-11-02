@@ -2311,13 +2311,13 @@ void fitsdata::clear()
     fileName.clear();
     fitsHeader.clear();
     for(int i=0; i<12; i++) WCSdata[i] = 0.0;
-    if(catMarks!=NULL) delete catMarks;// = new marksGrid();
+    /*if(catMarks!=NULL) delete catMarks;// = new marksGrid();
     //catMarks = NULL;
     if(ipixMarks!=NULL) delete ipixMarks;// = new marksGrid();
     //catMarks = NULL;
     if(refMarks!=NULL) delete refMarks;// = new marksGrid();
     //catMarks = NULL;
-    if(objMarks!=NULL) delete objMarks;// = new marksGrid();
+    if(objMarks!=NULL) delete objMarks;// = new marksGrid();*/
     //catMarks = NULL;
     //if(expList!=NULL) delete expList;// = new ExposureList;
     //catMarks = NULL;
@@ -2336,10 +2336,10 @@ void fitsdata::clear()
     if(tmu!=NULL) delete tmu;
     tmu = NULL;
 
-    catMarks = NULL;
-    ipixMarks = NULL;
-    refMarks = NULL;
-    objMarks = NULL;
+    catMarks->clearMarks();
+    ipixMarks->clearMarks();
+    refMarks->clearMarks();
+    objMarks->clearMarks();
     //expList = NULL;
     //refParam = NULL;
     //refMaker = NULL;
