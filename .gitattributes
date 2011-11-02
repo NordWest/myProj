@@ -307,6 +307,8 @@ mpeph/main.cpp -text
 mpeph/mpeph.cpp -text
 mpeph/mpeph.h -text
 mpeph/mpeph.pro -text
+multiFits/main.cpp -text
+multiFits/multiFits.pro -text
 objSearchPL/main.cpp -text
 objSearchPL/objSearchPL.pro -text
 oclTest/main.cpp -text
