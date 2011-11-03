@@ -75,46 +75,59 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         Q_ASSERT( codec1 );
         QTextCodec::setCodecForCStrings(codec1);
 
-        int i, sz, resRed, oNum;
-        QList <catFinder*> starCatList;
-        QString obsCode;
         QString uTime;
-        QString dateStr, timeStr, descS, oName;
+        QString dateStr, timeStr;
         QProcess outerProcess;
         QStringList outerArguments;
+        QString optName, optVal, optStr, pnStr, headerFileName;
+        QString resFolder;
+        sysCorrParam *sysCorr = NULL;
+        QString cfgFileName = "ruler3PL.ini";
+        int doWhat = 0;                         //0-http; 1-file
+        int detPlName = 1;
+        int resdirDef=0;
+        QString scFile, descS, oName;
+        int isSc = 0;
+        QList <catFinder*> starCatList;
+        QString obsCode;
+        int sz, i, oNum;
+        int resRed = 0;
+
+    //command line  ///////////////////////////////////////
 
 
-//command line  ///////////////////////////////////////
-    QString optName, optVal, optStr, pnStr, headerFileName;
-    QString resFolder;
-    sysCorrParam *sysCorr = NULL;
-    QString cfgFileName = "ruler3.ini";
-
-    int resdirDef=0;
-    QString scFile;
-    int isSc = 0;
-
-    for(i=1; i<argc; i++)
-    {
-        optStr = QString(argv[i]);
-        optName = optStr.section("=", 0, 0);
-        optVal = optStr.section("=", 1, 1);
-        if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+        for(i=1; i<argc; i++)
         {
-            cfgFileName = optVal;
-        }
-        else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
-        {
-            resdirDef=1;
-            resFolder = optVal;
-        }
-        else if(QString::compare(optName, "syscorr", Qt::CaseSensitive)==0)
-        {
-            isSc = 1;
-            scFile = optVal;
+            optStr = QString(argv[i]);
+            optName = optStr.section("=", 0, 0);
+            optVal = optStr.section("=", 1, 1);
+            if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+            {
+                cfgFileName = optVal;
+            }
+            else if(QString::compare(optName, "plName", Qt::CaseSensitive)==0)
+            {
+                detPlName = 0;
+                pnStr = optVal;
+            }
+            else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
+            {
+                detPlName = 0;
+                doWhat = 1;
+                headerFileName = optVal;
+            }
+            else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
+            {
+                resdirDef=1;
+                resFolder = optVal;
+            }
+            else if(QString::compare(optName, "syscorr", Qt::CaseSensitive)==0)
+            {
+                isSc = 1;
+                scFile = optVal;
 
+            }
         }
-    }
 
 ///////// 1. Reading settings ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

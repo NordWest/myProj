@@ -134,6 +134,7 @@ struct whatOutput
     int objresreport;
     int namereport;
     int ocreject;
+    int ipixPos;
 };
 
 struct ouputParams
@@ -143,6 +144,7 @@ struct ouputParams
 
 int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff, outputLimits outLim, whatOutput whatOut, ouputParams outPar);
 int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, outputLimits outLim, whatOutput whatOut, ouputParams outPar);
+int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff);
 
 //objects   ////////////////////////////////
 void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);

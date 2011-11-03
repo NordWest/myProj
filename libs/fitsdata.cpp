@@ -9535,7 +9535,7 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
 
         double ra_c,de_c;
         QVector<int> rsindex;
-        QString mTimeCode;
+        QString mTimeCode, outstr;
         int szRef, szObj;
         int selNum;
         int i, sz;
@@ -9563,19 +9563,6 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
         redParam.uweMax = settings->value("reduction/uweMax", 500).toDouble();
         redParam.maxRefStars = settings->value("reduction/maxRefStars", -1).toInt();
 
-/*  syscorr
-        QString syscorIni = settings->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
-        int useSysCorr = settings->value("syscorr/useSysCorr", 0).toInt();
-*/
-        qDebug() << QString("\nredParam.redType: %1\n").arg(redParam.redType);
-        qDebug() << QString("redParam.maxres: %1\n").arg(redParam.maxres);
-        qDebug() << QString("redParam.maxresMAG: %1\n").arg(redParam.maxresMAG);
-        qDebug() << QString("redParam.sigma: %1\n").arg(redParam.sigma);
-        qDebug() << QString("redParam.sMax: %1\n").arg(redParam.sMax);
-        qDebug() << QString("redParam.minRefStars: %1\n").arg(redParam.minRefStars);
-        qDebug() << QString("redParam.weights: %1\n").arg(redParam.weights);
-        qDebug() << QString("redParam.uweMax: %1\n").arg(redParam.uweMax);
-
 //[outputLimits]
 
         outputLimits outLim = {};
@@ -9599,6 +9586,7 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
         whatOut.objresreport=settings->value("whatOutput/objresreport", 0).toInt();//make ERRORREPORT
         whatOut.namereport=settings->value("whatOutput/namereport", 0).toInt();
         whatOut.ocreject=settings->value("whatOutput/ocreject", 0).toInt();//if ocreject=0 then results with BAD (O-C) (see maxOCMAG, maxOCRA and maxOCDE) will be inluded to output
+        whatOut.ipixPos=settings->value("whatOutput/ipixPos", 0).toInt();
 
 //outputParams
         ouputParams outPar;
@@ -9641,7 +9629,6 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
         sel6.minStarsNum = settings->value("rsSelector6/minStarsNum", 0).toInt();
 
 ////
-
         QStringList allSett;
         allSett << settings->allKeys();
         sz = allSett.size();
@@ -9779,6 +9766,7 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
                     refMarks->ebRec->obsCode = obscode;
 
                     makeErrReports(refMarks, rsindex, redMake, refMarks->ebRec, resFolder, "", outLim,  whatOut, outPar);
+                    if(whatOut.ipixPos) makeIpixReports(ipixMarks, redMake, refMarks->ebRec, resFolder, "");
 
                     //qDebug() << QString("objSepRed: %1\n").arg(objSepRed);
                     if(!objSepRed)
@@ -10218,6 +10206,43 @@ int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *re
                 resFile.saveAs(resFolder+"/residuals"+suff+".txt");
 
             }
+}
+
+int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff)
+{
+    qDebug() << "\nmakeIpixReports\n";
+    QString outstr;
+    int resNum;
+    int i;
+    double ra,de,x,y,pixmag,ksi,eta, mag;
+    marksP *mT;
+
+    QFile errFile(resFolder+"/ipixPos"+suff+".txt");
+    errFile.open(QIODevice::Append| QIODevice::Text);
+    QTextStream errStream;
+    errStream.setDevice(&errFile);
+
+    resNum = ipixMarks->marks.size();
+
+    for(i=0; i<resNum; i++)
+    {
+        outstr.clear();
+
+        mT = ipixMarks->marks.at(i);
+
+        x = mT->mTanImg[0];
+        y = mT->mTanImg[1];
+        pixmag = mT->mTanImg[2];
+        redMake->detTan(&ksi, &eta, x, y);
+        getTangToDeg(&ra, &de, ksi, eta, ebRec->RAoc, ebRec->DEoc);
+        redMake->detMagn(&mag, pixmag);
+
+        outstr = QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(ebRec->MJD, 15, 'f', 7, QLatin1Char(' ')).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 16, 'e', 8, QLatin1Char(' ')).arg(ebRec->mesureTimeCode);
+        errStream << outstr;
+    }
+
+
+
 }
 
 /////////////////////////////////////

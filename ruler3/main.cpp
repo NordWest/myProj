@@ -68,16 +68,15 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         QString optName, optVal, optStr, pnStr, headerFileName;
         QString resFolder;
         sysCorrParam *sysCorr = NULL;
-        QString cfgFileName = "ruler3PL.ini";
-        int doWhat = 0;                         //0-http; 1-file
-        int detPlName = 1;
-        int resdirDef=0;
-        QString scFile, descS, oName;
-        int isSc = 0;
-        QList <catFinder*> starCatList;
-        QString obsCode;
+        QString cfgFileName = "ruler3.ini";
         int sz, i, oNum;
         int resRed = 0;
+        QString descS, oName;
+        QList <catFinder*> starCatList;
+        QString obsCode;
+        int resdirDef=0;
+        QString scFile;
+        int isSc = 0;
 
         for(i=1; i<argc; i++)
         {
@@ -87,17 +86,6 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
             {
                 cfgFileName = optVal;
-            }
-            else if(QString::compare(optName, "plName", Qt::CaseSensitive)==0)
-            {
-                detPlName = 0;
-                pnStr = optVal;
-            }
-            else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
-            {
-                detPlName = 0;
-                doWhat = 1;
-                headerFileName = optVal;
             }
             else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
             {
@@ -111,6 +99,8 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
             }
         }
+
+
 
 
 
