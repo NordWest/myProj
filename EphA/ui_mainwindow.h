@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Fri 20. Aug 12:22:30 2010
-**      by: Qt User Interface Compiler version 4.6.3
+** Created: Thu Nov 10 00:52:48 2011
+**      by: Qt User Interface Compiler version 4.7.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -14,12 +14,13 @@
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
+#include <QtGui/QDockWidget>
 #include <QtGui/QHeaderView>
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenuBar>
 #include <QtGui/QStatusBar>
-#include <QtGui/QTableWidget>
 #include <QtGui/QToolBar>
+#include <QtGui/QTreeWidget>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -28,10 +29,12 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralWidget;
-    QTableWidget *tableWidget;
+    QTreeWidget *treeWidget;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
+    QDockWidget *dockWidget;
+    QWidget *dockWidgetContents;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -40,18 +43,21 @@ public:
         MainWindow->resize(670, 477);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
-        tableWidget = new QTableWidget(centralWidget);
-        tableWidget->setObjectName(QString::fromUtf8("tableWidget"));
-        tableWidget->setGeometry(QRect(10, 0, 651, 261));
-        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
-        sizePolicy.setHorizontalStretch(1);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(tableWidget->sizePolicy().hasHeightForWidth());
-        tableWidget->setSizePolicy(sizePolicy);
+        treeWidget = new QTreeWidget(centralWidget);
+        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
+        __qtreewidgetitem->setText(0, QString::fromUtf8("1"));
+        treeWidget->setHeaderItem(__qtreewidgetitem);
+        treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
+        treeWidget->setGeometry(QRect(0, 0, 671, 361));
+        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        sizePolicy.setHorizontalStretch(2);
+        sizePolicy.setVerticalStretch(1);
+        sizePolicy.setHeightForWidth(treeWidget->sizePolicy().hasHeightForWidth());
+        treeWidget->setSizePolicy(sizePolicy);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 670, 21));
+        menuBar->setGeometry(QRect(0, 0, 670, 25));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -59,6 +65,13 @@ public:
         statusBar = new QStatusBar(MainWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         MainWindow->setStatusBar(statusBar);
+        dockWidget = new QDockWidget(MainWindow);
+        dockWidget->setObjectName(QString::fromUtf8("dockWidget"));
+        dockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+        dockWidgetContents = new QWidget();
+        dockWidgetContents->setObjectName(QString::fromUtf8("dockWidgetContents"));
+        dockWidget->setWidget(dockWidgetContents);
+        MainWindow->addDockWidget(static_cast<Qt::DockWidgetArea>(8), dockWidget);
 
         retranslateUi(MainWindow);
 

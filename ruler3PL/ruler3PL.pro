@@ -11,7 +11,6 @@ SOURCES += main.cpp \
     ../libs/sscat.cpp \
     ../libs/fBuffer.cpp \
     ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp \
     ../libs/fitstools.cpp\
     ../libs/alglib/ap.cpp \
     ../libs/alglib/interpolation.cpp \
@@ -32,8 +31,16 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
-win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
+TARGET = ./../bin/ruler3PL
+#TARGET = ./../../bin/win32/ruler3PL
+
+documentation.path = /usr/local/ruler3PL/doc
+documentation.files = docs/*
+
+INSTALLS += documentation
+
+target.path = /usr/local/ruler3PL
+INSTALLS += target
 
 CONFIG += console \
     exceptions \
@@ -53,7 +60,6 @@ HEADERS += ../libs/astro.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h \
     ../libs/fitstools.h\
     ../libs/alglib/ap.h \
     ../libs/alglib/interpolation.h \

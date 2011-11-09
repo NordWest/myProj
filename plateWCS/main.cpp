@@ -96,7 +96,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
 
 
 //insSettings
-    QString insSettFile = sett->value("insSettings/insSettFile", "./conf/telescopes.ini").toString();
+    QString insSettFile = sett->value("insSettings/insSettFile", "./telescopes.ini").toString();
     int instrNum = sett->value("insSettings/instrNum", 0).toInt();
 
 //identify  ///////
@@ -117,23 +117,21 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     wcsParams.maxRefStars = sett->value("reduction/maxRefStars", -1).toInt();
 
 //  catalogs    /////
-    QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
-    int catNum = sett->value("catalogs/catNum", 0).toInt();
-    double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
-    double mag1 = sett->value("catalogs/mag1", 15.0).toDouble();
+        QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
+        int catProgType = sett->value("catalogs/catProgType", 0).toInt();
+        double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
+        double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
 //process
 
-    QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader.exe").toString();
+    QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader").toString();
     QString gethttp_prog_folder = sett->value("processes/gethttp_prog_folder", "./").toString();
     int gethttp_wait_time = sett->value("processes/gethttp_wait_time", -1).toInt();
-    QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr.exe").toString();
+    QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr").toString();
     QString utcorr_prog_folder = sett->value("processes/utcorr_prog_folder", "./").toString();
     int utcorr_wait_time = sett->value("processes/utcorr_wait_time", -1).toInt();
 
-//observatory
-    QString observatoryCat = sett->value("observatory/observatoryCat", "./../../../data/cats/Obs.txt").toString();
-    obsCode = sett->value("observatory/obsCode", "084").toString();
+
 
 //marks /////////////////
     QString mSep = sett->value("marks/mSep", " ").toString();
@@ -144,6 +142,9 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     double rectX1 = sett->value("marks/rectX1", 0.0).toDouble();
     double rectY1 = sett->value("marks/rectY1", 0.0).toDouble();
 
+//observatory
+    QString observatoryCat = sett->value("observatory/observatoryCat", "./Obs.txt").toString();
+    obsCode = sett->value("observatory/obsCode", "084").toString();
 ///////////////////////////////////////////////////////////
 
     QString fileName =  QString(argv[2]);
@@ -326,7 +327,12 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
         double fov = fovp*fitsd->detFov();
 
         fitsd->catMarks->clearMarks();
-        getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
+        //getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
+        if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
+        {
+            qDebug() << QString("getMarksGrid error\n");
+            return 2;
+        }
         fitsd->detTan();
 
 //////////

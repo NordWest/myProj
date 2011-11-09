@@ -10252,20 +10252,11 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
 {
     catFinder *starCat;
     QSettings *sett = new QSettings(catiniFileName, QSettings::IniFormat);
-/*
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac2/exeName").toString();
-    starCat->exePath = sett->value("ucac2/exePath").toString();
-    starCat->catType = sett->value("ucac2/catType").toInt();
-    starCat->catName = sett->value("ucac2/catName").toString();
-    starCat->catMagName = sett->value("ucac2/catMagName").toString();
-    starCat->catPath = sett->value("ucac2/catPath").toString();
-    starCatList->append(starCat);
-    */
+
     starCat = new catFinder;
     starCat->exeName = sett->value("cdsfind/exeName").toString();
     starCat->exePath = sett->value("cdsfind/exePath").toString();
-    //starCat->catType = sett->value("cdsfind/catType").toInt();
+    starCat->catType = sett->value("cdsfind/catType").toInt();
     starCat->catName = sett->value("cdsfind/catName").toString();
     starCat->catMagName = sett->value("cdsfind/catMagName").toString();
     starCat->catPath = sett->value("cdsfind/catPath").toString();
@@ -10274,7 +10265,7 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCat = new catFinder;
     starCat->exeName = sett->value("ucac3/exeName").toString();
     starCat->exePath = sett->value("ucac3/exePath").toString();
-    //starCat->catType = sett->value("ucac3/catType").toInt();
+    starCat->catType = sett->value("ucac3/catType").toInt();
     starCat->catName = sett->value("ucac3/catName").toString();
     starCat->catMagName = sett->value("ucac3/catMagName").toString();
     starCat->catPath = sett->value("ucac3/catPath").toString();
@@ -10292,7 +10283,7 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCat = new catFinder;
     starCat->exeName = sett->value("lspmFind/exeName").toString();
     starCat->exePath = sett->value("lspmFind/exePath").toString();
-    //starCat->catType = sett->value("lspmFind/catType").toInt();
+    starCat->catType = sett->value("lspmFind/catType").toInt();
     starCat->catName = sett->value("lspmFind/catName").toString();
     starCat->catMagName = sett->value("lspmFind/catMagName").toString();
     starCat->catPath = sett->value("lspmFind/catPath").toString();

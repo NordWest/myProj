@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     ../libs/coord.cpp \
     ../libs/commetorbcat.cpp \
     ../libs/comfunc.cpp \
-    ../libs/astro.cpp
+#    ../libs/astro.cpp
+    settwindow.cpp
 
 HEADERS  += mainwindow.h \
     ephthread.h \
@@ -53,6 +54,17 @@ HEADERS  += mainwindow.h \
     ../libs/coord.h \
     ../libs/commetorbcat.h \
     ../libs/comfunc.h \
-    ../libs/astro.h
+    ../libs/astro.h \
+    ../libs/mb.h \
+    settwindow.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settwindow.ui
+
+win32:LIBS += ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libmb.a \
+            ./../libs/unix/libastro.a
+
+
+

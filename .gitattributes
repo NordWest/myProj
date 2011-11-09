@@ -12,6 +12,9 @@ EphA/main.cpp -text
 EphA/mainwindow.cpp -text
 EphA/mainwindow.h -text
 EphA/mainwindow.ui -text
+EphA/settwindow.cpp -text
+EphA/settwindow.h -text
+EphA/settwindow.ui -text
 EphA/ui_mainwindow.h -text
 archOnePlate/archOnePlate.pro -text
 archOnePlate/main.cpp -text

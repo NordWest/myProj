@@ -139,8 +139,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
         QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
 
-        QString redparamIni = sett->value("general/redparamIni", "./conf/redParam.ini").toString();
-        int expNum = sett->value("general/expNum").toInt();
+        QString redparamIni = sett->value("general/redparamIni", "./redParam.ini").toString();
+        int expNum = sett->value("general/expNum", -1).toInt();
         int aper = sett->value("general/aperture", 20).toInt();
         int isRedRef = sett->value("general/isRedRef", 0).toInt();
         int plNameType = sett->value("general/plNameType", 0).toInt();
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
         //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
  //       syscorr
-        QString syscorIni = sett->value("syscorr/syscorIni", "./conf/syscorr.ini").toString();
+        QString syscorIni = sett->value("syscorr/syscorIni", "./syscorr.ini").toString();
         int useSysCorr = sett->value("syscorr/useSysCorr", 0).toInt();
 
 //objects   ////
@@ -162,29 +162,29 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int tryMpeph = sett->value("objects/tryMpeph", 0).toInt();
         int mpephType = sett->value("objects/mpephType", 0).toInt();
         double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
-        double magObj1 = sett->value("objects/mag1", 15.0).toDouble();
+        double magObj1 = sett->value("objects/mag1", 16.0).toDouble();
         QString headObjName = sett->value("objects/headObjName", "OBJECT").toString();
 
 //  catalogs    /////
-        QString catIni = sett->value("catalogs/catIni", "./conf/catalogs.ini").toString();
+        QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
         int catProgType = sett->value("catalogs/catProgType", 0).toInt();
         double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
         double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
-//process
-        QString mpeph_prog = sett->value("processes/mpeph_prog", "./mpeph.exe").toString();
+//processes
+        QString mpeph_prog = sett->value("processes/mpeph_prog", "./mpeph").toString();
         QString mpeph_prog_folder = sett->value("processes/mpeph_prog_folder", "./").toString();
         int mpeph_wait_time = sett->value("processes/mpeph_wait_time", -1).toInt();
         if(mpeph_wait_time>0) mpeph_wait_time *= 1000;
-        QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient.exe").toString();
+        QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient").toString();
         QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
         int skybot_wait_time = sett->value("processes/skybot_wait_time", -1).toInt();
         if(skybot_wait_time>0) skybot_wait_time *= 1000;
-        QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader.exe").toString();
+        QString gethttp_prog = sett->value("processes/gethttp_prog", "./getHttpHeader").toString();
         QString gethttp_prog_folder = sett->value("processes/gethttp_prog_folder", "./").toString();
         int gethttp_wait_time = sett->value("processes/gethttp_wait_time", -1).toInt();
         if(gethttp_wait_time>0) gethttp_wait_time *= 1000;
-        QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr.exe").toString();
+        QString utcorr_prog = sett->value("processes/utcorr_prog", "./uTimeCorr").toString();
         QString utcorr_prog_folder = sett->value("processes/utcorr_prog_folder", "./").toString();
         int utcorr_wait_time = sett->value("processes/utcorr_wait_time", -1).toInt();
         if(utcorr_wait_time>0) utcorr_wait_time *= 1000;

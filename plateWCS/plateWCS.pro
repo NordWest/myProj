@@ -2,9 +2,9 @@
 # Project created by QtCreator 2010-03-29T11:20:21
 # -------------------------------------------------
 # QT -= gui
-TARGET = plateWCS
-unix:TARGET=./../../lab/ruler3PL.unix/plateWCS
-win32:TARGET=./../../../lab/ruler3PL.win32/plateWCS
+unix:TARGET = ./../bin/plateWCS
+win32:TARGET = ./../../bin/plateWCS
+
 CONFIG += console \
     qt \
     warn_off
@@ -24,11 +24,17 @@ SOURCES += main.cpp \
     ../libs/observatory.cpp \
     ../libs/sscat.cpp \
     ../libs/fBuffer.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
     ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
+    ../libs/sysCorr.cpp
 HEADERS += ../libs/fitsdata.h \
     ../libs/comfunc.h \
     ../libs/astro.h \
@@ -41,16 +47,22 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/observatory.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h
-win32:LIBS += ./../libs/cfitsio.lib  \
-    ../libs/ablas.dll
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h
+
 unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
-win32:LIBS += ./../libs/win32/libmb.a \
+win32:LIBS += ./../libs/cfitsio.lib \
+              ./../libs/win32/libmb.a \
               ./../libs/win32/libastro.a
 

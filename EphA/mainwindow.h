@@ -29,6 +29,8 @@ public:
 
 
     QString timeStr;
+    QString starTimeStr;
+    QString jdTimeStr;
     QTime sysTime;
 
 private slots:
@@ -44,6 +46,8 @@ private:
     QToolBar *mainToolBar;
 
     QLineEdit *sysTimeEdit;
+    QLineEdit *starTimeEdit;
+    QLineEdit *jdTimeEdit;
     QTableWidget *mainTable;
 
     QMenu *fileMenu;

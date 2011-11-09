@@ -30,8 +30,23 @@ MainWindow::~MainWindow()
 void MainWindow::slotUpdateTable()
 {
     //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
+    double jDay;
+    int yr, mth, day, hr, min, sec;
+
     sysTime = QTime().currentTime();
     timeStr = sysTime.toString("HH mm ss");
+    hr = timeStr.section(" ", 0, 0).toInt();
+    min = timeStr.section(" ", 1, 1).toInt();
+    sec = timeStr.section(" ", 2, 2).toInt();
+    QDate sysDate = QDate().currentDate();
+    QString dateStr = sysDate.toString("yyyy M dd");
+    yr = dateStr.section(" ", 0, 0).toInt();
+    mth = dateStr.section(" ", 1, 1).toInt();
+    day = dateStr.section(" ", 2, 2).toInt();
+    dat2JD_time(&jDay, yr, mth, day, hr, min, sec);
+    jdTimeStr = QString("%1 | %2").arg(jDay, 13, 'f', 5).arg(sysDate.toJulianDay());
+
+
     slotStatBarUpdate();
     updater->start(1000);
 }
@@ -40,6 +55,7 @@ void MainWindow::slotStatBarUpdate()
 {
         //statusBar()->showMessage(timeStr);
         sysTimeEdit->setText(timeStr);
+        jdTimeEdit->setText(jdTimeStr);
 }
 
 void MainWindow::setMenu()
@@ -55,8 +71,16 @@ void MainWindow::setMenu()
 void MainWindow::setWidgets()
 {
     sysTimeEdit = new QLineEdit(this);
-    sysTimeEdit->setMaximumWidth(50);
+    sysTimeEdit->setMaximumWidth(100);
     statusBar()->addWidget(sysTimeEdit);
+
+    jdTimeEdit = new QLineEdit(this);
+    jdTimeEdit->setMaximumWidth(200);
+    statusBar()->addWidget(jdTimeEdit);
+
+    starTimeEdit = new QLineEdit(this);
+    starTimeEdit->setMaximumWidth(100);
+    statusBar()->addWidget(starTimeEdit);
 
     mainToolBar = qFindChild<QToolBar*>(this, "mainToolBar");
 
