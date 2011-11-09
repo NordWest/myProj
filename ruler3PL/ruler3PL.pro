@@ -1,8 +1,6 @@
 TEMPLATE = app
 SOURCES += main.cpp \
- #   ../libs/astro.cpp \
     ../libs/fitsdata.cpp \
-    ../libs/DynArr.cpp \
     ../libs/comfunc.cpp \
     ../libs/multidim.cpp \
     ../libs/ccdmeasurements.cpp \
@@ -34,11 +32,8 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-#TARGET = ./ruler3PL
 unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
 win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
-unix:target.path=./../../lab/ruler3PL.unix
-INSTALLS += target
 
 CONFIG += console \
     exceptions \
@@ -48,7 +43,6 @@ HEADERS += ../libs/astro.h \
     ../libs/mb.h \
     ../libs/fitsio.h \
     ../libs/fitsdata.h \
-    ../libs/DynArr.h \
     ../libs/comfunc.h \
     ../libs/multidim.h \
     ../libs/ccdmeasurements.h \
