@@ -1,7 +1,7 @@
 #include <QtCore>
 #include "math.h"
-#include "astro.h"
-#include "mb.h"
+#include "./../astro/astro.h"
+#include "./../mb/mb.h"
 #include "comfunc.h"
 //#include "multidim.h"
 //#include "sscat.h"

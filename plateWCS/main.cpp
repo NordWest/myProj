@@ -1,7 +1,7 @@
 #include <QtCore>
 
 #include "./../libs/fitsdata.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/observatory.h"
 
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     else
     {
 
-        if(detPlName) detPlateName(&pnStr, filePath, plNameType);
+        if(detPlName) detPlateName(&pnStr, fileName, plNameType);
 
         outerArguments.clear();
         outerProcess.setWorkingDirectory(gethttp_prog_folder);

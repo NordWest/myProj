@@ -41,4 +41,6 @@ svn export --force libs/fBuffer.h $1/libs/fBuffer.h
 svn export --force libs/vectGrid3D.h $1/libs/vectGrid3D.h
 svn export --force libs/fitstools.h $1/libs/fitstools.h
 svn export --force libs/sysCorr.h $1/libs/sysCorr.h
+svn export --force libs/fitsio.h $1/libs/fitsio.h
+svn export --force libs/longnam.h $1/libs/longnam.h
 

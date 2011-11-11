@@ -1,10 +1,10 @@
 #ifndef ASTRO_H
 
-#include "../libs/astro.h"
+#include "../astro/astro.h"
 
 #endif
 
-#include "../libs/mb.h"
+#include "../mb/mb.h"
 
 #include <inttypes.h>
 

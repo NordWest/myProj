@@ -76,7 +76,7 @@ int main(int argc, char *argv[])//wcsFinder.exe wcsFinder.ini [workdir]
 
          wcsProcess.setWorkingDirectory(wcs_prog_folder);
          outerArguments.clear();
-         outerArguments << pwcsCfg << tFile;// << "0" << pnStr;
+         outerArguments << tFile << "config="+pwcsCfg ;// << "0" << pnStr;
          qDebug() << wcs_prog << outerArguments.join(" ");
          wcsProcess.start(wcs_prog, outerArguments);
 

@@ -3,7 +3,7 @@
 //#include "..\DAster\DAster.h"
 
 #include <QtCore>
-#include "mb.h"
+#include "./../mb/mb.h"
 
 //#include "..\DAster\MainFrm.h"
 /*
