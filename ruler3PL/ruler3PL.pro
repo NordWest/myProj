@@ -46,8 +46,8 @@ CONFIG += console \
     exceptions \
     warn_off
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
+HEADERS += ../astro/astro.h \
+    ../mb/mb.h \
     ../libs/fitsio.h \
     ../libs/fitsdata.h \
     ../libs/comfunc.h \

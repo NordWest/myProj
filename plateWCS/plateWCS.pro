@@ -37,9 +37,9 @@ SOURCES += main.cpp \
     ../libs/sysCorr.cpp
 HEADERS += ../libs/fitsdata.h \
     ../libs/comfunc.h \
-    ../libs/astro.h \
+    ../astro/astro.h \
     ../libs/multidim.h \
-    ../libs/mb.h \
+    ../mb/mb.h \
     ../libs/ccdmeasurements.h \
     ../libs/redStat.h \
     ../libs/identify.h \

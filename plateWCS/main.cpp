@@ -68,7 +68,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     ExposureList* expList;
     QProcess outerProcess;
     QStringList outerArguments;
-    QString pnStr, uTime, dateStr, timeStr;
+    QString uTime, dateStr, timeStr;
 
     QString codecName;
 
@@ -83,9 +83,38 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     QTextCodec::setCodecForCStrings(codec1);
 
 
-    QString cfgFile = QString(argv[1]);
+    //command line  ///////////////////////////////////////
 
-    QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
+    QString cfgFileName = "./plateWCS.ini";
+    int doWhat = 0;                         //0-http; 1-file
+    int detPlName = 1;
+    QString optName, optVal, optStr, pnStr, headerFileName;
+    QString resFolder;
+
+        for(i=1; i<argc; i++)
+        {
+            optStr = QString(argv[i]);
+            optName = optStr.section("=", 0, 0);
+            optVal = optStr.section("=", 1, 1);
+            if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+            {
+                cfgFileName = optVal;
+            }
+            else if(QString::compare(optName, "plName", Qt::CaseSensitive)==0)
+            {
+                detPlName = 0;
+                pnStr = optVal;
+            }
+            else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
+            {
+                detPlName = 0;
+                doWhat = 1;
+                headerFileName = optVal;
+            }
+        }
+
+
+    QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
 //general
     int expNum = sett->value("general/expNum", -1).toInt();
@@ -117,10 +146,10 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     wcsParams.maxRefStars = sett->value("reduction/maxRefStars", -1).toInt();
 
 //  catalogs    /////
-        QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
-        int catProgType = sett->value("catalogs/catProgType", 0).toInt();
-        double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
-        double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
+    QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
+    int catProgType = sett->value("catalogs/catProgType", 0).toInt();
+    double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
+    double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
 //process
 
@@ -147,13 +176,13 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     obsCode = sett->value("observatory/obsCode", "084").toString();
 ///////////////////////////////////////////////////////////
 
-    QString fileName =  QString(argv[2]);
+    QString fileName =  QString(argv[1]);
     QString logFileName = fileName+".wcs.log";
     QString wcsFileName = QString("%1.wcs").arg(fileName);
     QString wcsLockFile = QString("%1.lock").arg(fileName);
 
     QFileInfo fi(fileName);
-    QString platePath = fi.absolutePath();
+    QString filePath = fi.absolutePath();
 
     if(QDir().exists(wcsLockFile)||(QDir().exists(wcsFileName)&&!refindWCS)) return 1;
     else
@@ -176,7 +205,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
 ///////////////////////////////////////////////////////////
 
     qDebug() << QString("fileName: %1\n").arg(fileName);
-    qDebug() << QString("platePath: %1\n").arg(platePath);
+    qDebug() << QString("platePath: %1\n").arg(filePath);
 
 /////////////////////////////
 
@@ -222,50 +251,34 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
 
 //get header
 
-        int doWhat;
-        if(argc>3) doWhat = atoi(argv[3]);
-        else doWhat = 0;
-        if(doWhat)   //0-http; 1-file
+    if(doWhat)   //0-http; 1-file
+    {
+        if(fitsd->loadHeaderFile(headerFileName))
         {
-            if(fitsd->loadHeaderFile(QString(argv[4])))
-            {
-                qDebug() << "\nloadHeaderFile error\n";
-                QDir().remove(wcsLockFile);
-                return 1;
-            }
+            qDebug() << "\nloadHeaderFile error\n";
+            return 1;
         }
-        else
+    }
+    else
+    {
+
+        if(detPlName) detPlateName(&pnStr, filePath, plNameType);
+
+        outerArguments.clear();
+        outerProcess.setWorkingDirectory(gethttp_prog_folder);
+        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+        outerProcess.setReadChannel(QProcess::StandardOutput);
+        outerArguments << pnStr.toAscii().constData();
+        qDebug() << gethttp_prog << outerArguments.join(" ") << "\n";
+        outerProcess.start(gethttp_prog, outerArguments);
+
+        outerProcess.waitForFinished(gethttp_wait_time);
+        if(fitsd->readHttpHeader(QString(outerProcess.readAllStandardOutput())))
         {
-
-            qDebug() << QString("argc= %1").arg(argc);
-            if(argc>4)
-            {
-                pnStr = QString(argv[4]);
-            }
-            else
-            {
-                detPlateName(&pnStr, fileName, plNameType);
-            }
-            qDebug() << QString("pnStr: %1\n").arg(pnStr);
-
-            outerArguments.clear();
-            outerProcess.setWorkingDirectory(gethttp_prog_folder);
-            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-            outerProcess.setReadChannel(QProcess::StandardOutput);
-            outerArguments << pnStr.toAscii().constData();
-            qDebug() << gethttp_prog << outerArguments.join(" ");
-            outerProcess.start(gethttp_prog, outerArguments);
-
-            outerProcess.waitForFinished(gethttp_wait_time);
-            QTextStream catStream(outerProcess.readAllStandardOutput());
-
-            if(fitsd->readHttpHeader(catStream.readAll()))
-            {
-                qDebug() << "\nreadHttpHeader error\n";
-                QDir().remove(wcsLockFile);
-                return 1;
-            }
+            qDebug() << "\nreadHttpHeader error\n";
+            return 1;
         }
+    }
 
 /////////////////////////////
 

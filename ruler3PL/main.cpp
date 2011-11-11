@@ -131,13 +131,13 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
 ///////// 1. Reading settings ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        QString cfgFile = QString(cfgFileName);
+        //QString cfgFile = QString(cfgFileName);
 
         refractionParam *refParam = NULL;
 
-        qDebug() << "started....\n";
+        qDebug() << "Reading settings....\n";
 
-        QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
+        QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
         QString redparamIni = sett->value("general/redparamIni", "./redParam.ini").toString();
         int expNum = sett->value("general/expNum", -1).toInt();
@@ -151,8 +151,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 //  logs
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
         int isRemLog = sett->value("logs/isRemLog", 0).toInt();
-        //QString logFolder = sett->value("logs/logFolder", "./logs").toString();
- //       syscorr
+
+//  syscorr
         QString syscorIni = sett->value("syscorr/syscorIni", "./syscorr.ini").toString();
         int useSysCorr = sett->value("syscorr/useSysCorr", 0).toInt();
 
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QStringList allSett;
         allSett << sett->allKeys();
         sz = allSett.size();
-        qDebug() << QString("\n\nconfig: %1\n").arg(cfgFile);
+        qDebug() << QString("\n\nconfig: %1\n").arg(cfgFileName);
         for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
         qDebug() << "\n\n";
 

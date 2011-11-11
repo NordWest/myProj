@@ -11,12 +11,12 @@ unix:TARGET = ./../libs/unix/astro
 TEMPLATE = lib
 CONFIG += staticlib warn_off
 
-SOURCES += ./../libs/astro.cpp \
+SOURCES += astro.cpp \
     ../libs/comfunc.cpp
 
-HEADERS += ./../libs/astro.h \
+HEADERS += astro.h \
     ../libs/comfunc.h \
-    ../libs/mb.h
+    ../mb/mb.h
 
 win32:LIBS+=./../libs/win32/libmb.a
 unix:LIBS+=./../libs/unix/libmb.a
