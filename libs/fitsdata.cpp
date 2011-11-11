@@ -10263,12 +10263,12 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCatList->append(starCat);
     //
     starCat = new catFinder;
-    starCat->exeName = sett->value("ucac3/exeName").toString();
-    starCat->exePath = sett->value("ucac3/exePath").toString();
-    starCat->catType = sett->value("ucac3/catType").toInt();
-    starCat->catName = sett->value("ucac3/catName").toString();
-    starCat->catMagName = sett->value("ucac3/catMagName").toString();
-    starCat->catPath = sett->value("ucac3/catPath").toString();
+    starCat->exeName = sett->value("ucac3find/exeName").toString();
+    starCat->exePath = sett->value("ucac3find/exePath").toString();
+    starCat->catType = sett->value("ucac3find/catType").toInt();
+    starCat->catName = sett->value("ucac3find/catName").toString();
+    starCat->catMagName = sett->value("ucac3find/catMagName").toString();
+    starCat->catPath = sett->value("ucac3find/catPath").toString();
     starCatList->append(starCat);
     /*
     starCat = new catFinder;
