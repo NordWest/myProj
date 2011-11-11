@@ -344,6 +344,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
         if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
         {
             qDebug() << QString("getMarksGrid error\n");
+            QDir().remove(wcsLockFile);
             return 2;
         }
         fitsd->detTan();
