@@ -15,10 +15,11 @@ HEADERS += ./../libs/astro.h
 #INCLUDEPATH += /mnt/winsys/boost_1_33_1
 #INCLUDEPATH += /home/berezhnoy/myProjects/boost_1_33_1
 #}
-TARGET = mpeph
+win32:TARGET = ./../../bin/mpeph
+unix:TARGET = ./../../bin/mpeph
 QT += network
 CONFIG += console exceptions warn_off release
-win32:LIBS += ./../libs/cfitsio.lib
+win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
 unix:LIBS += ./../libs/unix/libmb.a
 win32:LIBS += ./../libs/win32/libmb.a

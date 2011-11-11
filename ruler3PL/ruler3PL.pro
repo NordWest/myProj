@@ -31,7 +31,8 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-TARGET = ./../bin/ruler3PL
+unix:TARGET = ./../bin/ruler3PL
+win32:TARGET = ./../../bin/ruler3PL
 #TARGET = ./../../bin/win32/ruler3PL
 
 documentation.path = /usr/local/ruler3PL/doc

@@ -62,7 +62,7 @@ HEADERS += ../libs/fitsdata.h \
 unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
-win32:LIBS += ./../libs/cfitsio.lib \
+win32:LIBS += ./../libs/win32/cfitsio.lib \
               ./../libs/win32/libmb.a \
               ./../libs/win32/libastro.a
 

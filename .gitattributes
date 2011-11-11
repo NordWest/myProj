@@ -280,6 +280,9 @@ libs/uneven.cpp -text
 libs/uneven.h -text
 libs/vectGrid3D.cpp -text
 libs/vectGrid3D.h -text
+libs/win32/cfitsio.def -text
+libs/win32/cfitsio.dll -text
+libs/win32/cfitsio.lib -text
 lspmFind/lspmFind.pro -text
 lspmFind/main.cpp -text
 mPack/mPack.pro -text
