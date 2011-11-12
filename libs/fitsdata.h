@@ -83,8 +83,8 @@ void detOCgrid(marksGrid *mG, double *ra_oc, double *de_oc);
 bool findStars(img2d *imgArr, QVector<double>& cmX, QVector<double>&cmY, QVector<double>& flux, int rho, int bsize);
 
 void rsSelector0(marksGrid *refMarks, QVector<int> &rsindex, rsSelector0Sett rss0sett);
-void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect wFrame, double xc, double yc);
-void rsSelector2(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double aper);
+void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect wFrame, int minRefStar);
+void rsSelector2(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double aper, int minRefStar);
 void rsSelector3(marksGrid *refMarks, QVector<int> &rsindex, double objMag, double magDiap, int minStarsNum);
 void rsSelector4(marksGrid *refMarks, QVector<int> &rsindex, double muMax, int minRefStars);
 void rsSelector5(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double dMax, double nMin, double nMax);

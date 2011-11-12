@@ -9698,10 +9698,10 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
                         rsSelector0(refMarks, rsindex, sel0);
                         break;
                     case 1:
-                        rsSelector1(refMarks, rsindex, sel1.cDist, workFrame, WCSdata[0], WCSdata[1]);
+                        rsSelector1(refMarks, rsindex, sel1.cDist, workFrame, sel1.minStarsNum);
                         break;
                     case 2:
-                        if((mObj!=NULL)&&objSepRed) rsSelector2(refMarks, rsindex, mObj, sel2.aper);
+                        if((mObj!=NULL)&&objSepRed) rsSelector2(refMarks, rsindex, mObj, sel2.aper, sel2.minStarsNum);
                         break;
                     case 3:
                         if((mObj!=NULL)&&objSepRed) rsSelector3(refMarks, rsindex, mObj->mEkv[2], sel3.magDiap, sel3.minStarsNum);
@@ -10716,7 +10716,7 @@ void rsSelector0(marksGrid *refMarks, QVector<int> &rsindex, rsSelector0Sett rss
     qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
 }
 
-void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect wFrame, double xc, double yc)
+void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect wFrame, int minRefStar)
 {
     qDebug() << QString("refStarSelector1\n");
 
@@ -10744,12 +10744,13 @@ void rsSelector1(marksGrid *refMarks, QVector<int> &rsindex, double cDist, QRect
        //qDebug() << QString("cDist: %1\ndi: %2\t%3\t%4\t%5\n").arg(cDist).arg(d0).arg(d1).arg(d2).arg(d3);
        if(!tFrame.contains(x, y)) rsindex.remove(i);
        //if((d0<cDist)||(d1<cDist)||(d2<cDist)||(d3<cDist)) rsindex.remove(i);
+       if(rsindex.size()<minRefStar) break;
     }
 
     qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
 }
 
-void rsSelector2(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double aper)
+void rsSelector2(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double aper, int minRefStar)
 {
     qDebug() << QString("refStarSelector2\n");
     int szRef = rsindex.count();
@@ -10767,6 +10768,7 @@ void rsSelector2(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double 
        //data = refMarks->marks.at(j)->data;
        iDist = marksImgDist(mP, refMarks->marks.at(j));
        if(iDist<aper) rsindex.remove(i);
+       if(rsindex.size()<minRefStar) break;
     }
 
 qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
