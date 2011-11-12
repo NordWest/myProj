@@ -355,6 +355,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
     copyImgGrid(fitsd->catMarks, fitsd->ipixMarks);
     fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
     fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
+    fitsd->findCloserStars(aper);
 //
     //////////
 
@@ -389,8 +390,11 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             fitsd->detTanObj();
     ///////////
             fitsd->cleanObjects(aper);
+            copyImgGrid(fitsd->objMarks, fitsd->ipixMarks);
+            fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
+            fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
             fitsd->findCloserObjects(aper);
-            fitsd->findCloserStars(aper);
+
 //reduction
 
     //int resRed = fitsd->makeReduction(ruler3File, resFolder);
