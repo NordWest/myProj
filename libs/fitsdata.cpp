@@ -876,7 +876,7 @@ int reductionMaker::make6const(marksGrid *refMarks, QVector<int> &rsindex, reduc
         rsSize = rsindex.count();
 
     }while((rsSize>=params.minRefStars)&&recount);
-    return 0;
+    return recount;
 }
 /*
 void reductionMaker::clear()
@@ -1394,7 +1394,7 @@ int reductionMaker::make8const(marksGrid *refMarks, QVector<int> &rsindex, reduc
 
 
 
-    return 0;
+    return recount;
 }
 
 void reductionMaker::getCenterPos8const(double *Xoc, double *Yoc)
