@@ -33,15 +33,6 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
 
 unix:TARGET = ./../bin/ruler3PL
 win32:TARGET = ./../../bin/ruler3PL
-#TARGET = ./../../bin/win32/ruler3PL
-
-documentation.path = /usr/local/ruler3PL/doc
-documentation.files = docs/*
-
-INSTALLS += documentation
-
-target.path = /usr/local/ruler3PL
-INSTALLS += target
 
 CONFIG += console \
     exceptions \
@@ -72,5 +63,3 @@ HEADERS += ../astro/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h
-
-

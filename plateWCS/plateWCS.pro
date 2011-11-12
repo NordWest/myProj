@@ -2,6 +2,7 @@
 # Project created by QtCreator 2010-03-29T11:20:21
 # -------------------------------------------------
 # QT -= gui
+
 unix:TARGET = ./../bin/plateWCS
 win32:TARGET = ./../../bin/plateWCS
 
@@ -9,8 +10,6 @@ CONFIG += console \
     qt \
     warn_off
 
-
-# CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/fitsdata.cpp \

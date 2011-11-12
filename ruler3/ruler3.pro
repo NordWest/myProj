@@ -32,13 +32,13 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-win32:TARGET = ./../../../lab/ruler3/ruler3
-unix:TARGET = ./../../lab/ruler3/ruler3
+win32:TARGET = ./../../bin/ruler3
+unix:TARGET = ./../bin/ruler3
 
 CONFIG += console \
     exceptions \
     warn_off
-HEADERS += ../libs/astro.h \
+HEADERS += ../astro/astro.h \
     ../libs/comfunc.h \
     ../libs/sscat.h \
     ../libs/redStat.h \
@@ -48,7 +48,7 @@ HEADERS += ../libs/astro.h \
     ../libs/fitsdata.h \
     ../libs/fBuffer.h \
     ../libs/ccdmeasurements.h \
-    ../libs/mb.h \
+    ../mb/mb.h \
     ../libs/identify.h \
     ../libs/cmnk.h \
     ../libs/fitstools.h\
