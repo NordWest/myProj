@@ -1,6 +1,6 @@
 #include <QtCore>
 #include <QCoreApplication>
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 
 int main(int argc, char *argv[])
 {//ucac3find hh:mm:ss +dd:am:as r=10 ucac3path

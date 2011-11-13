@@ -96,7 +96,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
     //command line  ///////////////////////////////////////
 
 
-        for(i=1; i<argc; i++)
+        for(i=2; i<argc; i++)
         {
             optStr = QString(argv[i]);
             optName = optStr.section("=", 0, 0);
@@ -126,6 +126,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 isSc = 1;
                 scFile = optVal;
 
+            }
+            else
+            {
+                qDebug() << QString("Error option %1.\nUseage: config|plName|headerFile|resFolder|syscorr\n").arg(optName);
+                return 1;
             }
         }
 

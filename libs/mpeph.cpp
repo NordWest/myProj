@@ -1,5 +1,5 @@
 #include "mpeph.h"
-#include "astro.h"
+#include "./../astro/astro.h"
 /*о командной строчке замолвите словечко...
 mpeph.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
 1 -num - это значит задается номер астероида (как в примере)

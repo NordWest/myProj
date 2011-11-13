@@ -9,7 +9,6 @@ CONFIG += console warn_off
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
-    ../astro/astro.cpp \
     ../libs/comfunc.cpp
 HEADERS += ../astro/astro.h \
     ../libs/comfunc.h \

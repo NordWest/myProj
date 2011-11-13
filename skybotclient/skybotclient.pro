@@ -1,6 +1,7 @@
 TEMPLATE = app
 QT += network
-TARGET = skybotclient
+unix:TARGET = ./../bin/skybotclient
+win32:TARGET = ./../../bin/skybotclient
 CONFIG   += console warn_off release
 CONFIG   -= app_bundle
 SOURCES += main.cpp

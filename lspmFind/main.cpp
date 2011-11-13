@@ -1,10 +1,10 @@
 #include <QtCore>
 #include <QCoreApplication>
 #include "./../libs/sscatFB.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 #include "./../libs/comfunc.h"
 
-int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|} LSPMcat muMin
+int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|}=['] LSPMcat muMin
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
@@ -32,8 +32,6 @@ int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|} LSPMcat mu
         distMax=areaSize.toDouble()/60.0;//grad
     }
 
-
-
     sscatFB *starCat = new sscatFB;
     if(starCat->init(argv[4]))
     {
@@ -48,7 +46,7 @@ int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|} LSPMcat mu
     int i=0;
     char *str_out = new char[1024];
     double raC, deC, cosD;
-    cosD = cos(grad2rad(ra_oc));
+    cosD = cos(grad2rad(de_oc));
     while(!starCat->GetRec(i))
     {
         //qDebug() << QString("pos= %1\n").arg(i);
@@ -57,7 +55,7 @@ int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|} LSPMcat mu
         deC = starCat->record->DEdeg;
 
         dist = sqrt(pow((raC-ra_oc)*cosD, 2.0) + pow(deC-de_oc, 2.0));
-        //qDebug() << QString("pos= %1\tdist= %2\n").arg(i).arg(dist-distMax);
+
         if(dist<distMax&&((argc!=6)||(muMin<starCat->record->pm)))
         {
             starCat->rec2s(str_out);
@@ -65,21 +63,7 @@ int main(int argc, char *argv[])    //getLSPM.exe ra de {rad|square|} LSPMcat mu
         }
         i++;
     }
-/*
-    if(starCat->GetName(argv[1])==-1)
-    {
-        stream << "err: star not found\n";
-        return 3;
-    }
 
-    char *str_out = new char[1024];
-    starCat->rec2s(str_out);
-
-    stream << str_out << "\n";
-
-
-*/
     delete [] str_out;
     return 0;
-   // return a.exec();
 }

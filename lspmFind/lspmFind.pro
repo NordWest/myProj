@@ -2,7 +2,8 @@
 # Project created by QtCreator 2010-05-10T00:03:05
 # -------------------------------------------------
 QT -= gui
-TARGET = lspmFind
+unix:TARGET = ./../bin/lspmFind
+win32:TARGET = ./../../bin/lspmFind
 CONFIG += console \
     release \
     warn_off
@@ -11,16 +12,17 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/sscat.cpp \
     ../libs/comfunc.cpp \
-    ../libs/astro.cpp \
     ../libs/fBuffer.cpp \
     ../libs/sscatFB.cpp \
     ../libs/fbStream.cpp
 HEADERS += ../libs/sscat.h \
     ../libs/comfunc.h \
-    ../libs/astro.h \
+    ../astro/astro.h \
     ../libs/fBuffer.h \
     ../libs/sscatFB.h \
     ../libs/fbStream.h \
-    ../libs/mb.h
+    ../mb/mb.h
 unix:LIBS += ./../libs/unix/libmb.a
 win32:LIBS += ./../libs/win32/libmb.a
+unix:LIBS += ./../libs/unix/libastro.a
+win32:LIBS += ./../libs/win32/libastro.a

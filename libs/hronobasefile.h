@@ -1,8 +1,8 @@
 #include <QtCore>
 
-#include "astro.h"
+#include "./../astro/astro.h"
 #include "comfunc.h"
-#include "mb.h"
+#include "./../mb/mb.h"
 
 #ifndef HRONOBASEFILE_H
 #define HRONOBASEFILE_H
