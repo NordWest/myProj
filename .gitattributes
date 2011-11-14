@@ -62,7 +62,6 @@ everBody/main.cpp -text
 findSimMpcs/findSimMpcs.pro -text
 findSimMpcs/main.cpp -text
 fitsIndex/fitsIndex.pro -text
-fitsIndex/fitsIndex.pro.user -text
 fitsIndex/main.cpp -text
 fitsRenamer/fitsRenamer.pro -text
 fitsRenamer/main.cpp -text
