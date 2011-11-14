@@ -1,7 +1,10 @@
 #include <QtCore>
 
 #include "./../libs/fitsdata.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
+
+#include <QtSql>
+//#include <QSqlDatabase>
 
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -169,6 +172,8 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
          dateCode.append(QString("%1").arg((int)dObs.sec, 2, 10, QLatin1Char( '0' )));
          dateCode.append(QString("%1").arg((int)((int)(dObs.sec*10) - ((int)dObs.sec)*10), 1, 10, QLatin1Char( '0' )));
 */
+
+         QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 
          nFile = QString("%1%2.fit").arg(resPath).arg(dateCode);

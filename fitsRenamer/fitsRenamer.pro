@@ -17,7 +17,7 @@ CONFIG += console \
     warn_off
 
 SOURCES += main.cpp \
-    ../libs/astro.cpp \
+#    ../libs/astro.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscat.cpp \
     ../libs/redStat.cpp \
@@ -28,19 +28,28 @@ SOURCES += main.cpp \
     ../libs/ccdmeasurements.cpp \
     ../libs/identify.cpp \
     ../libs/cmnk.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
-    ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp
-win32:LIBS += ./../libs/cfitsio.lib  \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/libcfitsio.a
-win32:LIBS += ./../libs/win/libmb.a
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
+    ../libs/sysCorr.cpp \
+    ../libs/vectGrid3D.cpp
+win32:LIBS += ./../libs/win32/cfitsio.lib
+unix:LIBS += ./../libs/unix/libcfitsio.a
+win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
+win32:LIBS += ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libastro.a
 
-HEADERS += ../libs/mb.hpp \
-    ../libs/astro.h \
+QT += sql
+
+HEADERS += ../mb/mb.h \
+    ../astro/astro.h \
     ../libs/comfunc.h \
     ../libs/sscat.h \
     ../libs/redStat.h \
@@ -50,12 +59,17 @@ HEADERS += ../libs/mb.hpp \
     ../libs/fitsdata.h \
     ../libs/fBuffer.h \
     ../libs/ccdmeasurements.h \
-    ../libs/mb.h \
     ../libs/identify.h \
     ../libs/cmnk.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
-    ../libs/vectGrid3D.h \
-    ../libs/ialglib.h
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h \
+    ../libs/vectGrid3D.h
 
