@@ -11,7 +11,7 @@ TEMPLATE = app
 #SOURCES += main.cpp \
 SOURCES += main.cpp \
     ./../libs/redStat.cpp \
-    ./../libs/astro.cpp \
+#    ./../libs/astro.cpp \
     ./../libs/comfunc.cpp \
     ./../libs/multidim.cpp \
     ./../libs/observatory.cpp \
@@ -23,9 +23,6 @@ SOURCES += main.cpp \
     ../libs/sscat.cpp \
     ../libs/fbStream.cpp \
     ../libs/fBuffer.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
     ../libs/vectGrid3D.cpp \
     ../libs/ialglib.cpp \
     ../libs/alglib/ap.cpp \
@@ -38,8 +35,8 @@ SOURCES += main.cpp \
     ../libs/alglib/alglibmisc.cpp \
     ../libs/alglib/alglibinternal.cpp
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
+HEADERS += ../astro/astro.h \
+    ../mb/mb.h \
     ../libs/comfunc.h \
     ../libs/astro.h \
     ../libs/redStat.h \
@@ -56,11 +53,7 @@ HEADERS += ../libs/astro.h \
     ../libs/sscat.h \
     ../libs/fbStream.h \
     ../libs/fBuffer.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h \
     ../libs/alglib/ap.h \
     ../libs/alglib/interpolation.h \
     ../libs/alglib/specialfunctions.h \
@@ -71,9 +64,11 @@ HEADERS += ../libs/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h
 
-win32:LIBS += ./../libs/cfitsio.lib \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/libcfitsio.a
-win32:LIBS += ./../libs/libmb.a
-unix:LIBS += ./libmb.a
+win32:LIBS += ./../libs/win32/cfitsio.lib
+unix:LIBS += ./../libs/unix/libcfitsio.a
+win32:LIBS += ./../libs/win32/libmb.a
+unix:LIBS += ./../libs/unix/libmb.a
+win32:LIBS += ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libastro.a
+
 #INCLUDEPATH += C:\Qt\GnuWin32\include

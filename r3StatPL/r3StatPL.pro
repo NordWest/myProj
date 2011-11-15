@@ -12,7 +12,7 @@ CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
     ./../libs/redStat.cpp \
-    ./../libs/astro.cpp \
+#    ./../libs/astro.cpp \
     ./../libs/comfunc.cpp \
     ./../libs/multidim.cpp \
     ./../libs/observatory.cpp \
@@ -40,8 +40,8 @@ SOURCES += main.cpp \
     ../libs/sysCorr.cpp \
     ../libs/uneven.cpp
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
+HEADERS += ../astro/astro.h \
+    ../mb/mb.h \
     ../libs/comfunc.h \
     ../libs/astro.h \
     ../libs/redStat.h \
@@ -73,9 +73,9 @@ HEADERS += ../libs/astro.h \
     ../libs/sysCorr.h \
     ../libs/uneven.h
 
-win32:LIBS += ./../libs/cfitsio.lib
+win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
 win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
-
-
+win32:LIBS += ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libastro.a
