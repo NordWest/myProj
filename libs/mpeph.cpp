@@ -112,11 +112,13 @@ cdsfind::cdsfind(QCoreApplication *app)//конструктор
 		"&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));
 
         QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
+
+        requestStr += QString("&planete=Aster");
         if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
-        requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale+"&te="+te;
+        requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale+"&te="+te;
     //                if(simplemode==3) requestStr = requestStr + "&uploadfile_dat="+mjdfname;
         if (msgout==1) stream << requestStr<<"\n";//печатать запрос в консоли
-	http->get(requestStr);// посылаем запрос методом get
+        http->get(requestStr);// посылаем запрос методом get
 	
 };
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1

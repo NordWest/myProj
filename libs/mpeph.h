@@ -29,6 +29,11 @@ Q_OBJECT
         QString keph;
         QString te;
 	int timescale;
+
+        QNetworkAccessManager manager;
+        QNetworkReply *reply;
+        QUrl apiUrl;
+        QByteArray requestString;
 	
 private slots:// самый минимум слотов. нам ведь нужно чтобы прога могла "узнать":  
     void slotProcessingData(bool error);//получить и обработать данные;
