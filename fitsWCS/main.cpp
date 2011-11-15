@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include <QtCore>
 #include "./../libs/fitsdata.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/observatory.h"
 
@@ -45,272 +45,290 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 
-int main(int argc, char *argv[])//fitsWCS file.fit [conf.ini]
+int main(int argc, char *argv[])//fitsWCS file.fit [options]
 {
     qInstallMsgHandler(customMessageHandler);
-    QString msgstr;
     QCoreApplication app(argc, argv);
-    QTextStream stream(stdout);
 
-    QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
-    Q_ASSERT( codec1 );
-///////// 1. Reading settings ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    QString fileName = QString(argv[1]);
-    QString logFileName = fileName+".wcs.log";
-    QFile* logFile = new QFile(logFileName);
-    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered)) clog = new QDataStream(logFile);
+    setlocale(LC_NUMERIC, "C");
 
-    //QString wcsFileName = QString("%1.wcs").arg(fileName);
-    QString wcsLockFile = QString("%1.lock").arg(fileName);
+    QFile* logFile;
 
-    QString filePath = fileName.left(fileName.lastIndexOf("/")+1);
-    if(filePath=="") filePath = QString("./");
-    qDebug() << QString("fileName: %1\n").arg(fileName);
-    qDebug() << QString("filePath: %1\n").arg(filePath);
-    qDebug() << QString("logFileName: %1\n").arg(logFileName);
+    if(argc<2)
+    {
+        qDebug() << "argc= " << argc << "\n";
+        return 1;
+    }
 
-    QString cfgFile;
-    if(argc>2) cfgFile = codec1->toUnicode(argv[2]);
-    else cfgFile = QString("./conf/conf.ini");
-
-    //if(QFile::exists(logFileName)) return 1;
-    //QFile* logFile = new QFile(logFileName);
-
-
-
-    fitsdata *fitsd = new fitsdata;
-    if(fitsd->openFile(fileName)) return 1;
-
-
-
-
-    int currentCat, isMove2corner;
-    double maxObjDisp;
-    catFinder *starCat;
     QList <catFinder*> starCatList;
     QString obsCode;
     int sz, i;
-    //BEGIN settings
-    QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);
+    QString dateCode;
+    QString nFile;
 
-    QStringList allSett;
-    allSett << sett->allKeys();
-    sz = allSett.size();
-    qDebug() << QString("\n\nconf.ini:\n");
-    for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
-    qDebug() << "\n\n";
-    QString ruler3File = sett->value("general/ruler3File", "./conf/ruler3.ini").toString();
-    QString telescopeFile = sett->value("telescope/telescopeFile", "./conf/telescopes.ini").toString();
-    int insNum = sett->value("telescope/instrNum", 2).toInt();
-    //insSettings *instruments = new insSettings("./conf/telescopes.ini");
-    //instruments->getNumIns(instruments->curInst);
+    QString codecName;
 
-    int mpeWaitTime = sett->value("General/mpeWaitTime").toInt();
-    int sbWaitTime = sett->value("General/sbWaitTime").toInt();
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
 
-    int expMin = sett->value("General/expMin", 0).toInt();
-
-    QString resFolder = sett->value("general/resFolder", "./resDefault").toString();
-    QDir resDir("./");
-    if(resDir.mkpath(resFolder))qDebug() << "\nresFolder created\n";
-    else qDebug() << "\nresFolder don't create\n";
-    resDir.setPath(resFolder);
-
-    int reFindWCS = sett->value("general/reFindWCS", 0).toInt();
-    int saveRefindWCS = sett->value("general/saveRefindWCS", 0).toInt();
-
-    int identType = sett->value("identify/identType", 0).toInt();
-    int targNum = sett->value("identify/targNum", 5).toInt();
-
-    reductionParams wcsParams;
-
-    wcsParams.maxres = sett->value("wcs/maxres", 300).toDouble();
-    wcsParams.maxresMAG = sett->value("wcs/maxresMAG", 10).toDouble();
-    //wcsParams.minRefMag = sett->value("wcs/minRefMag", 8).toDouble();
-    //wcsParams.maxRefMag = sett->value("wcs/maxRefMag", 15).toDouble();
-    wcsParams.redType = sett->value("wcs/redType", 0).toDouble();
-    wcsParams.sMax = sett->value("wcs/sMax", 500).toDouble();
-    wcsParams.uweMax = sett->value("wcs/uweMax", 500).toDouble();
-    wcsParams.weights = sett->value("wcs/weights", 0).toDouble();
-    wcsParams.minRefStars = sett->value("wcs/minRefStars", 4).toInt();
-    wcsParams.sigma = sett->value("wcs/sigmaN", 3).toDouble();
-
-    int starsNum = sett->value("wcs/starsNum", 100).toInt();
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
 
 
-    int lspmFind = sett->value("objectsFind/lspmFind").toInt();
-    int skybotFind = sett->value("objectsFind/skybotFind").toInt();
-    int tryMpeph = sett->value("objectsFind/tryMpeph").toInt();
-    int mpephType = sett->value("objectsFind/mpephType", 0).toInt();
-    double magObj0 = sett->value("objectsFind/mag0", 6.0).toDouble();
-    double magObj1 = sett->value("objectsFind/mag1", 15.0).toDouble();
+    //command line  ///////////////////////////////////////
 
+    QString cfgFileName = "./fitsWCS.ini";
+    int resdirDef = 0;
+    QString optName, optVal, optStr;
+    QString resFolder;
 
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac2/exeName").toString();
-    starCat->exePath = sett->value("ucac2/exePath").toString();
-    starCat->catType = sett->value("ucac2/catType").toInt();
-    starCat->catName = sett->value("ucac2/catName").toString();
-    starCat->catPath = sett->value("ucac2/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("usnob/exeName").toString();
-    starCat->exePath = sett->value("usnob/exePath").toString();
-    starCat->catType = sett->value("usnob/catType").toInt();
-    starCat->catName = sett->value("usnob/catName").toString();
-    starCat->catPath = sett->value("usnob/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("ucac3/exeName").toString();
-    starCat->exePath = sett->value("ucac3/exePath").toString();
-    starCat->catType = sett->value("ucac3/catType").toInt();
-    starCat->catName = sett->value("ucac3/catName").toString();
-    starCat->catPath = sett->value("ucac3/catPath").toString();
-    starCatList << starCat;
-    starCat = new catFinder;
-    starCat->exeName = sett->value("lspm/exeName").toString();
-    starCat->exePath = sett->value("lspm/exePath").toString();
-    starCat->catType = sett->value("lspm/catType").toInt();
-    starCat->catName = sett->value("lspm/catName").toString();
-    starCat->catPath = sett->value("lspm/catPath").toString();
-    starCatList << starCat;
-    //
-    starCat = new catFinder;
-    starCat->exeName = sett->value("lspmFind/exeName").toString();
-    starCat->exePath = sett->value("lspmFind/exePath").toString();
-    starCat->catType = sett->value("lspmFind/catType").toInt();
-    starCat->catName = sett->value("lspmFind/catName").toString();
-    starCat->catPath = sett->value("lspmFind/catPath").toString();
-    starCatList << starCat;
-    //
-    //qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
-    QString ast_eph_prog = sett->value("processes/ast_eph_prog", "./mpeph.exe").toString();
-    QString ast_eph_prog_folder = sett->value("processes/ast_eph_prog_folder", "./").toString();
-    QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient.exe").toString();
-    QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
+        for(i=2; i<argc; i++)
+        {
+            optStr = QString(argv[i]);
+            optName = optStr.section("=", 0, 0);
+            optVal = optStr.section("=", 1, 1);
+            if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+            {
+                cfgFileName = optVal;
+            }
+            else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
+            {
+                resdirDef=1;
+                resFolder = optVal;
+            }
+            else
+            {
+                qDebug() << QString("Error option %1.\nUseage: config|resFolder\n").arg(optName);
+                return 1;
+            }
 
-    currentCat = sett->value("catalogs/currentCatalog", 0).toInt();
-    QString observatoryCat = sett->value("catalogs/observatoryCat", "./../../../data/cats/Obs.txt").toString();
-    double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
-    double mag1 = sett->value("catalogs/mag1", 15.0).toDouble();
-    isMove2corner = sett->value("marks/isMove2corner", 0).toInt();
+        }
+///////// 1. Reading settings
 
-//celestial
-    //obsCode->clear();
-    obsCode = sett->value("celestial/obsName", "084").toString();
-    maxObjDisp = sett->value("celestial/maxObjDisp", 2).toDouble();
+        QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
-    observatory *obsList = new observatory;
-    obsList->init(observatoryCat.toAscii().data(), OBS_SIZE);
+    //general
+        int refindWCS = sett->value("general/refindWCS", 0).toInt();
+        double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
+        int log_level = sett->value("general/log_level", 0).toInt();
+        int expMin = sett->value("general/expMin", 0).toInt();
+
+    //insSettings
+        QString insSettFile = sett->value("insSettings/insSettFile", "./telescopes.ini").toString();
+        int instrNum = sett->value("insSettings/instrNum", 0).toInt();
+
+    //identify  ///////
+        int identType = sett->value("identify/identType", 0).toInt();
+        int identNum = sett->value("identify/identNum", 6).toInt();
+        int maxNum = sett->value("identify/maxNum", 100).toInt();
+
+        reductionParams wcsParams;
+
+        wcsParams.redType = sett->value("reduction/redType", 0).toInt();
+        wcsParams.weights = sett->value("reduction/weights", 0).toDouble();
+        wcsParams.minRefStars = sett->value("reduction/minRefStars", 4).toDouble();
+        wcsParams.sMax = sett->value("reduction/sMax", 500).toDouble();
+        wcsParams.uweMax = sett->value("reduction/uweMax", 500).toDouble();
+        wcsParams.sigma = sett->value("reduction/sigma", 3).toDouble();
+        wcsParams.maxres = sett->value("reduction/maxres", 300).toDouble();
+        wcsParams.maxresMAG = sett->value("reduction/maxresMAG", 30).toDouble();
+        wcsParams.maxRefStars = sett->value("reduction/maxRefStars", -1).toInt();
+
+    //psf
+        measureParam mesPar;
+        mesPar.model = sett->value("psf/model", 3).toInt();//settings->value("psf/model").toInt();//PSF model: 0 - Lorentz PSF, 1 - Gauss PSF, 2 - Moffat PSF, 3 - CoM
+        mesPar.nofit = sett->value("psf/nofit", 10).toInt();
+        mesPar.delta = sett->value("psf/delta", 1.2).toDouble();
+        mesPar.ringradius = sett->value("psf/ringradius", 10).toInt();
+        mesPar.ringwidth = sett->value("psf/ringwidth", 6).toInt();
+        mesPar.lb = sett->value("psf/lb", 1).toInt();
+        mesPar.sg = sett->value("psf/subgrad", 1).toInt();
+        mesPar.apRadius = sett->value("psf/apRadius", 10).toInt();
+
+    //  catalogs    /////
+        QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
+        int catProgType = sett->value("catalogs/catProgType", 0).toInt();
+        double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
+        double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
+
+    //observatory
+        QString observatoryCat = sett->value("observatory/observatoryCat", "./Obs.txt").toString();
+        obsCode = sett->value("observatory/obsCode", "084").toString();
+    ///////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    QString fileName = QString(argv[1]);
+
+    if(log_level>0)
+    {
+        QString logFileName = fileName+".wcs.log";
+        logFile = new QFile(logFileName);
+        if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered)) clog = new QDataStream(logFile);
+    }
+
+    //QString wcsFileName = QString("%1.wcs").arg(fileName);
+    QString wcsLockFile = QString("%1.lock").arg(fileName);
+    QString logFileName = fileName+".wcs.log";
+
+    QFileInfo fi(fileName);
+    QString filePath = fi.absolutePath();
+
+    if(QDir().exists(wcsLockFile)) return 1;
+    else
+    {
+        logFile = new QFile(logFileName);
+        if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered)) clog = new QDataStream(logFile);
+        QFile lockFile(wcsLockFile);
+        lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        lockFile.close();
+    }
+
+    if(log_level>0)
+    {
+        qDebug() << QString("fileName: %1\n").arg(fileName);
+        qDebug() << QString("filePath: %1\n").arg(filePath);
+        qDebug() << QString("logFileName: %1\n").arg(logFileName);
+    }
+
+////////////////////////////////////////////////////////////////
+
+    if(log_level>0)
+    {
+        QStringList allSett;
+        allSett << sett->allKeys();
+        sz = allSett.size();
+        qDebug() << QString("\n\nconf: %1\n").arg(cfgFileName);
+        for(i=0; i<sz; i++) qDebug() << QString("%1=%2\n").arg(allSett.at(i)).arg(sett->value(allSett.at(i)).toString());
+        qDebug() << "\n\n";
+    }
+
+////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
+
+    fitsdata *fitsd = new fitsdata;
+    if(fitsd->openFile(fileName))
+    {
+        if(log_level>0) qDebug() << QString("Fits file %1 is not opened\n").arg(fileName);
+        QDir().remove(wcsLockFile);
+        return 1;
+    }
 
     if(fitsd->exptime<expMin)
     {
-        qDebug() << QString("Fits exposure %1 smaller then expMin=%2").arg(fitsd->exptime).arg(expMin);
+        if(log_level>0) qDebug() << QString("Fits exposure %1 smaller then expMin=%2").arg(fitsd->exptime).arg(expMin);
 
         qInstallMsgHandler(0);
-        return 0;
+        QDir().remove(wcsLockFile);
+        return 1;
     }
 
-    QString dateCode;
-    QString nFile;
-    /*DATEOBS dObs;
+/////////////////////////////
 
+    initCatList(&starCatList, catIni);
+    if(log_level>0)qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
 
-    dObs = getDATEOBSfromMJD(fitsd->MJD);
-    dateCode = QString("%1").arg((int)dObs.year, 4, 10, QLatin1Char( '0' ));
-    dateCode.append(QString("%1").arg((int)dObs.month, 2, 10, QLatin1Char( '0' )));
-    dateCode.append(QString("%1").arg((int)dObs.day, 2, 10, QLatin1Char( '0' )));
-    dateCode.append(QString("%1").arg((int)dObs.hour, 2, 10, QLatin1Char( '0' )));
-    dateCode.append(QString("%1").arg((int)dObs.min, 2, 10, QLatin1Char( '0' )));
-    dateCode.append(QString("%1").arg((int)dObs.sec, 2, 10, QLatin1Char( '0' )));
-    dateCode.append(QString("%1").arg((int)((int)(dObs.sec*10) - ((int)dObs.sec)*10), 1, 10, QLatin1Char( '0' )));*/
+/////////////////////////////
 
-    mjdDateCode(&dateCode, fitsd->MJD);
-
-    nFile = QString("%1%2.fit").arg(resFolder).arg(dateCode);
-    if(QDir().exists(nFile))
+    observatory *obsList = new observatory;
+    obsy *obsPos;
+    if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
     {
-
-        qDebug() << QString("file %1 exists\n").arg(nFile);
-
-        qInstallMsgHandler(0);
-        return 0;
+        if(log_level>0) qDebug() << QString("obsCat is not opened\n");
+        QDir().remove(wcsLockFile);
+        return 1;
     }
 
-    if(fitsd->WCSdata[12]&&!reFindWCS)
+/////////////////////////////
+
+    if(resdirDef)
     {
-        qDebug() << QString("wcs in file %1 obtained\n").arg(fileName);
-        QFile().copy(fileName, nFile);
+        mjdDateCode(&dateCode, fitsd->MJD);
 
-        qInstallMsgHandler(0);
-        return 0;
+        QDir rDir(resFolder);
+
+        nFile = rDir.absolutePath()+rDir.separator()+dateCode+".fit";
+        if(log_level>0) qDebug() << QString("nfile: %1\n").arg(nFile);
+        if(rDir.exists(nFile))
+        {
+            if(log_level>0) qDebug() << QString("file %1 exists\n").arg(nFile);
+            qInstallMsgHandler(0);
+            QDir().remove(wcsLockFile);
+            return 0;
+        }
     }
 
-    QDir wDir(filePath);
-    if(wDir.exists(wcsLockFile))
+/////////////////////////////
+
+    if(fitsd->WCSdata[12]&&!refindWCS)
     {
-        qDebug() << QString("file %1 locked\n").arg(fileName);
+        if(log_level>0) qDebug() << QString("wcs in file %1 is present\n").arg(fileName);
+        if(resdirDef) QFile().copy(fileName, nFile);
 
         qInstallMsgHandler(0);
+        QDir().remove(wcsLockFile);
         return 0;
     }
 
-    QFile lockFile(wcsLockFile);
-    lockFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    lockFile.close();
 
+/////////////////////////////
 
+    insSettings instr(insSettFile);
+    instr.getNumIns(instrNum);
+    fitsd->setInstrSettings(instr);
 
-    fitsd->initInst(telescopeFile, insNum);
+    if(obsList->getobsynumO(obsCode.toAscii().data()))
+    {
+        if(log_level>0) qDebug() << QString("obsCode is not found\n");
+        QDir().remove(wcsLockFile);
+        return 1;
+    }
+    obsPos = obsList->record;
+    fitsd->initObsPos(obsList->record);
 
-    //fitsd->findHstars();
-    qDebug() << "\ninit ended\n";
+/////////////////////////////
 
-    fitsd->marksG->clearMarks();
-    fitsd->getMarksGrid(starCatList.at(currentCat), fitsd->instr->fov, mag0, mag1, starsNum);
+    double fov = fovp*fitsd->detFov();
 
-    //fitsd->detTan();
-    //fitsd->WCSdata[12] = 0;
-    //fitsd->copyImgGrid(fitsd->marksG, fitsd->marksGIpix);
-    //fitsd->marksGIpix->copy(fitsd->marksG);
+    if(log_level>0) qDebug() << "\n\nfind WCS\n\n";
+    fitsd->catMarks->clearMarks();
+    if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
+    {
+        if(log_level>0) qDebug() << QString("getMarksGrid error\n");
+        QDir().remove(wcsLockFile);
+        return 2;
+    }
+    fitsd->detTan();
 
-    QSettings *settM;
-    measureParam mesPar;
-    settM = new QSettings(ruler3File, QSettings::IniFormat);
-    mesPar.model = settM->value("psf/model", 3).toInt();//settings->value("psf/model").toInt();//PSF model: 0 - Lorentz PSF, 1 - Gauss PSF, 2 - Moffat PSF, 3 - CoM
-    mesPar.nofit = settM->value("psf/nofit", 10).toInt();
-    mesPar.delta = settM->value("psf/delta", 1.2).toDouble();
-    mesPar.ringradius = settM->value("psf/ringradius", 10).toInt();
-    mesPar.ringwidth = settM->value("psf/ringwidth", 6).toInt();
-    mesPar.lb = settM->value("psf/lb", 1).toInt();
-    mesPar.sg = settM->value("psf/subgrad", 1).toInt();
-    mesPar.aperture = settM->value("psf/aperture", 10).toInt();
+    fitsd->findHstars(mesPar.apRadius*2, identNum);
+    fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
+    if(log_level>0) qDebug() << QString("premeasured stars num: %1\n").arg(fitsd->ipixMarks->marks.size());
+    fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
 
+    int resAuto = identAuto(fitsd->refMarks, fitsd->catMarks, fitsd->ipixMarks, &fitsd->WCSdata[0], identNum, identType, maxNum);
 
-    fitsd->marksGIpix->clearMarks();
-    fitsd->findHstars(mesPar.aperture, targNum);
-    //fitsd->copyImgGrid(fitsd->marksG, fitsd->marksGIpix);
-    fitsd->moveMassCenter(fitsd->marksGIpix, mesPar.aperture);
-    fitsd->measureMarksGrid(fitsd->marksGIpix, mesPar);
-    //fitsd->detTan();
+    if(log_level>0) qDebug() << QString("resAuto: %1\n").arg(resAuto);
 
-    int resAuto = fitsd->identAuto(fitsd->refMarks, fitsd->instr->rang, targNum, identType);
+    if(fitsd->detWCS1(wcsParams))
+    {
+        if(log_level>0) qDebug() << QString("detWCS1 error\n");
+        QDir().remove(wcsLockFile);
+        return 1;
+    }
+    fitsd->ipixMarks->clearMarks();
 
-    qDebug() << QString("resAuto: %1\n").arg(resAuto);
+/////////////////////////////
+    if(resdirDef)
+    {
+        fitsd->saveFitsAs(nFile);
+    }
+    else fitsd->saveFits();
 
-    if(fitsd->detWCS1(wcsParams))fitsd->saveFitsAs(nFile);
-    //fitsd->detTan();
-    //fitsd->marksGIpix->clearMarks();
-
-
-    QDir(filePath).remove(wcsLockFile);
-
-
-
-
-
+    QDir().remove(wcsLockFile);
 
     delete clog;
     clog = 0;
@@ -318,8 +336,6 @@ int main(int argc, char *argv[])//fitsWCS file.fit [conf.ini]
     logFile = 0;
 
     qInstallMsgHandler(0);
-
-    //if(!resRed) QDir(filePath).remove(logFileName);
 
     return 0;
 }

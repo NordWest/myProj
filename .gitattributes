@@ -58,6 +58,7 @@ estimatesA/main.cpp -text
 everBody/everBody.pro -text
 everBody/force_ev.cpp -text
 everBody/main.cpp -text
+/export_lazaProj.bash -text
 /export_ruler3PL.sh -text
 findSimMpcs/findSimMpcs.pro -text
 findSimMpcs/main.cpp -text

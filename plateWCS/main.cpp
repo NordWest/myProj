@@ -46,7 +46,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 
 
 
-int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNum|headerFile]
+int main(int argc, char *argv[])// plateWCS marks.txt [options]
 {
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
 
     QFile* logFile;
 
-    if(argc<3)
+    if(argc<2)
     {
         qDebug() << "argc= " << argc << "\n";
         return 1;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
     QString optName, optVal, optStr, pnStr, headerFileName;
     QString resFolder;
 
-        for(i=1; i<argc; i++)
+        for(i=2; i<argc; i++)
         {
             optStr = QString(argv[i]);
             optName = optStr.section("=", 0, 0);
@@ -111,8 +111,14 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
                 doWhat = 1;
                 headerFileName = optVal;
             }
+            else
+            {
+                qDebug() << QString("Error option %1.\nUseage: config|plName|headerFile\n").arg(optName);
+                return 1;
+            }
         }
 
+//////////////////////////////////////////////////////////////////////////////
 
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
@@ -363,7 +369,7 @@ int main(int argc, char *argv[])// plateWCS conf.ini marks.txt [pnType] [plateNu
         return 3;
     }
 
-    if(fitsd->detWCS1(wcsParams))
+    if(!fitsd->detWCS1(wcsParams))
     {
         fitsd->detTan();
         fitsd->saveWCSFile(wcsFileName);

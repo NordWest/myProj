@@ -337,7 +337,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
         qDebug() << QString("resAuto: %1\n").arg(resAuto);
 
-        if(fitsd->detWCS1(wcsParams)&&saveRefindWCS)fitsd->saveWCS();
+        if((!fitsd->detWCS1(wcsParams))&&saveRefindWCS)fitsd->saveWCS();
         //fitsd->detTan();
         fitsd->ipixMarks->clearMarks();
     }

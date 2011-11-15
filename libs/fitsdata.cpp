@@ -247,6 +247,10 @@ int detHeadType(HeadList hList)
     return -1;
 }
 
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 refractionMaker::refractionMaker(refractionParam refParam)
 {
@@ -2661,7 +2665,7 @@ int fitsdata::detWCS1(reductionParams params)
         if(szRef<params.minRefStars)
         {
             qDebug() << QString("ref stars num = %1 and less than wcsN = %2\n").arg(szRef).arg(params.minRefStars);
-            return 0;
+            return 1;
         }
  //       int szRef = refMarks->marks.size();
         //detNaxes(&naxes[0], &naxes[1]);
@@ -2723,20 +2727,18 @@ int fitsdata::detWCS1(reductionParams params)
         //singulAR = (grad_to_mas(redMake->Sx)<params.sMax)&&(grad_to_mas(redMake->Sy)<params.sMax)&&(redMake->RNKSI>=params.minRefStars)&&(redMake->RNETA>=params.minRefStars);
         qDebug() << QString("singulAR= %1\n").arg(singulAR);
 
-        WCSdata[12]=singulAR;//п·п²п≥п╝п�� п╗п▒п╝п∙п═, п▓п═п² WCS п░п║п�� п∙п═ п▒п·п╔п╞п╝п°п╝
-        WCSdata[0]=errB->Xoc;//+curF->imgArr->naxes[0]/2;//п²п·п²п÷п°п╗п≤ п·п╔п≥п╞п∙п п╜ п·п÷п╔ п╞п⌡п∙п╚п∙п°п╔п╔ п°п╝п▓п╝п п╝ п≥п²п²п÷п�� п╔п°п╝п═ п▒ п п∙п▒п╗п≤ п▒п∙п÷пёп°п╔п≤ п║п╕п²п  п≥п╝п�� п÷п╝ (п·п÷п╝п▒п╔п п² п═п╝п≥п²п∙ п∙п╞п═п╜ п·п÷п╔ п▒п·п╔п╞п╗п▒п╝п°п╔п╔ WCS)
-        WCSdata[1]=errB->Yoc;//+curF->imgArr->naxes[1]/2;
-        //WCSdata[2]=OCp0;// RA, DEC п²п·п²п÷п°п²п╕п² п·п╔п≥п╞п∙п п╝ п▒ п╕п÷п╝п�� п║п╞п╝пё
-        //WCSdata[3]=OCp1;
-        WCSdata[4]=sqrt(pow(redMake->ZKSI[0],2)+pow(redMake->ZETA[0],2));// п÷п╝п╞п▓п∙п═ п⌡п╝п╞п╛п═п╝п░п²п▒ п▒п�� п²п п╜ п²п╞п∙п≤ (п╕п÷п╝п�� п║п╞п╗ п°п╝ п·п╔п≥п╞п∙п п╜ - п°п∙п║п�� п²п░п°п², п╝ п▓п═п² п�� п∙п п╝п═п╜ - п╞п═п╝п°п�� п╝п÷п═ п°п╝п�� п² п║п▒п╝п╓п╝п═п╜)
+        WCSdata[12]=singulAR;
+        WCSdata[0]=errB->Xoc;
+        WCSdata[1]=errB->Yoc;
+        WCSdata[4]=sqrt(pow(redMake->ZKSI[0],2)+pow(redMake->ZETA[0],2));
         WCSdata[5]=sqrt(pow(redMake->ZKSI[1],2)+pow(redMake->ZETA[1],2));
-        double rho1 =180*atan2(-redMake->ZETA[0]/WCSdata[4],redMake->ZKSI[0]/WCSdata[4])/(atan(1)*4);//п÷п╝п╞п▓п∙п═ п║п╕п п²п▒ п⌡п∙п╓п�� п║ п²п╞п╙п⌡п╔ п═п╝п°п╕п∙п°п√п╔п╝п п╜п°п╗пё п╔ п·п╔п≥п╞п∙п п╜п°п╗пё п≥п²п²п÷п�� п╔п°п╝п═
-        double rho2 = 180*atan2(redMake->ZKSI[1]/WCSdata[5],redMake->ZETA[1]/WCSdata[5])/(atan(1)*4);// п║п╕п п²п▒ п�� п▒п╝, п═п╝п≥ п≥п╝п≥ п▒ п²п░п╚п∙п⌡ п╞п п║п▓п╝п∙ п▒п²п�� п⌡п²п╓п°п╝ п≥п²п╞п²п║п╕п²п п╜п°п²п╞п═п╜
+        double rho1 =180*atan2(-redMake->ZETA[0]/WCSdata[4],redMake->ZKSI[0]/WCSdata[4])/(atan(1)*4);
+        double rho2 = 180*atan2(redMake->ZKSI[1]/WCSdata[5],redMake->ZETA[1]/WCSdata[5])/(atan(1)*4);
         if(rho1<0) rho1 = 360+rho1;
         if(rho2<0) rho2 = 360+rho2;
-        WCSdata[6]=rho1;//п�� п╝п·п╔п╞п╗п▒п╝п∙п⌡ п║п╕п п╗
+        WCSdata[6]=rho1;
         WCSdata[7]=rho2;
-        WCSdata[8]=redMake->ZKSI[0];//п�� п╝п·п╔п╞п╗п▒п╝п∙п⌡ п·п²п╞п═п²п╙п°п°п╗п∙ п≥п╝п�� п÷п╝ (п⌡п╝п╞п╛п═п╝п░+п·п²п▒п²п÷п²п═)
+        WCSdata[8]=redMake->ZKSI[0];
         WCSdata[9]=redMake->ZKSI[1];
         WCSdata[10]=redMake->ZETA[0];
         WCSdata[11]=redMake->ZETA[1];
@@ -2756,8 +2758,7 @@ int fitsdata::detWCS1(reductionParams params)
 	qDebug() << "\nWCSdata[10]\t" << WCSdata[10] << "\n";
 	qDebug() << "\nWCSdata[11]\t" << WCSdata[11] << "\n";
 	
-        return singulAR;
-	
+        return !singulAR;
 }
 
 int fitsdata::detWCS(int wcsN, double sMax)
