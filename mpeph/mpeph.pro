@@ -6,7 +6,7 @@ SOURCES += ./../libs/mpeph.cpp
 HEADERS += ./../libs/mpeph.h \
     ../libs/comfunc.h \
     ../libs/fitsio.h \
-    ../libs/mb.h
+    ../mb/mb.h
 HEADERS += ./../astro/astro.h
 #win32 {
 # INCLUDEPATH += C:\boost_1_33_1
