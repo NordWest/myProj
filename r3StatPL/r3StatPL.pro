@@ -2,8 +2,9 @@
 # Project created by QtCreator 2010-05-27T13:59:25
 # -------------------------------------------------
 
-unix:TARGET = ./../../lab/r3StatPL.unix/r3StatPL
-win32:TARGET = ./../../../lab/r3StatPL.win32/r3StatPL
+TARGET = r3StatPL
+#unix:TARGET = ./../../lab/r3StatPL.unix/r3StatPL
+#win32:TARGET = ./../../../lab/r3StatPL.win32/r3StatPL
 #unix:TARGET = ./../../lab/r3StatPL/r3StatPL
 #win32:TARGET = ./../../../lab/r3StatPL/r3StatPL
 CONFIG += qt
