@@ -8,7 +8,7 @@ TARGET = r3StatPL
 #unix:TARGET = ./../../lab/r3StatPL/r3StatPL
 #win32:TARGET = ./../../../lab/r3StatPL/r3StatPL
 CONFIG += qt
-CONFIG += console warn_off
+CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
@@ -44,7 +44,6 @@ SOURCES += main.cpp \
 HEADERS += ../astro/astro.h \
     ../mb/mb.h \
     ../libs/comfunc.h \
-    ../libs/astro.h \
     ../libs/redStat.h \
     ../libs/multidim.h \
     ../libs/observatory.h \
