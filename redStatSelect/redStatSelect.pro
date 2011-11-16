@@ -39,8 +39,7 @@ SOURCES += main.cpp \
     ../libs/vectGrid3D.cpp \
     ../libs/sysCorr.cpp
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
+HEADERS += ../mb/mb.h \
     ../libs/comfunc.h \
     ../astro/astro.h \
     ../libs/redStat.h \
