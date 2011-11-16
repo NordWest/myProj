@@ -876,14 +876,14 @@ void errBudgetRec::rec2s(QString *str)
         str->append(QString("%1#%2#%3#%4").arg(xParams.toString()).arg(yParams.toString()).arg(mParams.toString()).arg(originName));
 };
 
-void errBudgetRec::s2rec(QString str)
+int errBudgetRec::s2rec(QString str)
 {
     QStringList parts = str.split("#");
-    if(parts.size()!=5) return;
+    if(parts.size()!=5) return 1;
 //	//qDebug() << "\n" << str << "\n";
         QStringList sL = parts.at(0).split("|");
 //	//qDebug() << "\nsize=" << sL.size() << "\n";
-        if(sL.size()!=7) return;
+        if(sL.size()!=7) return 1;
 
         MJD = sL[0].toDouble();
         RAoc = sL[1].toDouble();
@@ -899,6 +899,8 @@ void errBudgetRec::s2rec(QString str)
         mParams.fromString(parts.at(3));
 
         originName = parts.at(4);
+
+        return 0;
 
 };
 
@@ -2735,7 +2737,7 @@ void eqFile::getSeriesRec(ocRec *eqsRec)
 
 residualFile::residualFile()
 {
-	
+    clear();
 };
 
 residualFile::~residualFile()
@@ -3214,6 +3216,7 @@ colRec* objResidualFile::getColNum(int cNum)
 
 errBudgetFile::errBudgetFile()
 {
+    errList.clear();
 };
 
 errBudgetFile::~errBudgetFile()
@@ -3240,8 +3243,8 @@ void errBudgetFile::init(const char *fname)
 	while (!dataStream.atEnd())
 	{
 		dataLine = dataStream.readLine();
-		errB = new errBudgetRec(dataLine);
-		errList << errB;
+                errB = new errBudgetRec;
+                if(!errB->s2rec(dataLine))errList << errB;
 	}
 	
 };
@@ -4597,7 +4600,7 @@ void platesStat::dropObj(reductionStat rStat)
     {
         plSz=platesList.at(i)->mStatList.size();
         qDebug() << QString("plSz: %1").arg(plSz);
-        for(j=plSz-1; j>0; j--)
+        for(j=plSz-1; j>=0; j--)
         {
             msRec = platesList.at(i)->mStatList.at(j);
             mRec = rStat.getMeasurement(msRec->mesureTimeCode);
@@ -4896,6 +4899,7 @@ void platesStat::init(QList <measurementStatRec*> mesStatList, int plNameType)
     int i, sz0, j, sz1;
     int isNew;
     plateStatRec* plRec;
+    platesList.clear();
 
     sz0 = mesStatList.size();
     for(i=0; i<sz0; i++)

@@ -27,15 +27,15 @@ void customMessageHandler(QtMsgType type, const char* msg)
         "Fatal    : "
     };
 
-    static QTextStream cout(stdout);
-    static QTextStream cerr(stderr);
+ //   static QTextStream cout1(stdout);
+ //   static QTextStream cerr(stderr);
 
-    cerr << msgType[type] << msg << endl;
+//    cerr << msgType[type] << msg << endl;
     if(clog1 && clog1->device())
         *clog1 << type << msg;
     if(type == QtFatalMsg)
     {
-        cerr << "aborting..." << endl;
+       // cerr << "aborting..." << endl;
 
 #if defined(Q_CC_MSVC) && defined(QT_DEBUG) && defined(_CRT_ERROR) && defined(_DEBUG)
         int reportMode = _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
