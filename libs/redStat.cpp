@@ -4391,6 +4391,7 @@ void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* 
     int year, mth;
     double day, pyear;
     int j, szj;
+    ocRec ocr;
 
     dataStr->clear();
 
@@ -4405,6 +4406,13 @@ void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* 
     pyear = partOfYear(year, mth, day);
 
     dataStr->append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13").arg(plateName).arg(pyear, 7, 'f', 2).arg((int)mesRec->errBud->MJD).arg(versName).arg(msRec->Nx).arg(msRec->UWEx).arg(msRec->Ny).arg(msRec->UWEy).arg(msRec->ocNum).arg(msRec->rmsOneOCksi).arg(msRec->rmsOneOCeta).arg(msRec->rmsMeanOCksi).arg(msRec->rmsMeanOCeta));
+
+    szj = mesRec->objList.size();
+    for(j=0; j<szj; j++)
+    {
+        mesRec->objList.at(j)->toOcRec(&ocr);
+        dataStr->append(QString("|%1|%2|%3").arg(ocr.ocRaCosDe).arg(ocr.ocDe).arg(ocr.name.simplified()));
+    }
 /*
     szj = mesRec->mpeList.size();
     for(j=0; j<szj; j++)dataStr->append(QString("|%1|%2|%3").arg(mesRec->mpeList.at(j)->ocRaCosDe).arg(mesRec->mpeList.at(j)->ocDe).arg(mesRec->mpeList.at(j)->name.simplified()));
