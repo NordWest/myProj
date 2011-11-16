@@ -17,7 +17,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ./../libs/redStat.cpp \
-    ./../libs/astro.cpp \
     ./../libs/comfunc.cpp \
     ../libs/sscat.cpp \
     ../libs/fBuffer.cpp \
@@ -43,7 +42,7 @@ SOURCES += main.cpp \
 HEADERS += ../libs/astro.h \
     ../libs/mb.h \
     ../libs/comfunc.h \
-    ../libs/astro.h \
+    ../astro/astro.h \
     ../libs/redStat.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \
@@ -69,5 +68,7 @@ HEADERS += ../libs/astro.h \
 
 win32:LIBS += ./../libs/win/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a
-win32:LIBS += ./../libs/cfitsio.lib
+win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
+win32:LIBS += ./../libs/win/libastro.a
+unix:LIBS += ./../libs/unix/libastro.a
