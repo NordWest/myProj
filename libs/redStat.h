@@ -819,7 +819,7 @@ struct platesStat
 
     void dropObj(reductionStat rStat);
     void selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesList);
-    void selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList);
+    void selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList, int minObj=0);
     void selMesList(reductionStat *rStat, QList <measurementRec*> *mesList);
 
 

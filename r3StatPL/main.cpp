@@ -350,6 +350,7 @@ int main(int argc, char *argv[])    //r3StatPL
     int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
     int isDropObj = sett->value("report0/isDropObj", 0).toInt();
     QString versSeq = sett->value("report0/versSeq", "33|32|23|22|21").toString();
+    int minObj = sett->value("report0/minObj", 0).toInt();
 
 
     int r1aveNum = sett->value("report1/aveNum", 1).toInt();
@@ -968,7 +969,7 @@ int main(int argc, char *argv[])    //r3StatPL
     }
 */
     if(isDropObj) plStat.dropObj(rStat);
-    if(isVersSeq) plStat.selVersSeq(versSeq.split("|"), &rStat, &mesList);
+    if(isVersSeq) plStat.selVersSeq(versSeq.split("|"), &rStat, &mesList, minObj);
     else  if(isMinUWE) plStat.selMinUWE(&rStat, &mesList);
     else plStat.selMesList(&rStat, &mesList);
     //if(isVersSeq) plStat.saveReport0Seq(reportDirName+"report0.txt", versSeq, excList,  plNameType, &rStat, &mesList);

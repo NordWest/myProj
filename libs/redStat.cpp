@@ -4677,14 +4677,14 @@ void platesStat::selMesList(reductionStat *rStat, QList <measurementRec*> *mesLi
 
 
 
-void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList)
+void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList, int minObj)
 {
     qDebug() << QString("selVersSeq\n");
     int pMin, i, j, szi;
     measurementStatRec* msRec;
     measurementRec* mesRec;
 
-    int plSz;
+    int plSz, isapp, mo;
 
     //QStringList versSeqList = versSeq.split("|");
     int versNum = versSeqList.size();
@@ -4707,33 +4707,47 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
         //plStat.platesList.at(i)->getMinUWE(msRec);
             //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
 
+            isapp = 0;
+            mo = minObj;
 
-            for(j=0; j<versNum; j++)
+            do
             {
-                pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
-                //if(pMin!=-1) break;
 
-                qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
-
-
-                if(pMin!=-1)
-                //qDebug() << "msRec: " << msRec << "\n";
-                //if(msRec!=NULL)
+                for(j=0; j<versNum; j++)
                 {
-                    msRec = platesList.at(i)->mStatList.at(pMin);
+                    pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
+                    //if(pMin!=-1) break;
 
-                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
 
-                    mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                    //qDebug() << "mesRec: " << mesRec << "\n";
-                    //if(detObj&&(mesRec->objList.size()==0)) break;
-                    if(mesList!=NULL) mesList->append(mesRec);
 
-                    break;
+                    if(pMin!=-1)
+                    //qDebug() << "msRec: " << msRec << "\n";
+                    //if(msRec!=NULL)
+                    {
+                        msRec = platesList.at(i)->mStatList.at(pMin);
+                        //msRec->ocNum
+                        qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+
+                        mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
+                        if(mesRec->objList.size()<minObj) continue;
+                        //qDebug() << "mesRec: " << mesRec << "\n";
+                        //if(detObj&&(mesRec->objList.size()==0)) break;
+                        if(mesList!=NULL)
+                        {
+                            mesList->append(mesRec);
+                            isapp=1;
+                            break;
+                        }
+
+                    }
 
                 }
+                if(mo==0) break;
+                mo = 0;
 
-            }
+            }while(!isapp);
+
 //            if(pMin==-1) dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
 
         }
