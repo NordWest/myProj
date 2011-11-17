@@ -467,8 +467,8 @@ public:
         int loadHeaderFile1(QString headFName);
         int saveHeaderFile(QString headFName);
 
-        int readHttpHeader(QString httpStr);
-        int readHeader(QStringList headVals);
+ //       int readHttpHeader(QString httpStr);
+        int readHeader(QString headStr);
         int initHeadList();
 
         int saveFitsHeader();

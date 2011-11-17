@@ -2,8 +2,8 @@
 # Project created by QtCreator 2010-03-30T12:56:39
 # -------------------------------------------------
 QT -= gui
-win32:TARGET = ./../../bin/getHttpHeader
-unix:TARGET = ./../bin/getHttpHeader
+TARGET = getHttpHeader
+#unix:TARGET = ./../bin/getHttpHeader
 CONFIG += console \
     exceptions \
     warn_off

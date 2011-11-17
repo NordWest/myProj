@@ -91,15 +91,18 @@ QTextStream stream(stdout);
 
             //QString str = codec1->toUnicode(httpData);
             QString str = codec1->toUnicode(httpData.data());
+            QStringList strL;
 
             //QStringList strL = str.split("\n");
             //int sizeS = strL.size();
-            int p0 = str.lastIndexOf("<pre>")+5;
+            int p0 = str.lastIndexOf("<pre>")+7;
             int p1 = str.lastIndexOf("</pre>");
             //int sz = str.size();
 
+            str = str.mid(p0, p1-p0);
+            strL = str.split("\n", QString::SkipEmptyParts);
 
-            stream << str.mid(p0, p1-p0).section("\n", 2, -1) << "\n";
+            stream << strL.join("\n") << "\n";
             //stream << httpData;
 
             headfapp->quit();

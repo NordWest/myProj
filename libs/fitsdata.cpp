@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 0
+#define FD_LOG_LEVEL 1
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -4041,7 +4041,7 @@ int fitsdata::loadHeaderFile1(QString headFName)
         }
         fclose(FI);
 
-        readHeader(headVals);
+        readHeader(headVals.join("\n"));
 
     }
     else return 2;
@@ -4056,10 +4056,7 @@ int fitsdata::loadHeaderFile(QString headFName)
 
     if (!headFName.isEmpty())
     {
-        QTextCodec *codec1 = QTextCodec::codecForName("windows-1251");
-        QTextCodec *codec2 = QTextCodec::codecForName("IBM 866");
-        QTextCodec *codec3 = QTextCodec::codecForName("KOI8-R");
-        QStringList headVals;
+        //QStringList headVals;
 
         QFile hFile(headFName);
 
@@ -4071,23 +4068,17 @@ int fitsdata::loadHeaderFile(QString headFName)
 
         QTextStream hStream(&hFile);
 
-        hStream.setCodec(codec1);
-
         if(FD_LOG_LEVEL) qDebug() << "\nREADING HEADER...\n";
 
         QString string;
 
-        headList.clear();
-
-        while(!hStream.atEnd())
-        {
-            string = hStream.readLine();
-            headVals << string;
-        }
+        //headList.clear();
+        fitsHeader.clear();
+        fitsHeader = hStream.readAll();
 
         hFile.close();
 
-        readHeader(headVals);
+        readHeader(fitsHeader);
 
     }
     else return 2;
@@ -4097,6 +4088,27 @@ int fitsdata::loadHeaderFile(QString headFName)
 
 int fitsdata::saveHeaderFile(QString headFName)
 {
+    //QTextCodec *codec1 = QTextCodec::codecForName("windows-1251");
+    QStringList strL;
+
+    QFile hFile(headFName);
+
+    if(!hFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        if(FD_LOG_LEVEL) qDebug() << QString("Can't open Header file\n");
+        return 1;
+    }
+
+    QTextStream hStream(&hFile);
+
+    //hStream.setCodec(codec1);
+
+    strL = fitsHeader.split("\n", QString::SkipEmptyParts);
+    //str = headVals.join("\n");
+    //if(FD_LOG_LEVEL) qDebug() << QString("headVals: %1\n").arg(str);
+    hStream << strL.join("\n") << "\n";
+
+    hFile.close();
     return 0;
 }
 
@@ -4328,31 +4340,18 @@ int fitsdata::saveFitsAs(QString fitsFileName)
     saveFitsHeader();
     if(WCSdata[12]) saveWCS();
 }
-
-int fitsdata::readHttpHeader(QString httpStr)
+/*
+int fitsdata::readHeaderStr(QString headerStr)
 {
-    //int i, sz;
-    //QString kName, kVal, tstr;
     fitsHeader.clear();
-    fitsHeader.append(httpStr);
-    QStringList headVals;//, keyVals;
-    //HeadRecord *headRec;
-    //int pos0, pos1;
-    //QTextCodec *codec1 = QTextCodec::codecForName("windows-1251");
-    //QTextCodec *codec2 = QTextCodec::codecForName("IBM 866");
-
-    //QString str = codec1->toUnicode(httpData);
+    fitsHeader.append(headerStr.mid(pos0, sz));
     if(FD_LOG_LEVEL) qDebug() << QString("httpData: %1\n").arg(httpStr);
 
-    //headList.clear();
-
-    headVals  = httpStr.split("\n");
-
-    if(readHeader(headVals)==-1) return 1;
+    if(readHeader(fitsHeader.split("\n", QString::SkipEmptyParts))==-1) return 1;
 
     return 0;
 }
-
+*/
 int fitsdata::getApeSize(double apeSec)
 {
     apeSec /= 3600.0;
@@ -4395,10 +4394,16 @@ double fitsdata::getMeanScale()
     return(msc);
 }
 
-int fitsdata::readHeader(QStringList headVals)
+int fitsdata::readHeader(QString headStr)
 {
+    QStringList headVals;
     int pos0, pos1;
     headList.clear();
+
+    if(FD_LOG_LEVEL) qDebug() << "headStr " << headStr << "\n";
+
+    fitsHeader = headStr;
+    headVals = headStr.split("\n", QString::SkipEmptyParts);
     int sz = headVals.size();
     //if(FD_LOG_LEVEL) qDebug() << "headVals.size= " << sz << "\n";
     if(sz<10) return 1;
@@ -4431,7 +4436,7 @@ int fitsdata::readHeader(QStringList headVals)
     //if(expList->exps.size()==0) return -1;
     //setExposure(expList->exps.size());
     initRaDeHeadList();
-    return headList.size();
+    return 0;
 }
 
 int fitsdata::initHeadList()

@@ -419,8 +419,13 @@ ruler2/main.cpp -text
 ruler2/ruler2.pro -text
 ruler3/main.cpp -text
 ruler3/ruler3.pro -text
+ruler3PL/catalogs.ini -text
 ruler3PL/main.cpp -text
+ruler3PL/redParam.ini -text
+ruler3PL/ruler3PL.ini -text
 ruler3PL/ruler3PL.pro -text
+ruler3PL/syscorr.ini -text
+ruler3PL/telescopes.ini -text
 rulermanager/astro.cpp -text
 rulermanager/astro.h -text
 rulermanager/basewidget.cpp -text

@@ -1754,15 +1754,15 @@ void jdUT1_to_GMST1(double *gm1, double jdUT1)
 void GMST1_to_jdUT1(double *jdUT1, double gm1, double jd0)//[jd0] = day; [gm1] = day; [jdUT1] = day(0UT1)
 {
     double gm0 = gmst0jd(jd0);
-    qDebug() << QString("jd0= %1\tgm0= %2\n").arg(jd0, 12, 'f', 4).arg(gm0);
+    //qDebug() << QString("jd0= %1\tgm0= %2\n").arg(jd0, 12, 'f', 4).arg(gm0);
    // gm0 = gm0 - (int)gm0;
-    qDebug() << QString("gm0= %1\n").arg(gm0);
+    //qDebug() << QString("gm0= %1\n").arg(gm0);
     double dgm = gm1 - gm0;
-    qDebug() << QString("dgm= %1\n").arg(dgm);
+    //qDebug() << QString("dgm= %1\n").arg(dgm);
     if(dgm<0.0) dgm += 1.0;
-    qDebug() << QString("dgm= %1\n").arg(dgm);
+    //qDebug() << QString("dgm= %1\n").arg(dgm);
     *jdUT1 = dgm - VIU*dgm;
-    qDebug() << QString("jdUT1= %1\n").arg(*jdUT1, 12, 'f', 4);
+    //qDebug() << QString("jdUT1= %1\n").arg(*jdUT1, 12, 'f', 4);
     //if(*jdUT1<0) *jdUT1 +=1.0;
     //if(*jdUT1>1) *jdUT1 -=1.0;
     *jdUT1 += jd0;
@@ -1792,13 +1792,13 @@ int s2UTC(double s, double lam, double *utc)
         GMST0=GMST0-floor(GMST0);
         GMST0 *= 2.0*PI;
         double v = 0.0027304336;//0.997269566329084 - 5.8684e-11*T+5.9e-15*T*T;
-        printf("s=%f\tJD=%f\tdS=%f\tS0=%f\tv=%f\td_day=%f\tlam=%f\n", s, eJD, dS, GMST0, v, d_day, lam);
+        //printf("s=%f\tJD=%f\tdS=%f\tS0=%f\tv=%f\td_day=%f\tlam=%f\n", s, eJD, dS, GMST0, v, d_day, lam);
         double UT1 = dS - GMST0 - v*(dS - GMST0);
-        printf("UT1=%f\n", UT1);
+        //printf("UT1=%f\n", UT1);
         if(UT1<0.0) UT1 += 2.0*PI;
         if(UT1>2.0*PI) UT1 -= 2.0*PI;
         //if(UT1<0.0) UT1 = fabs(UT1);
-        printf("UT1=%f\n", UT1);
+        //printf("UT1=%f\n", UT1);
         UT1 /= 2.0*PI;
         *utc = eJD + UT1;
 //        *utc = JD+(d_day-S0)*v/86400.0;
@@ -1833,16 +1833,16 @@ int sJD2UT1(double utcJDay, double s, double lam, double *utc)
 //	double d_day;
 
         T=(utcJDay-2451545)/36525.0;
-        printf("T=%f\n", T);
+        //printf("T=%f\n", T);
         //double S0=6*3600+41*60+50.54841+8640184.812866*T+0.093104*T*T-0.0000062*T*T*T;
         GMST0=(6*3600+41*60+50.54841)/SECINDAY+(8640184.812866/SECINDAY)*T+(0.093104/SECINDAY)*T*T-(0.0000062/SECINDAY)*T*T*T;
-        printf("GMST0=%f\n", GMST0);
+        //printf("GMST0=%f\n", GMST0);
         GMST0=GMST0+sign(GMST0)*floor(GMST0);
-        printf("GMST0=%f\n", GMST0);
+        //printf("GMST0=%f\n", GMST0);
         GMST0 *= 2.0*PI;
-        printf("GMST0=%f\n", GMST0);
+        //printf("GMST0=%f\n", GMST0);
         //0.997269566329084 - 5.8684e-11*T+5.9e-15*T*T;
-        printf("s=%f\tJD=%f\tdS=%f\tS0=%f\tv=%f\td_day=%f\tlam=%f\n", s, utcJDay, dS, GMST0, v, d_day, lam);
+        //printf("s=%f\tJD=%f\tdS=%f\tS0=%f\tv=%f\td_day=%f\tlam=%f\n", s, utcJDay, dS, GMST0, v, d_day, lam);
         if((dS-GMST0)<0.0)
         {
             printf("POVTOR\n");
@@ -1856,11 +1856,11 @@ int sJD2UT1(double utcJDay, double s, double lam, double *utc)
             printf("GMST0=%f\n", GMST0);
         }
         double UT1 = dS - GMST0 - v*(dS - GMST0);
-        printf("UT1=%f\n", UT1);
+        //printf("UT1=%f\n", UT1);
         if(UT1<0.0) UT1 += 2.0*PI;
         if(UT1>2.0*PI) UT1 -= 2.0*PI;
         //if(UT1<0.0) UT1 = fabs(UT1);
-        printf("UT1=%f\n", UT1);
+        //printf("UT1=%f\n", UT1);
         UT1 /= 2.0*PI;
         *utc = UT1;
 //        *utc = JD+(d_day-S0)*v/86400.0;

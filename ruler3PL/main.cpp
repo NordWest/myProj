@@ -83,7 +83,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QString resFolder;
         sysCorrParam *sysCorr = NULL;
         QString cfgFileName = "ruler3PL.ini";
-        int doWhat = 0;                         //0-http; 1-file
+        int useHeaderFile = 0;                         //0-http; 1-file
         int detPlName = 1;
         int resdirDef=0;
         QString scFile, descS, oName;
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QString obsCode;
         int sz, i, oNum;
         int resRed = 0;
+        int detHname = 0;
 
     //command line  ///////////////////////////////////////
 
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
             {
                 detPlName = 0;
-                doWhat = 1;
+                useHeaderFile = 1;
                 headerFileName = optVal;
             }
             else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
@@ -125,7 +126,6 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             {
                 isSc = 1;
                 scFile = optVal;
-
             }
             else
             {
@@ -152,6 +152,12 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
         if(!resdirDef) resFolder = sett->value("general/resFolder", "./results").toString();
         double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
+        if(!useHeaderFile)
+        {
+            useHeaderFile = sett->value("general/useHeaderFile", 0).toInt();
+            detHname = 1;
+        }
+        int saveHeaderFile = sett->value("general/saveHeaderFile", 0).toInt();
 
 //  logs
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
@@ -224,6 +230,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QString wcsFileName = QString("%1.wcs").arg(fileName);
         //QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
         QString logFileName = QString("%1.log").arg(fi.absoluteFilePath());
+        if(detHname) headerFileName = QString("%1.hdr").arg(fileName);
 
         if(useLogLock&&QDir().exists(logFileName))
         {
@@ -268,7 +275,12 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(obsList->init(observatoryCat.toAscii().data(), OBS_SIZE))
         {
             qDebug() << QString("obsCat is not opened\n");
-            if(isRemLog)QDir().remove(logFileName);
+            logFile->close();
+            delete clog;
+            clog = 0;
+            delete logFile;
+            if(resRed&&isRemLog) QDir().remove(logFileName);
+            qInstallMsgHandler(0);
             return 1;
         }
 
@@ -278,16 +290,18 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
         fitsdata *fitsd = new fitsdata();
 
-/*
-        insSettings instr(insSettFile);
-        instr.getNumIns(instrNum);
-        fitsd->setInstrSettings(instr);
-*/
+////////////////////////////////////////
 
         if(obsList->getobsynumO(obsCode.toAscii().data()))
         {
             qDebug() << QString("obsCode is not found\n");
-            if(isRemLog)QDir().remove(logFileName);
+            logFile->close();
+            delete clog;
+            clog = 0;
+            delete logFile;
+            delete fitsd;
+            if(isRemLog) QDir().remove(logFileName);
+            qInstallMsgHandler(0);
             return 1;
         }
         obsPos = obsList->record;
@@ -300,12 +314,18 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
 //get header
 
-        if(doWhat)   //0-http; 1-file
+        if(useHeaderFile)   //0-http; 1-file
         {
             if(fitsd->loadHeaderFile(headerFileName))
             {
                 qDebug() << "\nloadHeaderFile error\n";
-                if(isRemLog)QDir().remove(logFileName);
+                logFile->close();
+                delete clog;
+                clog = 0;
+                delete logFile;
+                delete fitsd;
+                if(isRemLog) QDir().remove(logFileName);
+                qInstallMsgHandler(0);
                 return 1;
             }
         }
@@ -323,12 +343,25 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             outerProcess.start(gethttp_prog, outerArguments);
 
             outerProcess.waitForFinished(gethttp_wait_time);
-            if(fitsd->readHttpHeader(QString(outerProcess.readAllStandardOutput())))
+            if(fitsd->readHeader(QString(outerProcess.readAllStandardOutput())))
             {
                 qDebug() << "\nreadHttpHeader error\n";
-                if(isRemLog)QDir().remove(logFileName);
+                logFile->close();
+                delete clog;
+                clog = 0;
+                delete logFile;
+                delete fitsd;
+                if(isRemLog) QDir().remove(logFileName);
+                qInstallMsgHandler(0);
                 return 1;
             }
+        }
+
+        if(saveHeaderFile)
+        {
+            qDebug() << QString("saveHeaderFile: %1\n").arg(headerFileName);
+            qDebug() << QString("headList.size: %1\n").arg(fitsd->headList.size());
+            if(fitsd->saveHeaderFile(headerFileName)) qDebug() << "saveHeaderFile error\n";
         }
 
 /////////////////////////////
@@ -336,7 +369,13 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(fitsd->loadWCSFile(wcsFileName))
         {
             qDebug() << "\nloadWCSFile error\n";
-            if(isRemLog)QDir().remove(logFileName);
+            logFile->close();
+            delete clog;
+            clog = 0;
+            delete logFile;
+            delete fitsd;
+            if(isRemLog) QDir().remove(logFileName);
+            qInstallMsgHandler(0);
             return 1;
         }
 /////////////////////////////
@@ -394,7 +433,13 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(fitsd->loadIpixMarks(fileName, mSep, mCol))
         {
             qDebug() << "Ipix marks load error\n";
+            logFile->close();
+            delete clog;
+            clog = 0;
+            delete logFile;
+            delete fitsd;
             if(isRemLog) QDir().remove(logFileName);
+            qInstallMsgHandler(0);
             return 1;
         }
 
@@ -408,7 +453,13 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
         {
             qDebug() << QString("getMarksGrid error\n");
+            logFile->close();
+            delete clog;
+            clog = 0;
+            delete logFile;
+            delete fitsd;
             if(isRemLog) QDir().remove(logFileName);
+            qInstallMsgHandler(0);
             return 2;
         }
         fitsd->detTan();
@@ -450,23 +501,19 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
     fitsd->findCloserObjects(aper);
     fitsd->findCloserStars(aper);
 
-    resRed = fitsd->ruler3(redparamIni, resFolder, refParam, sysCorr);
+    fitsd->ruler3(redparamIni, resFolder, refParam, sysCorr);
 
-    qDebug() << QString("resRed: %1\n").arg(resRed);
+
+    qDebug() << QString("\nend ruler3PL\n");
 
 ///////////
     logFile->close();
     delete clog;
     clog = 0;
-
     delete logFile;
-    //logFile = 0;
     delete fitsd;
-if(resRed&&isRemLog) QDir().remove(logFileName);
-
+    if(isRemLog) QDir().remove(logFileName);
     qInstallMsgHandler(0);
-
-
 
     return 0;
 }
