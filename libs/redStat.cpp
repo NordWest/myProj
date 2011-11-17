@@ -4684,7 +4684,7 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
     measurementStatRec* msRec;
     measurementRec* mesRec;
 
-    int plSz, isapp, mo;
+    int plSz, isapp, mo, osize;
 
     //QStringList versSeqList = versSeq.split("|");
     int versNum = versSeqList.size();
@@ -4730,7 +4730,8 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
                         qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
 
                         mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                        if(mesRec->objList.size()<minObj) continue;
+                        osize = mesRec->objList.size();
+                        if(osize<mo) continue;
                         //qDebug() << "mesRec: " << mesRec << "\n";
                         //if(detObj&&(mesRec->objList.size()==0)) break;
                         if(mesList!=NULL)
