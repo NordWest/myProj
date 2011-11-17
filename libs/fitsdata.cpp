@@ -3836,7 +3836,9 @@ void fitsdata::setRpix()
 
 int fitsdata::loadIpixMarks(QString fName, QString mSep, QString mCol)
 {
-    fileName = fName;
+    QFileInfo fi(fName);
+    //fi.makeAbsolute();
+    fileName = fi.absoluteFilePath();
     return(ipixMarks->loadTanImg(fName, mSep, mCol));
 }
 
@@ -9759,6 +9761,7 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
 
 
    /////////////////////////////////////////////////////////
+
 
                     refMarks->ebRec->MJD = MJD;
                     refMarks->ebRec->RAoc = ra_c;
