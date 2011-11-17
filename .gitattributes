@@ -401,6 +401,7 @@ r3Stat/r3Stat.pro -text
 r3StatPL/main.cpp -text
 r3StatPL/r3StatPL.pro -text
 redStatSelect/main.cpp -text
+redStatSelect/redStatSelect.ini -text
 redStatSelect/redStatSelect.pro -text
 refTest/main.cpp -text
 refTest/refTest.pro -text
