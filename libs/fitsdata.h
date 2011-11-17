@@ -163,6 +163,8 @@ fov - field of view [arcmin]
 void findSkybot(marksGrid *objMarks, double ra, double de, double MJD, QString prog, QString progFolder, double fov, QString obsCode, double mag0, double mag1, int sbWaitTime=-1);
 void findSkybotNamesList(QStringList *namesList, double ra, double de, double MJD, QString prog, QString progFolder, double fov, QString obsCode, double mag0, double mag1, int sbWaitTime=-1);
 
+void detTan6const(double *ksi, double *eta, double x, double y, plateConstRec xParams, plateConstRec yParams);
+void detXcYc6const(double *x, double *y, double ksi, double eta, plateConstRec xParams, plateConstRec yParams);
 
 ////////////////////////////////////////////
 

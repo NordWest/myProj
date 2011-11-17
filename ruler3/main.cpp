@@ -326,7 +326,19 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
         fitsd->ipixMarks->clearMarks();
 
-        fitsd->findHstars(aper, identNum);
+        if(fitsd->findHstars(aper, identNum))
+        {
+            qDebug() << QString("\nfindHstars error\n");
+            logFile->close();
+            delete clog;
+            clog = 0;
+
+            delete logFile;
+            //logFile = 0;
+            delete fitsd;
+            if(isRemLog) QDir().remove(logFileName);
+            return 1;
+        }
         //fitsd->copyImgGrid(fitsd->catMarks, fitsd->ipixMarks);
         fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
         qDebug() << QString("premeasured stars num: %1\n").arg(fitsd->ipixMarks->marks.size());
@@ -335,9 +347,38 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
         int resAuto = identAuto(fitsd->refMarks, fitsd->catMarks, fitsd->ipixMarks, &fitsd->WCSdata[0], identNum, identType, maxNum);
 
+
+
         qDebug() << QString("resAuto: %1\n").arg(resAuto);
 
-        if((!fitsd->detWCS1(wcsParams))&&saveRefindWCS)fitsd->saveWCS();
+        if(resAuto)
+        {
+            qDebug() << QString("\nidentAuto error\n");
+            logFile->close();
+            delete clog;
+            clog = 0;
+
+            delete logFile;
+            //logFile = 0;
+            delete fitsd;
+            if(isRemLog) QDir().remove(logFileName);
+            return 1;
+        }
+
+        if(fitsd->detWCS1(wcsParams))
+        {
+            qDebug() << QString("\ndetWCS1 error\n");
+            logFile->close();
+            delete clog;
+            clog = 0;
+
+            delete logFile;
+            //logFile = 0;
+            delete fitsd;
+            if(isRemLog) QDir().remove(logFileName);
+            return 1;
+        }
+        if(saveRefindWCS)fitsd->saveWCS();
         //fitsd->detTan();
         fitsd->ipixMarks->clearMarks();
     }
@@ -411,7 +452,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
     delete logFile;
     //logFile = 0;
     delete fitsd;
-    if(resRed&&isRemLog) QDir().remove(logFileName);
+    if(isRemLog) QDir().remove(logFileName);
 
     qInstallMsgHandler(0);
 

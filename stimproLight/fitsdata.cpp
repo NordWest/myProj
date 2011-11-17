@@ -1,6 +1,6 @@
 #include "fitsdata.h"
-#include <astro.hpp>
-#include <mb.hpp>
+#include "./../astro/astro.h"
+#include "./../mb/mb.h"
 //#include <mb.hpp>
 
 
@@ -247,7 +247,8 @@ QString fitsdata::getEqCoordinatesOfPixel(int x, int y)
 		if(WCSdata[12]>0)
 		{
 			double cpos[2];
-			getCposFromWCS(x, y, WCSdata, cpos);
+                        getPixPosToDegWCS(&cpos[0], &cpos[1], x, y, WCSdata);
+                        //getCposFromWCS(x, y, WCSdata, cpos);
 			return "RA = "+mas_to_hms(cpos[0], ":", 3)+
                                 ", Dec = "+mas_to_damas(cpos[1], ":", 2);
 		}
@@ -551,7 +552,8 @@ bool fitsdata::matchStars()
         ra = hms_to_mas(u3Line.section('|',0,0),":");
         dec = damas_to_mas(u3Line.section('|',1,1),":");
         mag = u3Line.section('|',2,2).toDouble();
-        getRaDeToTang(ra,dec,WCSdata[2]*3600000,WCSdata[3]*3600000,tang);
+        getDegToTang(&tang[0], &tang[1], ra,dec,WCSdata[2]*3600000,WCSdata[3]*3600000);
+        //getRaDeToTang(ra,dec,WCSdata[2]*3600000,WCSdata[3]*3600000,tang);
         if((mag>5)&&(mag<17)){KSI << tang[0];ETA << tang[1];MAG<<mag;}//select stars within 5 to 12 mag
         /*if((mag>0)&&(mag<15))
         {

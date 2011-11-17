@@ -1048,6 +1048,20 @@ void reductionMaker::detTan6const(double *ksi, double *eta, double x, double y)
 
 }
 
+void detTan6const(double *ksi, double *eta, double x, double y, plateConstRec xParams, plateConstRec yParams)
+{
+    *ksi = xParams.params.at(0)*x+xParams.params.at(1)*y+xParams.params.at(2);
+    *eta = yParams.params.at(0)*x+yParams.params.at(1)*y+yParams.params.at(2);
+
+}
+
+void detXcYc6const(double *x, double *y, double ksi, double eta, plateConstRec xParams, plateConstRec yParams)
+{
+    *y = ((eta-yParams.params[2])-yParams.params[0]*(ksi-xParams.params[2])/xParams.params[0])/(yParams.params[1]-yParams.params[0]*xParams.params[1]/xParams.params[0]);
+    *x = ((ksi-xParams.params[2])-xParams.params[1]*(*y))/xParams.params[0];
+}
+
+
 void reductionMaker::detMagn(double *mag, double pixmag)
 {
     switch(reductionType)
@@ -2607,8 +2621,9 @@ double fitsdata::detFov()
 
         if(FD_LOG_LEVEL) qDebug() << QString("sc= %1\n").arg(sc);
 
-        maxdim *= sc;
+        maxdim *= sc*60;
 
+        if(FD_LOG_LEVEL) qDebug() << QString("fov= %1\n").arg(maxdim);
 
         /*
 	marksGrid *mGr;
@@ -2640,7 +2655,7 @@ double fitsdata::detFov()
 //	if(FD_LOG_LEVEL) qDebug() << "\nscales\t" << mGr->scales[0];
 //	if(FD_LOG_LEVEL) qDebug() << "\nscFactor\t" << scFactor;
 */
-        return(maxdim*60.0);
+        return(maxdim);
 }
 
 int fitsdata::detWCS1(reductionParams params)
@@ -3603,7 +3618,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             outerProcess.setWorkingDirectory(sCat->exePath);
                             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
                             outerProcess.setReadChannel(QProcess::StandardOutput);
-                            outerArguments << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("r=%1").arg(fov/2.0) << QString("%1").arg(sCat->catPath);
+                            outerArguments << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("r=%1").arg(fov) << QString("%1").arg(sCat->catPath);
                             if(FD_LOG_LEVEL) qDebug() << sCat->exeName << outerArguments.join(" ");
                             outerProcess.start(sCat->exeName, outerArguments);
                             break;
@@ -8281,7 +8296,7 @@ int fitsdata::findHstars(int apeDiam, int targNum)
         ipixMarks->addImgMark(cmX.at(i), cmY[i], flux.at(i));
     }
 
-    if(FD_LOG_LEVEL) qDebug() << QString("sz= %1\n").arg(sz);
+    if(FD_LOG_LEVEL) qDebug() << QString("findHstars sz= %1\n").arg(sz);
     return (sz<targNum);
 }
 

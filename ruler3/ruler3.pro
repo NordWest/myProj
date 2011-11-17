@@ -32,8 +32,8 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 
-win32:TARGET = ./../../bin/ruler3
-unix:TARGET = ./../bin/ruler3
+TARGET = ruler3
+#unix:TARGET = ./../bin/ruler3
 
 CONFIG += console \
     exceptions \

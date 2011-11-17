@@ -298,6 +298,8 @@ mb/mb.pro -text
 mb/mb_global.h -text
 medianplus/main.cpp -text
 medianplus/medianplus.pro -text
+mergeFits/main.cpp -text
+mergeFits/mergeFits.pro -text
 mpcStat/apvt.h -text
 mpcStat/ccdmeasurements.cpp -text
 mpcStat/ccdmeasurements.h -text
