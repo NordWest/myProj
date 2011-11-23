@@ -197,7 +197,11 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
     QFileInfo fi(fileName);
     QString filePath = fi.absolutePath();
 
-    if(QDir().exists(wcsLockFile)||(QDir().exists(wcsFileName)&&!refindWCS)) return 1;
+    if(QDir().exists(wcsLockFile)||(QDir().exists(wcsFileName)&&!refindWCS))
+    {
+        qDebug() << QString("\nWCS is present\n");
+        return 1;
+    }
     else
     {
         logFile = new QFile(logFileName);
