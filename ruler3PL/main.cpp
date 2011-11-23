@@ -332,7 +332,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         else
         {
 
-            if(detPlName) detPlateName(&pnStr, filePath, plNameType);
+            if(detPlName) detPlateName(&pnStr, fileName, plNameType);
 
             outerArguments.clear();
             outerProcess.setWorkingDirectory(gethttp_prog_folder);
