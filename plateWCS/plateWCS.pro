@@ -3,8 +3,8 @@
 # -------------------------------------------------
 # QT -= gui
 
-unix:TARGET = ./../bin/plateWCS
-win32:TARGET = ./../../bin/plateWCS
+TARGET = plateWCS
+#win32:TARGET = ./../../bin/plateWCS
 
 CONFIG += console \
     qt \
