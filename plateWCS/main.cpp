@@ -274,6 +274,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
                     delete logFile;
                     delete fitsd;
                     //if(isRemLog) QDir().remove(logFileName);
+                    QDir().remove(wcsLockFile);
                     qInstallMsgHandler(0);
                     return 1;
                 }
@@ -301,6 +302,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
                     delete logFile;
                     delete fitsd;
                     //if(isRemLog) QDir().remove(logFileName);
+                    QDir().remove(wcsLockFile);
                     qInstallMsgHandler(0);
                     return 1;
                 }
