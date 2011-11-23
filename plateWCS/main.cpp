@@ -192,6 +192,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
     QString logFileName = fileName+".wcs.log";
     QString wcsFileName = QString("%1.wcs").arg(fileName);
     QString wcsLockFile = QString("%1.lock").arg(fileName);
+    if(detHname) headerFileName = QString("%1.hdr").arg(fileName);
 
     QFileInfo fi(fileName);
     QString filePath = fi.absolutePath();
