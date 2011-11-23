@@ -335,6 +335,7 @@ plStat/longnam.h -text
 plStat/main.cpp -text
 plStat/plStat.pro -text
 plateWCS/main.cpp -text
+plateWCS/plateWCS.ini -text
 plateWCS/plateWCS.pro -text
 plateWCSn/main.cpp -text
 plateWCSn/plateWCSn.pro -text

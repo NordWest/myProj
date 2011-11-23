@@ -86,10 +86,11 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
     //command line  ///////////////////////////////////////
 
     QString cfgFileName = "./plateWCS.ini";
-    int doWhat = 0;                         //0-http; 1-file
+    int useHeaderFile = 0;                         //0-http; 1-file
     int detPlName = 1;
     QString optName, optVal, optStr, pnStr, headerFileName;
     QString resFolder;
+    int detHname = 0;
 
         for(i=2; i<argc; i++)
         {
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
             else if(QString::compare(optName, "headerFile", Qt::CaseSensitive)==0)
             {
                 detPlName = 0;
-                doWhat = 1;
+                useHeaderFile = 1;
                 headerFileName = optVal;
             }
             else
@@ -128,7 +129,12 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
     int useUtCorr = sett->value("general/useUtCorr", 0).toInt();
     int refindWCS = sett->value("general/refindWCS", 0).toInt();
     double fovp = sett->value("general/fovp", 1.0).toDouble();        //field of view percent, [0.0 - 1.0]
-
+    if(!useHeaderFile)
+    {
+        useHeaderFile = sett->value("general/useHeaderFile", 0).toInt();
+        detHname = 1;
+    }
+    int saveHeaderFile = sett->value("general/saveHeaderFile", 0).toInt();
 
 //insSettings
     QString insSettFile = sett->value("insSettings/insSettFile", "./telescopes.ini").toString();
@@ -255,36 +261,57 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
 
 
 
-//get header
+    //get header
 
-    if(doWhat)   //0-http; 1-file
-    {
-        if(fitsd->loadHeaderFile(headerFileName))
-        {
-            qDebug() << "\nloadHeaderFile error\n";
-            return 1;
-        }
-    }
-    else
-    {
+            if(useHeaderFile)   //0-http; 1-file
+            {
+                if(fitsd->loadHeaderFile(headerFileName))
+                {
+                    qDebug() << "\nloadHeaderFile error\n";
+                    logFile->close();
+                    delete clog;
+                    clog = 0;
+                    delete logFile;
+                    delete fitsd;
+                    //if(isRemLog) QDir().remove(logFileName);
+                    qInstallMsgHandler(0);
+                    return 1;
+                }
+            }
+            else
+            {
 
-        if(detPlName) detPlateName(&pnStr, fileName, plNameType);
+                if(detPlName) detPlateName(&pnStr, filePath, plNameType);
 
-        outerArguments.clear();
-        outerProcess.setWorkingDirectory(gethttp_prog_folder);
-        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-        outerProcess.setReadChannel(QProcess::StandardOutput);
-        outerArguments << pnStr.toAscii().constData();
-        qDebug() << gethttp_prog << outerArguments.join(" ") << "\n";
-        outerProcess.start(gethttp_prog, outerArguments);
+                outerArguments.clear();
+                outerProcess.setWorkingDirectory(gethttp_prog_folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+                outerArguments << pnStr.toAscii().constData();
+                qDebug() << gethttp_prog << outerArguments.join(" ") << "\n";
+                outerProcess.start(gethttp_prog, outerArguments);
 
-        outerProcess.waitForFinished(gethttp_wait_time);
-        if(fitsd->readHttpHeader(QString(outerProcess.readAllStandardOutput())))
-        {
-            qDebug() << "\nreadHttpHeader error\n";
-            return 1;
-        }
-    }
+                outerProcess.waitForFinished(gethttp_wait_time);
+                if(fitsd->readHeader(QString(outerProcess.readAllStandardOutput())))
+                {
+                    qDebug() << "\nreadHttpHeader error\n";
+                    logFile->close();
+                    delete clog;
+                    clog = 0;
+                    delete logFile;
+                    delete fitsd;
+                    //if(isRemLog) QDir().remove(logFileName);
+                    qInstallMsgHandler(0);
+                    return 1;
+                }
+            }
+
+            if(saveHeaderFile)
+            {
+                qDebug() << QString("saveHeaderFile: %1\n").arg(headerFileName);
+                qDebug() << QString("headList.size: %1\n").arg(fitsd->headList.size());
+                if(fitsd->saveHeaderFile(headerFileName)) qDebug() << "saveHeaderFile error\n";
+            }
 
 /////////////////////////////
 
