@@ -1993,7 +1993,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
         for(i=0; i<di; i++)
         {
-                printf("\nsetPoint: %f\%\n", (double)i*100.0/(double)di);
+                printf("\nsetPoint: %f\%\r", (double)i*100.0/(double)di);
 
                 mesRec = mesList.at(i);
 
