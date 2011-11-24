@@ -317,6 +317,11 @@ mpeph/mpeph.h -text
 mpeph/mpeph.pro -text
 multiFits/main.cpp -text
 multiFits/multiFits.pro -text
+napoint/main.cpp -text
+napoint/napoint.pro -text
+napoint/napoint.pro.user -text
+napoint/widget.cpp -text
+napoint/widget.h -text
 objSearchPL/main.cpp -text
 objSearchPL/objSearchPL.pro -text
 oclTest/main.cpp -text
