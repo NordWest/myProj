@@ -5,8 +5,8 @@
 #-------------------------------------------------
 
 QT       += core gui
-INCLUDEPATH +=D:/coding/qt_hardware/qextserialport-1.2win-alpha
-QMAKE_LIBDIR +=D:/coding/qt_hardware/qextserialport-build-desktop/build
+INCLUDEPATH +=D:/svnProj/qextserialport-1.2win-alpha
+QMAKE_LIBDIR +=D:/svnProj/qextserialport-1.2win-alpha/build
 TARGET = napoint
 TEMPLATE = app
 

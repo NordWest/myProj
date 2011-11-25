@@ -288,6 +288,8 @@ Widget::Widget(QWidget *parent)
     luftDE->setText(QString("%1").arg(luft_DE,5,'f',0,QLatin1Char( ' ' )));
     maxNumberOfStepDE->setText(QString("%1").arg(maxNumberOfStep_DE,5,'f',0,QLatin1Char( ' ' )));
     delayRA->setText(QString("%1").arg(delay_RA,8,'f',0,QLatin1Char( ' ' )));
+
+    stepDEs = 0;
 }
 
 Widget::~Widget()
@@ -466,9 +468,22 @@ void Widget::moveButtonClicked()
                              QString("%1").arg(de2,16,'f',3,QLatin1Char( ' ' ))
                              ,QMessageBox::Ok,0,0);*/
     //BEGIN move in RA
+    moveRaButtonClicked();
+    /*
     //if(portRA->isOpen())stopProgramAtSMSD3(portRA);
     /////////////LD1*BG*EN*AL0*SD89*DL*ON*MV*ED*ST1
     //int nOfStepsRA = (ra2-ra1)*scale_RA;
+
+    if((ra2-ra1)>43200) ra2 -= 86400;
+    if((ra2-ra1)<-43200) ra2 += 86400;
+
+    /*QMessageBox::information(0,"napoint",
+                             QString("%1").arg(ra1,16,'f',3,QLatin1Char( ' ' ))+"\n"+
+                             QString("%1").arg(de1,16,'f',3,QLatin1Char( ' ' ))+"\n"+
+                             QString("%1").arg(ra2,16,'f',3,QLatin1Char( ' ' ))+"\n"+
+                             QString("%1").arg(de2,16,'f',3,QLatin1Char( ' ' ))
+                             ,QMessageBox::Ok,0,0);/
+
     if(ra2-ra1>0) ra2+=luft_RA/scale_RA-delay_RA;
     else ra2+=delay_RA;
     double nOfStepsRA = numberOfRASteps(ra2-ra1,scale_RA,speed_RA,speed_RAHM);
@@ -491,7 +506,7 @@ void Widget::moveButtonClicked()
     slRA<<"DL*"<<"SD"+QString("%1").arg(speed_RAHM,5,'f',0,QLatin1Char( '0' ))+"*";
     slRA<<"MV*"<<"ED*";
     QString str="";for(int i=0;i<slRA.count();i++)str+=slRA[i];
-    //QMessageBox::information(0,"napoint",str,QMessageBox::Ok,0,0);
+    QMessageBox::information(0,"napoint",str,QMessageBox::Ok,0,0);
     qDebug()<<str;
     if(portRA->isOpen())
     {
@@ -501,6 +516,8 @@ void Widget::moveButtonClicked()
     }
     //END move in RA*/
     //BEGIN move in Dec
+    moveDeButtonClicked();
+    /*
     //forming the list of commands
     int nOfStepsDE = (de2-de1)*scale_DE;
     if((currentStep_DE+nOfStepsDE>0)&&
@@ -540,7 +557,21 @@ void Widget::moveDeButtonClicked()
     fromTextToRADE(radeLineEdit2->text(),ra2,de2);
     //BEGIN move in Dec
     //forming the list of commands
-    int nOfStepsDE = (de2-de1)*scale_DE;
+    int nOfStepsDE;
+    int ts;
+    nOfStepsDE = (de2-de1)*scale_DE;
+/*QMessageBox::information(0,"napoint",
+                             QString("nOfStepsDE: %1\nstepDEs: %2").arg(nOfStepsDE).arg(stepDEs)+"\n"
+                            ,QMessageBox::Ok,0,0);*/
+    ts = stepDEs;
+    stepDEs = abs(nOfStepsDE)/nOfStepsDE;
+    if(nOfStepsDE*ts<0)
+    {
+        nOfStepsDE += stepDEs*luft_DE;
+        /*QMessageBox::information(0,"napoint",
+                             QString("nOfStepsDE: %1\nstepDEs: %2").arg(nOfStepsDE).arg(stepDEs)+"\n"
+                            ,QMessageBox::Ok,0,0);*/
+    }
     if((currentStep_DE+nOfStepsDE>0)&&
        (currentStep_DE+nOfStepsDE<maxNumberOfStep_DE))
     {
@@ -586,6 +617,10 @@ void Widget::moveRaButtonClicked()
     //if(portRA->isOpen())stopProgramAtSMSD3(portRA);
     /////////////LD1*BG*EN*AL0*SD89*DL*ON*MV*ED*ST1
     //int nOfStepsRA = (ra2-ra1)*scale_RA;
+
+    if((ra2-ra1)>43200) ra2 -= 86400;
+    if((ra2-ra1)<-43200) ra2 += 86400;
+
     if(ra2-ra1>0) ra2+=luft_RA/scale_RA-delay_RA;
     else ra2+=delay_RA;
     double nOfStepsRA = numberOfRASteps(ra2-ra1,scale_RA,speed_RA,speed_RAHM);

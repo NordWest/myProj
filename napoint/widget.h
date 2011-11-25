@@ -98,6 +98,7 @@ private:
     double currentStep_DE;//current number of step in Dec
     int luftStatus_RA;//status of position of the telescope 0 - last motion to west, 1- to east
     int delay_RA;//time delay in RA in sec(it causes during program loading to device)
+    int stepDEs;//signum of prev de step;
     //
     QSettings *settings;
     QPushButton *adoptButton;
