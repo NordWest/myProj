@@ -313,6 +313,8 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
                 }
             }
 
+            qDebug() << QString("\nfitsHeader:\n") << fitsd->fitsHeader << "\n";
+
             if(saveHeaderFile)
             {
                 qDebug() << QString("saveHeaderFile: %1\n").arg(headerFileName);
@@ -364,6 +366,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
 
 /////////
 ////////
+        qDebug() << "\nloadIpixMarks:\n";
 
         if(fitsd->loadIpixMarks(fileName, mSep, mCol))
         {
@@ -371,15 +374,24 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
             return 1;
         }
 
+        qDebug() << QString("ipixMarks size: %1\n").arg(fitsd->ipixMarks->marks.size());
+
         if(detRect) fitsd->detIpixWorkFrame();
         else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
         fitsd->setRpix();
+
+        qDebug() << QString("rect: %1:%2 - %3:%4\n").arg(fitsd->workFrame.topLeft().x()).arg(fitsd->workFrame.topLeft().y()).arg(fitsd->workFrame.bottomRight().x()).arg(fitsd->workFrame.bottomRight().y());
 
 /////////
 
         double fov = fovp*fitsd->detFov();
 
+        qDebug() << QString("fov: %1\n").arg(fov);
+
         fitsd->catMarks->clearMarks();
+
+        qDebug() << "\ngetMarksGrid:\n";
+
         //getMarksGrid(fitsd->catMarks, starCatList.at(catNum), fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
         if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
         {
@@ -387,14 +399,19 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
             QDir().remove(wcsLockFile);
             return 2;
         }
+
+        qDebug() << QString("catMarks size: %1\n").arg(fitsd->catMarks->marks.size());
+
         fitsd->detTan();
 
 //////////
 
 
 //ident
-    qDebug() << QString("refMarksSize= %1\n").arg(fitsd->refMarks->marks.size());
+
     int resAuto = identAuto(fitsd->refMarks, fitsd->catMarks, fitsd->ipixMarks, &fitsd->WCSdata[0], identNum, identType, maxNum);
+
+    qDebug() << QString("refMarksSize= %1\n").arg(fitsd->refMarks->marks.size());
 
     if(resAuto)
     {

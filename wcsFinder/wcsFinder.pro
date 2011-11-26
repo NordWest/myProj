@@ -3,8 +3,8 @@
 # -------------------------------------------------
 QT -= gui
 
-unix:TARGET = ./../bin/wcsFinder
-win32:TARGET = ./../../bin/wcsFinder
+TARGET = wcsFinder
+#win32:TARGET = ./../../bin/wcsFinder
 
 CONFIG += console \
     qt \
