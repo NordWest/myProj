@@ -33,9 +33,7 @@ skybotclient::skybotclient(QCoreApplication *app)
 		"&-rm="+skybotclient_app->arguments().at(4)+
 		"&-mime=text&-out=all&-loc="+skybotclient_app->arguments().at(5)+
                 "&-filter=0";
-        //QTextStream stream(stdout);
-        //stream << getrequest<<endl;
-	http->get(getrequest);//skybotclient.exe 2454679.5 271.45567 -12.45564 60 084
+        http->get(getrequest);
 	//END get
 }
 

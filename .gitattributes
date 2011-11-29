@@ -222,8 +222,6 @@ libs/mpcqt.cpp -text
 libs/mpcqt.h -text
 libs/mpcs.cpp -text
 libs/mpcs.h -text
-libs/mpeph.cpp -text
-libs/mpeph.h -text
 libs/multidim.cpp -text
 libs/multidim.h -text
 libs/observ.cpp -text
@@ -313,7 +311,9 @@ mpeph/astro.cpp -text
 mpeph/astro.h -text
 mpeph/main.cpp -text
 mpeph/mpeph.cpp -text
+mpeph/mpeph.cpp.save -text
 mpeph/mpeph.h -text
+mpeph/mpeph.h.save -text
 mpeph/mpeph.pro -text
 multiFits/main.cpp -text
 multiFits/multiFits.pro -text

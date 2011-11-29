@@ -21,7 +21,6 @@ Q_OBJECT
 	
 private slots:  
     void slotProcessingData(bool error);
-    //void slotReadingData(QHttpResponseHeader hData);
 
 
  public:

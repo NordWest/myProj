@@ -1,5 +1,5 @@
 #include "mpeph.h"
-#include "./../astro/astro.h"
+#include "astro.h"
 /*о командной строчке замолвите словечко...
 mpeph.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
 1 -num - это значит задается номер астероида (как в примере)
@@ -30,8 +30,8 @@ cdsfind::cdsfind(QCoreApplication *app)//конструктор
 	replyDir = settings->value("general/replyDir").toString();// это папка, в которую выдается файлик с результатом
 	proxyPort = settings->value("general/proxyPort").toInt();// не по порядку правда - это порт прокси
 	useProxy = settings->value("general/useProxy").toInt();// 0 - не используем прокси, 1 - используем
-        int useNetworkIni = settings->value("general/useNetworkIni", 0).toInt();
-        if(useNetworkIni)
+        useNetworkCfg = settings->value("general/useNetworkCfg", 0).toInt();
+        if(useNetworkCfg)
         {
             QSettings *netSett = new QSettings("network.ini",QSettings::IniFormat);
             proxyName = netSett->value("general/proxyName").toString();
@@ -42,7 +42,6 @@ cdsfind::cdsfind(QCoreApplication *app)//конструктор
 	obsCode = settings->value("general/obsCode").toString();// код обсерватории
         centre = settings->value("general/centre").toString();//Reference center - тип положения наблюдателя. 1-гелиоцентр, 2-геоцентр, 3-хз, 4- по коду обсерватории (UAI_code)
         if(centre.toInt()<0||centre.toInt()>4) centre = QString("4");                      //если такого пункта нет в ini-файле, то параметр будет по старинке равер 4
-        te = settings->value("general/te", "1").toString();
 
         keph = settings->value("general/keph").toString();//Номер эфемериды:1-DE200 / LE200; 2-VSOP82 / ELP2000-82; 3-DE403 / LE403; 4-VSOP87 / ELP2000-82B; 5-DE405 / LE405; 6-DE406 / LE406; 7-INPOP06
         if(keph=="") keph = QString("5");                      //если такого пункта нет в ini-файле, то параметр будет по старинке равер 5
@@ -112,13 +111,11 @@ cdsfind::cdsfind(QCoreApplication *app)//конструктор
 		"&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));
 
         QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
-
-        requestStr += QString("&planete=Aster");
         if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
-        requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale+"&te="+te;
+        requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale;
     //                if(simplemode==3) requestStr = requestStr + "&uploadfile_dat="+mjdfname;
         if (msgout==1) stream << requestStr<<"\n";//печатать запрос в консоли
-        http->get(requestStr);// посылаем запрос методом get
+	http->get(requestStr);// посылаем запрос методом get
 	
 };
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1

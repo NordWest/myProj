@@ -15,7 +15,7 @@ Q_OBJECT
 	QString proxyName;
 	int proxyPort;
 	int useProxy;
-        int useNetworkCfg;
+        //int useNetworkCfg;
 	int eventMessages;
 	int msgout;
 	QString obscode;
@@ -27,7 +27,13 @@ Q_OBJECT
 	QString obsCode;
         QString centre;
         QString keph;
+        QString te;
 	int timescale;
+
+        QNetworkAccessManager manager;
+        QNetworkReply *reply;
+        QUrl apiUrl;
+        QByteArray requestString;
 	
 private slots:// самый минимум слотов. нам ведь нужно чтобы прога могла "узнать":  
     void slotProcessingData(bool error);//получить и обработать данные;

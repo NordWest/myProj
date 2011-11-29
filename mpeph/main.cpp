@@ -2,7 +2,7 @@
 //это консольное приложение с циклом обработки сообщений или событий (event loop)
 #include <QCoreApplication>
 #include <QtCore>
-#include "./../libs/mpeph.h"
+#include "mpeph.h"
 
 
 
