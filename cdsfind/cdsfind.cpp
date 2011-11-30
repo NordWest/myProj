@@ -33,10 +33,15 @@ cdsfind::cdsfind(QCoreApplication *app)
 
 
     //end load settings
-    //stream  << "\nhostName: " << hostName<<'\n';
+    if (eventMessages) stream  << "\nhostName: " << hostName<<'\n';
     //begin setup of http connection
     http = new QHttp(this);
-    if (useProxy==1) http->setProxy(proxyName, proxyPort);
+
+    if (useProxy==1)
+    {
+        if (eventMessages) stream  << "\nuseProxy 1\n";
+        http->setProxy(proxyName, proxyPort);
+    }
     http->setHost(hostName);
     //end setup of http connection
     //begin signal-slot

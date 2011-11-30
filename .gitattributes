@@ -27,6 +27,7 @@ bmpProc/bmpProc.pro -text
 bmpProc/main.cpp -text
 cdsfind/cdsfind.cpp -text
 cdsfind/cdsfind.h -text
+cdsfind/cdsfind.ini -text
 cdsfind/cdsfind.pro -text
 cdsfind/main.cpp -text
 convert405/convert405.pro -text
@@ -575,6 +576,7 @@ scanArch/scanArch.pro -text
 skybotclient/main.cpp -text
 skybotclient/skybotclient.cpp -text
 skybotclient/skybotclient.h -text
+skybotclient/skybotclient.ini -text
 skybotclient/skybotclient.pro -text
 sphereMod/main.cpp -text
 sphereMod/sphereMod.pro -text
