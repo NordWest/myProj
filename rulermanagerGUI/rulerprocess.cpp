@@ -1,7 +1,7 @@
 #include "rulerprocess.h"
 #include "math.h"
-#include "astro.h"
-#include "ccdmeasurements.h"
+//#include "astro.h"
+//#include "ccdmeasurements.h"
 
 rulerprocess::rulerprocess(QProgressBar *pb, QProgressBar *pbTot, QLabel *lb, QStringList *pl, QObject *parent)
 {

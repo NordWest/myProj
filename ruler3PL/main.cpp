@@ -80,7 +80,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QProcess outerProcess;
         QStringList outerArguments;
         QString optName, optVal, optStr, pnStr, headerFileName;
-        QString resFolder;
+        QString logFileName, filePath, wcsFileName;
+        QString resFolder, logPath;
         sysCorrParam *sysCorr = NULL;
         QString cfgFileName = "ruler3PL.ini";
         int useHeaderFile = 0;                         //0-http; 1-file
@@ -93,6 +94,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int sz, i, oNum;
         int resRed = 0;
         int detHname = 0;
+        int isLP = 0;
 
     //command line  ///////////////////////////////////////
 
@@ -126,6 +128,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             {
                 isSc = 1;
                 scFile = optVal;
+            }
+            else if(QString::compare(optName, "logPath", Qt::CaseSensitive)==0)
+            {
+                isLP = 1;
+                logPath = optVal;
             }
             else
             {
@@ -225,11 +232,12 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         //else qDebug() << "\nlogFolder don't create\n";
 
         QFileInfo fi(fileName);
-        QString filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
+        filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
         if(filePath=="") filePath = QString("./");
-        QString wcsFileName = QString("%1.wcs").arg(fileName);
+        wcsFileName = QString("%1.wcs").arg(fileName);
         //QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
-        QString logFileName = QString("%1.log").arg(fi.absoluteFilePath());
+        if(isLP) logFileName = QString("%1%2.log").arg(QDir(logPath).absolutePath()).arg(fi.fileName());
+        else logFileName = QString("%1.log").arg(fi.absoluteFilePath());
         if(detHname) headerFileName = QString("%1.hdr").arg(fileName);
 
         if(useLogLock&&QDir().exists(logFileName))
