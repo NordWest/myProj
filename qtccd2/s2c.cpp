@@ -1,7 +1,7 @@
 #include <QtCore>
 #include <QtGui>
 #include <QLibrary>
-#include "S2C.h"
+#include "s2c.h"
 
 
 S2C::S2C()

@@ -4,7 +4,7 @@
 #include "AccuTime.h"
 #include "./../libs/fitsio.h"
 #include "math.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 //#include <QTranslator>
 
 

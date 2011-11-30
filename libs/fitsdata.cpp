@@ -10433,6 +10433,7 @@ void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast
     outerProcess.setReadChannel(QProcess::StandardOutput);
 
     if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << ast_eph_prog << " " << outerArguments.join("|") << "\n";
+
     outerProcess.start(ast_eph_prog, outerArguments);
 
     outerProcess.waitForFinished(mpeWaitTime);
@@ -10471,7 +10472,7 @@ void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast
         if(FD_LOG_LEVEL) qDebug() << QString("Object: %1\tra: %2\tde:%3\tmagn:%4\n").arg(mT->mpcObj->name).arg(deg_to_hms(mT->mEkv[0], " ", 5)).arg(deg_to_damas(mT->mEkv[1], " ", 5)).arg(mT->mEkv[2]);
 
         //objMarks->marks << mT;
-        if(FD_LOG_LEVEL) qDebug() << "obj mpc: " << objMarks->addMark(mT)->mpcObj << "\n";
+        objMarks->addMark(mT);
         //mT = new marksP(OBJ_TYPE_MPEPH);
     }
 

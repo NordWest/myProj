@@ -324,6 +324,12 @@ napoint/widget.cpp -text
 napoint/widget.h -text
 objSearchPL/main.cpp -text
 objSearchPL/objSearchPL.pro -text
+obsCoordinator/main.cpp -text
+obsCoordinator/mainwindow.cpp -text
+obsCoordinator/mainwindow.h -text
+obsCoordinator/mainwindow.ui -text
+obsCoordinator/obsCoordinator.pro -text
+obsCoordinator/obsCoordinator.pro.user -text
 oclTest/main.cpp -text
 oclTest/oclTest.pro -text
 oclTest/oclTest.pro.user -text

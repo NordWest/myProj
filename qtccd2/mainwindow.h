@@ -5,9 +5,9 @@
 #include <QtCore>
 #include <QMainWindow>
 #include "ccdframe.h"
-#include "S2C.h"
+#include "s2c.h"
 #include "serialWidget.h"
-#include "begPropDlg.h"
+#include "begpropdlg.h"
 #include "autosetuptimerdlg.h"
 #include "wakeupdlg.h"
 

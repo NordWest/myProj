@@ -2,7 +2,7 @@
 #include "ccdframe.h"
 #include "math.h"
 #include "./../libs/fitsio.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 
 CCDFrame::CCDFrame(QString FileName)
 {

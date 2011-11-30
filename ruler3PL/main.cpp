@@ -438,6 +438,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
 ////////
 
+        qDebug() << "ipixMarks load\n";
         if(fitsd->loadIpixMarks(fileName, mSep, mCol))
         {
             qDebug() << "Ipix marks load error\n";
@@ -451,6 +452,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             return 1;
         }
 
+        qDebug() << QString("ipixMarks num: %1\n").arg(fitsd->ipixMarks->marks.size());
+
         if(detRect) fitsd->detIpixWorkFrame();
         else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
 
@@ -458,6 +461,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         double fov = fovp*fitsd->detFov();
 
         fitsd->catMarks->clearMarks();
+        qDebug() << "catMarks load\n";
         if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
         {
             qDebug() << QString("getMarksGrid error\n");
@@ -470,6 +474,9 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             qInstallMsgHandler(0);
             return 2;
         }
+
+        qDebug() << QString("catMarks num: %1\n").arg(fitsd->ipixMarks->marks.size());
+
         fitsd->detTan();
 
 //////////
@@ -495,6 +502,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         }
         else if(tryMpeph)
         {
+            qDebug() << "tryMpeph\n";
             if(!fitsd->headList.getKeyName(headObjName, &descS))
             {
                 desc2NumName(descS, &oNum, &oName);
@@ -502,6 +510,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 else getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
             }
         }
+        qDebug() << QString("objMarks num: %1\n").arg(fitsd->ipixMarks->marks.size());
         fitsd->detTanObj();
 ///////////
 

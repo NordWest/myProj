@@ -6,7 +6,7 @@ HEADERS += mainwindow.h \
     ./../libs/fitsio.h \
     ./../libs/longnam.h \
     AccuTime.h \
-    ./../libs/astro.h \
+    ./../astro/astro.h \
     ./../libs/mb.h \
     ./../libs/comfunc.h \
     serialWidget.h \
@@ -17,7 +17,7 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     ccdframe.cpp \
     S2C.cpp \
-    ./../libs/astro.cpp \
+    ./../astro/astro.cpp \
     ./../libs/comfunc.cpp \
     serialWidget.cpp \
     begpropdlg.cpp \
@@ -25,9 +25,9 @@ SOURCES += main.cpp \
     wakeupdlg.cpp
 
 win32 {
- LIBS =  ./../libs/cfitsio.lib  AccuTime.lib
+ LIBS =  ./../libs/win32/cfitsio.lib  AccuTime.lib
 }
-win32:LIBS +=  ./../libs/win/libmb.a
+win32:LIBS +=  ./../libs/win32/libmb.a
 TARGET = qtccd2
 TRANSLATIONS = qtccd_ru.ts
 CONFIG += windows exceptions warn_off
