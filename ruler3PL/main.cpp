@@ -236,7 +236,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(filePath=="") filePath = QString("./");
         wcsFileName = QString("%1.wcs").arg(fileName);
         //QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
-        if(isLP) logFileName = QString("%1%2.log").arg(QDir(logPath).absolutePath()).arg(fi.fileName());
+        if(isLP) logFileName = QString("%1/%2.log").arg(QDir(logPath).absolutePath()).arg(fi.fileName());
         else logFileName = QString("%1.log").arg(fi.absoluteFilePath());
         if(detHname) headerFileName = QString("%1.hdr").arg(fileName);
 
