@@ -834,7 +834,7 @@ struct objStatRec
     platesStat *plStat;
     QList <measurementStatRec*> mStatList;
     void init(int plNameType);
-    void do3Sigma(reductionStat *rStat, double sigma, double pfc = 0.0);
+    void do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*> *rejList = NULL, double pfc = 0.05);
     void getOCList(reductionStat *rStat, QList <objResRec*> *ocList);
     //void getSstarList(reductionStat *rStat, QList <sstarRes*> *sstarList);
     void removeMes(QString mesTimeCode);

@@ -5117,7 +5117,7 @@ void objStatRec::init(int plNameType)
     plStat->init(mStatList, plNameType);
 }
 
-void objStatRec::do3Sigma(reductionStat *rStat, double sigma, double pfc)
+void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*> *rejList, double pfc)
 {
     qDebug() << "objStatRec::do3Sigma\n";
     double *vectx, *vecty;
@@ -5180,6 +5180,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, double pfc)
                     qDebug() << QString("remove mes: %1\tocX: %2\tocY: %3\n").arg(objList.at(i)->mesureTimeCode).arg(objList.at(i)->ksiOC).arg(objList.at(i)->etaOC);
                     rStat->removeMes(objList.at(i)->mesureTimeCode);
                     removeMes(objList.at(i)->mesureTimeCode);
+                    if(rejList!=NULL) *rejList << objList.at(i);
                     objList.removeAt(i);
                 }
             }

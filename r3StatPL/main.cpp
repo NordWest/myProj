@@ -1123,6 +1123,7 @@ int main(int argc, char *argv[])    //r3StatPL
         reportDir.mkdir(reportObjDir);
         objResidualFile objTemp;// = new objResidualFile;
         objResidualFile objAggTemp;// = new objResidualFile;
+        objResidualFile objRejTemp;
 
         eqFile eqTemp;// = new objResidualFile;
         eqFile aggEqTemp;// = new objResidualFile;
@@ -1145,6 +1146,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
         ocRec *ocrec;
         sstarRes *ssrec;
+        QList <objResRec*> rejList;
 
 
 
@@ -1160,15 +1162,22 @@ int main(int argc, char *argv[])    //r3StatPL
             ssAggFile.setFileName(reportObjDir+"/sstar.txt");
             ssAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             ssAggStm.setDevice(&ssAggFile);
+
+
         }
 
             for(i=0; i<szi; i++)
             {
                 objTemp.clear();
+                objRejTemp.ocList.clear();
                 //ssF.clear();
                 //szj = objPStat.objList.at(i);
                 qDebug() << QString("objName: %1\n").arg(objStat.objList.at(i)->objName);
-                if(objSigma>0.0) objStat.objList.at(i)->do3Sigma(&rStat, objSigma);
+                if(objSigma>0.0)
+                {
+                    objStat.objList.at(i)->do3Sigma(&rStat, objSigma, &objRejTemp.ocList);
+
+                }
                 objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
 
                 qDebug() << QString("eq size: %1\n").arg(objTemp.ocList.size());
@@ -1176,6 +1185,8 @@ int main(int argc, char *argv[])    //r3StatPL
                 catName = objStat.objList.at(i)->catName.simplified();
                 tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
                 szj = objTemp.ocList.size();
+                qDebug() << QString("objTemp.ocList.size: %1\n").arg(szj);
+                if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
                 if(szj>0)
                 {
                     objTemp.saveAs(tfName+"_or.txt");
