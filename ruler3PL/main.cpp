@@ -475,7 +475,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             return 2;
         }
 
-        qDebug() << QString("catMarks num: %1\n").arg(fitsd->ipixMarks->marks.size());
+        qDebug() << QString("catMarks num: %1\n").arg(fitsd->catMarks->marks.size());
 
         fitsd->detTan();
 
@@ -510,7 +510,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 else getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
             }
         }
-        qDebug() << QString("objMarks num: %1\n").arg(fitsd->ipixMarks->marks.size());
+        qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());
         fitsd->detTanObj();
 ///////////
 

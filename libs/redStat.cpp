@@ -4255,11 +4255,11 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
 */
 measurementRec* reductionStat::getMeasurement(QString mesTimeCode)
 {
-    qDebug() << QString("\ngetMeasurement\n");
-    qDebug() << QString("get mesureTimeCode: %1\n").arg(mesTimeCode);
+    //qDebug() << QString("\ngetMeasurement\n");
+    //qDebug() << QString("get mesureTimeCode: %1\n").arg(mesTimeCode);
     int i, sz0;
     sz0 = mesList.size();
-    qDebug() << QString("mes size: %1\n").arg(sz0);
+    //qDebug() << QString("mes size: %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
         //qDebug() << QString("mesureTimeCode: %1\n").arg(mesList.at(i)->mesureTimeCode);
@@ -5157,7 +5157,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, double pfc)
                 vectx[i] = objList.at(i)->ksiOC;
                 vecty[i] = objList.at(i)->etaOC;
                 objList.at(i)->rec2s(&tstr);
-                qDebug() << tstr << "\n";
+                //qDebug() << tstr << "\n";
 
             }
             countColStat(cRecRa, vectx, sz0);
@@ -5229,6 +5229,8 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, double pfc)
         }while((abs(sz0-sz1)>(pfc*sz1))&&(sz1>3));
     }
 */
+
+    qDebug() << "END objStatRec::do3Sigma\n";
 }
 
 void objStatRec::removeMes(QString mesTimeCode)
