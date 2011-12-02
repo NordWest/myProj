@@ -1091,6 +1091,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
     for(k=0; k<magEq.diapsNum-1; k++)
     {
+        if(mgEqSigma>1e-2) magEq.resListDiap.at(k)->remSigma(mgEqSigma);
+        //magEq.resListDiap.at(k)->detStat();
         magEq.resListDiap.at(k)->detStat();
 
        dataStrL.clear();
@@ -1324,8 +1326,8 @@ int main(int argc, char *argv[])    //r3StatPL
     for(k=0; k<magEq.diapsNum-1; k++)
     {
 
-       if(mgEqSigma>1e-2) magEq.resListDiap.at(k)->remSigma(mgEqSigma);
-       else magEq.resListDiap.at(k)->detStat();
+//       if(mgEqSigma>1e-2) magEq.resListDiap.at(k)->remSigma(mgEqSigma);
+//       else magEq.resListDiap.at(k)->detStat();
 
        dataStrL.clear();
 
