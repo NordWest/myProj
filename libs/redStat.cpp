@@ -5050,6 +5050,7 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
                 isNew = 0;
 
                 objList.at(i)->mStatList.append(redStat->getMeasurementStat(redStat->objFile->ocList.at(k)->mesureTimeCode));
+                objList.at(i)->objList << redStat->objFile->ocList.at(k);
                 break;
             }
         }
@@ -5058,6 +5059,7 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
             objStat = new objStatRec;
             objStat->objName = redStat->objFile->ocList.at(k)->name;
             objStat->catName = redStat->objFile->ocList.at(k)->catName;
+            objStat->objList << redStat->objFile->ocList.at(k);
             objStat->mStatList.append(redStat->getMeasurementStat(redStat->objFile->ocList.at(k)->mesureTimeCode));
             objList << objStat;
         }
@@ -5126,7 +5128,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
     double maxOcX, maxOcY;
     QString tstr;
     measurementRec *mesR;
-    QList <objResRec*> objList;
+    //QList <objResRec*> objList;
     //QList <ocRec*> mpeList;
     //QList <sstarRes*> sstarList;
     colRec *cRecRa = new colRec;
@@ -5135,13 +5137,13 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
     qDebug() << QString("objName: %1\n").arg(objName);
 
     sz0 = mStatList.size();
-    for(i=0; i<sz0; i++)
+ /*   for(i=0; i<sz0; i++)
     {
         mesR = rStat->getMeasurement(mStatList.at(i)->mesureTimeCode);
 
         objList << mesR->objList;
         //sstarList << mesR->sstarList;
-    }
+    }*/
     sz1 = objList.size();
     qDebug() << QString("mpeList.size: %1\n").arg(sz1);
     if(sz1>3)
@@ -5178,7 +5180,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
                 if((fabs(cRecRa->mean-objList.at(i)->ksiOC)>maxOcX)||(fabs(cRecDe->mean-objList.at(i)->etaOC)>maxOcY))
                 {
                     qDebug() << QString("remove mes: %1\tocX: %2\tocY: %3\n").arg(objList.at(i)->mesureTimeCode).arg(objList.at(i)->ksiOC).arg(objList.at(i)->etaOC);
-                    rStat->removeMes(objList.at(i)->mesureTimeCode);
+                    if(rStat!=NULL) rStat->removeMes(objList.at(i)->mesureTimeCode);
                     removeMes(objList.at(i)->mesureTimeCode);
                     if(rejList!=NULL) *rejList << objList.at(i);
                     objList.removeAt(i);

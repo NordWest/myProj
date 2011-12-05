@@ -832,6 +832,7 @@ struct objStatRec
 {
     QString objName, catName;
     platesStat *plStat;
+    QList <objResRec*> objList;
     QList <measurementStatRec*> mStatList;
     void init(int plNameType);
     void do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*> *rejList = NULL, double pfc = 0.05);
