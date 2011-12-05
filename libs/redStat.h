@@ -54,6 +54,9 @@ void detTimeCode(QString &timeCode);
 void detPlateName(QString *plateName, QString originName, int plNameType = 0);
 //void getPlateName(QString origName, QString *plName, int plNameType);
 
+void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax, double dExpMax);
+void sortORList(QList <objResRec*> orList, int dir = 1);
+
 //////////////////////////////////////////////////////////////////////////////////////
 class ocRec
 {
@@ -619,6 +622,50 @@ public:
         void removeMes(QString mesureTimeCode);
 };
 
+class objResidualFile
+{
+public:
+    QList <objResRec*> ocList;
+    QList <colRec*> colList;
+    moveModelRec* mmRec;
+
+    QString fName;
+
+    objResidualFile();
+    ~objResidualFile();
+
+    void init(QString fname);
+
+    void clear();
+    void save();
+    void saveAs(QString fname);
+
+    void removeMes(QString mesureTimeCode);
+
+    void do3sigma(double proofP, double sigmaMul);
+
+    int getColRecNum(int colNum);
+    int setColRec(colRec* cRec);
+    void sortColList();
+
+    colRec* getColNum(int cNum);
+
+    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+    int reCountCols();
+    void delMMrec();
+
+    /*
+    int getColRecNum(int colNum);
+    int setColRec(colRec* cRec);
+    void sortColList();
+
+    colRec* getColNum(int cNum);
+
+    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+    int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
+    */
+};
+
 class sstarFile
 {
 public:
@@ -684,35 +731,7 @@ public:
 
 };
 
-class objResidualFile
-{
-public:
-    QList <objResRec*> ocList;
 
-    QString fName;
-
-    objResidualFile();
-    ~objResidualFile();
-
-    void init(QString fname);
-
-    void clear();
-    void save();
-    void saveAs(QString fname);
-
-    void removeMes(QString mesureTimeCode);
-
-    /*
-    int getColRecNum(int colNum);
-    int setColRec(colRec* cRec);
-    void sortColList();
-
-    colRec* getColNum(int cNum);
-
-    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
-    int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
-    */
-};
 
 class errBudgetFile
 {

@@ -345,6 +345,7 @@ int main(int argc, char *argv[])    //r3StatPL
     int saveMpc = sett->value("reportObj/saveMpc", 0).toInt();
     int saveAgg = sett->value("reportObj/saveAgg", 0).toInt();
     QString mpcOrbCat = sett->value("reportObj/mpcOrbCat", "").toString();
+    int isSeries = sett->value("reportObj/isSeries", 0).toInt();
 
     int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
     int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
@@ -1177,7 +1178,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << QString("objName: %1\n").arg(objStat.objList.at(i)->objName);
                 if(objSigma>0.0)
                 {
-                    objStat.objList.at(i)->do3Sigma(&rStat, objSigma, &objRejTemp.ocList);
+                    objStat.objList.at(i)->do3Sigma(NULL, objSigma, &objRejTemp.ocList);
 
                 }
                 //objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);

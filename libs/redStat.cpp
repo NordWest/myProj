@@ -1,5 +1,62 @@
 #include "redStat.h"
 
+void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double dtMax)
+{
+    int i, szi, j, szj, k, szk;
+    int isFound;
+    szi = orList.size();
+    objResRec* tResRec;
+    objResidualFile* tResFile;
+    for(i=sz-1; i>=0; i--)
+    {
+        isFound=0;
+        tResRec = orList.at(i);
+        szj = orSeriesList->size();
+        for(j=0; (j<szj)&&!isFound; j++)
+        {
+            szk = orSeriesList->at(j)->ocList.size();
+            for(k=0; k<szk; k++)
+            {
+                if(fabs(tResRec->mJD-orSeriesList->at(j)->ocList.at(k)->mJD)<=dtMax)
+                {
+                    orSeriesList->at(j)->ocList << tResRec;
+                    orList.removeAt(i);
+                    isFound = 1;
+                    break;
+                }
+            }
+        }
+        if(!isFound)
+        {
+            tResFile = new objResidualFile;
+            tResFile->ocList << tResRec;
+            orSeriesList->append(tResFile);
+        }
+    }
+}
+
+void sortORList(QList <objResRec*> orList, int dir = 1)
+{
+    int i, j, sz;
+    szi = orList.size();
+    double val;
+    int vPos;
+
+    for(i=0; i<sz-1; i++)
+    {
+        val = orList.at(i)->mJD;
+        vPos = i;
+        for(j=i+1; j<sz; j++)
+        {
+            if(dir*val>dir*orList.at(j)->mJD)
+            {
+                orList.swap(i, j);
+                break;
+            }
+
+        }
+    }
+}
 
 void detPlateName(QString *plateName, QString originName, int plNameType)
 {
@@ -2885,7 +2942,7 @@ void residualFile::removeMes(QString mesureTimeCode)
 
 objResidualFile::objResidualFile()
 {
-
+    ocList.clear();
 };
 
 objResidualFile::~objResidualFile()
@@ -2962,6 +3019,468 @@ void objResidualFile::removeMes(QString mesureTimeCode)
         if(QString::compare(mesureTimeCode, ocList.at(i)->mesureTimeCode)==0) ocList.removeAt(i);
     }
 }
+
+void objResidualFile::do3sigma(double proofP, double sigmaMul)
+{
+
+    int num0, num1, i, sz;
+    int num0E, num1E;
+    double meanRa, meanDec;
+    double sigmaKsi, sigmaEta;
+    double maxOCKsi, maxOCEta;
+
+    num1 = ocList.size();
+
+    QFile s3File("s3file.txt");
+    s3File.open(QIODevice::Append);
+    QTextStream s3Stm(&s3File);
+    qDebug() << "\ndo3Sigma\n";
+    s3Stm << "\ndo3Sigma\n";
+    if(num1<3) return;
+
+    do
+    {
+            num0 = num1;
+
+            if((getColRecNum(4)!=-1)&&(getColRecNum(5)!=-1)) reCountCols();
+            else countCols("4,5");
+
+            meanRa = getColNum(4)->mean;
+            meanDec = getColNum(5)->mean;
+
+            sigmaKsi = getColNum(4)->rmsOne;
+            sigmaEta = getColNum(5)->rmsOne;
+
+            sz = ocList.size();
+            qDebug() << QString("\n\nocList:\n");
+            for(i=0; i<sz; i++)
+            {
+                qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
+                s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
+            }
+
+            qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+
+            s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+
+            maxOCKsi = sigmaMul*sigmaKsi;
+            maxOCEta = sigmaMul*sigmaEta;
+
+            qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+            s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+
+
+            sz = ocList.size();
+            for(i=sz-1; i>=0; i--)
+            {
+                if((fabs(meanRa-ocList[i]->ocRaCosDe)>maxOCKsi)||(fabs(meanDec-ocList[i]->ocDe)>maxOCEta))
+                {
+                    qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
+                    s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
+                    ocList.removeAt(i);
+                }
+            }
+            num1 = ocList.size();
+
+            qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+
+
+    }while(abs(num0-num1)>(proofP*num1));
+
+    s3File.close();
+}
+
+int objResidualFile::getColRecNum(int colNum)
+{
+//	if(colRec==NULL) return -1;
+        int i;
+        int csz = colList.size();
+
+        for(i=0; i<csz; i++)
+        {
+                if(colList[i]->colNum==colNum)
+                {
+//			cRec = colList[i];
+                        return i;
+                }
+        }
+
+        return -1;
+}
+
+int objResidualFile::setColRec(colRec* cRec)
+{
+        colRec *pRec;
+        int rpos = getColRecNum(cRec->colNum);
+//	//qDebug() << "rpos= " << rpos << "\n";
+        if(rpos==-1)
+        {
+                pRec = new colRec;
+                colList << pRec;
+                rpos = colList.size()-1;
+        }
+
+        colList[rpos]->colNum = cRec->colNum;
+        colList[rpos]->num = cRec->num;
+        colList[rpos]->mean = cRec->mean;
+        colList[rpos]->rmsMean = cRec->rmsMean;
+        colList[rpos]->rmsOne = cRec->rmsOne;
+
+        return 0;
+}
+
+void objResidualFile::sortColList()
+{
+        int sz = colList.size();
+        int nMin, pMin;
+
+        for(int i=0; i<sz-1; i++)
+        {
+                nMin = colList[i]->colNum;
+                pMin = i;
+                for(int j=i+1; j<sz; j++)
+                {
+                        if(colList[j]->colNum<nMin){pMin = j; nMin = colList[j]->colNum;}
+                }
+
+                colList.swap(i, pMin);
+
+        }
+}
+
+void objResidualFile::delMMrec()
+{
+        if(mmRec!=NULL) delete(mmRec);
+        mmRec = NULL;
+}
+
+int objResidualFile::countCols(QString colNums)
+{
+    colList.clear();
+    QStringList columns = colNums.split(",");
+    int i, j, k, sz, sz1;
+    QList <colRec *> cols;
+    colRec *cRec;
+    QString str;
+    double val;
+    double *vect = new double[ocList.size()];
+
+    sz = ocList.size();
+   // if(sz<=2) return 1;
+
+            sz1 = columns.count();
+            for(j=0;j<sz1;j++)
+            {
+                    str = columns[j];
+                    cRec = new colRec;
+                    cRec->colNum = str.toInt();
+    //							means<<0;
+    //							serrors<<0;
+                    cols << cRec;
+            }
+
+            cRec = new colRec;
+
+            for(i=0; i<sz1; i++)
+            {
+                for(j=0;j<sz;j++)
+                {
+                    switch(cols[k]->colNum)
+                    {
+                            case 0:
+                            val= ocList[j]->MJday;
+                            cols[k]->num++;
+                            break;
+                            case 1:
+                            val= ocList[j]->ra;
+                            cols[k]->num++;
+                            break;
+                            case 2:
+                            val= ocList[j]->de;
+                            cols[k]->num++;
+                            break;
+                            case 3:
+                            val= ocList[j]->mag0;
+                            cols[k]->num++;
+                            break;
+                            case 4:
+                            val= ocList[j]->ocRaCosDe;
+                            cols[k]->num++;
+                            break;
+                            case 5:
+                            val= ocList[j]->ocDe;
+                            cols[k]->num++;
+                            break;
+                            case 6:
+                            val= ocList[j]->ocMag;
+                            cols[k]->num++;
+                            break;
+
+                    /*case 7:
+                    cols[k]->mean += ocList[j]->x;
+                    cols[k]->num++;
+                    break;
+                    case 8:
+                    cols[k]->mean += ocList[j]->y;
+                    cols[k]->num++;
+                    break;
+                    case 9:
+                    cols[k]->mean += ocList[j]->pixmag;
+                    cols[k]->num++;
+                    break;
+                    case 10:
+                    cols[k]->mean += ocList[j]->Dx;
+                    cols[k]->num++;
+                    break;
+                    case 11:
+                    cols[k]->mean += ocList[j]->Dy;
+                    cols[k]->num++;
+                    break;
+                    case 12:
+                    cols[k]->mean += ocList[j]->Dpixmag;
+                    cols[k]->num++;
+                    break;*/
+
+
+                            case 7:
+                            cols[k]->mean += ocList[j]->topDist;
+                            cols[k]->num++;
+                            break;
+                            case 8:
+                            cols[k]->mean += ocList[j]->muRaCosDe;
+                            cols[k]->num++;
+                            break;
+                            case 9:
+                            cols[k]->mean += ocList[j]->muDe;
+                            cols[k]->num++;
+                            break;
+                            case 10:
+                            cols[k]->mean += ocList[j]->Vr;
+                            cols[k]->num++;
+                            break;
+                            case 11:
+                            cols[k]->mean += ocList[j]->phase;
+                            cols[k]->num++;
+                            break;
+                            case 12:
+                            cols[k]->mean += ocList[j]->elong;
+                            cols[k]->num++;
+                            break;
+                            case 13:
+                            cols[k]->mean += ocList[j]->expTime;
+                            cols[k]->num++;
+                            break;
+                    }
+                    vect[j];
+                }
+
+                if(countColStat(&cRec, vect, sz)) continue;
+                colList << cRec;
+                cRec = new colRec;
+            }
+
+
+            for(j=0;j<sz;j++)
+            {
+                    for(k=0;k<sz1;k++)
+                    {
+                            switch(cols[k]->colNum)
+                            {
+                                    case 0:
+                                    cols[k]->mean += ocList[j]->MJday;
+                                    cols[k]->num++;
+                                    break;
+                                    case 1:
+                                    cols[k]->mean += ocList[j]->ra;
+                                    cols[k]->num++;
+                                    break;
+                                    case 2:
+                                    cols[k]->mean += ocList[j]->de;
+                                    cols[k]->num++;
+                                    break;
+                                    case 3:
+                                    cols[k]->mean += ocList[j]->mag0;
+                                    cols[k]->num++;
+                                    break;
+                                    case 4:
+                                    cols[k]->mean += ocList[j]->ocRaCosDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 5:
+                                    cols[k]->mean += ocList[j]->ocDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 6:
+                                    cols[k]->mean += ocList[j]->ocMag;
+                                    cols[k]->num++;
+                                    break;
+
+                            /*case 7:
+                            cols[k]->mean += ocList[j]->x;
+                            cols[k]->num++;
+                            break;
+                            case 8:
+                            cols[k]->mean += ocList[j]->y;
+                            cols[k]->num++;
+                            break;
+                            case 9:
+                            cols[k]->mean += ocList[j]->pixmag;
+                            cols[k]->num++;
+                            break;
+                            case 10:
+                            cols[k]->mean += ocList[j]->Dx;
+                            cols[k]->num++;
+                            break;
+                            case 11:
+                            cols[k]->mean += ocList[j]->Dy;
+                            cols[k]->num++;
+                            break;
+                            case 12:
+                            cols[k]->mean += ocList[j]->Dpixmag;
+                            cols[k]->num++;
+                            break;*/
+
+
+                                    case 7:
+                                    cols[k]->mean += ocList[j]->topDist;
+                                    cols[k]->num++;
+                                    break;
+                                    case 8:
+                                    cols[k]->mean += ocList[j]->muRaCosDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 9:
+                                    cols[k]->mean += ocList[j]->muDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 10:
+                                    cols[k]->mean += ocList[j]->Vr;
+                                    cols[k]->num++;
+                                    break;
+                                    case 11:
+                                    cols[k]->mean += ocList[j]->phase;
+                                    cols[k]->num++;
+                                    break;
+                                    case 12:
+                                    cols[k]->mean += ocList[j]->elong;
+                                    cols[k]->num++;
+                                    break;
+                                    case 13:
+                                    cols[k]->mean += ocList[j]->expTime;
+                                    cols[k]->num++;
+                                    break;
+                            }
+                    }
+            }
+            for(k=0;k<sz1;k++) cols[k]->mean /= cols[k]->num;
+
+            for(j=0;j<sz;j++)
+            {
+                    for(k=0;k<sz1;k++)
+                    {
+                            switch(cols[k]->colNum)
+                            {
+                                    case 0:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->MJday, 2.0);
+                                    break;
+                                    case 1:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ra, 2.0);
+                                    break;
+                                    case 2:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->de, 2.0);
+                                    break;
+                                    case 3:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag0, 2.0);
+                                    break;
+                                    case 4:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocRaCosDe, 2.0);
+                                    break;
+                                    case 5:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocDe, 2.0);
+                                    break;
+                                    case 6:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocMag, 2.0);
+                                    break;
+/*
+                            case 7:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->x, 2.0);
+                            break;
+                            case 8:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->y, 2.0);
+                            break;
+                            case 9:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->pixmag, 2.0);
+                            break;
+                            case 10:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dx, 2.0);
+                            break;
+                            case 11:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dx, 2.0);
+                            break;
+                            case 12:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dpixmag, 2.0);
+                            break;
+*/
+                                    case 7:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->topDist, 2.0);
+                                    break;
+                                    case 8:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->muRaCosDe, 2.0);
+                                    break;
+                                    case 9:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->muDe, 2.0);
+                                    break;
+                                    case 10:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Vr, 2.0);
+                                    break;
+                                    case 11:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->phase, 2.0);
+                                    break;
+                                    case 12:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->elong, 2.0);
+                                    break;
+                                    case 13:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->expTime, 2.0);
+                                    break;
+                            }
+                    }
+            }
+
+            for(k=0;k<sz1;k++)
+            {
+                    cols[k]->rmsOne = sqrt(cols[k]->rmsOne/(cols[k]->num-1.0));
+                    cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
+                    str.clear();
+                    cols[k]->rec2s(&str);
+//                    //qDebug() << k << ": " << str << "\n";
+                    setColRec(cols[k]);
+            }
+
+    sortColList();
+    return 0;
+}
+
+int eqFile::reCountCols()
+{
+    QStringList colNums;
+    int i, sz;
+    sz = colList.size();
+
+    for(i=0; i<sz; i++)
+    {
+        colNums << QString("%1").arg(colList[i]->colNum);
+    }
+    if(countCols(colNums.join(","))) return 1;
+    return 0;
+}
+
+
+
+///////////////////////////////////////////////////////
+
 /*
 int objResidualFile::getColRecNum(int colNum)
 {
