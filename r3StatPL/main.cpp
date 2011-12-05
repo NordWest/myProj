@@ -1180,7 +1180,8 @@ int main(int argc, char *argv[])    //r3StatPL
                     objStat.objList.at(i)->do3Sigma(&rStat, objSigma, &objRejTemp.ocList);
 
                 }
-                objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
+                //objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
+                objTemp.ocList << objStat.objList.at(i)->objList;
 
                 qDebug() << QString("eq size: %1\n").arg(objTemp.ocList.size());
                 objName = objStat.objList.at(i)->objName.simplified();
