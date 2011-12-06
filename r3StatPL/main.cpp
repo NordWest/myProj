@@ -346,6 +346,9 @@ int main(int argc, char *argv[])    //r3StatPL
     int saveAgg = sett->value("reportObj/saveAgg", 0).toInt();
     QString mpcOrbCat = sett->value("reportObj/mpcOrbCat", "").toString();
     int isSeries = sett->value("reportObj/isSeries", 0).toInt();
+    int d3s2 = sett->value("reportObj/d3s2", 0).toInt();
+    int d3s3 = sett->value("reportObj/d3s3", 0).toInt();
+    int d3s4 = sett->value("reportObj/d3s4", 0).toInt();
 
     int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
     int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
@@ -1124,12 +1127,22 @@ int main(int argc, char *argv[])    //r3StatPL
     {
         QString reportObjDir = reportDir.absolutePath() + reportDir.separator() + "objStat";
         reportDir.mkdir(reportObjDir);
+        if(isSeries) reportDir.mkdir(reportObjDir+QDir().separator()+"eqSeries");
         objResidualFile objTemp;// = new objResidualFile;
         objResidualFile objAggTemp;// = new objResidualFile;
         objResidualFile objRejTemp;
+        objResidualFile *orTempS = new objResidualFile;
+        objResidualFile *orTotS = new objResidualFile;
+        objResRec* orRec;
+        QList <objResidualFile*> orList;
 
         eqFile eqTemp;// = new objResidualFile;
         eqFile aggEqTemp;// = new objResidualFile;
+        eqFile *eqTempS = new eqFile;
+        eqFile *eqTotS = new eqFile;
+        QList <eqFile*> eqList;
+
+        ocRec* ocR;
 
         sstarFile ssTemp;
         sstarFile aggSsTemp;
@@ -1194,6 +1207,38 @@ int main(int argc, char *argv[])    //r3StatPL
                 if(szj>0)
                 {
                     objTemp.saveAs(tfName+"_or.txt");
+                    if(isSeries)
+                    {
+
+                        orList.clear();
+                        //bjTemp.findSeries(&eqList);
+
+                        szj = eqList.size();
+                        qDebug() << QString("eq series size: %1\n").arg(szj);
+                        eqTempS->clear();
+                        for(j=0; j<szj; j++)
+                        {
+                            qDebug() << QString("serie %1: %2 obs\n").arg(j).arg(eqList.at(j)->ocList.size());
+                            if(d3s2) eqList.at(j)->do3sigma(0.05, objSigma);
+                            //eqList.at(j)->countCols("0,1,2,3,4,5,6");
+                            //eqList.at(j)->countMM();
+                             qDebug() << QString("do3sigma size: %1\n").arg(eqList.at(j)->ocList.size());
+                             ocR = new ocRec;
+                            eqList.at(j)->getSeriesRec(ocR);
+
+                            eqTempS->ocList << ocR;
+
+                            //eqsR->rec2s(&tStr);
+                           //dataStream1 << QString("%1").arg(tStr);
+                        }
+                        if(d3s3) eqTempS->do3sigma(0.05, objSigma);
+                        eqTempS->countCols("4,5,6");
+                        eqTempS->saveAs(QString("%1/eqSeries/%2_eqs.txt").arg(reportDirName).arg(objName), 2);
+
+                        eqTotS->ocList << eqTempS->ocList;
+                    }
+
+
                     if(QString().compare(catName, "mpeph")==0)
                     {
                         eqTemp.clear();
@@ -1204,6 +1249,37 @@ int main(int argc, char *argv[])    //r3StatPL
                             eqTemp.ocList << ocrec;
                         }
                         objAggTemp.ocList << objTemp.ocList;
+
+                        if(isSeries)
+                        {
+
+                            eqList.clear();
+                            eqTemp.findSeries(&eqList);
+
+                            szj = eqList.size();
+                            qDebug() << QString("eq series size: %1\n").arg(szj);
+                            eqTempS->clear();
+                            for(j=0; j<szj; j++)
+                            {
+                                qDebug() << QString("serie %1: %2 obs\n").arg(j).arg(eqList.at(j)->ocList.size());
+                                if(d3s2) eqList.at(j)->do3sigma(0.05, objSigma);
+                                //eqList.at(j)->countCols("0,1,2,3,4,5,6");
+                                //eqList.at(j)->countMM();
+                                 qDebug() << QString("do3sigma size: %1\n").arg(eqList.at(j)->ocList.size());
+                                 ocR = new ocRec;
+                                eqList.at(j)->getSeriesRec(ocR);
+
+                                eqTempS->ocList << ocR;
+
+                                //eqsR->rec2s(&tStr);
+                               //dataStream1 << QString("%1").arg(tStr);
+                            }
+                            if(d3s3) eqTempS->do3sigma(0.05, objSigma);
+                            eqTempS->countCols("4,5,6");
+                            eqTempS->saveAs(QString("%1/eqSeries/%2_eqs.txt").arg(reportDirName).arg(objName), 2);
+
+                            eqTotS->ocList << eqTempS->ocList;
+                        }
 
                         if(cCols)eqTemp.countCols("4,5,6");
                         if(saveEq)
@@ -1276,6 +1352,13 @@ int main(int argc, char *argv[])    //r3StatPL
 
                 aggSsTemp.countCols("6,7,8");
                 aggSsTemp.saveAs(reportObjDir+"/sstar.txt");
+            }
+            if(isSeries)
+            {
+                if(d3s4) eqTotS->do3sigma(0.05, objSigma);
+
+                eqTotS->countCols("4,5,6");
+                eqTotS->saveAs(reportDirName+"/eqSeries.txt", 0);
             }
             /*
             if(objAggSigma>0.0)

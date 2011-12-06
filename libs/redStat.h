@@ -43,6 +43,8 @@ class errBudgetFile;
 class reductionStat;
 struct measurementStatRec;
 struct eqSeriesRec;
+class objResRec;
+class objResidualFile;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +56,7 @@ void detTimeCode(QString &timeCode);
 void detPlateName(QString *plateName, QString originName, int plNameType = 0);
 //void getPlateName(QString origName, QString *plName, int plNameType);
 
-void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax, double dExpMax);
+void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double dExpMax, double expMax = 0);
 void sortORList(QList <objResRec*> orList, int dir = 1);
 
 //////////////////////////////////////////////////////////////////////////////////////
