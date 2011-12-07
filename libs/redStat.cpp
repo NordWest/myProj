@@ -1,10 +1,11 @@
 #include "redStat.h"
 
-void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, int dExpCoef, double expMax)
+void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax)
 {
     int i, szi;
     double dT0, dT1, expTemp, mjd0, mjd1;
     if(orList.size()==0) return;
+    expMax = expMax/1440.0;
 
     sortORList(orList);
 
@@ -28,7 +29,8 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
         dT1 = mjd1 - mjd0;
         expTemp+=dT1;
         //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<1.5*dT0)&&((expTemp<expMax)||(expMax<=0))))
-        if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
+        //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
+        if((expTemp<expMax)||(expMax<=0))
         {
             tResFile->ocList << tResRec;
         }
@@ -3169,6 +3171,7 @@ void objResidualFile::delMMrec()
 
 int objResidualFile::countCols(QString colNums)
 {
+    qDebug() << QString("\nobjResidualFile::countCols: %1\n").arg(colNums);
     colList.clear();
     QStringList columns = colNums.split(",");
     int i, j, k, sz, sz1;
@@ -3176,13 +3179,15 @@ int objResidualFile::countCols(QString colNums)
     colRec *cRec;
     QString str;
     double val;
+    sz = ocList.size();
+    qDebug() << QString("ocList.size= %1\n").arg(sz);
     double *vect = new double[ocList.size()];
 
-    sz = ocList.size();
+
    // if(sz<=2) return 1;
 
             sz1 = columns.count();
-            for(j=0;j<sz1;j++)
+            /*for(j=0;j<sz1;j++)
             {
                     str = columns[j];
                     cRec = new colRec;
@@ -3190,75 +3195,79 @@ int objResidualFile::countCols(QString colNums)
     //							means<<0;
     //							serrors<<0;
                     cols << cRec;
-            }
+            }*/
+
+            //sz1 = cols.size();
+            qDebug() << QString("cols.size= %1\n").arg(sz1);
 
             cRec = new colRec;
+            int nI;
 
-            for(i=0; i<sz1; i++)
+            for(k=0; k<sz1; k++)
             {
                 for(j=0;j<sz;j++)
                 {
-                    switch(cols[k]->colNum)
+                    switch(columns.at(k).toInt())
                     {
                             case 0:
                             val= ocList[j]->mJD;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 1:
                             val= ocList[j]->ra;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 2:
                             val= ocList[j]->de;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 3:
                             val= ocList[j]->ksi;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 4:
                             val= ocList[j]->eta;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 5:
                             val= ocList[j]->mag;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 6:
                             val= ocList[j]->ksiOC;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 7:
                             val= ocList[j]->etaOC;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 8:
                             val= ocList[j]->magOC;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 9:
                             val= ocList[j]->x;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 10:
                             val= ocList[j]->y;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 11:
                             val= ocList[j]->pixmag;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 12:
                             val= ocList[j]->Dx;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 13:
                             val= ocList[j]->Dy;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                             case 14:
                             val= ocList[j]->Dpixmag;
-                            cols[k]->num++;
+                            //cols[k]->num++;
                             break;
                     default:
                             qDebug() << "\nobjResidualFile::countCols: Wrong col num\n";
@@ -3301,6 +3310,112 @@ colRec* objResidualFile::getColNum(int cNum)
         if(cNum==colList[i]->colNum) return colList[i];
     }
     return NULL;
+}
+
+void objResidualFile::getSeriesRec(objResRec *orsRec)
+{
+    countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+    sortColList();
+    //countMM();
+    //qDebug() << "mmRec: " << mmRec << "\n";
+
+    colRec* cRec;
+
+
+    cRec = getColNum(0);
+    if(cRec!=NULL) orsRec->mJD = cRec->mean;
+    else orsRec->mJD = 0.0;
+
+    cRec = getColNum(1);
+    if(cRec!=NULL) orsRec->ra = cRec->mean;
+    else  orsRec->ra = 0.0;
+
+    cRec = getColNum(2);
+    if(cRec!=NULL) orsRec->de = cRec->mean;
+    else orsRec->de = 0.0;
+
+    cRec = getColNum(3);
+    if(cRec!=NULL) orsRec->ksi = cRec->mean;
+    else orsRec->ksi = 0.0;
+
+    cRec = getColNum(4);
+    if(cRec!=NULL) orsRec->eta = cRec->mean;
+    else orsRec->eta = 0.0;
+
+    cRec = getColNum(5);
+    if(cRec!=NULL) orsRec->mag = cRec->mean;
+    else orsRec->mag = 0.0;
+
+    cRec = getColNum(6);
+    if(cRec!=NULL) orsRec->ksiOC = cRec->mean;
+    else orsRec->ksiOC = 0.0;
+
+    cRec = getColNum(7);
+    if(cRec!=NULL) orsRec->etaOC = cRec->mean;
+    else orsRec->etaOC = 0.0;
+
+    cRec = getColNum(8);
+    if(cRec!=NULL) orsRec->magOC = cRec->mean;
+    else orsRec->magOC = 0.0;
+
+    cRec = getColNum(9);
+    if(cRec!=NULL) orsRec->x = cRec->mean;
+    else orsRec->x = 0.0;
+
+    cRec = getColNum(10);
+    if(cRec!=NULL) orsRec->y = cRec->mean;
+    else orsRec->y = 0.0;
+
+    cRec = getColNum(11);
+    if(cRec!=NULL) orsRec->pixmag = cRec->mean;
+    else orsRec->pixmag = 0.0;
+
+    cRec = getColNum(12);
+    if(cRec!=NULL) orsRec->Dx = cRec->mean;
+    else orsRec->Dx = 0.0;
+
+    cRec = getColNum(13);
+    if(cRec!=NULL) orsRec->Dy = cRec->mean;
+    else orsRec->Dy = 0.0;
+
+    cRec = getColNum(14);
+    if(cRec!=NULL) orsRec->Dpixmag = cRec->mean;
+    else orsRec->Dpixmag = 0.0;
+
+    //qDebug() << QString("\n19 mean\n");
+/*
+    if(mmRec!=NULL)
+    {
+        qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
+        qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
+        eqsRec->ocRaMM = grad_to_mas(eqsRec->ra - mmRec->xTm);
+        eqsRec->ocDeMM = grad_to_mas(eqsRec->de - mmRec->yTm);
+    }
+    else
+    {
+        eqsRec->ocRaMM = 0.0;
+        eqsRec->ocDeMM = 0.0;
+    }
+*/
+    int i, szi;
+    szi = ocList.size();
+
+    orsRec->name=QString("");
+    orsRec->catName=QString("");
+    orsRec->catMagName=QString("");
+    orsRec->mesureTimeCode=QString("");
+
+    for(i=0; i<szi; i++)
+    {
+        if((orsRec->name=="")||(orsRec->name==ocList.at(i)->name))orsRec->name=ocList.at(i)->name;
+        else orsRec->name=QString("var");
+
+        if((orsRec->catName=="")||(orsRec->catName==ocList.at(i)->catName))orsRec->catName=ocList.at(i)->catName;
+        else orsRec->catName=QString("var");
+
+        if((orsRec->catMagName=="")||(orsRec->catMagName==ocList.at(i)->catMagName))orsRec->catMagName=ocList.at(i)->catMagName;
+        else orsRec->catMagName=QString("var");
+    }
 }
 
 ///////////////////////////////////////////////////////

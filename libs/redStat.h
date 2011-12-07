@@ -56,7 +56,7 @@ void detTimeCode(QString &timeCode);
 void detPlateName(QString *plateName, QString originName, int plNameType = 0);
 //void getPlateName(QString origName, QString *plName, int plNameType);
 
-void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double dExpMax, double expMax = 0);
+void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax);
 void sortORList(QList <objResRec*> orList, int dir = 1);
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -655,6 +655,8 @@ public:
     int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
     int reCountCols();
     void delMMrec();
+
+    void getSeriesRec(objResRec *orsRec);
 
     /*
     int getColRecNum(int colNum);
