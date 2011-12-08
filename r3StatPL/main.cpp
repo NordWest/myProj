@@ -1137,6 +1137,7 @@ int main(int argc, char *argv[])    //r3StatPL
         objResidualFile objRejTemp;
         objResidualFile *orTempS = new objResidualFile;
         objResidualFile *orTotS = new objResidualFile;
+        objSeries serTemp;
         objResRec* orRec;
         QList <objResidualFile*> orList;
 
@@ -1211,16 +1212,18 @@ int main(int argc, char *argv[])    //r3StatPL
                 if(szj>0)
                 {
                     objTemp.saveAs(tfName+"_or.txt");
+                    objAggTemp.ocList << objTemp.ocList;
                     if(isSeries)
                     {
-
+                        serTemp.serieList.clear();
                         orList.clear();
-                        detSeriesList(objTemp.ocList, &orList, 9);
+                        detSeriesList(objTemp.ocList, &serTemp.serieList, 9);
                         //bjTemp.findSeries(&eqList);
 
-                        szj = orList.size();
+                        szj = serTemp.serieList.size();
                         qDebug() << QString("or series size: %1\n").arg(szj);
-                        orTempS->clear();
+                        serTemp.saveAs_Full(QString("%1/orSeries/%2_ors.txt").arg(reportObjDir).arg(objName));
+                        /*orTempS->clear();
                         for(j=0; j<szj; j++)
                         {
                             qDebug() << QString("serie %1: %2 obs\n").arg(j).arg(orList.at(j)->ocList.size());
@@ -1241,6 +1244,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         orTempS->saveAs(QString("%1/orSeries/%2_ors.txt").arg(reportObjDir).arg(objName));
 
                         orTotS->ocList << orTempS->ocList;
+                        */
                     }
 
 
@@ -1324,13 +1328,14 @@ int main(int argc, char *argv[])    //r3StatPL
                     if(QString().compare(catName, "LSPM")==0)
                     {
                         ssTemp.clear();
+                        szj = objTemp.ocList.size();
                         for(j=0; j<szj; j++)
                         {
                             ssrec = new sstarRes;
                             objTemp.ocList.at(j)->toSstarRes(ssrec);
                             ssTemp.ocList << ssrec;
                         }
-                        objAggTemp.ocList << objTemp.ocList;
+
 
                         if(cCols)ssTemp.countCols("6,7,8");
                         if(saveEq)
@@ -1362,8 +1367,8 @@ int main(int argc, char *argv[])    //r3StatPL
             {
                 if(d3s4) orTotS->do3sigma(0.05, objSigma);
 
-                orTotS->countCols("5,6,7");
-                orTotS->saveAs(reportDirName+"/orSeries.txt");
+                //orTotS->countCols("5,6,7");
+                //orTotS->saveAs(reportDirName+"/orSeries.txt");
 
                 if(d3s4) eqTotS->do3sigma(0.05, objSigma);
 

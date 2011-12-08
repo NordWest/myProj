@@ -13,12 +13,13 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
     objResRec* tResRec;
     objResidualFile* tResFile;
     tResFile = new objResidualFile;
+    orSeriesList->append(tResFile);
     tResRec = orList.at(0);
     mjd1 = tResRec->mJD;
     tResFile->ocList << tResRec;
     expTemp = 0.0;
     dT1 = 0.0;
-    for(i=0; i<szi; i++)
+    for(i=1; i<szi; i++)
     {
       mjd0 = mjd1;
       dT0 = dT1;
@@ -45,6 +46,7 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
         }
 
     }
+
 }
 
 void sortORList(QList <objResRec*> orList, int dir)
@@ -3036,52 +3038,54 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul)
 {
 
     int num0, num1, i, sz;
-    int num0E, num1E;
     double meanRa, meanDec;
     double sigmaKsi, sigmaEta;
     double maxOCKsi, maxOCEta;
 
+    colRec raCol, deCol;
+
     num1 = ocList.size();
 
-    QFile s3File("s3file.txt");
-    s3File.open(QIODevice::Append);
-    QTextStream s3Stm(&s3File);
+    //QFile s3File("s3file.txt");
+    //s3File.open(QIODevice::Append);
+    //QTextStream s3Stm(&s3File);
     qDebug() << "\ndo3Sigma\n";
-    s3Stm << "\ndo3Sigma\n";
+    //s3Stm << "\ndo3Sigma\n";
     if(num1<3) return;
 
     do
     {
             num0 = num1;
 
-            if((getColRecNum(6)!=-1)&&(getColRecNum(7)!=-1)) reCountCols();
-            else countCols("6,7");
+            if(getColNum(&raCol, 6)||getColNum(&deCol, 7)) return;
+            //if((getColRecNum(6)!=-1)&&(getColRecNum(7)!=-1)) reCountCols();
+            //else countCols("6,7");
 
-            meanRa = getColNum(6)->mean;
-            meanDec = getColNum(7)->mean;
+            meanRa = raCol.mean;
+            meanDec = deCol.mean;
 
-            sigmaKsi = getColNum(6)->rmsOne;
-            sigmaEta = getColNum(7)->rmsOne;
+            sigmaKsi = raCol.rmsOne;
+            sigmaEta = deCol.rmsOne;
 
             sz = ocList.size();
             qDebug() << QString("\n\nocList:\n");
             for(i=0; i<sz; i++)
             {
                 qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
-                s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
+                //s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
             }
 
             qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
             qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
-            s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
-            s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+            //s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            //s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
             maxOCKsi = sigmaMul*sigmaKsi;
             maxOCEta = sigmaMul*sigmaEta;
 
             qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
-            s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+            //s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
 
 
             sz = ocList.size();
@@ -3090,228 +3094,244 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul)
                 if((fabs(meanRa-ocList[i]->ksiOC)>maxOCKsi)||(fabs(meanDec-ocList[i]->etaOC)>maxOCEta))
                 {
                     qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
-                    s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
+                    //s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
                     ocList.removeAt(i);
                 }
             }
             num1 = ocList.size();
 
             qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
-            s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            //s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
 
     }while(abs(num0-num1)>(proofP*num1));
 
-    s3File.close();
+    //s3File.close();
 }
 
-int objResidualFile::getColRecNum(int colNum)
-{
-//	if(colRec==NULL) return -1;
-        int i;
-        int csz = colList.size();
-
-        for(i=0; i<csz; i++)
-        {
-                if(colList[i]->colNum==colNum)
-                {
-//			cRec = colList[i];
-                        return i;
-                }
-        }
-
-        return -1;
-}
-
-int objResidualFile::setColRec(colRec* cRec)
-{
-        colRec *pRec;
-        int rpos = getColRecNum(cRec->colNum);
-//	//qDebug() << "rpos= " << rpos << "\n";
-        if(rpos==-1)
-        {
-                pRec = new colRec;
-                colList << pRec;
-                rpos = colList.size()-1;
-        }
-
-        colList[rpos]->colNum = cRec->colNum;
-        colList[rpos]->num = cRec->num;
-        colList[rpos]->mean = cRec->mean;
-        colList[rpos]->rmsMean = cRec->rmsMean;
-        colList[rpos]->rmsOne = cRec->rmsOne;
-
-        return 0;
-}
-
-void objResidualFile::sortColList()
-{
-        int sz = colList.size();
-        int nMin, pMin;
-
-        for(int i=0; i<sz-1; i++)
-        {
-                nMin = colList[i]->colNum;
-                pMin = i;
-                for(int j=i+1; j<sz; j++)
-                {
-                        if(colList[j]->colNum<nMin){pMin = j; nMin = colList[j]->colNum;}
-                }
-
-                colList.swap(i, pMin);
-
-        }
-}
-
-void objResidualFile::delMMrec()
-{
-        if(mmRec!=NULL) delete(mmRec);
-        mmRec = NULL;
-}
-
-int objResidualFile::countCols(QString colNums)
+int objResidualFile::countCols(QList <colRec*> *colList, QString colNums)
 {
     qDebug() << QString("\nobjResidualFile::countCols: %1\n").arg(colNums);
-    colList.clear();
     QStringList columns = colNums.split(",");
-    int i, j, k, sz, sz1;
-    QList <colRec *> cols;
+    int i, sz;
+
     colRec *cRec;
-    QString str;
-    double val;
-    sz = ocList.size();
-    qDebug() << QString("ocList.size= %1\n").arg(sz);
-    double *vect = new double[ocList.size()];
+    cRec = new colRec;
 
-
-   // if(sz<=2) return 1;
-
-            sz1 = columns.count();
-            /*for(j=0;j<sz1;j++)
+    sz = columns.count();
+    for(i=0;i<sz;i++)
+    {
+            if(!getColNum(cRec, columns[i].toInt()))
             {
-                    str = columns[j];
-                    cRec = new colRec;
-                    cRec->colNum = str.toInt();
-    //							means<<0;
-    //							serrors<<0;
-                    cols << cRec;
-            }*/
-
-            //sz1 = cols.size();
-            qDebug() << QString("cols.size= %1\n").arg(sz1);
-
-            cRec = new colRec;
-            int nI;
-
-            for(k=0; k<sz1; k++)
-            {
-                for(j=0;j<sz;j++)
-                {
-                    switch(columns.at(k).toInt())
-                    {
-                            case 0:
-                            val= ocList[j]->mJD;
-                            //cols[k]->num++;
-                            break;
-                            case 1:
-                            val= ocList[j]->ra;
-                            //cols[k]->num++;
-                            break;
-                            case 2:
-                            val= ocList[j]->de;
-                            //cols[k]->num++;
-                            break;
-                            case 3:
-                            val= ocList[j]->ksi;
-                            //cols[k]->num++;
-                            break;
-                            case 4:
-                            val= ocList[j]->eta;
-                            //cols[k]->num++;
-                            break;
-                            case 5:
-                            val= ocList[j]->mag;
-                            //cols[k]->num++;
-                            break;
-                            case 6:
-                            val= ocList[j]->ksiOC;
-                            //cols[k]->num++;
-                            break;
-                            case 7:
-                            val= ocList[j]->etaOC;
-                            //cols[k]->num++;
-                            break;
-                            case 8:
-                            val= ocList[j]->magOC;
-                            //cols[k]->num++;
-                            break;
-                            case 9:
-                            val= ocList[j]->x;
-                            //cols[k]->num++;
-                            break;
-                            case 10:
-                            val= ocList[j]->y;
-                            //cols[k]->num++;
-                            break;
-                            case 11:
-                            val= ocList[j]->pixmag;
-                            //cols[k]->num++;
-                            break;
-                            case 12:
-                            val= ocList[j]->Dx;
-                            //cols[k]->num++;
-                            break;
-                            case 13:
-                            val= ocList[j]->Dy;
-                            //cols[k]->num++;
-                            break;
-                            case 14:
-                            val= ocList[j]->Dpixmag;
-                            //cols[k]->num++;
-                            break;
-                    default:
-                            qDebug() << "\nobjResidualFile::countCols: Wrong col num\n";
-                            return 1;
-
-                    }
-                    vect[j] = val;
-                }
-
-                if(countColStat(cRec, vect, sz)) continue;
-                colList << cRec;
+                colList->append(cRec);
                 cRec = new colRec;
             }
+    }
 
+    //sz1 = cols.size();
+    qDebug() << QString("cols.size= %1\n").arg(sz);
 
-    sortColList();
     return 0;
 }
 
-int objResidualFile::reCountCols()
+int objResidualFile::getColNum(colRec* cRec, int cNum)
 {
-    QStringList colNums;
     int i, sz;
-    sz = colList.size();
+    double val;
+
+    sz = ocList.size();
+    qDebug() << QString("ocList.size= %1\n").arg(sz);
+    double *vect = new double[sz];
 
     for(i=0; i<sz; i++)
     {
-        colNums << QString("%1").arg(colList[i]->colNum);
+
+        switch(cNum)
+        {
+                case 0:
+                val= ocList[i]->mJD;
+                //cols[k]->num++;
+                break;
+                case 1:
+                val= ocList[i]->ra;
+                //cols[k]->num++;
+                break;
+                case 2:
+                val= ocList[i]->de;
+                //cols[k]->num++;
+                break;
+                case 3:
+                val= ocList[i]->ksi;
+                //cols[k]->num++;
+                break;
+                case 4:
+                val= ocList[i]->eta;
+                //cols[k]->num++;
+                break;
+                case 5:
+                val= ocList[i]->mag;
+                //cols[k]->num++;
+                break;
+                case 6:
+                val= ocList[i]->ksiOC;
+                //cols[k]->num++;
+                break;
+                case 7:
+                val= ocList[i]->etaOC;
+                //cols[k]->num++;
+                break;
+                case 8:
+                val= ocList[i]->magOC;
+                //cols[k]->num++;
+                break;
+                case 9:
+                val= ocList[i]->x;
+                //cols[k]->num++;
+                break;
+                case 10:
+                val= ocList[i]->y;
+                //cols[k]->num++;
+                break;
+                case 11:
+                val= ocList[i]->pixmag;
+                //cols[k]->num++;
+                break;
+                case 12:
+                val= ocList[i]->Dx;
+                //cols[k]->num++;
+                break;
+                case 13:
+                val= ocList[i]->Dy;
+                //cols[k]->num++;
+                break;
+                case 14:
+                val= ocList[i]->Dpixmag;
+                //cols[k]->num++;
+                break;
+        default:
+                qDebug() << "\nobjResidualFile::countCols: Wrong col num\n";
+                return 1;
+
+            }
+            vect[i] = val;
+        }
+
+    int res = countColStat(cRec, vect, sz);
+
+    delete [] vect;
+
+    return res;
+}
+
+int objResidualFile::countMoveModel(moveModelRec* mmRec, int fp, int ft, int vflag, int modelDeg)
+{
+    int sz, i;
+    double t;
+
+    //delMMrec();
+    sz = ocList.size();
+
+    if(sz<=modelDeg) return 1;
+
+
+    double *X = new double[sz];
+    double *Y = new double[sz];
+    double *Weights = new double[sz];
+    double *C = new double[sz*modelDeg];
+    double *Dx = new double[modelDeg*modelDeg];
+    double *Dy = new double[modelDeg*modelDeg];
+    double *Zx = new double[modelDeg];
+    double *Zy = new double[modelDeg];
+    double *uZx = new double[modelDeg];
+    double *uZy = new double[modelDeg];
+    int *excX = new int [sz];
+    int *excY = new int [sz];
+    double uweX, uweY;
+    int rnX, rnY;
+
+    double mt = 0,mxdot=0,mydot=0;
+    QVector<double> times;
+    for (i=0;i<sz;i++)
+    {
+            switch(ft)
+            {
+                    case 0:{t = ocList.at(i)->mJD;break;}
+            }
+            mt = mt + t;
+            times << t;
+            if(vflag==1)
+            {
+                    //elS = dataLine.section('|',xdc,xdc);
+//                        mxdot = mxdot + ocList.at(j)->muRaCosDe;// elS.toDouble();
+                    //elS = dataLine.section('|',ydc,ydc);
+//                        mydot = mydot + ocList.at(j)->muDe;// elS.toDouble();
+            }
     }
-    if(countCols(colNums.join(","))) return 1;
+    mt = mt/(sz*1.0);//dataLines.count();
+    if(vflag==1)
+    {
+            mxdot = mxdot/(1.0*sz);//dataLines.count();
+            mydot = mydot/(1.0*sz);//dataLines.count();
+    }
+    for (i=0;i<sz;i++)
+    {
+            Weights[i]=1.0;
+            //dataLine = dataLines[j];
+            switch(fp)
+            {
+                    case 0:{X[i] = ocList.at(i)->ra;Y[i]=ocList.at(i)->de;break;}
+                        default:{X[i] = ocList.at(i)->ra;Y[i]=ocList.at(i)->de;break;}
+
+            }
+            C[i*2] = 1;C[i*2+1] = times[i]-mt;
+    }
+//						matrix<double> Zx = LSM_corr(X, C, Weights, 500);
+//						matrix<double> Zy = LSM_corr(Y, C, Weights, 500);
+    uweX = uweY = 0.0;
+    iLSM(modelDeg, sz, 500, excX, Zx, C, X, uweX, Dx, 3, rnX, Weights);
+    iLSM(modelDeg, sz, 500, excY, Zy, C, Y, uweY, Dy, 3, rnY, Weights);
+
+    if(rnX<=modelDeg||rnY<=modelDeg) return 2;
+
+/*        lsm(2, sz, Zx, C, X, uweX, Dx, Weights);
+    lsm(2, sz, Zy, C, Y, uweY, Dy, Weights);
+    rnX = rnY = sz;
+*/
+    //qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
+    //qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
+    uZx[0] = sqrt(uweX*Dx[0]);
+    uZx[1] = sqrt(uweX*Dx[3]);
+    uZy[0] = sqrt(uweY*Dy[0]);
+    uZy[1] = sqrt(uweY*Dy[3]);
+//              slsm(2, int h, double *const z, const double* c, const double* L, const double* W = 0);
+    //END apparent motion parameters
+    //BEGIN output
+
+    mmRec = new moveModelRec;
+    mmRec->Tm = mt;
+    mmRec->xTm = Zx[0];
+    mmRec->yTm = Zy[0];
+    mmRec->nPosX = rnX;
+    mmRec->uweX = uweX;
+    mmRec->rmsX = uZx[0];
+    mmRec->Xdot = Zx[1]/1440.0;
+    mmRec->rmsXdot = uZx[1]/1440.0;
+    mmRec->XdotOC = Zx[1]/1440.0 - mxdot;
+    mmRec->nPosY = rnY;
+    mmRec->uweY = uweY;
+    mmRec->rmsY = uZy[0];
+    mmRec->Ydot = Zy[1]/1440.0;
+    mmRec->rmsYdot = uZy[1]/1440.0;
+    mmRec->YdotOC = Zy[1]/1440.0 - mydot;
+
+    mmRec->fp = fp;
+    mmRec->ft = ft;
+    mmRec->vflag = vflag;
+
     return 0;
 }
 
-colRec* objResidualFile::getColNum(int cNum)
-{
-    int i, sz;
-    sz = colList.size();
-    for(i=0; i<sz; i++)
-    {
-        if(cNum==colList[i]->colNum) return colList[i];
-    }
-    return NULL;
-}
-
+/*
 void objResidualFile::getSeriesRec(objResRec *orsRec)
 {
     countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
@@ -3396,7 +3416,7 @@ void objResidualFile::getSeriesRec(objResRec *orsRec)
         eqsRec->ocRaMM = 0.0;
         eqsRec->ocDeMM = 0.0;
     }
-*/
+/
     int i, szi;
     szi = ocList.size();
 
@@ -3416,6 +3436,81 @@ void objResidualFile::getSeriesRec(objResRec *orsRec)
         if((orsRec->catMagName=="")||(orsRec->catMagName==ocList.at(i)->catMagName))orsRec->catMagName=ocList.at(i)->catMagName;
         else orsRec->catMagName=QString("var");
     }
+}
+*/
+moveModelFile::moveModelFile()
+{
+    mmList.clear();
+}
+
+moveModelFile::~moveModelFile()
+{
+    mmList.clear();
+}
+
+int moveModelFile::saveAs(QString fileName)
+{
+    QString tstr;
+
+    QFile dataFile(fileName);
+    dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    QTextStream dataStream;
+    dataStream.setDevice(&dataFile);
+
+    int i, sz;
+
+    sz = mmList.size();
+    for(i=0;i<sz;i++)
+    {
+            mmList[i]->rec2s(&tstr);
+            dataStream << tstr << "\n";
+    }
+    dataFile.close();
+}
+///////////////////////////////////////////////////////
+
+objSeries::objSeries()
+{
+    serieList.clear();
+}
+
+objSeries::~objSeries()
+{
+    serieList.clear();
+}
+
+int objSeries::saveAs_Full(QString fileName)
+{
+    int i, sz, j, sz1;
+    objResidualFile* orTemp;
+    sz = serieList.size();
+    QString tStr;
+    QStringList tStrL;
+    QList <colRec*> colList;
+
+    QFile dataFile(fileName);
+    dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    QTextStream dataStream;
+    dataStream.setDevice(&dataFile);
+
+    for(i=0; i<sz; i++)
+    {
+        tStr.clear();
+        tStrL.clear();
+        orTemp = serieList.at(i);
+
+        colList.clear();
+        orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+        sz1 = colList.size();
+        for(j=0; j<sz1; j++)
+        {
+            tStrL << QString("%1").arg(colList.at(j)->mean);
+        }
+        dataStream << tStrL.join("|") << "\n";
+        //orTemp->colList.clear();
+       // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+    }
+    dataFile.close();
 }
 
 ///////////////////////////////////////////////////////

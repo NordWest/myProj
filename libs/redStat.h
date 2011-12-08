@@ -628,8 +628,8 @@ class objResidualFile
 {
 public:
     QList <objResRec*> ocList;
-    QList <colRec*> colList;
-    moveModelRec* mmRec;
+    //QList <colRec*> colList;
+    //moveModelRec* mmRec;
 
     QString fName;
 
@@ -646,17 +646,19 @@ public:
 
     void do3sigma(double proofP, double sigmaMul);
 
-    int getColRecNum(int colNum);
-    int setColRec(colRec* cRec);
-    void sortColList();
+    //int getColRecNum(int colNum);
+    //int setColRec(colRec* cRec);
+    //void sortColList();
 
-    colRec* getColNum(int cNum);
+    int getColNum(colRec* cRec, int cNum);
 
-    int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
-    int reCountCols();
-    void delMMrec();
+    int countCols(QList <colRec*> *colList, QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
+    int countMoveModel(moveModelRec* mmRec, int fp = 0, int ft = 0, int vflag = 0, int modelDeg = 2);
 
-    void getSeriesRec(objResRec *orsRec);
+    //int reCountCols();
+    //void delMMrec();
+
+    //void getSeriesRec(objResRec *orsRec);
 
     /*
     int getColRecNum(int colNum);
@@ -668,6 +670,30 @@ public:
     int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
     int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
     */
+};
+
+class objSeries
+{
+public:
+    objSeries();
+    ~objSeries();
+    QList <objResidualFile*> serieList;
+
+    int saveAs_Full(QString fileName);
+
+//    void rec2s(QString *str);
+//    void s2rec(QString str);
+};
+
+class moveModelFile
+{
+public:
+    QList <moveModelRec*> mmList;
+
+    moveModelFile();
+    ~moveModelFile();
+
+    int saveAs(QString fileName);
 };
 
 class sstarFile
@@ -702,9 +728,8 @@ public:
     int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
     int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
     void do3sigma(double proofP, double sigmaMul);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
-    //int countMM(int fp = 0, int ft = 0, int vflag = 1);
-
-    //void delMMrec();
+    int countMM(int fp = 0, int ft = 0, int vflag = 1);
+    void delMMrec();
 
     void removeMes(QString mesureTimeCode);
 };
