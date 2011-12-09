@@ -412,8 +412,8 @@ void moveModelRec::rec2s(QString *str)
         {
             case 0://positions in RA and DEC
             {
-                xStr = mas_to_hms(xTm, " ", 5);
-                yStr = mas_to_damas(yTm, " ", 5);
+                xStr = deg_to_hms(xTm, " ", 5);
+                yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
             case 1://relative positions in arcsec //РњР•Р”РќР”Р•РљР®РњРќ
@@ -3114,12 +3114,12 @@ int objResidualFile::countCols(QList <colRec*> *colList, QString colNums)
     qDebug() << QString("\nobjResidualFile::countCols: %1\n").arg(colNums);
     QStringList columns = colNums.split(",");
     int i, sz;
-
+if(ocList.size()<2) return 1;
     colRec *cRec;
     cRec = new colRec;
 
     sz = columns.count();
-    if(sz<2) return 1;
+
     for(i=0;i<sz;i++)
     {
             if(!getColNum(cRec, columns[i].toInt()))
@@ -3314,7 +3314,7 @@ int objResidualFile::countMoveModel(moveModelRec* mmRec, int fp, int ft, int vfl
     //END apparent motion parameters
     //BEGIN output
 
-    mmRec = new moveModelRec;
+    //mmRec = new moveModelRec;
     mmRec->Tm = mt;
     mmRec->xTm = Zx[0];
     mmRec->yTm = Zy[0];
@@ -3554,12 +3554,15 @@ int objSeries::saveAs_Mean(QString fileName)
         if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
         {
             sz1 = colList.size();
-            for(j=0; j<sz1; j++)
+            if(sz1)
             {
-                colList.at(j)->rec2s(&tStr);
-                tStrL << QString("%1").arg(colList.at(j)->mean);
+                for(j=0; j<sz1; j++)
+                {
+                    colList.at(j)->rec2s(&tStr);
+                    tStrL << QString("%1").arg(colList.at(j)->mean);
+                }
+                dataStream << tStrL.join("|") << "\n";
             }
-            dataStream << tStrL.join("|") << "\n";
         }
         //orTemp->colList.clear();
        // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
@@ -3575,8 +3578,8 @@ int objSeries::saveAs_MoveModel(QString fileName)
     QString tStr;
     QStringList tStrL;
     QList <colRec*> colList;
-    moveModelRec *mmRec;
-    mmRec = new moveModelRec;
+    moveModelRec mmRec;
+    //mmRec = new moveModelRec;
 
     QFile dataFile(fileName);
     dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
@@ -3588,13 +3591,13 @@ int objSeries::saveAs_MoveModel(QString fileName)
         tStr.clear();
 
         orTemp = serieList.at(i);
-        dataStream << tStrL.join("|") << "\n";
+        //dataStream << tStrL.join("|") << "\n";
 
-        orTemp->countMoveModel(mmRec);//>countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
-        mmRec->rec2s(&tStr);
-
-
+        if(!orTemp->countMoveModel(&mmRec))
+        {
+        mmRec.rec2s(&tStr);
         dataStream << tStr << "\n";
+        }
         //orTemp->colList.clear();
        // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
     }
@@ -6968,7 +6971,7 @@ void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
 int countColStat(colRec *cRec, double *vect, int sz)
 {
     int i, num;
-    if(sz<3) return 1;
+    if(sz<2) return 1;
 
     double mean, rmsMean, rmsOne;
 
