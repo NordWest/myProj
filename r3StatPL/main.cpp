@@ -1328,7 +1328,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     }
                     if(QString().compare(catName, "LSPM")==0)
                     {
-                        serTemp.saveAs_MoveModel(QString("%1/orSeries_mean.txt").arg(reportObjDir));
+                        serTemp.saveAs_Mean(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                         ssTemp.clear();
                         szj = objTemp.ocList.size();
                         for(j=0; j<szj; j++)
