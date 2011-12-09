@@ -680,6 +680,8 @@ public:
     QList <objResidualFile*> serieList;
 
     int saveAs_Full(QString fileName);
+    int saveAs_Mean(QString fileName);
+    int saveAs_MoveModel(QString fileName);
 
 //    void rec2s(QString *str);
 //    void s2rec(QString str);

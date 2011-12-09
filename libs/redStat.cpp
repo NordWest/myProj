@@ -3142,6 +3142,7 @@ int objResidualFile::getColNum(colRec* cRec, int cNum)
     sz = ocList.size();
     qDebug() << QString("ocList.size= %1\n").arg(sz);
     double *vect = new double[sz];
+    cRec->colNum = cNum;
 
     for(i=0; i<sz; i++)
     {
@@ -3499,14 +3500,93 @@ int objSeries::saveAs_Full(QString fileName)
         tStrL.clear();
         orTemp = serieList.at(i);
 
+        sz1 = orTemp->ocList.size();
+        for(j=0;j<sz1;j++)
+        {
+            orTemp->ocList.at(j)->rec2s(&tStr);
+            dataStream << tStr << "\n";
+        }
+
         colList.clear();
+        tStr.clear();
+        tStrL.clear();
         orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
         sz1 = colList.size();
         for(j=0; j<sz1; j++)
         {
+            colList.at(j)->rec2s(&tStr);
+            dataStream << tStr << "\n";
+        }
+
+        //orTemp->colList.clear();
+       // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+    }
+    dataFile.close();
+}
+
+int objSeries::saveAs_Mean(QString fileName)
+{
+    int i, sz, j, sz1;
+    objResidualFile* orTemp;
+    sz = serieList.size();
+    QString tStr;
+    QStringList tStrL;
+    QList <colRec*> colList;
+
+    QFile dataFile(fileName);
+    dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    QTextStream dataStream;
+    dataStream.setDevice(&dataFile);
+
+    for(i=0; i<sz; i++)
+    {
+        tStr.clear();
+        tStrL.clear();
+        orTemp = serieList.at(i);
+
+
+        orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+        sz1 = colList.size();
+        for(j=0; j<sz1; j++)
+        {
+            colList.at(j)->rec2s(&tStr);
             tStrL << QString("%1").arg(colList.at(j)->mean);
         }
         dataStream << tStrL.join("|") << "\n";
+        //orTemp->colList.clear();
+       // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+    }
+    dataFile.close();
+}
+
+int objSeries::saveAs_MoveModel(QString fileName)
+{
+    int i, sz, j, sz1;
+    objResidualFile* orTemp;
+    sz = serieList.size();
+    QString tStr;
+    QStringList tStrL;
+    QList <colRec*> colList;
+    moveModelRec *mmRec;
+    mmRec = new moveModelRec;
+
+    QFile dataFile(fileName);
+    dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    QTextStream dataStream;
+    dataStream.setDevice(&dataFile);
+
+    for(i=0; i<sz; i++)
+    {
+        tStr.clear();
+
+        orTemp = serieList.at(i);
+        dataStream << tStrL.join("|") << "\n";
+
+        orTemp->countMoveModel(mmRec);//>countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
+        mmRec->rec2s(&tStr);
+
+
+        dataStream << tStr << "\n";
         //orTemp->colList.clear();
        // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
     }

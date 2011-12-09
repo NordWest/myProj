@@ -1222,7 +1222,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
                         szj = serTemp.serieList.size();
                         qDebug() << QString("or series size: %1\n").arg(szj);
-                        serTemp.saveAs_Full(QString("%1/orSeries/%2_ors.txt").arg(reportObjDir).arg(objName));
+                        serTemp.saveAs_Full(QString("%1/orSeries.txt").arg(reportObjDir));
                         /*orTempS->clear();
                         for(j=0; j<szj; j++)
                         {
@@ -1250,6 +1250,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
                     if(QString().compare(catName, "mpeph")==0)
                     {
+                        serTemp.saveAs_MoveModel(QString("%1/orSeries_mm.txt").arg(reportObjDir));
                         eqTemp.clear();
                         for(j=0; j<szj; j++)
                         {
@@ -1327,6 +1328,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     }
                     if(QString().compare(catName, "LSPM")==0)
                     {
+                        serTemp.saveAs_MoveModel(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                         ssTemp.clear();
                         szj = objTemp.ocList.size();
                         for(j=0; j<szj; j++)
@@ -1373,7 +1375,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 if(d3s4) eqTotS->do3sigma(0.05, objSigma);
 
                 eqTotS->countCols("4,5,6");
-                eqTotS->saveAs(reportDirName+"/eqSeries.txt", 0);
+                eqTotS->saveAs(reportObjDir+"/eqSeries.txt", 0);
             }
             /*
             if(objAggSigma>0.0)
@@ -3345,6 +3347,7 @@ int detCurf3(double *Zi, double *x, double *y, int num, int deg)
     }
 
     EXCLIND = new int [num];
+
    // ZKSI=new double[3];
     D=new double[deg*deg];
     RN=0;
