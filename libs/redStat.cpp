@@ -3144,6 +3144,7 @@ int objResidualFile::getColNum(colRec* cRec, int cNum)
     qDebug() << QString("ocList.size= %1\n").arg(sz);
     double *vect = new double[sz];
     cRec->colNum = cNum;
+    int num = 0;
 
     for(i=0; i<sz; i++)
     {
@@ -3215,10 +3216,14 @@ int objResidualFile::getColNum(colRec* cRec, int cNum)
                 return 1;
 
             }
-            vect[i] = val;
+            if(isfinite(val))
+            {
+                vect[num] = val;
+                num++;
+            }
         }
 
-    int res = countColStat(cRec, vect, sz);
+    int res = countColStat(cRec, vect, num);
 
     delete [] vect;
 
@@ -6962,7 +6967,7 @@ void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
 //////////////////////////////////////////////////////////////////////
 int countColStat(colRec *cRec, double *vect, int sz)
 {
-    int i;
+    int i, num;
     if(sz<3) return 1;
 
     double mean, rmsMean, rmsOne;
