@@ -1127,11 +1127,16 @@ int main(int argc, char *argv[])    //r3StatPL
     {
         QString reportObjDir = reportDir.absolutePath() + reportDir.separator() + "objStat";
         reportDir.mkdir(reportObjDir);
+        reportDir.mkdir(reportObjDir+QDir().separator()+"mpeph");
+        QString mpeDir(reportObjDir+QDir().separator()+"mpeph");
+        reportDir.mkdir(reportObjDir+QDir().separator()+"sstar");
+        QString sstarDir(reportObjDir+QDir().separator()+"sstar");
         if(isSeries)
         {
             reportDir.mkdir(reportObjDir+QDir().separator()+"eqSeries");
             reportDir.mkdir(reportObjDir+QDir().separator()+"orSeries");
         }
+
         objResidualFile objTemp;// = new objResidualFile;
         objResidualFile objAggTemp;// = new objResidualFile;
         objResidualFile objRejTemp;
@@ -1205,7 +1210,15 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << QString("or size: %1\n").arg(objTemp.ocList.size());
                 objName = objStat.objList.at(i)->objName.simplified();
                 catName = objStat.objList.at(i)->catName.simplified();
-                tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
+                if(QString().compare(catName, "mpeph")==0)
+                {
+                    tfName = QString("%1/%2").arg(mpeDir).arg(objName);
+                }
+                else if(QString().compare(catName, "LSPM")==0)
+                {
+                    tfName = QString("%1/%2").arg(sstarDir).arg(objName);
+                }
+                else tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
                 szj = objTemp.ocList.size();
                 qDebug() << QString("objTemp.ocList.size: %1\n").arg(szj);
                 if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
@@ -1286,7 +1299,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             }
                             if(d3s3) eqTempS->do3sigma(0.05, objSigma);
                             eqTempS->countCols("4,5,6");
-                            eqTempS->saveAs(QString("%1/eqSeries/%2_eqs.txt").arg(reportObjDir).arg(objName), 2);
+                            eqTempS->saveAs(QString("%1_eqs.txt").arg(tfName), 2);
 
                             eqTotS->ocList << eqTempS->ocList;
                         }
