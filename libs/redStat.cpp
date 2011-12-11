@@ -377,6 +377,10 @@ colRec& colRec::operator=(const colRec &source)
 
 /////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////
+
 moveModelRec::moveModelRec()
 {
         nPosX = nPosY = -1;
@@ -393,10 +397,6 @@ moveModelRec::moveModelRec(QString str)
 	moveModelRec();
 	s2rec(str);
 }
-
-/////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////
 
 
 	
@@ -3321,15 +3321,15 @@ int objResidualFile::countMoveModel(moveModelRec* mmRec, int fp, int ft, int vfl
     mmRec->nPosX = rnX;
     mmRec->uweX = uweX;
     mmRec->rmsX = uZx[0];
-    mmRec->Xdot = Zx[1]/1440.0;
-    mmRec->rmsXdot = uZx[1]/1440.0;
-    mmRec->XdotOC = Zx[1]/1440.0 - mxdot;
+    mmRec->Xdot = Zx[1]*150000;//mas/min
+    mmRec->rmsXdot = uZx[1]*150000;
+    mmRec->XdotOC = Zx[1]*150000 - mxdot;
     mmRec->nPosY = rnY;
     mmRec->uweY = uweY;
     mmRec->rmsY = uZy[0];
-    mmRec->Ydot = Zy[1]/1440.0;
-    mmRec->rmsYdot = uZy[1]/1440.0;
-    mmRec->YdotOC = Zy[1]/1440.0 - mydot;
+    mmRec->Ydot = Zy[1]*150000;
+    mmRec->rmsYdot = uZy[1]*150000;
+    mmRec->YdotOC = Zy[1]*150000 - mydot;
 
     mmRec->fp = fp;
     mmRec->ft = ft;
@@ -3549,16 +3549,17 @@ int objSeries::saveAs_Mean(QString fileName)
         tStr.clear();
         tStrL.clear();
         orTemp = serieList.at(i);
-
+        colList.clear();
 
         if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
         {
             sz1 = colList.size();
             if(sz1)
             {
+                tStrL.clear();
                 for(j=0; j<sz1; j++)
                 {
-                    colList.at(j)->rec2s(&tStr);
+                    //colList.at(j)->rec2s(&tStr);
                     tStrL << QString("%1").arg(colList.at(j)->mean);
                 }
                 dataStream << tStrL.join("|") << "\n";
