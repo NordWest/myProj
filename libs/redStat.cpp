@@ -1867,6 +1867,8 @@ void ppmxl_rec::copy(const ppmxl_rec &source)
 eqFile::eqFile()
 {
 	mmRec = NULL;
+        ocList.clear();
+        colList.clear();
 };
 
 eqFile::~eqFile()
@@ -2370,7 +2372,7 @@ colRec* eqFile::getColNum(int cNum)
     return NULL;
 }
 
-void eqFile::do3sigma(double proofP, double sigmaMul)
+void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
 {
 
     int num0, num1, i, sz;
@@ -2429,6 +2431,7 @@ void eqFile::do3sigma(double proofP, double sigmaMul)
                 {
                     qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
                     s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
+                    if(rejList!=NULL) rejList->append(ocList.at(i));
                     ocList.removeAt(i);
                 }
             }
@@ -3034,7 +3037,7 @@ void objResidualFile::removeMes(QString mesureTimeCode)
     }
 }
 
-void objResidualFile::do3sigma(double proofP, double sigmaMul)
+void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*> *rejList)
 {
 
     int num0, num1, i, sz;
@@ -3095,6 +3098,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul)
                 {
                     qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
                     //s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
+                    if(rejList!=NULL) rejList->append(ocList.at(i));
                     ocList.removeAt(i);
                 }
             }

@@ -611,7 +611,7 @@ public:
 
         int countCols(QString colNums);        //ЯДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList Я МНЛЕПЮЛХ, ГЮДЮММШЛХ Б ЯРПНЙЕ colNums (ПЮГДЕКХРЕКЭ - ',')
         int reCountCols();                     //ОЕПЕДЕКЮРЭ НЯПЕДМЕМХЕ ОН ЯРНКАЖЮЛ ocList МЮ НЯМНБЕ СФЕ ЯСЫЕЯРБСЧЫХУ colList
-        void do3sigma(double proofP, double sigmaMul);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
+        void do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList = NULL);                        //ЯДЕКЮРЭ НРАПЮЙНБЙС ОН 3*sigma ДКЪ OMC(ra) Х OMC(dec)
         int countMM(int fp = 0, int ft = 0, int vflag = 1);
 
         void findSeries(QList <eqFile*> *eqList);
@@ -644,7 +644,7 @@ public:
 
     void removeMes(QString mesureTimeCode);
 
-    void do3sigma(double proofP, double sigmaMul);
+    void do3sigma(double proofP, double sigmaMul, QList <objResRec*> *rejList = NULL);
 
     //int getColRecNum(int colNum);
     //int setColRec(colRec* cRec);

@@ -1149,6 +1149,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
         eqFile eqTemp;// = new objResidualFile;
         eqFile aggEqTemp;// = new objResidualFile;
+        eqFile rejEqTemp;
+        eqFile rejEqTot;
         eqFile *eqTempS = new eqFile;
         eqFile *eqTotS = new eqFile;
         QList <eqFile*> eqList;
@@ -1262,10 +1264,9 @@ int main(int argc, char *argv[])    //r3StatPL
                         */
                     }
 
-
                     if(QString().compare(catName, "mpeph")==0)
                     {
-                        serTemp.saveAs_MoveModel(QString("%1/orSeries_mm.txt").arg(reportObjDir));
+
                         eqTemp.clear();
                         for(j=0; j<szj; j++)
                         {
@@ -1273,10 +1274,11 @@ int main(int argc, char *argv[])    //r3StatPL
                             objTemp.ocList.at(j)->toOcRec(ocrec);
                             eqTemp.ocList << ocrec;
                         }
-                        objAggTemp.ocList << objTemp.ocList;
+
 
                         if(isSeries)
                         {
+                            serTemp.saveAs_MoveModel(QString("%1/orSeries_mm.txt").arg(reportObjDir));
 
                             eqList.clear();
                             eqTemp.findSeries(&eqList);
