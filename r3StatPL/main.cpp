@@ -1140,6 +1140,7 @@ int main(int argc, char *argv[])    //r3StatPL
         objResidualFile objTemp;// = new objResidualFile;
         objResidualFile objAggTemp;// = new objResidualFile;
         objResidualFile objRejTemp;
+        objResidualFile objRejAgg;
         objResidualFile *orTempS = new objResidualFile;
         objResidualFile *orTotS = new objResidualFile;
         objSeries serTemp;
@@ -1220,6 +1221,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 }
                 else tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
                 szj = objTemp.ocList.size();
+                objRejAgg.ocList << objRejTemp.ocList;
                 qDebug() << QString("objTemp.ocList.size: %1\n").arg(szj);
                 if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
                 if(szj>0)
@@ -1368,6 +1370,7 @@ int main(int argc, char *argv[])    //r3StatPL
         {
             qDebug() << "saveAgg\n";
             objAggTemp.saveAs(reportObjDir+"/objRes.txt");
+            objRejTemp.saveAs(reportObjDir+"/objRes_rej.txt");
             if(saveEq)
             {
                 qDebug() << "saveEq\n";
