@@ -217,8 +217,6 @@ void ocRec::s2rec(QString str)
 	
 	QString tstr = sL[0];
 	
-	
-	
 	MJday = getMJDfromYMD(tstr);
         ra = hms_to_deg(sL[1], " ");
         de = damas_to_deg(sL[2], " ");
@@ -3702,6 +3700,64 @@ int objSeries::saveAs_MoveModel(QString fileName)
     }
     dataFile.close();
 }
+
+void objSeries::getMean(QList <objResRec*> *ocList)
+{
+    int i, sz, sz1;
+    objResidualFile* orTemp;
+    sz = serieList.size();
+    QList <colRec*> colList;
+    objResRec *orRec;
+
+    for(i=0; i<sz; i++)
+    {
+        orTemp = serieList.at(i);
+        colList.clear();
+
+        if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
+        {
+            sz1 = colList.size();
+
+            if(sz1)
+            {
+                orRec = new objResRec;
+                orRec->fromColList(colList);
+                orRec->name = objName;
+                orRec->catName = catName;
+                orRec->catMagName = catMagName;
+                ocList->append(orRec);
+            }
+        }
+    }
+
+}
+
+void objSeries::getMoveModel(QList <ocRec*> *ocList)
+{
+    int i, sz;
+    objResidualFile* orTemp;
+    sz = serieList.size();
+    ocRec *ocR;
+
+    moveModelRec mmRec;
+
+    for(i=0; i<sz; i++)
+    {
+        orTemp = serieList.at(i);
+
+        if(!orTemp->countMoveModel(&mmRec))
+        {
+            ocR = new ocRec;
+            ocR->MJday = mmRec.Tm;
+            ocR->ra = mmRec.xTm;
+            ocR->de = mmRec.yTm;
+            ocR->muRaCosDe = mmRec.Xdot;
+            ocR->muDe = mmRec.Ydot;
+            ocList->append(ocR);
+        }
+    }
+}
+
 
 ///////////////////////////////////////////////////////
 

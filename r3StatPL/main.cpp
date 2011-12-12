@@ -1164,6 +1164,7 @@ int main(int argc, char *argv[])    //r3StatPL
         objResidualFile objAggTemp;// = new objResidualFile;
         objResidualFile objRejTemp;
         objResidualFile objRejAgg;
+        objResidualFile objMean;
         objResidualFile *orTempS = new objResidualFile;
         objResidualFile *orTotS = new objResidualFile;
         objSeries serTemp;
@@ -1172,11 +1173,13 @@ int main(int argc, char *argv[])    //r3StatPL
 
         eqFile eqTemp;// = new objResidualFile;
         eqFile aggEqTemp;// = new objResidualFile;
+
         eqFile rejEqTemp;
         eqFile rejEqTot;
         eqFile *eqTempS = new eqFile;
         eqFile *eqTotS = new eqFile;
         QList <eqFile*> eqList;
+        QList <ocRec*> ocEqList;
 
         ocRec* ocR;
 
@@ -1207,9 +1210,12 @@ int main(int argc, char *argv[])    //r3StatPL
         {
             if(mpoCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
 
-            mpcAggFile.setFileName(reportObjDir+"/mpc.txt");
-            mpcAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-            mpcAggStm.setDevice(&mpcAggFile);
+            if(saveAgg)
+            {
+                mpcAggFile.setFileName(reportObjDir+"/mpc.txt");
+                mpcAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+                mpcAggStm.setDevice(&mpcAggFile);
+            }
 
             ssAggFile.setFileName(reportObjDir+"/sstar.txt");
             ssAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -1292,6 +1298,17 @@ int main(int argc, char *argv[])    //r3StatPL
 
                     if(QString().compare(catName, "mpeph")==0)
                     {
+                        if(mpoCat.GetRecName(objName.toAscii().data()))
+                        {
+                            qDebug() << QString("objName is not found\n");
+                            objNum = 0;
+                        }
+                        else
+                        {
+                            objNum = mpoCat.record->getProvnum();
+                            qDebug() << QString("objNum: %1\n").arg(objNum);
+                            //qDebug() << QString("number: %1\n").arg(mpoCat.record->number);
+                        }
 
                         eqTemp.clear();
                         szj = objTemp.ocList.size();
@@ -1320,7 +1337,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
                         if(isSeries)
                         {
-                            serTemp.saveAs_MoveModel(QString("%1/orSeries_mm.txt").arg(reportObjDir));
+                            //ocEqList.clear();
+                            serTemp.getMoveModel(&ocEqList);
 
                             eqList.clear();
                             eqTemp.findSeries(&eqList);
@@ -1362,17 +1380,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             mpcFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
                             mpcStm.setDevice(&mpcFile);
 
-                            if(mpoCat.GetRecName(objName.toAscii().data()))
-                            {
-                                qDebug() << QString("objName is not found\n");
-                                objNum = 0;
-                            }
-                            else
-                            {
-                                objNum = mpoCat.record->getNum();
-                                qDebug() << QString("objNum: %1\n").arg(objNum);
-                                //qDebug() << QString("number: %1\n").arg(mpoCat.record->number);
-                            }
+                            //
 
                             szj = eqTemp.ocList.size();
                             for(j=0; j<szj; j++)
@@ -1404,7 +1412,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             ssTemp.saveAs(tfName+"_sstar.txt");
                             if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
                         }
-                        if(isSeries)serTemp.saveAs_Mean(QString("%1/orSeries_mean.txt").arg(reportObjDir));
+                        if(isSeries)serTemp.getMean(&objMean.ocList);//
                     }
                 }
 
@@ -1426,6 +1434,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 aggSsTemp.countCols("6,7,8");
                 aggSsTemp.saveAs(reportObjDir+"/sstar.txt");
             }
+
             if(isSeries)
             {
                 if(d3s4) orTotS->do3sigma(0.05, objSigma);
@@ -1437,6 +1446,25 @@ int main(int argc, char *argv[])    //r3StatPL
 
                 eqTotS->countCols("4,5,6");
                 eqTotS->saveAs(reportObjDir+"/eqSeries.txt", 0);
+
+
+                szj = ocEqList.size();
+                if(szj)
+                {
+                    mpcFile.setFileName(QString("%1/orSeries_mm.txt").arg(reportObjDir));
+                    mpcFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+                    mpcStm.setDevice(&mpcFile);
+                    for(j=0; j<szj; j++)
+                    {
+                        ocEqList.at(j)->rec2MPC(&tstr, "084", objNum);
+                        mpcStm << tstr << "\n";
+                        if(saveAgg) mpcAggStm << tstr << "\n";
+                    }
+                }
+                mpcFile.close();
+
+                objMean.saveAs(QString("%1/orSeries_mean.txt").arg(reportObjDir));
+                //objMoveModel.saveAs(QString("%1/orSeries_mm.txt").arg(reportObjDir));
             }
             /*
             if(objAggSigma>0.0)
@@ -1453,7 +1481,7 @@ int main(int argc, char *argv[])    //r3StatPL
             aggSsF.saveAs(reportObjDir+"/agg_sstar.txt");*/
         }
 
-        if(saveMpc) mpcAggFile.close();
+        if(saveMpc&&saveAgg) mpcAggFile.close();
 
 
 

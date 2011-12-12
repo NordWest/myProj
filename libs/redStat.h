@@ -691,6 +691,9 @@ public:
     int saveAs_Mean(QString fileName);
     int saveAs_MoveModel(QString fileName);
 
+    void getMean(QList <objResRec*> *ocList);
+    void getMoveModel(QList <ocRec*> *ocList);
+
 //    void rec2s(QString *str);
 //    void s2rec(QString str);
 };
