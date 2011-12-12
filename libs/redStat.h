@@ -683,6 +683,10 @@ public:
     ~objSeries();
     QList <objResidualFile*> serieList;
 
+    QString objName;
+    QString catName;
+    QString catMagName;
+
     int saveAs_Full(QString fileName);
     int saveAs_Mean(QString fileName);
     int saveAs_MoveModel(QString fileName);
@@ -884,7 +888,7 @@ struct platesStat
 
 struct objStatRec
 {
-    QString objName, catName;
+    QString objName, catName, catMagName;
     platesStat *plStat;
     QList <objResRec*> objList;
     QList <measurementStatRec*> mStatList;

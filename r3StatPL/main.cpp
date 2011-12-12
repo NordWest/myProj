@@ -1168,7 +1168,7 @@ int main(int argc, char *argv[])    //r3StatPL
         QFile mpcAggFile, mpcFile;
         QFile ssAggFile, ssFile;
         QTextStream mpcAggStm, mpcStm, ssAggStm;
-        QString tfName, objName, tstr, catName;
+        QString tfName, objName, tstr, catName, catMagName;
 
         ///eqFile eqF;
         int objNum;
@@ -1213,6 +1213,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << QString("or size: %1\n").arg(objTemp.ocList.size());
                 objName = objStat.objList.at(i)->objName.simplified();
                 catName = objStat.objList.at(i)->catName.simplified();
+                catMagName = objStat.objList.at(i)->catMagName.simplified();
                 if(QString().compare(catName, "mpeph")==0)
                 {
                     tfName = QString("%1/%2").arg(mpeDir).arg(objName);
@@ -1235,6 +1236,8 @@ int main(int argc, char *argv[])    //r3StatPL
                         serTemp.serieList.clear();
                         orList.clear();
                         detSeriesList(objTemp.ocList, &serTemp.serieList, 9);
+                        serTemp.objName = objName;
+                        serTemp.catName = catName;
                         //bjTemp.findSeries(&eqList);
 
                         szj = serTemp.serieList.size();

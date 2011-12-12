@@ -3648,6 +3648,7 @@ int objSeries::saveAs_Mean(QString fileName)
 
             if(sz1)
             {
+                orRec.clear();
                 orRec.fromColList(colList);
 
                 tStrL << QString("%1").arg(orTemp->ocList.at(0)->name) << QString("%1").arg(orTemp->ocList.at(0)->catMagName) << QString("%1").arg(orTemp->ocList.at(0)->catName);
@@ -3666,6 +3667,7 @@ int objSeries::saveAs_MoveModel(QString fileName)
     objResidualFile* orTemp;
     sz = serieList.size();
     QString tStr;
+    ocRec ocR;
 
     moveModelRec mmRec;
     //mmRec = new moveModelRec;
@@ -3684,8 +3686,16 @@ int objSeries::saveAs_MoveModel(QString fileName)
 
         if(!orTemp->countMoveModel(&mmRec))
         {
-        mmRec.rec2s(&tStr);
-        dataStream << tStr << QString("|%1|%2|%3").arg(orTemp->ocList.at(0)->name).arg(orTemp->ocList.at(0)->catMagName).arg(orTemp->ocList.at(0)->catName) << "\n";
+            //orRec.clear();
+            ocR.MJday = mmRec.Tm;
+            ocR.ra = mmRec.xTm;
+            ocR.de = mmRec.yTm;
+            ocR.muRaCosDe = mmRec.Xdot;
+            ocR.muDe = mmRec.Ydot;
+            ocR.rec2MPC(&tStr, "084", 0);
+
+        //mmRec.rec2s(&tStr);
+            dataStream << tStr << "\n";// << QString("|%1|%2|%3").arg(orTemp->ocList.at(0)->name).arg(orTemp->ocList.at(0)->catMagName).arg(orTemp->ocList.at(0)->catName) << "\n";
         }
         //orTemp->colList.clear();
        // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
@@ -5792,6 +5802,7 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
             objStat = new objStatRec;
             objStat->objName = redStat->objFile->ocList.at(k)->name;
             objStat->catName = redStat->objFile->ocList.at(k)->catName;
+            objStat->catMagName = redStat->objFile->ocList.at(k)->catMagName;
             objStat->objList << redStat->objFile->ocList.at(k);
             objStat->mStatList.append(redStat->getMeasurementStat(redStat->objFile->ocList.at(k)->mesureTimeCode));
             objList << objStat;
