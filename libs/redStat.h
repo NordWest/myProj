@@ -563,12 +563,16 @@ public:
     objResRec(QString str);
     ~objResRec();
 
+    void clear();
+
     void rec2s(QString *str);
     void s2rec(QString str);
 
     void setMesParams(double *P, int pSize);
 
     void copy(const objResRec &source);
+
+    void fromColList(QList <colRec*> colList);
 
     void toOcRec(ocRec *rec);
     void toSstarRes(sstarRes *rec);

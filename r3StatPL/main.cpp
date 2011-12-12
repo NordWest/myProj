@@ -1268,13 +1268,29 @@ int main(int argc, char *argv[])    //r3StatPL
                     {
 
                         eqTemp.clear();
+                        szj = objTemp.ocList.size();
                         for(j=0; j<szj; j++)
                         {
                             ocrec = new ocRec;
                             objTemp.ocList.at(j)->toOcRec(ocrec);
                             eqTemp.ocList << ocrec;
                         }
+                        eqTemp.sortOClist();
 
+                        if(saveAgg) aggEqTemp.ocList << eqTemp.ocList;
+
+                        if(objRejTemp.ocList.size()>0)
+                        {
+                            objRejTemp.saveAs(tfName+"_rej.txt");
+                            eqTemp.clear();
+                            for(j=0; j<szj; j++)
+                            {
+                                ocrec = new ocRec;
+                                objTemp.ocList.at(j)->toOcRec(ocrec);
+                                eqTemp.ocList << ocrec;
+                            }
+                            eqTemp.sortOClist();
+                        }
 
                         if(isSeries)
                         {
@@ -1312,7 +1328,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         if(saveEq)
                         {
                             eqTemp.saveAs(tfName+"_eq.txt");
-                            if(saveAgg) aggEqTemp.ocList << eqTemp.ocList;
+
                         }
                         if(saveMpc)
                         {
@@ -1345,7 +1361,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     }
                     if(QString().compare(catName, "LSPM")==0)
                     {
-                        serTemp.saveAs_Mean(QString("%1/orSeries_mean.txt").arg(reportObjDir));
+
                         ssTemp.clear();
                         szj = objTemp.ocList.size();
                         for(j=0; j<szj; j++)
@@ -1362,7 +1378,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             ssTemp.saveAs(tfName+"_sstar.txt");
                             if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
                         }
-
+                        if(isSeries)serTemp.saveAs_Mean(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                     }
                 }
 
@@ -1378,6 +1394,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 qDebug() << "saveEq\n";
                 if(cCols)aggEqTemp.countCols("4,5,6");
 
+                aggEqTemp.sortOClist();
                 aggEqTemp.saveAs(reportObjDir+"/eq.txt");
 
                 aggSsTemp.countCols("6,7,8");

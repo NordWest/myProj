@@ -31,11 +31,7 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
         expTemp+=dT1;
         //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<1.5*dT0)&&((expTemp<expMax)||(expMax<=0))))
         //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
-        if((expTemp<expMax)||(expMax<=0))
-        {
-            tResFile->ocList << tResRec;
-        }
-        else
+        if((expTemp>expMax)&&(expMax>0))
         {
             orSeriesList->append(tResFile);
             tResFile = new objResidualFile;
@@ -44,6 +40,8 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
             expTemp = 0.0;
             dT1 = 0.0;
         }
+        else tResFile->ocList << tResRec;
+
 
     }
 
@@ -673,10 +671,11 @@ void sstarRes::copy(const sstarRes &source)
 objResRec::objResRec()
 {
         mJD = ra = de = ksi = eta = mag = ksiOC = etaOC = magOC = x = y = pixmag = Dx = Dy = Dpixmag = 0.0;
-        name = QString("noname");
-        catName = QString("noname");
-        catMagName = QString("noname");
-        mesureTimeCode = QString("YYYYMMDDHHMMSSSS");
+        name = QString("");
+        catName = QString("");
+        catMagName = QString("");
+        mesureTimeCode = QString("");
+        mesParams = QString("");
 };
 
 objResRec::objResRec(QString str)
@@ -688,6 +687,16 @@ objResRec::objResRec(QString str)
 objResRec::~objResRec()
 {
 
+}
+
+void objResRec::clear()
+{
+        mJD = ra = de = ksi = eta = mag = ksiOC = etaOC = magOC = x = y = pixmag = Dx = Dy = Dpixmag = 0.0;
+        name = QString("");
+        catName = QString("");
+        catMagName = QString("");
+        mesureTimeCode = QString("");
+        mesParams = QString("");
 }
 
 void objResRec::copy(const objResRec &source)
@@ -822,6 +831,82 @@ void objResRec::toSstarRes(sstarRes *rec)
         rec->pixmag = pixmag;
         rec->x = x;
         rec->y = y;
+}
+
+void objResRec::fromColList(QList <colRec*> colList)
+{
+    int j, sz1;
+    double val;
+    sz1 = colList.size();
+    for(j=0; j<sz1; j++)
+    {
+        val = colList.at(j)->rmsMean;
+        switch(colList.at(j)->colNum)
+        {
+            case 0:
+            mJD = val;
+            //cols[k]->num++;
+            break;
+            case 1:
+            ra = val;
+            //cols[k]->num++;
+            break;
+            case 2:
+            de = val;
+            //cols[k]->num++;
+            break;
+            case 3:
+            ksi = val;
+            //cols[k]->num++;
+            break;
+            case 4:
+            eta = val;
+            //cols[k]->num++;
+            break;
+            case 5:
+            mag = val;
+            //cols[k]->num++;
+            break;
+            case 6:
+            ksiOC = val;
+            //cols[k]->num++;
+            break;
+            case 7:
+            etaOC = val;
+            //cols[k]->num++;
+            break;
+            case 8:
+            magOC = val;
+            //cols[k]->num++;
+            break;
+            case 9:
+            x = val;
+            //cols[k]->num++;
+            break;
+            case 10:
+            y = val;
+            //cols[k]->num++;
+            break;
+            case 11:
+            pixmag = val;
+            //cols[k]->num++;
+            break;
+            case 12:
+            Dx = val;
+            //cols[k]->num++;
+            break;
+            case 13:
+            Dy = val;
+            //cols[k]->num++;
+            break;
+            case 14:
+            Dpixmag = val;
+            //cols[k]->num++;
+            break;
+
+        }
+
+    }
 }
 
 
@@ -3018,6 +3103,7 @@ void objResidualFile::save()
                 ocList[i]->rec2s(&tstr);
                 dataStream << tstr << "\n";
         }
+        dataFile.close();
 };
 
 void objResidualFile::saveAs(QString fname)
@@ -3542,6 +3628,7 @@ int objSeries::saveAs_Mean(QString fileName)
     QString tStr;
     QStringList tStrL;
     QList <colRec*> colList;
+    objResRec orRec;
 
     QFile dataFile(fileName);
     dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
@@ -3558,14 +3645,12 @@ int objSeries::saveAs_Mean(QString fileName)
         if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
         {
             sz1 = colList.size();
+
             if(sz1)
             {
-                tStrL.clear();
-                for(j=0; j<sz1; j++)
-                {
-                    //colList.at(j)->rec2s(&tStr);
-                    tStrL << QString("%1").arg(colList.at(j)->mean);
-                }
+                orRec.fromColList(colList);
+
+                tStrL << QString("%1").arg(orTemp->ocList.at(0)->name) << QString("%1").arg(orTemp->ocList.at(0)->catMagName) << QString("%1").arg(orTemp->ocList.at(0)->catName);
                 dataStream << tStrL.join("|") << "\n";
             }
         }
@@ -3577,12 +3662,11 @@ int objSeries::saveAs_Mean(QString fileName)
 
 int objSeries::saveAs_MoveModel(QString fileName)
 {
-    int i, sz, j, sz1;
+    int i, sz;
     objResidualFile* orTemp;
     sz = serieList.size();
     QString tStr;
-    QStringList tStrL;
-    QList <colRec*> colList;
+
     moveModelRec mmRec;
     //mmRec = new moveModelRec;
 
@@ -3601,7 +3685,7 @@ int objSeries::saveAs_MoveModel(QString fileName)
         if(!orTemp->countMoveModel(&mmRec))
         {
         mmRec.rec2s(&tStr);
-        dataStream << tStr << "\n";
+        dataStream << tStr << QString("|%1|%2|%3").arg(orTemp->ocList.at(0)->name).arg(orTemp->ocList.at(0)->catMagName).arg(orTemp->ocList.at(0)->catName) << "\n";
         }
         //orTemp->colList.clear();
        // orTemp->countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
