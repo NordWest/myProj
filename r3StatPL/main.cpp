@@ -288,8 +288,31 @@ int main(int argc, char *argv[])    //r3StatPL
     int pMin;
     //QTextCodec *codec1 = QTextCodec::codecForName("KOI8-R");
     //Q_ASSERT( codec1 );
+    QString cfgFileName = "r3StatPL.ini";
+    QString optStr, optName, optVal;
+
+/////////////////////////////    command line   /////////////////////////
+
+    for(i=2; i<argc; i++)
+    {
+        optStr = QString(argv[i]);
+        optName = optStr.section("=", 0, 0);
+        optVal = optStr.section("=", 1, 1);
+        if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
+        {
+            cfgFileName = optVal;
+        }
+
+        else
+        {
+            qDebug() << QString("Error option %1.\nUseage: config=cfgFileName\n").arg(optName);
+            return 1;
+        }
+    }
+
+
 /////////////////////// sett    /////////////////////////////////////////
-    QSettings *sett = new QSettings("r3StatPL.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
     //QString workDir = sett->value("general/workDir", ".").toString();
     if(argc==1) workPath = sett->value("general/workPath", "./").toString();
     else workPath = QString(argv[1]);
