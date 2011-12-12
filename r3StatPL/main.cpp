@@ -1372,7 +1372,7 @@ int main(int argc, char *argv[])    //r3StatPL
         {
             qDebug() << "saveAgg\n";
             objAggTemp.saveAs(reportObjDir+"/objRes.txt");
-            objRejTemp.saveAs(reportObjDir+"/objRes_rej.txt");
+            objRejAgg.saveAs(reportObjDir+"/objRes_rej.txt");
             if(saveEq)
             {
                 qDebug() << "saveEq\n";
