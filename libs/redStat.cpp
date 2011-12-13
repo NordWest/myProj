@@ -838,7 +838,7 @@ void objResRec::fromColList(QList <colRec*> colList)
     sz1 = colList.size();
     for(j=0; j<sz1; j++)
     {
-        val = colList.at(j)->rmsMean;
+        val = colList.at(j)->mean;
         switch(colList.at(j)->colNum)
         {
             case 0:

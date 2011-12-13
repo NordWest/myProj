@@ -1152,12 +1152,12 @@ int main(int argc, char *argv[])    //r3StatPL
         reportDir.mkdir(reportObjDir);
         reportDir.mkdir(reportObjDir+QDir().separator()+"mpeph");
         QString mpeDir(reportObjDir+QDir().separator()+"mpeph");
-        reportDir.mkdir(reportObjDir+QDir().separator()+"sstar");
-        QString sstarDir(reportObjDir+QDir().separator()+"sstar");
+        reportDir.mkdir(reportObjDir+QDir().separator()+"lspm");
+        QString sstarDir(reportObjDir+QDir().separator()+"lspm");
         if(isSeries)
         {
-            reportDir.mkdir(reportObjDir+QDir().separator()+"eqSeries");
-            reportDir.mkdir(reportObjDir+QDir().separator()+"orSeries");
+            //reportDir.mkdir(reportObjDir+QDir().separator()+"eqSeries");
+            //reportDir.mkdir(reportObjDir+QDir().separator()+"orSeries");
         }
 
         objResidualFile objTemp;// = new objResidualFile;
@@ -1216,12 +1216,12 @@ int main(int argc, char *argv[])    //r3StatPL
                 mpcAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
                 mpcAggStm.setDevice(&mpcAggFile);
             }
-
+        }
+        if(saveAgg)
+        {
             ssAggFile.setFileName(reportObjDir+"/sstar.txt");
             ssAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             ssAggStm.setDevice(&ssAggFile);
-
-
         }
 
             for(i=0; i<szi; i++)
@@ -1253,9 +1253,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 }
                 else tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
                 szj = objTemp.ocList.size();
-                objRejAgg.ocList << objRejTemp.ocList;
-                qDebug() << QString("objTemp.ocList.size: %1\n").arg(szj);
-                if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
+
                 if(szj>0)
                 {
                     objTemp.saveAs(tfName+"_or.txt");
@@ -1267,6 +1265,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         detSeriesList(objTemp.ocList, &serTemp.serieList, 9);
                         serTemp.objName = objName;
                         serTemp.catName = catName;
+                        serTemp.catMagName = catMagName;
                         //bjTemp.findSeries(&eqList);
 
                         szj = serTemp.serieList.size();
@@ -1320,8 +1319,8 @@ int main(int argc, char *argv[])    //r3StatPL
                         }
                         eqTemp.sortOClist();
 
-                        if(saveAgg) aggEqTemp.ocList << eqTemp.ocList;
-
+                        //if(saveAgg) aggEqTemp.ocList << eqTemp.ocList;
+/*
                         if(objRejTemp.ocList.size()>0)
                         {
                             objRejTemp.saveAs(tfName+"_rej.txt");
@@ -1334,38 +1333,56 @@ int main(int argc, char *argv[])    //r3StatPL
                             }
                             eqTemp.sortOClist();
                         }
-
+*/
                         if(isSeries)
                         {
-                            //ocEqList.clear();
+                            ocEqList.clear();
                             serTemp.getMoveModel(&ocEqList);
 
-                            eqList.clear();
-                            eqTemp.findSeries(&eqList);
+                            szj = ocEqList.size();
+                            if(szj)
+                            {
+                                mpcFile.setFileName(QString("%1/orSeries_mm.txt").arg(reportObjDir));
+                                mpcFile.open(QIODevice::Append | QIODevice::WriteOnly);
+                                mpcStm.setDevice(&mpcFile);
+                                for(j=0; j<szj; j++)
+                                {
+                                    ocEqList.at(j)->rec2MPC(&tstr, "084", objNum);
+                                    mpcStm << tstr << "\n";
+                                    if(saveAgg) mpcAggStm << tstr << "\n";
+                                }
+                                mpcFile.close();
+                            }
 
-                            szj = eqList.size();
+
+/*
+                            eqList.clear();
+                            //eqTemp.findSeries(&eqList);
+                            szj = serTemp.serieList.size();
+
+                            //szj = eqList.size();
                             qDebug() << QString("eq series size: %1\n").arg(szj);
                             eqTempS->clear();
                             for(j=0; j<szj; j++)
                             {
-                                qDebug() << QString("serie %1: %2 obs\n").arg(j).arg(eqList.at(j)->ocList.size());
-                                if(d3s2) eqList.at(j)->do3sigma(0.05, objSigma);
-                                //eqList.at(j)->countCols("0,1,2,3,4,5,6");
-                                //eqList.at(j)->countMM();
-                                 qDebug() << QString("do3sigma size: %1\n").arg(eqList.at(j)->ocList.size());
+                                qDebug() << QString("serie %1: %2 obs\n").arg(j).arg(serTemp.serieList.at(j)->ocList.size());
+                                if(d3s2) serTemp.serieList.at(j)->do3sigma(NULL, objSigma, &objRejTemp);
+
+                                 qDebug() << QString("do3sigma size: %1\n").arg(serTemp.serieList.at(j)->ocList.size());
+
+
+
                                  ocR = new ocRec;
-                                eqList.at(j)->getSeriesRec(ocR);
+                                 eqList.at(j)->getSeriesRec(ocR);
 
-                                eqTempS->ocList << ocR;
+                                 eqTempS->ocList << ocR;
 
-                                //eqsR->rec2s(&tStr);
-                               //dataStream1 << QString("%1").arg(tStr);
                             }
                             if(d3s3) eqTempS->do3sigma(0.05, objSigma);
                             eqTempS->countCols("4,5,6");
                             eqTempS->saveAs(QString("%1_eqs.txt").arg(tfName), 2);
 
-                            eqTotS->ocList << eqTempS->ocList;
+                            eqTotS->ocList << eqTempS->ocList;*/
                         }
 
                         if(cCols)eqTemp.countCols("4,5,6");
@@ -1416,6 +1433,10 @@ int main(int argc, char *argv[])    //r3StatPL
                     }
                 }
 
+                objRejAgg.ocList << objRejTemp.ocList;
+                qDebug() << QString("objTemp.ocList.size: %1\n").arg(szj);
+                if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
+
             }
 
         if(saveAgg)
@@ -1426,6 +1447,16 @@ int main(int argc, char *argv[])    //r3StatPL
             if(saveEq)
             {
                 qDebug() << "saveEq\n";
+                aggEqTemp.ocList.clear();
+                szj = objAggTemp.ocList.size();
+                for(j=0; j<szj; j++)
+                {
+                    ocrec = new ocRec;
+                    objTemp.ocList.at(j)->toOcRec(ocrec);
+                    aggEqTemp.ocList << ocrec;
+                }
+                aggEqTemp.sortOClist();
+
                 if(cCols)aggEqTemp.countCols("4,5,6");
 
                 aggEqTemp.sortOClist();
@@ -1437,31 +1468,15 @@ int main(int argc, char *argv[])    //r3StatPL
 
             if(isSeries)
             {
-                if(d3s4) orTotS->do3sigma(0.05, objSigma);
+                /*if(d3s4) orTotS->do3sigma(0.05, objSigma);
 
-                //orTotS->countCols("5,6,7");
-                //orTotS->saveAs(reportDirName+"/orSeries.txt");
+                orTotS->countCols("5,6,7");
+                orTotS->saveAs(reportDirName+"/orSeries.txt");*/
 
-                if(d3s4) eqTotS->do3sigma(0.05, objSigma);
+                //if(d3s4) eqTotS->do3sigma(0.05, objSigma);
 
-                eqTotS->countCols("4,5,6");
-                eqTotS->saveAs(reportObjDir+"/eqSeries.txt", 0);
-
-
-                szj = ocEqList.size();
-                if(szj)
-                {
-                    mpcFile.setFileName(QString("%1/orSeries_mm.txt").arg(reportObjDir));
-                    mpcFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-                    mpcStm.setDevice(&mpcFile);
-                    for(j=0; j<szj; j++)
-                    {
-                        ocEqList.at(j)->rec2MPC(&tstr, "084", objNum);
-                        mpcStm << tstr << "\n";
-                        if(saveAgg) mpcAggStm << tstr << "\n";
-                    }
-                }
-                mpcFile.close();
+                //eqTotS->countCols("4,5,6");
+                //eqTotS->saveAs(reportObjDir+"/eqSeries.txt", 0);
 
                 objMean.saveAs(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                 //objMoveModel.saveAs(QString("%1/orSeries_mm.txt").arg(reportObjDir));
