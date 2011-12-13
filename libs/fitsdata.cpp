@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 1
+#define FD_LOG_LEVEL 0
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -9972,7 +9972,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
             {
                 outstr ="";
                 //int obj_num;
-                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num.toInt(), outPar.mpcObsType);
+                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
 
                 if(FD_LOG_LEVEL) qDebug() << QString("mpcFile: %1\n").arg(resFolder+"/"+"mpc"+rejSuff+".txt");
                 QFile astFile(resFolder+"/"+"mpc.txt");
@@ -10088,7 +10088,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
             if(whatOut.mpcreport==1)
             {
                 outstr ="";
-                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num.toInt(), outPar.mpcObsType);
+                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
 
                 if(FD_LOG_LEVEL) qDebug() << QString("sumMpcFile: %1\n").arg(resFolder+"/"+"mpc"+rejSuff+".txt");
                 QFile astFile(resFolder+"/"+"mpc"+rejSuff+".txt");

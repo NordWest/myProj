@@ -720,48 +720,103 @@ double dinm(int mounth, int isves)
 	else return(m[mounth-1] + isves);
 }
 
-int packedDigStr(char *pstr, char *fstr)
+int upackDigStr(char *pstr, char *upstr)
 {
-        if(streqv(pstr, " ")) strcpy(fstr, " \0");
-	if(streqv(pstr, "0")) strcpy(fstr, "0\0");
-	if(streqv(pstr, "1")) strcpy(fstr, "1\0");
-	if(streqv(pstr, "2")) strcpy(fstr, "2\0");
-	if(streqv(pstr, "3")) strcpy(fstr, "3\0");
-	if(streqv(pstr, "4")) strcpy(fstr, "4\0");
-	if(streqv(pstr, "5")) strcpy(fstr, "5\0");
-	if(streqv(pstr, "6")) strcpy(fstr, "6\0");
-	if(streqv(pstr, "7")) strcpy(fstr, "7\0");
-	if(streqv(pstr, "8")) strcpy(fstr, "8\0");
-	if(streqv(pstr, "9")) strcpy(fstr, "9\0");
+        if(streqv(pstr, " ")) strcpy(upstr, " \0");
+        if(streqv(pstr, "0")) strcpy(upstr, "0\0");
+        if(streqv(pstr, "1")) strcpy(upstr, "1\0");
+        if(streqv(pstr, "2")) strcpy(upstr, "2\0");
+        if(streqv(pstr, "3")) strcpy(upstr, "3\0");
+        if(streqv(pstr, "4")) strcpy(upstr, "4\0");
+        if(streqv(pstr, "5")) strcpy(upstr, "5\0");
+        if(streqv(pstr, "6")) strcpy(upstr, "6\0");
+        if(streqv(pstr, "7")) strcpy(upstr, "7\0");
+        if(streqv(pstr, "8")) strcpy(upstr, "8\0");
+        if(streqv(pstr, "9")) strcpy(upstr, "9\0");
 
-	if(streqv(pstr, "A")) strcpy(fstr, "10\0");
-	if(streqv(pstr, "B")) strcpy(fstr, "11\0");
-	if(streqv(pstr, "C")) strcpy(fstr, "12\0");
-	if(streqv(pstr, "D")) strcpy(fstr, "13\0");
-	if(streqv(pstr, "E")) strcpy(fstr, "14\0");
-	if(streqv(pstr, "F")) strcpy(fstr, "15\0");
-	if(streqv(pstr, "G")) strcpy(fstr, "16\0");
-	if(streqv(pstr, "H")) strcpy(fstr, "17\0");
-	if(streqv(pstr, "I")) strcpy(fstr, "18\0");
-	if(streqv(pstr, "J")) strcpy(fstr, "19\0");
-	if(streqv(pstr, "K")) strcpy(fstr, "20\0");
-	if(streqv(pstr, "L")) strcpy(fstr, "21\0");
-	if(streqv(pstr, "M")) strcpy(fstr, "22\0");
-	if(streqv(pstr, "N")) strcpy(fstr, "23\0");
-	if(streqv(pstr, "O")) strcpy(fstr, "24\0");
-	if(streqv(pstr, "P")) strcpy(fstr, "25\0");
-	if(streqv(pstr, "Q")) strcpy(fstr, "26\0");
-	if(streqv(pstr, "R")) strcpy(fstr, "27\0");
-	if(streqv(pstr, "S")) strcpy(fstr, "28\0");
-	if(streqv(pstr, "T")) strcpy(fstr, "29\0");
-	if(streqv(pstr, "U")) strcpy(fstr, "30\0");
-	if(streqv(pstr, "V")) strcpy(fstr, "31\0");
+        if(streqv(pstr, "A")) strcpy(upstr, "10\0");
+        if(streqv(pstr, "B")) strcpy(upstr, "11\0");
+        if(streqv(pstr, "C")) strcpy(upstr, "12\0");
+        if(streqv(pstr, "D")) strcpy(upstr, "13\0");
+        if(streqv(pstr, "E")) strcpy(upstr, "14\0");
+        if(streqv(pstr, "F")) strcpy(upstr, "15\0");
+        if(streqv(pstr, "G")) strcpy(upstr, "16\0");
+        if(streqv(pstr, "H")) strcpy(upstr, "17\0");
+        if(streqv(pstr, "I")) strcpy(upstr, "18\0");
+        if(streqv(pstr, "J")) strcpy(upstr, "19\0");
+        if(streqv(pstr, "K")) strcpy(upstr, "20\0");
+        if(streqv(pstr, "L")) strcpy(upstr, "21\0");
+        if(streqv(pstr, "M")) strcpy(upstr, "22\0");
+        if(streqv(pstr, "N")) strcpy(upstr, "23\0");
+        if(streqv(pstr, "O")) strcpy(upstr, "24\0");
+        if(streqv(pstr, "P")) strcpy(upstr, "25\0");
+        if(streqv(pstr, "Q")) strcpy(upstr, "26\0");
+        if(streqv(pstr, "R")) strcpy(upstr, "27\0");
+        if(streqv(pstr, "S")) strcpy(upstr, "28\0");
+        if(streqv(pstr, "T")) strcpy(upstr, "29\0");
+        if(streqv(pstr, "U")) strcpy(upstr, "30\0");
+        if(streqv(pstr, "V")) strcpy(upstr, "31\0");
 
 	return 0;
 }
 
+int packDigStr(char *upstr, char *pstr)
+{
+        //if(streqv(upstr, " ")) strcpy(pstr, " \0");
+        if(streqv(upstr, "00")) strcpy(pstr, "0\0");
+        if(streqv(upstr, "01")) strcpy(pstr, "1\0");
+        if(streqv(upstr, "02")) strcpy(pstr, "2\0");
+        if(streqv(upstr, "03")) strcpy(pstr, "3\0");
+        if(streqv(upstr, "04")) strcpy(pstr, "4\0");
+        if(streqv(upstr, "05")) strcpy(pstr, "5\0");
+        if(streqv(upstr, "06")) strcpy(pstr, "6\0");
+        if(streqv(upstr, "07")) strcpy(pstr, "7\0");
+        if(streqv(upstr, "08")) strcpy(pstr, "8\0");
+        if(streqv(upstr, "09")) strcpy(pstr, "9\0");
+
+        if(streqv(upstr, "10")) strcpy(pstr, "A\0");
+        if(streqv(upstr, "11")) strcpy(pstr, "B\0");
+        if(streqv(upstr, "12")) strcpy(pstr, "C\0");
+        if(streqv(upstr, "13")) strcpy(pstr, "D\0");
+        if(streqv(upstr, "14")) strcpy(pstr, "E\0");
+        if(streqv(upstr, "15")) strcpy(pstr, "F\0");
+        if(streqv(upstr, "16")) strcpy(pstr, "G\0");
+        if(streqv(upstr, "17")) strcpy(pstr, "H\0");
+        if(streqv(upstr, "18")) strcpy(pstr, "I\0");
+        if(streqv(upstr, "19")) strcpy(pstr, "J\0");
+        if(streqv(upstr, "20")) strcpy(pstr, "K\0");
+        if(streqv(upstr, "21")) strcpy(pstr, "L\0");
+        if(streqv(upstr, "22")) strcpy(pstr, "M\0");
+        if(streqv(upstr, "23")) strcpy(pstr, "N\0");
+        if(streqv(upstr, "24")) strcpy(pstr, "O\0");
+        if(streqv(upstr, "25")) strcpy(pstr, "P\0");
+        if(streqv(upstr, "26")) strcpy(pstr, "Q\0");
+        if(streqv(upstr, "27")) strcpy(pstr, "R\0");
+        if(streqv(upstr, "28")) strcpy(pstr, "S\0");
+        if(streqv(upstr, "29")) strcpy(pstr, "T\0");
+        if(streqv(upstr, "30")) strcpy(pstr, "U\0");
+        if(streqv(upstr, "31")) strcpy(pstr, "V\0");
+
+        return 0;
+}
+
 int packString(QString upStr, QString *pStr, int targLen)
 {
+    int i, j;
+    char *fstr = new char[2];
+    char *upstr = new char[2];
+    pStr->clear();
+    int iLen = upStr.size();
+    int dLen = iLen - targLen;
+    for(i=dLen; i<0; i++) pStr->append("0");
+    for(i=0;i<dLen;i++)
+    {
+        j= i*2;
+        strncpy(upstr, &upStr.toAscii().constData()[j], 2);
+        packDigStr(upstr, fstr);
+        pStr->append(fstr);
+    }
+
     return 0;
 }
 
@@ -778,7 +833,7 @@ int unpackString(QString *upStr, QString pStr)
         strncpy(ustr, "\0", 1);
         strncpy(ustr, &pStr.toAscii().constData()[i], 1);
         strncpy(&ustr[1], "\0", 1);
-        packedDigStr(ustr, fstr);
+        upackDigStr(ustr, fstr);
         upStr->append(fstr);
     }
 
@@ -3371,6 +3426,7 @@ MEtop::~MEtop()
 {
 	delete(this->top);
 	this->top = NULL;
+
 	this->next = NULL;
 }
 

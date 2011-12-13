@@ -176,14 +176,20 @@ void ocRec::rec2sBase(QString *recStr)
     recStr->insert(0, QString("%1 %2 ").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5) + getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6) + " " + deg_to_hms(ra, " ", 3) + " "+ deg_to_damas(de, " ", 2) + " " + QString("%1 %2").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')));//+QString(" %1").arg(catName, 8));
 }
 
-void ocRec::rec2MPC(QString *str, QString obsName, int objNum, QString objType)
+void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, QString objType)
 {
     //int obj_num;
     str->clear();
+    QString discAster(" ");
+    QString note1(" ");
     QString outstr;
     DATEOBS dateObs = getDATEOBSfromMJD(MJday);
     //obj_num = name.toInt();
-    outstr = outstr +QString( "%1" ).arg(objNum,5,10,QLatin1Char( '0' ))+"         " + objType;
+    if(provNum) outstr = outstr +QString( "%1       " ).arg(objNum,5,QLatin1Char( '0' ));
+    else outstr = outstr +QString( "     %1" ).arg(objNum,7,QLatin1Char( '0' ))+"       ";
+    outstr += discAster;
+    outstr += note1;
+    outstr += objType;
     outstr = outstr +getStrFromDATEOBS(dateObs," ", 0, 5) +" ";
     outstr = outstr +deg_to_hms(ra, " ",2);
     outstr = outstr + " " +deg_to_damas(de, " ",1)+"          ";
@@ -3740,6 +3746,7 @@ void objSeries::getMoveModel(QList <ocRec*> *ocList)
     ocRec *ocR;
 
     moveModelRec mmRec;
+    colRec cRec;
 
     for(i=0; i<sz; i++)
     {
@@ -3753,6 +3760,12 @@ void objSeries::getMoveModel(QList <ocRec*> *ocList)
             ocR->de = mmRec.yTm;
             ocR->muRaCosDe = mmRec.Xdot;
             ocR->muDe = mmRec.Ydot;
+
+            if(!orTemp->getColNum(&cRec, 5));
+            {
+                ocR->mag0 = cRec.mean;
+            }
+
             ocList->append(ocR);
         }
     }

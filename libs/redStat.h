@@ -92,7 +92,7 @@ public:
         void rec2sBase(QString *str);
         void rec2sSeries(QString *str);
 	void s2rec(QString str);
-        void rec2MPC(QString *str, QString obsName, int objNum, QString obsType = " ");
+        void rec2MPC(QString *str, QString obsName, QString objNum, int provNum = 0, QString obsType = " ");
 
         void copy(const ocRec &source);
         ocRec& operator=(const ocRec &source);

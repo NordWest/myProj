@@ -201,10 +201,10 @@ int mpcrec::getProvnum()
 
 	for(int i=0; i<7; i++)
 	{
-		strncpy(sim, &this->provnum[i], 1);
+                strncpy(sim, &this->provnum[i], 1);
 		strcpy(&sim[1], "\0");
 
-		packedDigStr(sim, sim1);
+                upackDigStr(sim, sim1);
 		strcat(upstr, sim1);
 
 	}
@@ -253,7 +253,7 @@ double mpcrec::getEpoch()
 		strncpy(sim, &this->epoch[i], 1);
 		strcpy(&sim[1], "\0");
 
-		packedDigStr(sim, sim1);
+                upackDigStr(sim, sim1);
 		if(i>2)
 		{
 			sprintf(sim, "%02d", atoi(sim1));

@@ -1194,10 +1194,11 @@ int main(int argc, char *argv[])    //r3StatPL
         QFile mpcAggFile, mpcFile;
         QFile ssAggFile, ssFile;
         QTextStream mpcAggStm, mpcStm, ssAggStm;
-        QString tfName, objName, tstr, catName, catMagName;
+        QString tfName, objNum, objName, tstr, catName, catMagName;
 
         ///eqFile eqF;
-        int objNum;
+        //int objNum;
+        int pNum;
 
         ocRec *ocrec;
         sstarRes *ssrec;
@@ -1217,12 +1218,12 @@ int main(int argc, char *argv[])    //r3StatPL
                 mpcAggStm.setDevice(&mpcAggFile);
             }
         }
-        if(saveAgg)
+        /*if(saveAgg)
         {
             ssAggFile.setFileName(reportObjDir+"/sstar.txt");
             ssAggFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             ssAggStm.setDevice(&ssAggFile);
-        }
+        }*/
 
             for(i=0; i<szi; i++)
             {
@@ -1300,11 +1301,18 @@ int main(int argc, char *argv[])    //r3StatPL
                         if(mpoCat.GetRecName(objName.toAscii().data()))
                         {
                             qDebug() << QString("objName is not found\n");
-                            objNum = 0;
+                            objNum = "00000";
                         }
                         else
                         {
-                            objNum = mpoCat.record->getProvnum();
+                            pNum = 0;
+                            objNum = QString(mpoCat.record->number);
+                            if(objNum.size()==0)
+                            {
+                                pNum = 1;
+                                objNum = mpoCat.record->provnum;
+                            }
+                            else if(objNum.size()>5)
                             qDebug() << QString("objNum: %1\n").arg(objNum);
                             //qDebug() << QString("number: %1\n").arg(mpoCat.record->number);
                         }
@@ -1347,7 +1355,7 @@ int main(int argc, char *argv[])    //r3StatPL
                                 mpcStm.setDevice(&mpcFile);
                                 for(j=0; j<szj; j++)
                                 {
-                                    ocEqList.at(j)->rec2MPC(&tstr, "084", objNum);
+                                    ocEqList.at(j)->rec2MPC(&tstr, "084", objNum, pNum);
                                     mpcStm << tstr << "\n";
                                     if(saveAgg) mpcAggStm << tstr << "\n";
                                 }
