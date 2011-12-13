@@ -67,6 +67,7 @@ fitsIndex/fitsIndex.pro -text
 fitsIndex/main.cpp -text
 fitsRenamer/fitsRenamer.pro -text
 fitsRenamer/main.cpp -text
+fitsWCS/fitsWCS.ini -text
 fitsWCS/fitsWCS.pro -text
 fitsWCS/main.cpp -text
 fitsconv/fitsconv.pro -text
