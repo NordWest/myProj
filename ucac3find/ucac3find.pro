@@ -3,8 +3,8 @@
 # -------------------------------------------------
 QT -= gui
 //INCLUDEPATH += ./../libs/
-win32:TARGET = ./../../bin/ucac3find
-unix:TARGET = ./../bin/ucac3find
+TARGET = ucac3find
+#unix:TARGET = ./../bin/ucac3find
 CONFIG += console warn_off
 CONFIG -= app_bundle
 TEMPLATE = app

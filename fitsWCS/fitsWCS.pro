@@ -8,8 +8,9 @@ QT       += core
 
 QT       -= gui
 
-win32:TARGET = ./../../bin/fitsWCS
-unix:TARGET = ./../bin/fitsWCS
+#win32:TARGET = ./../../bin/fitsWCS
+#unix:TARGET = ./../bin/fitsWCS
+TARGET = fitsWCS
 #CONFIG   += console
 #CONFIG   -= app_bundle
 
