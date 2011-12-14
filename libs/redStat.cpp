@@ -1,6 +1,6 @@
 #include "redStat.h"
 
-void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax)
+void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax)
 {
     int i, szi;
     double dT0, dT1, expTemp, mjd0, mjd1;
@@ -47,6 +47,53 @@ void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeries
 
 }
 
+void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebSeriesList, double expMax)
+{
+    int i, szi;
+    double dT0, dT1, expTemp, mjd0, mjd1;
+    if(ebList.size()==0) return;
+    expMax = expMax/1440.0;
+
+    sortErrBList(ebList);
+
+    szi = ebList.size();
+    errBudgetRec* tResRec;
+    errBudgetFile* tResFile;
+    tResFile = new errBudgetFile;
+    ebSeriesList->append(tResFile);
+    tResRec = ebList.at(0);
+    mjd1 = tResRec->MJD;
+    tResFile->errList << tResRec;
+    expTemp = 0.0;
+    dT1 = 0.0;
+    for(i=1; i<szi; i++)
+    {
+      mjd0 = mjd1;
+      dT0 = dT1;
+
+
+        tResRec = ebList.at(i);
+        mjd1 = tResRec->MJD;
+        dT1 = mjd1 - mjd0;
+        expTemp+=dT1;
+        //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<1.5*dT0)&&((expTemp<expMax)||(expMax<=0))))
+        //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
+        if((expTemp>expMax)&&(expMax>0))
+        {
+            ebSeriesList->append(tResFile);
+            tResFile = new errBudgetFile;
+            mjd1 = tResRec->MJD;
+            tResFile->errList << tResRec;
+            expTemp = 0.0;
+            dT1 = 0.0;
+        }
+        else tResFile->errList << tResRec;
+
+
+    }
+
+}
+
 void sortORList(QList <objResRec*> orList, int dir)
 {
     int i, j, sz;
@@ -70,6 +117,32 @@ void sortORList(QList <objResRec*> orList, int dir)
 
         }
         orList.swap(i, j);
+    }
+}
+
+void sortErrBList(QList <errBudgetRec*> ebList, int dir)
+{
+    int i, j, sz;
+    sz = ebList.size();
+    double val;
+    int vPos;
+
+    int sn = pow(-1, dir);
+
+    for(i=0; i<sz-1; i++)
+    {
+        val = ebList.at(i)->MJD;
+        vPos = i;
+        for(j=i+1; j<sz; j++)
+        {
+            if(sn*val>sn*ebList.at(j)->MJD)
+            {
+                val = ebList.at(j)->MJD;
+                vPos = j;
+            }
+
+        }
+        ebList.swap(i, j);
     }
 }
 

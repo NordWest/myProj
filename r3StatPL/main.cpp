@@ -1263,7 +1263,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     {
                         serTemp.serieList.clear();
                         orList.clear();
-                        detSeriesList(objTemp.ocList, &serTemp.serieList, 9);
+                        detOrSeriesList(objTemp.ocList, &serTemp.serieList, 9);
                         serTemp.objName = objName;
                         serTemp.catName = catName;
                         serTemp.catMagName = catMagName;

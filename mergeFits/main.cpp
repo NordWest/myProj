@@ -105,11 +105,26 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
 //command line  ///////////////////////////////////////
+    double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
+    double *xT0 = new double[3];
+    double *xTi = new double[3];
+    double *r1 = new double[3];
+    double *r2 = new double[3];
+
+    double *T0 = new double[9];
+    double *Ti = new double[9];
+    double *TiT = new double[9];
+    double *Ai = new double[9];
 
     errBudgetFile errB;
     errB.init(argv[1]);
 
     QString resFolder = QString(argv[2]);
+
+    sortErrBList(errB.errList);
+
+
+
 
 ///////////////////////////////////////
     szi = errB.errList.size();
@@ -141,16 +156,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     int *nums = new int[szi];
     for(i=0; i<szi; i++) nums[i]=1;
 
-    double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
-    double *xT0 = new double[3];
-    double *xTi = new double[3];
-    double *r1 = new double[3];
-    double *r2 = new double[3];
 
-    double *T0 = new double[9];
-    double *Ti = new double[9];
-    double *TiT = new double[9];
-    double *Ai = new double[9];
 
     detRt(xT0, errB.errList.at(posMean)->RAoc, errB.errList.at(posMean)->DEoc);
     /*xT0[0] = cos(errB.errList.at(posMean)->RAoc)*cos(errB.errList.at(posMean)->DEoc);
