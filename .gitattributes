@@ -566,6 +566,7 @@ ruler3PL/ruler3PL.pro -text
 ruler3PL/syscorr.ini -text
 ruler3PL/telescopes.ini -text
 rulermanager/main.cpp -text
+rulermanager/rulermanager.ini -text
 rulermanager/rulermanager.pro -text
 rulermanagerGUI/astro.cpp -text
 rulermanagerGUI/astro.h -text
