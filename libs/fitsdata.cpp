@@ -2233,7 +2233,7 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     //Close FITS file
     fits_close_file(fptr, &status); status = 0;
 
-    updateHist();
+    //updateHist();
 /*
     catMarks = new marksGrid();
     ipixMarks = new marksGrid();
