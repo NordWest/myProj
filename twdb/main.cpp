@@ -1,8 +1,8 @@
 #include <QtCore>
 #include <QCoreApplication>
-#include "astro.h"
-#include "mb.h"
-#include "fitsio.h"
+#include "./../astro/astro.h"
+#include "./../mb/mb.h"
+#include "./../libs/fitsio.h"
 
 unsigned short freqpix(unsigned short *fdata, LONGLONG nelements)
 //determination of frequest pixel value
@@ -81,9 +81,9 @@ double surface(double* b, int bsize)
 }
 
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])//twdb iniFile resFolder
 {
-    QTextStream stream(stdout);
+    //QTextStream stream(stdout);
     QCoreApplication a(argc, argv);
     ///////////1. Reading fits file //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     QString ifname = QString(argv[1]);

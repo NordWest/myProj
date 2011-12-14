@@ -16,8 +16,8 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 win32 {
- LIBS +=  ./../libs/cfitsio.lib ./../libs/win/libmb.a ./../libs/win/libastro.a
+ LIBS +=  ./../libs/cfitsio.lib ./../libs/win32/libmb.a ./../libs/win32/libastro.a
 }
 unix {
-LIBS +=  ./../libs/libcfitsio.a ./../libs/unix/libmb.a ./../libs/unix/libastro.a
+LIBS +=  ./../libs/unix/libcfitsio.a ./../libs/unix/libmb.a ./../libs/unix/libastro.a
 }
