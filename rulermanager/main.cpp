@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
         QString listFile = QString(argv[1]);
 
-        for(i=1; i<argc; i++)
+        for(i=2; i<argc; i++)
         {
             optStr = QString(argv[i]);
             optName = optStr.section("=", 0, 0);
