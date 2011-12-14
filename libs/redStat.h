@@ -57,7 +57,7 @@ void detPlateName(QString *plateName, QString originName, int plNameType = 0);
 //void getPlateName(QString origName, QString *plName, int plNameType);
 
 void detSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax);
-void sortORList(QList <objResRec*> orList, int dir = 1);
+void sortORList(QList <objResRec*> orList, int dir = 0);
 
 //////////////////////////////////////////////////////////////////////////////////////
 class ocRec

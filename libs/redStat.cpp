@@ -54,19 +54,22 @@ void sortORList(QList <objResRec*> orList, int dir)
     double val;
     int vPos;
 
+    int sn = pow(-1, dir);
+
     for(i=0; i<sz-1; i++)
     {
         val = orList.at(i)->mJD;
         vPos = i;
         for(j=i+1; j<sz; j++)
         {
-            if(dir*val>dir*orList.at(j)->mJD)
+            if(sn*val>sn*orList.at(j)->mJD)
             {
-                orList.swap(i, j);
-                break;
+                val = orList.at(j)->mJD;
+                vPos = j;
             }
 
         }
+        orList.swap(i, j);
     }
 }
 

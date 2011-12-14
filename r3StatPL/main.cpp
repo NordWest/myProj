@@ -1310,10 +1310,15 @@ int main(int argc, char *argv[])    //r3StatPL
                             if(objNum.size()==0)
                             {
                                 pNum = 1;
-                                objNum = mpoCat.record->provnum;
+                                objNum = QString(mpoCat.record->provnum);
                             }
                             else if(objNum.size()>5)
-                            qDebug() << QString("objNum: %1\n").arg(objNum);
+                            {
+                                qDebug() << QString("objNum: %1\n").arg(objNum);
+                                tStr = objNum;
+                                objNum.clear();
+                                packString(tStr, &objNum, 5);
+                            }
                             //qDebug() << QString("number: %1\n").arg(mpoCat.record->number);
                         }
 
