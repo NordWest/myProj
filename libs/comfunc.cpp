@@ -814,7 +814,7 @@ int packString(QString upStr, QString *pStr, int targLen)
         j= i*2;
         strncpy(upstr, &upStr.toAscii().constData()[j], 2);
         packDigStr(upstr, fstr);
-        pStr->append(fstr);
+        pStr->append(QString(fstr));
     }
 
     return 0;
