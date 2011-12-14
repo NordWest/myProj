@@ -105,6 +105,8 @@ int main(int argc, char *argv[])
          if(isRD) outerArguments << QString("resFolder=%1").arg(resFolder);
          if(isSC) outerArguments << QString("syscorr=%1").arg(scFile);
 
+         qDebug() << QString("%1 %2\n").arg(r3_prog).arg(outerArguments.join(" "));
+
          r3Process.start(r3_prog, outerArguments);
 
          resR3 = r3Process.waitForFinished(r3_wait);
