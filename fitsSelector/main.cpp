@@ -157,6 +157,7 @@ int main(int argc, char *argv[])//fitsSelector [options]
          {
              if(kVal.indexOf(targetList.at(j))!=-1)
              {
+                 qDebug() << QString("fName: %1\n").arg(tFile);
                  resStm << tFile << "\n";
              }
          }

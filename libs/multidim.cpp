@@ -1,5 +1,7 @@
 #include "multidim.h"
 
+#define MDIM_LOG_LEVEL 0
+
 multidim::multidim()
 {
 
@@ -1687,9 +1689,9 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	bpix = dType;
 
-	qDebug() << "\nbpix\t" << bpix << "\n";
+        if(MDIM_LOG_LEVEL>0) qDebug() << "\nbpix\t" << bpix << "\n";
 
-	qDebug() << "\nsize\t" << size << "\n";
+        if(MDIM_LOG_LEVEL>0) qDebug() << "\nsize\t" << size << "\n";
 
 	switch(bpix)
 
@@ -1697,7 +1699,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	case USHORT_IMG:
 
-		qDebug() << "\nUSHORT_IMG\t" << USHORT_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nUSHORT_IMG\t" << USHORT_IMG << "\n";
 
 		
 
@@ -1705,13 +1707,13 @@ img2d::img2d(const int dType, const long n, const long m)
 
 //		ushD = (unsigned short*) calloc(size, 16);
 
-		qDebug() << "\nsizeof " << sizeof(ushD) << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nsizeof " << sizeof(ushD) << "\n";
 
 		break;
 
 	case SHORT_IMG:
 
-		qDebug() << "\nSHORT_IMG\t" << SHORT_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nSHORT_IMG\t" << SHORT_IMG << "\n";
 
 		shD = new short[size];
 
@@ -1719,7 +1721,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	case LONG_IMG:
 
-		qDebug() << "\nLONG_IMG\t" << LONG_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nLONG_IMG\t" << LONG_IMG << "\n";
 
 		lD = new long[size];
 
@@ -1727,7 +1729,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	case FLOAT_IMG:
 
-		qDebug() << "\nFLOAT_IMG\t" << FLOAT_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nFLOAT_IMG\t" << FLOAT_IMG << "\n";
 
 		fD = new float[size];
 
@@ -1735,7 +1737,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	case DOUBLE_IMG:
 
-		qDebug() << "\nDOUBLE_IMG\t" << DOUBLE_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\nDOUBLE_IMG\t" << DOUBLE_IMG << "\n";
 
 		dD = new double[size];
 
@@ -1743,7 +1745,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 	default:
 
-		qDebug() << "\ndefault\t" << DOUBLE_IMG << "\n";
+                if(MDIM_LOG_LEVEL>0) qDebug() << "\ndefault\t" << DOUBLE_IMG << "\n";
 
 		bpix = DOUBLE_IMG;
 
@@ -2452,7 +2454,7 @@ int img2d::getSgtC(segment *sg, int i, int j, int size0, int size1)
 int img2d::getAperture(imgAperture *iApe, int Xc, int Yc, int ro)//ro - aperture diam
 
 {
-    //qDebug() << "img2d::getAperture\n";
+    //if(MDIM_LOG_LEVEL>0) qDebug() << "img2d::getAperture\n";
 
 	int i,j;//counters
 
@@ -2551,7 +2553,7 @@ int img2d::getAperture(imgAperture *iApe, int Xc, int Yc, int ro)//ro - aperture
 
    if(n==0) return 1;
 
-   //qDebug() << QString("iApe->Size= %1\tn= %2\n").arg(iApe->Size).arg(n);
+   //if(MDIM_LOG_LEVEL>0) qDebug() << QString("iApe->Size= %1\tn= %2\n").arg(iApe->Size).arg(n);
 
    meanI = meanI/n;
 
@@ -2875,7 +2877,7 @@ int img2d::updateHist()
     if(histD==NULL) return 1;
     //if(imgArr==NULL) return 1;
     //BEGIN histogramm
-    qDebug() << "\nBEGIN histogramm\n";
+    if(MDIM_LOG_LEVEL>0) qDebug() << "\nBEGIN histogramm\n";
 
     histD->nelements = naxes[0]*naxes[1];
 
@@ -2922,7 +2924,7 @@ int img2d::updateHist()
     if(histD->minp<histD->minv)histD->minp=histD->minv;
     histD->st = 2*histD->hw/25;
     //END histogramm
-    qDebug() << "\nEND histogramm\n";
+    if(MDIM_LOG_LEVEL>0) qDebug() << "\nEND histogramm\n";
     return 0;
 }
 
