@@ -1,8 +1,8 @@
-//это заголовочный файл класса cdsfind. Пусть название класса не смущает.
+//это заголовочный файл класса mpeph. Пусть название класса не смущает.
 #include <QtCore>
 #include <QtNetwork>
 
-class cdsfind: public QObject
+class mpeph: public QObject
 {
 Q_OBJECT
 
@@ -40,6 +40,9 @@ private slots:// самый минимум слотов. нам ведь нуж�
 	void slotStateChanged(int state);//состояние запроса;
 	//void slotSslErrors(QList<QSslError> sslErr);
 	void slotRequestFinished(int id, bool error);//узнать, что выполнение запроса завершено;
+
+        void getReplyFinished();
+        void readyReadReply();
  public:
-	cdsfind(QCoreApplication *app);
+        mpeph(QCoreApplication *app);
 };

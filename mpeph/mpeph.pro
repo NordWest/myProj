@@ -10,7 +10,7 @@ HEADERS += ./../astro/astro.h
 
 TARGET = mpeph
 QT += network
-CONFIG += console exceptions warn_off release
+CONFIG += console exceptions warn_off
 win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
 unix:LIBS += ./../libs/unix/libmb.a \
