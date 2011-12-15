@@ -7,7 +7,7 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
     if(orList.size()==0) return;
     expMax = expMax/1440.0;
 
-    sortORList(orList);
+    sortORList(&orList);
 
     szi = orList.size();
     objResRec* tResRec;
@@ -35,7 +35,7 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
         {
             orSeriesList->append(tResFile);
             tResFile = new objResidualFile;
-            mjd1 = tResRec->mJD;
+            //mjd1 = tResRec->mJD;
             tResFile->ocList << tResRec;
             expTemp = 0.0;
             dT1 = 0.0;
@@ -54,7 +54,7 @@ void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebS
     if(ebList.size()==0) return;
     expMax = expMax/1440.0;
 
-    sortErrBList(ebList);
+    sortErrBList(&ebList);
 
     szi = ebList.size();
     errBudgetRec* tResRec;
@@ -94,10 +94,10 @@ void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebS
 
 }
 
-void sortORList(QList <objResRec*> orList, int dir)
+void sortORList(QList <objResRec*> *orList, int dir)
 {
     int i, j, sz;
-    sz = orList.size();
+    sz = orList->size();
     double val;
     int vPos;
 
@@ -105,25 +105,25 @@ void sortORList(QList <objResRec*> orList, int dir)
 
     for(i=0; i<sz-1; i++)
     {
-        val = orList.at(i)->mJD;
+        val = orList->at(i)->mJD;
         vPos = i;
         for(j=i+1; j<sz; j++)
         {
-            if(sn*val>sn*orList.at(j)->mJD)
+            if(sn*val>sn*orList->at(j)->mJD)
             {
-                val = orList.at(j)->mJD;
+                val = orList->at(j)->mJD;
                 vPos = j;
             }
 
         }
-        orList.swap(i, j);
+        orList->swap(i, vPos);
     }
 }
 
-void sortErrBList(QList <errBudgetRec*> ebList, int dir)
+void sortErrBList(QList <errBudgetRec*> *ebList, int dir)
 {
     int i, j, sz;
-    sz = ebList.size();
+    sz = ebList->size();
     double val;
     int vPos;
 
@@ -131,18 +131,18 @@ void sortErrBList(QList <errBudgetRec*> ebList, int dir)
 
     for(i=0; i<sz-1; i++)
     {
-        val = ebList.at(i)->MJD;
+        val = ebList->at(i)->MJD;
         vPos = i;
         for(j=i+1; j<sz; j++)
         {
-            if(sn*val>sn*ebList.at(j)->MJD)
+            if(sn*val>sn*ebList->at(j)->MJD)
             {
-                val = ebList.at(j)->MJD;
+                val = ebList->at(j)->MJD;
                 vPos = j;
             }
 
         }
-        ebList.swap(i, j);
+        ebList->swap(i, vPos);
     }
 }
 
@@ -261,7 +261,7 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     QString outstr;
     DATEOBS dateObs = getDATEOBSfromMJD(MJday);
     //obj_num = name.toInt();
-    if(provNum) outstr = outstr +QString( "%1       " ).arg(objNum,5,QLatin1Char( '0' ));
+    if(!provNum) outstr = outstr +QString( "%1       " ).arg(objNum,5,QLatin1Char( '0' ));
     else outstr = outstr +QString( "     %1" ).arg(objNum,7,QLatin1Char( '0' ))+"       ";
     outstr += discAster;
     outstr += note1;
@@ -3672,6 +3672,7 @@ int objSeries::saveAs_Full(QString fileName)
 
     for(i=0; i<sz; i++)
     {
+        dataStream << "\n##################################\n";
         tStr.clear();
         tStrL.clear();
         orTemp = serieList.at(i);

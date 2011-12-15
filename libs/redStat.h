@@ -58,8 +58,8 @@ void detPlateName(QString *plateName, QString originName, int plNameType = 0);
 
 void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax);
 void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebSeriesList, double expMax);
-void sortORList(QList <objResRec*> orList, int dir = 0);
-void sortErrBList(QList <errBudgetRec*> ebList, int dir = 0);
+void sortORList(QList <objResRec*> *orList, int dir = 0);
+void sortErrBList(QList <errBudgetRec*> *ebList, int dir = 0);
 
 
 //////////////////////////////////////////////////////////////////////////////////////

@@ -220,6 +220,39 @@ int mpcrec::getProvnum()
 	
 }
 
+void mpcrec::getProvnumStr(char *rstr)
+{
+/*	char *sim = new char[2];
+        strncpy(sim, "\0", 1);
+        strncpy(&sim[0], "\0", 1);
+        char *sim1 = new char[3];
+        strncpy(sim1, "\0", 1);
+        strncpy(&sim1[0], "\0", 1);
+        char *upstr = new char[16];
+        strncpy(upstr, "\0", 1);
+        strncpy(&upstr[0], "\0", 1);
+
+        for(int i=0; i<7; i++)
+        {
+                strncpy(sim, &this->provnum[i], 1);
+                strcpy(&sim[1], "\0");
+
+                upackDigStr(sim, sim1);
+                strcat(upstr, sim1);
+
+        }
+*/
+        strcpy(rstr, this->provnum);
+/*
+        delete [] sim;
+        delete [] sim1;
+        delete [] upstr;
+
+
+        return res;
+*/
+}
+
 int mpcrec::getNum()
 {
 	int res, i;
@@ -234,6 +267,30 @@ int mpcrec::getNum()
 	}
 
 	return 0;
+}
+
+void mpcrec::getNumStr(char *rstr)
+{
+        int res, i, p;
+        char *tstr = new char[8];
+        char *sim = new char[2];
+        strcpy(sim, "\0");
+        strcpy(tstr, "");
+        p=0;
+        for(i=0; i<8; i++)
+        {
+                strncpy(sim, &number[i], 1);
+                strcpy(&sim[1], "\0");
+                if((!streqv(sim, "("))&&(!streqv(sim, ")")))
+                {
+                    strncat(tstr, sim, 1);
+                    p++;
+                }
+        }
+        sprintf(rstr, "%d\0", atoi(tstr));
+
+        delete [] tstr;
+        delete [] sim;
 }
 
 double mpcrec::getEpoch()

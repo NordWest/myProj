@@ -111,6 +111,9 @@ double (or multiple) designation is involved.
 	int getProvnum();
 	int getNum();
 	double getEpoch();
+        void getNumStr(char *rstr);
+        void getProvnumStr(char *rstr);
+
 /*
 	void set_number(int numb);
 	void set_epoha(int epo);

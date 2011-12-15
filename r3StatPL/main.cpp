@@ -769,7 +769,7 @@ int main(int argc, char *argv[])    //r3StatPL
         ocRec *ocrec;
         sstarRes *ssrec;
         QList <objResRec*> rejList;
-
+        char *tcstr = new char[32];
 
 
         mpccat mpoCat;
@@ -873,11 +873,13 @@ int main(int argc, char *argv[])    //r3StatPL
                         else
                         {
                             pNum = 0;
-                            objNum = QString(mpoCat.record->number);
+                            mpoCat.record->getNumStr(tcstr);
+                            objNum = QString(tcstr);
                             if(objNum.size()==0)
                             {
                                 pNum = 1;
-                                objNum = QString(mpoCat.record->provnum);
+                                mpoCat.record->getProvnumStr(tcstr);
+                                objNum = QString(tcstr);
                             }
                             else if(objNum.size()>5)
                             {
@@ -982,7 +984,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             szj = eqTemp.ocList.size();
                             for(j=0; j<szj; j++)
                             {
-                                eqTemp.ocList.at(j)->rec2MPC(&tstr, "084", objNum);
+                                eqTemp.ocList.at(j)->rec2MPC(&tstr, "084", objNum, pNum);
                                 mpcStm << tstr << "\n";
                                 if(saveAgg) mpcAggStm << tstr << "\n";
                             }
@@ -1032,7 +1034,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 for(j=0; j<szj; j++)
                 {
                     ocrec = new ocRec;
-                    objTemp.ocList.at(j)->toOcRec(ocrec);
+                    objAggTemp.ocList.at(j)->toOcRec(ocrec);
                     aggEqTemp.ocList << ocrec;
                 }
                 aggEqTemp.sortOClist();
@@ -1870,6 +1872,7 @@ int main(int argc, char *argv[])    //r3StatPL
                                 dDec = 0.0;
                                 resRec->ksiOC-= dKsi;
                                 resRec->etaOC-= (dEta+dDec);
+
 
                                 resRec->ksi-= mas_to_grad(dKsi);
                                 resRec->eta-= mas_to_grad(dEta+dDec);
