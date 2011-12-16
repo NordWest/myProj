@@ -225,6 +225,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
         fitsdata fitsM, fitsT;
 
+        fitsM.clear();
+
         detPlateName(&obsName, errBtemp->errList.at(posMean)->originName, 1);
         fitsM.openFile(errBtemp->errList.at(posMean)->originName);
         int n = fitsM.workFrame.width();
