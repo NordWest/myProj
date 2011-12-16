@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         szi = errBtemp->errList.size();
         for(i=0; i< szi; i++)
         {
-            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6);
+            qDebug() << QString("time %1: %2 | %3\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6).arg(errBtemp->errList.at(i)->originName);
         }
     }
 
@@ -201,12 +201,12 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 ///////////////////////////////////////
         szi = errBtemp->errList.size();
-        if(szi<2) return 1;
+        if(szi<2) continue;
         tMean = 0.0;
         for(i=0; i<szi; i++)
         {
             tMean += errBtemp->errList.at(i)->MJD;
-            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6);
+            qDebug() << QString("time %1: %2 | %3\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6).arg(errBtemp->errList.at(i)->originName);
         }
         tMean /= szi;
         posMean = 0;
