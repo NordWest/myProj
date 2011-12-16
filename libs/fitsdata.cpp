@@ -4816,6 +4816,7 @@ void fitsdata::measureMarksGrid(marksGrid *mgr, measureParam params)
     if(params.model!=3)
     {
  //       int nofit = inSpinBox->value();
+        updateHist();
 
         int sz = mgr->marks.size();
         //double *P = new double[21];
@@ -4825,7 +4826,7 @@ void fitsdata::measureMarksGrid(marksGrid *mgr, measureParam params)
             if(FD_LOG_LEVEL) qDebug() << "\ni: " << mgr->marks.size() << "\tX: " << mgr->marks[i]->mTanImg[0] << "\tY: " << mgr->marks[i]->mTanImg[1] << "\n";
 
 
-            if(!measureMark(imgArr, mgr->marks.at(i), params)) mgr->marks.removeAt(i);
+            if(measureMark(imgArr, mgr->marks.at(i), params)) mgr->marks.removeAt(i);
         }
     }
     else
@@ -4835,6 +4836,8 @@ void fitsdata::measureMarksGrid(marksGrid *mgr, measureParam params)
         moveMassCenter(mgr, params.apRadius*2);
   //      slotCenterMass(mgr);
     }
+
+    if(FD_LOG_LEVEL) qDebug() << QString("measureMarksGrid: %1 marks measured\n").arg(mgr->marks.size());
 
 
  //       slotScrUpdate();
@@ -4858,10 +4861,10 @@ int measureMark(img2d *imgArr, marksP *mP, measureParam params)
         mP->mTanImg[1] = mP->P[1];
         mP->mTanImg[2] = mP->P[18];
         if(FD_LOG_LEVEL) qDebug() << "\nXn: " << mP->mTanImg[0] << "\tYn: " << mP->mTanImg[1] << "\tMagn: " << mP->mTanImg[2] << "\n";
-        return 1;
+        return 0;
     }
     if(FD_LOG_LEVEL) qDebug() << QString("\nmeasureMark error\n");
-    return 0;
+    return 1;
 }
 
 /*
