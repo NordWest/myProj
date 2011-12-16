@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(codec1);
 
     //command line  ///////////////////////////////////////
-        QString optName, optVal, optStr;
+        QString optName, optVal, optStr, logFolder;
         QString tFile;
         QString rmCfg = QString("rulermanager.ini");
         QString cfgFileName = "ruler3.ini";
@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
         int isCFG = 0;
         int isRD = 0;
         int isSC = 0;
+        int isLF = 0;
 
         QString listFile = QString(argv[1]);
 
@@ -62,6 +63,11 @@ int main(int argc, char *argv[])
                 isSC = 1;
                 scFile = optVal;
 
+            }
+            else if(QString::compare(optName, "logFolder", Qt::CaseSensitive)==0)
+            {
+                isLF=1;
+                logFolder = optVal;
             }
             else
             {
@@ -104,6 +110,7 @@ int main(int argc, char *argv[])
          if(isCFG) outerArguments << QString("config=%1").arg(cfgFileName);
          if(isRD) outerArguments << QString("resFolder=%1").arg(resFolder);
          if(isSC) outerArguments << QString("syscorr=%1").arg(scFile);
+         if(isLF) outerArguments << QString("logFolder=%1").arg(logFolder);
 
          qDebug() << QString("%1 %2\n").arg(r3_prog).arg(outerArguments.join(" "));
 
@@ -114,6 +121,11 @@ int main(int argc, char *argv[])
          if(!resR3)
          {
              r3Process.close();
+             qDebug() << QString("\ntime elapsed\n");
+         }
+         else
+         {
+             qDebug() << QString(r3Process.readAllStandardOutput()) << "\n";
          }
      }
 

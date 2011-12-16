@@ -66,7 +66,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
     //command line  ///////////////////////////////////////
         QString optName, optVal, optStr, pnStr, headerFileName;
-        QString resFolder;
+        QString resFolder, logFolder;
         sysCorrParam *sysCorr = NULL;
         QString cfgFileName = "ruler3.ini";
         int sz, i, oNum;
@@ -77,6 +77,8 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         int resdirDef=0;
         QString scFile;
         int isSc = 0;
+        int isLF = 0;
+        QString logFileName;
 
         for(i=1; i<argc; i++)
         {
@@ -91,6 +93,11 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             {
                 resdirDef=1;
                 resFolder = optVal;
+            }
+            else if(QString::compare(optName, "logFolder", Qt::CaseSensitive)==0)
+            {
+                isLF=1;
+                logFolder = optVal;
             }
             else if(QString::compare(optName, "syscorr", Qt::CaseSensitive)==0)
             {
@@ -211,7 +218,14 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             QFileInfo fi(fileName);
             QString filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
             if(filePath=="") filePath = QString("./");
-            QString logFileName = QString("%1.log").arg(fi.absoluteFilePath());
+            if(isLF)
+            {
+                QDir().mkdir(logFolder);
+                QDir ldir(logFolder);
+
+                logFileName = QString("%1/%2.log").arg(ldir.absolutePath()).arg(fi.fileName());
+            }
+            else logFileName = QString("%1.log").arg(fi.absoluteFilePath());
 
             if(useLogLock&&QDir().exists(logFileName))
             {
