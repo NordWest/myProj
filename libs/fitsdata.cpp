@@ -9833,7 +9833,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
     //if(FD_LOG_LEVEL) qDebug() << "mObj: " << mObj << "\n";
     //if(FD_LOG_LEVEL) qDebug() << "data: " << mObj->data << "\n";
 
-    QString outstr, msgstr;
+    QString outstr, msgstr, objNum, tStr;
     QFile oresFile;
     QTextStream orStm;
 
@@ -9975,7 +9975,15 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
             {
                 outstr ="";
                 //int obj_num;
-                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
+                objNum = mObj->mpcObj->num;
+                if(objNum.size()>5)
+                {
+                    if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
+                    tStr = objNum;
+                    objNum.clear();
+                    packString(tStr, &objNum, 5);
+                }
+                oc->rec2MPC(&outstr, ebRec->obsCode, objNum, 0, outPar.mpcObsType);
 
                 if(FD_LOG_LEVEL) qDebug() << QString("mpcFile: %1\n").arg(resFolder+"/"+"mpc"+rejSuff+".txt");
                 QFile astFile(resFolder+"/"+"mpc.txt");
