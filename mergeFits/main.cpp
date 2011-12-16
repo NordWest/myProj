@@ -182,12 +182,12 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     qDebug() << QString("find %1 series\n").arg(serSz);
     for(si=0; si< serSz; si++)
     {
-        qDebug() << QString("################ Serie %1 #################\n").arg(i);
+        qDebug() << QString("################ Serie %1 #################\n").arg(si);
         errBtemp = ebSeriesList.at(si);
         szi = errBtemp->errList.size();
         for(i=0; i< szi; i++)
         {
-            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD);
+            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6);
         }
     }
 
@@ -196,13 +196,18 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     for(si=0; si< serSz; si++)
     {
+        qDebug() << QString("################ Serie %1 #################\n").arg(si);
         errBtemp = ebSeriesList.at(si);
 
 ///////////////////////////////////////
         szi = errBtemp->errList.size();
         if(szi<2) return 1;
         tMean = 0.0;
-        for(i=0; i<szi; i++) tMean += errBtemp->errList.at(i)->MJD;
+        for(i=0; i<szi; i++)
+        {
+            tMean += errBtemp->errList.at(i)->MJD;
+            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD, 12, 'f', 6);
+        }
         tMean /= szi;
         posMean = 0;
         tmin = fabs(errBtemp->errList.at(0)->MJD-tMean);
