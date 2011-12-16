@@ -6,6 +6,45 @@
 #include "./../libs/observatory.h"
 #include "./../libs/redStat.h"
 
+static QTextStream* clog = 0;
+void customMessageHandler(QtMsgType type, const char* msg)
+{
+    static const char* msgType[] =
+    {
+        "Debug    : ",
+        "Warning  : ",
+        "Critical : ",
+        "Fatal    : "
+    };
+
+    static QTextStream cout(stdout);
+    static QTextStream cerr(stderr);
+
+    cerr << msgType[type] << msg << endl;
+    if(clog && clog->device())
+        *clog << type << msg;
+    if(type == QtFatalMsg)
+    {
+        cerr << "aborting..." << endl;
+
+#if defined(Q_CC_MSVC) && defined(QT_DEBUG) && defined(_CRT_ERROR) && defined(_DEBUG)
+        int reportMode = _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
+        _CrtSetReportMode(_CRT_ERROR, reportMode);
+        int ret = _CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, QT_VERSION_STR, msg);
+        if(ret == 0 && reportMode & _CRTDBG_MODE_WNDW)
+            return;
+        else if(ret == 1)
+            _CrtDbgBreak();
+#endif
+
+#if defined(Q_OS_UNIX) && defined(QT_DEBUG)
+        abort();
+#else
+        exit(1);
+#endif
+    }
+}
+
 
 void detRt(double *r, double ra, double de)
 {
@@ -74,9 +113,25 @@ void detAii(double *Aii, double *T1, double *T2)
 
 int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 {
+    qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
 
     setlocale(LC_NUMERIC, "C");
+
+    QString codecName;
+    #if defined(Q_OS_LINUX)
+    codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+    codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
+
+    QFile* logFile = new QFile("./mergeFits.log");
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+        clog = new QTextStream(logFile);
 
     if(argc<3)
     {
@@ -91,18 +146,6 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     QString dateCode;
     QString resFile;
     double tMean, tmin, ti;
-
-    QString codecName;
-
-    #if defined(Q_OS_LINUX)
-        codecName = "UTF-8";
-    #elif defined(Q_OS_WIN)
-        codecName = "CP1251";
-    #endif
-
-    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
-    Q_ASSERT( codec1 );
-    QTextCodec::setCodecForCStrings(codec1);
 
 
     QList <errBudgetFile*> ebSeriesList;
@@ -135,6 +178,17 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     //sortErrBList(errB.errList);
     detErrBSeriesList(errB.errList, &ebSeriesList, 9);
+
+    for(si=0; si< serSz; si++)
+    {
+        qDebug() << QString("################ Serie %1 #################\n").arg(i);
+        errBtemp = ebSeriesList.at(si);
+        szi = errBtemp->errList.size();
+        for(i=0; i< szi; i++)
+        {
+            qDebug() << QString("time %1: %2\n").arg(i).arg(errBtemp->errList.at(i)->MJD);
+        }
+    }
 
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
@@ -269,6 +323,12 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         qDebug() << QString("rfName: %1").arg(rfName);
         fitsM.saveFitsAs(rfName);
     }
+
+    logFile->close();
+    delete clog;
+    clog = 0;
+    delete logFile;
+    qInstallMsgHandler(0);
 
     return 0;//a.exec();
 }
