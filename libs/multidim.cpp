@@ -1703,7 +1703,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
 		
 
-		ushD = new unsigned short[size];
+                ushD = new uint16_t[size];
 
 //		ushD = (unsigned short*) calloc(size, 16);
 
@@ -1715,7 +1715,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
                 if(MDIM_LOG_LEVEL>0) qDebug() << "\nSHORT_IMG\t" << SHORT_IMG << "\n";
 
-		shD = new short[size];
+                shD = new int16_t[size];
 
 		break;
 
@@ -1723,7 +1723,7 @@ img2d::img2d(const int dType, const long n, const long m)
 
                 if(MDIM_LOG_LEVEL>0) qDebug() << "\nLONG_IMG\t" << LONG_IMG << "\n";
 
-		lD = new long[size];
+                lD = new int32_t[size];
 
 		break;
 

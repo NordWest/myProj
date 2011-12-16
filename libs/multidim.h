@@ -309,11 +309,11 @@ public:
 
 
 
-	unsigned short *ushD;//0
+        uint16_t *ushD;//0 unsigned short
 
-	short          *shD;//1
+        int16_t          *shD;//1
 
-	long           *lD;//2
+        int32_t           *lD;//2
 
 	float          *fD;//3
 
