@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
 
-        detRt(xT0, errBtemp->errList.at(posMean)->RAoc, errBtemp->errList.at(posMean)->DEoc);
+        detRt(xT0, grad2rad(errBtemp->errList.at(posMean)->RAoc), grad2rad(errBtemp->errList.at(posMean)->DEoc));
         /*xT0[0] = cos(errBtemp->errList.at(posMean)->RAoc)*cos(errBtemp->errList.at(posMean)->DEoc);
         xT0[1] = sin(errBtemp->errList.at(posMean)->RAoc)*cos(errBtemp->errList.at(posMean)->DEoc);
         xT0[2] = sin(errBtemp->errList.at(posMean)->DEoc);*/
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     */
 
 
-            detRt(xTi, errBtemp->errList.at(p)->RAoc, errBtemp->errList.at(p)->DEoc);
+            detRt(xTi, grad2rad(errBtemp->errList.at(p)->RAoc), grad2rad(errBtemp->errList.at(p)->DEoc));
             detT0(Ti, xTi);
             detAii(Ai, Ti, T0);
 
