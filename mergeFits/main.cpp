@@ -193,6 +193,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
     QString obsName;
+    int *nums;
 
     for(si=0; si< serSz; si++)
     {
@@ -233,7 +234,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         int m = fitsM.workFrame.height();
 
         szi = n*m;
-        int *nums = new int[szi];
+        nums = new int[szi];
         for(i=0; i<szi; i++) nums[i]=1;
 
 
@@ -325,6 +326,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         }
 
 
+        delete [] nums;
 
         QString rfName = resFolder+QDir().separator()+obsName+".fit";
         qDebug() << QString("rfName: %1").arg(rfName);
