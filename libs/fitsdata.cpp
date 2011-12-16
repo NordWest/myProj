@@ -10508,7 +10508,7 @@ void getMpephName(marksGrid *objMarks, double MJD, QString mpeName, QString ast_
 {
     QStringList outerArguments;
     outerArguments << QString("-name");
-    outerArguments << mpeName;
+    outerArguments << QString("\"%1\"").arg(mpeName);
     QString sMjd = QString("%1").arg(MJD, 11, 'f',7);
     outerArguments << QString("%1").arg(sMjd);
     getMpephObject(objMarks, outerArguments, ast_eph_prog, ast_eph_prog_folder, mag0, mag1, mpeWaitTime);

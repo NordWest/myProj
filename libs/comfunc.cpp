@@ -803,7 +803,7 @@ int packDigStr(char *upstr, char *pstr)
 int packString(QString upStr, QString *pStr, int targLen)
 {
     int i, j;
-    char *fstr = new char[2];
+    char *pstr = new char[2];
     char *upstr = new char[2];
     pStr->clear();
     int iLen = upStr.size();
@@ -813,8 +813,11 @@ int packString(QString upStr, QString *pStr, int targLen)
     {
         j= i*2;
         strncpy(upstr, &upStr.toAscii().constData()[j], 2);
-        packDigStr(upstr, fstr);
-        pStr->append(QString(fstr));
+        strncpy(&upstr[2], "\0", 1);
+        qDebug() << "upstr:" << upstr << "\n";
+        packDigStr(upstr, pstr);
+        qDebug() << "pstr:" << pstr << "\n";
+        pStr->append(QByteArray(pstr));
     }
     pStr->append(upStr.right(iLen-j-2));
     //for(i=j; i<iLen; i++)
