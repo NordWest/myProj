@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     QList <catFinder*> starCatList;
     QString obsCode;
     int szi, i, posMean, j, szj, p, szp, pos;
+    int serSz, si;
     QString dateCode;
     QString resFile;
     double tMean, tmin, ti;
@@ -104,6 +105,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     QTextCodec::setCodecForCStrings(codec1);
 
 
+    QList <errBudgetFile*> ebSeriesList;
 //command line  ///////////////////////////////////////
     double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
     double *xT0 = new double[3];
@@ -117,12 +119,16 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     double *Ai = new double[9];
 
     errBudgetFile errB;
+    errBudgetFile *errBtemp;
     errB.init(argv[1]);
 
     QString resFolder = QString(argv[2]);
 
     sortErrBList(errB.errList);
+    detErrBSeriesList(errB.errList, &ebSeriesList, 9);
 
+    serSz = ebSeriesList.size();
+    qDebug() << QString("find %1 series\n").arg(serSz);
 
 
 

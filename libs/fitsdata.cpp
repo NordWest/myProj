@@ -9982,6 +9982,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                     tStr = objNum;
                     objNum.clear();
                     packString(tStr, &objNum, 5);
+                    qDebug() << QString("packed objNum: %1\n").arg(objNum);
                 }
                 oc->rec2MPC(&outstr, ebRec->obsCode, objNum, 0, outPar.mpcObsType);
 
