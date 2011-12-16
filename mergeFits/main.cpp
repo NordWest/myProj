@@ -138,6 +138,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
+    QString obsName;
 
     for(si=0; si< serSz; si++)
     {
@@ -165,6 +166,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
         fitsdata fitsM, fitsT;
 
+        detPlateName(&obsName, errBtemp->errList.at(posMean)->originName, 1);
         fitsM.openFile(errBtemp->errList.at(posMean)->originName);
         int n = fitsM.workFrame.width();
         int m = fitsM.workFrame.height();
@@ -263,7 +265,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
 
-        QString rfName = resFolder+QDir().separator()+errBtemp->errList.at(posMean)->mesureTimeCode+".fit";
+        QString rfName = resFolder+QDir().separator()+obsName+".fit";
         qDebug() << QString("rfName: %1").arg(rfName);
         fitsM.saveFitsAs(rfName);
     }
