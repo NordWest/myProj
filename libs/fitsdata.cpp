@@ -2188,35 +2188,35 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     {
             case USHORT_IMG:
             {
-                        imgArr = new img2d(0, naxes[0], naxes[1]);
+                        //imgArr = new img2d(0, naxes[0], naxes[1]);
 //			ushD = new unsigned short[nelements];//allocation of appropriate tamporary buffer
                     fits_read_img(fptr, TUSHORT, felem, nelements, NULL, imgArr->ushD ,&anynul, &status);fitsErrors[10]=status;status = 0;//read data image from file
                     break;
             }
             case SHORT_IMG:
             {
-                        imgArr = new img2d(1, naxes[0], naxes[1]);
+                        //imgArr = new img2d(1, naxes[0], naxes[1]);
 //			shD = new short[nelements];
                     fits_read_img(fptr, TSHORT, felem, nelements, NULL, imgArr->shD ,&anynul, &status);fitsErrors[10]=status;status = 0;//read data image from file
                     break;
             }
             case LONG_IMG:
             {
-                        imgArr = new img2d(2, naxes[0], naxes[1]);
+                        //imgArr = new img2d(2, naxes[0], naxes[1]);
 //			lD = new long[nelements];
                     fits_read_img(fptr, TLONG, felem, nelements, NULL, imgArr->lD ,&anynul, &status);fitsErrors[10]=status;status = 0;//read data image from file
                     break;
             }
             case FLOAT_IMG:
             {
-                        imgArr = new img2d(3, naxes[0], naxes[1]);
+                        //imgArr = new img2d(3, naxes[0], naxes[1]);
 //			fD = new float[nelements];
                     fits_read_img(fptr, TFLOAT, felem, nelements, NULL, imgArr->fD ,&anynul, &status);fitsErrors[10]=status;status = 0;//read data image from file
                     break;
             }
             case DOUBLE_IMG:
             {
-                        imgArr = new img2d(4, naxes[0], naxes[1]);
+                        //imgArr = new img2d(4, naxes[0], naxes[1]);
 //			dD = new double[nelements];
                     fits_read_img(fptr, TDOUBLE, felem, nelements, NULL, imgArr->dD ,&anynul, &status);fitsErrors[10]=status;status = 0;//read data image from file
                     break;
