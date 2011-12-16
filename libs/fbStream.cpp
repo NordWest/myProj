@@ -148,15 +148,20 @@ int fbStream::Get(char *str, char *name, int kpos, int szstr)
 {
 	basic_string <char>::size_type spos;
 	static const basic_string <char>::size_type npos = -1;
-	spos = buf->find(name);
+        char *tname = new char[256];
+        int res;
+        sprintf(tname, " %s ", name);
+        spos = buf->find(tname);
+        res = 1;
 	if(spos!=npos)
 	{
-		buf->copy(str, szstr, spos-kpos);
+                buf->copy(str, szstr, spos-kpos+1);
 		strcpy(&str[szstr], "\0");
-		return 0;
+                res = 0;
 	}
 
-	return 2;
+        delete [] tname;
+        return res;
 }
 
 int fbStream::Del(char *name, int kpos, int szstr)

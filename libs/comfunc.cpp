@@ -816,7 +816,7 @@ int packString(QString upStr, QString *pStr, int targLen)
         packDigStr(upstr, fstr);
         pStr->append(QString(fstr));
     }
-    pStr->append(upStr.right(iLen-j-1));
+    pStr->append(upStr.right(iLen-j-2));
     //for(i=j; i<iLen; i++)
 
     return 0;
