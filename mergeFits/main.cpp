@@ -178,7 +178,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     //sortErrBList(errB.errList);
     detErrBSeriesList(errB.errList, &ebSeriesList, 9);
-
+    serSz = ebSeriesList.size();
+    qDebug() << QString("find %1 series\n").arg(serSz);
     for(si=0; si< serSz; si++)
     {
         qDebug() << QString("################ Serie %1 #################\n").arg(i);
@@ -190,8 +191,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         }
     }
 
-    serSz = ebSeriesList.size();
-    qDebug() << QString("find %1 series\n").arg(serSz);
+
     QString obsName;
 
     for(si=0; si< serSz; si++)
@@ -323,6 +323,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         qDebug() << QString("rfName: %1").arg(rfName);
         fitsM.saveFitsAs(rfName);
     }
+
+    qDebug() << "\n\nEND mergeFits\n\n";
 
     logFile->close();
     delete clog;
