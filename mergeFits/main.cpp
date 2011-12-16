@@ -265,6 +265,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         {
             if(i==posMean) continue;
 
+            fitsT.clear();
             //fitsT.clear();
             if(fitsT.openFile(errBtemp->errList.at(p)->originName))
             {
@@ -306,7 +307,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
                     eta2 = (Ai[3]*ksi1 + Ai[4]*eta1 + Ai[5])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
                     detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
                     //iF = spline2dcalc(interI, i, j);
-                    iF = fitsM.imgArr->getImgPixValue(i, j);
+                    iF = fitsT.imgArr->getImgPixValue(i, j);
                     pos = fitsM.imgArr->detPos(x2, y2);
                     fitsM.imgArr->setVal(fitsM.imgArr->getImgPixValue(x2, y2)+iF, pos);
                     nums[pos]++;
@@ -320,8 +321,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         {
             for(i=0; i<n; i++)
             {
-                pos = fitsT.imgArr->detPos(i, j);
-                fitsM.imgArr->setVal(fitsT.imgArr->getImgPixValue(i, j)/(1.0*nums[pos]), pos);
+                pos = fitsM.imgArr->detPos(i, j);
+                fitsM.imgArr->setVal(fitsM.imgArr->getImgPixValue(i, j)/(1.0*nums[pos]), pos);
             }
         }
 
