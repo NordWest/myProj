@@ -261,6 +261,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
         szp = errBtemp->errList.size();
+
+
         for(p=0; p<szp; p++)
         {
             if(i==posMean) continue;
@@ -300,16 +302,20 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
                 for(i=0; i<n; i++)
                 {
                     detTan6const(&ksi1, &eta1, i, j, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
+                    qDebug() << QString("ksi1: %1\teta1: %2\n").arg(ksi1).arg(eta1);
                     r1[0] = ksi1;
                     r1[1] = eta1;
                     r1[2] = 1;
                     ksi2 = (Ai[0]*ksi1 + Ai[1]*eta1 + Ai[2])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
                     eta2 = (Ai[3]*ksi1 + Ai[4]*eta1 + Ai[5])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
                     detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
+                    qDebug() << QString("ksi2: %1\teta2: %2\n").arg(ksi2).arg(eta2);
+
                     //iF = spline2dcalc(interI, i, j);
-                    iF = fitsT.imgArr->getImgPixValue(i, j);
+                    iF = fitsT.imgArr->getImgPix(i, j);
                     pos = fitsM.imgArr->detPos(x2, y2);
-                    fitsM.imgArr->setVal(fitsM.imgArr->getImgPixValue(x2, y2)+iF, pos);
+                    qDebug() << QString("x2: %1\ty2: %2\tpos: %3\n").arg(x2).arg(y2).arg(pos);
+                    fitsM.imgArr->setVal(fitsM.imgArr->getImgPix(x2, y2)+iF, pos);
                     nums[pos]++;
                 }
             }
@@ -322,7 +328,9 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
             for(i=0; i<n; i++)
             {
                 pos = fitsM.imgArr->detPos(i, j);
-                fitsM.imgArr->setVal(fitsM.imgArr->getImgPixValue(i, j)/(1.0*nums[pos]), pos);
+                iF = fitsM.imgArr->getImgPix(i, j);
+                qDebug() << QString("pos: %1\tiF: %2\tnums: %3\n").arg(pos).arg(iF).arg(nums[pos]);
+                fitsM.imgArr->setVal(iF/(1.0*nums[pos]), pos);
             }
         }
 
