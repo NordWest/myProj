@@ -3294,6 +3294,7 @@ int objResidualFile::countCols(QList <colRec*> *colList, QString colNums)
     QStringList columns = colNums.split(",");
     int i, sz;
 if(ocList.size()<2) return 1;
+    colList->clear();
     colRec *cRec;
     cRec = new colRec;
 
@@ -3804,22 +3805,26 @@ void objSeries::getMean(QList <objResRec*> *ocList)
     for(i=0; i<sz; i++)
     {
         orTemp = serieList.at(i);
-        colList.clear();
-
-        if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
+        if(orTemp->ocList.size()>1)
         {
-            sz1 = colList.size();
+            colList.clear();
 
-            if(sz1)
+            if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
             {
-                orRec = new objResRec;
-                orRec->fromColList(colList);
-                orRec->name = objName;
-                orRec->catName = catName;
-                orRec->catMagName = catMagName;
-                ocList->append(orRec);
+                sz1 = colList.size();
+
+                if(sz1)
+                {
+                    orRec = new objResRec;
+                    orRec->fromColList(colList);
+                    orRec->name = objName;
+                    orRec->catName = catName;
+                    orRec->catMagName = catMagName;
+                    ocList->append(orRec);
+                }
             }
         }
+        else ocList->append(orTemp->ocList.at(1));
     }
 
 }

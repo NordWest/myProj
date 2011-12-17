@@ -1020,7 +1020,9 @@ int main(int argc, char *argv[])    //r3StatPL
                         }
                         if(isSeries)
                         {
+                            objMean.ocList.clear();
                             serTemp.getMean(&objMean.ocList);//
+                            objMean.saveAs(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                             ssSerieNum += serTemp.serieList.size();
                         }
                     }
@@ -1076,7 +1078,7 @@ int main(int argc, char *argv[])    //r3StatPL
                 //eqTotS->countCols("4,5,6");
                 //eqTotS->saveAs(reportObjDir+"/eqSeries.txt", 0);
 
-                objMean.saveAs(QString("%1/orSeries_mean.txt").arg(reportObjDir));
+                //objMean.saveAs(QString("%1/orSeries_mean.txt").arg(reportObjDir));
                 //objMoveModel.saveAs(QString("%1/orSeries_mm.txt").arg(reportObjDir));
             }
             /*
