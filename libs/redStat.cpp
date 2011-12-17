@@ -262,7 +262,7 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     DATEOBS dateObs = getDATEOBSfromMJD(MJday);
     //obj_num = name.toInt();
     if(!provNum) outstr = outstr +QString( "%1       " ).arg(objNum,5,QLatin1Char( '0' ));
-    else outstr = outstr +QString( "     %1" ).arg(objNum,7,QLatin1Char( '0' ))+"       ";
+    else outstr = outstr +QString( "     %1" ).arg(objNum,7,QLatin1Char( '0' ));
     outstr += discAster;
     outstr += note1;
     outstr += objType;
