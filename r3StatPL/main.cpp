@@ -771,6 +771,10 @@ int main(int argc, char *argv[])    //r3StatPL
         QList <objResRec*> rejList;
         char *tcstr = new char[32];
 
+        int serieNum = 0;
+        int eqSerieNum = 0;
+        int ssSerieNum = 0;
+
 
         mpccat mpoCat;
         if(saveMpc)
@@ -830,6 +834,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         serTemp.serieList.clear();
                         orList.clear();
                         detOrSeriesList(objTemp.ocList, &serTemp.serieList, 9, 2);
+                        serieNum += serTemp.serieList.size();
                         serTemp.objName = objName;
                         serTemp.catName = catName;
                         serTemp.catMagName = catMagName;
@@ -921,6 +926,8 @@ int main(int argc, char *argv[])    //r3StatPL
                             ocEqList.clear();
                             serTemp.getMoveModel(&ocEqList);
 
+                            eqSerieNum += serTemp.serieList.size();
+
                             szj = ocEqList.size();
                             if(szj)
                             {
@@ -1011,7 +1018,11 @@ int main(int argc, char *argv[])    //r3StatPL
                             ssTemp.saveAs(tfName+"_sstar.txt");
                             if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
                         }
-                        if(isSeries)serTemp.getMean(&objMean.ocList);//
+                        if(isSeries)
+                        {
+                            serTemp.getMean(&objMean.ocList);//
+                            ssSerieNum += serTemp.serieList.size();
+                        }
                     }
                 }
 
@@ -1020,6 +1031,8 @@ int main(int argc, char *argv[])    //r3StatPL
                 if(objRejTemp.ocList.size()>0) objRejTemp.saveAs(tfName+"_rej.txt");
 
             }
+
+            qDebug() << QString("serieNum: %1\teqSerieNum: %2\tssSerieNum: %3\n").arg(serieNum).arg(eqSerieNum).arg(ssSerieNum);
 
         if(saveAgg)
         {
@@ -1033,9 +1046,12 @@ int main(int argc, char *argv[])    //r3StatPL
                 szj = objAggTemp.ocList.size();
                 for(j=0; j<szj; j++)
                 {
-                    ocrec = new ocRec;
-                    objAggTemp.ocList.at(j)->toOcRec(ocrec);
-                    aggEqTemp.ocList << ocrec;
+                    if(QString().compare(objAggTemp.ocList.at(j)->catName.simplified(), "mpeph")==0)
+                    {
+                        ocrec = new ocRec;
+                        objAggTemp.ocList.at(j)->toOcRec(ocrec);
+                        aggEqTemp.ocList << ocrec;
+                    }
                 }
                 aggEqTemp.sortOClist();
 

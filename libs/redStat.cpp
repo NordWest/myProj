@@ -7,6 +7,8 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
     if(orList.size()==0) return;
     expMax = expMax/1440.0;
 
+    orSeriesList->clear();
+
     sortORList(&orList);
 
     szi = orList.size();
