@@ -1,6 +1,6 @@
 #include "redStat.h"
 
-void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax)
+void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax, double expMin)
 {
     int i, szi;
     double dT0, dT1, expTemp, mjd0, mjd1;
@@ -33,8 +33,15 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
         //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
         if((expTemp>expMax)&&(expMax>0))
         {
-            orSeriesList->append(tResFile);
-            tResFile = new objResidualFile;
+            if(expTemp<expMin)
+            {
+                tResFile->ocList.clear();
+            }
+            else
+            {
+                orSeriesList->append(tResFile);
+                tResFile = new objResidualFile;
+            }
             //mjd1 = tResRec->mJD;
             tResFile->ocList << tResRec;
             expTemp = 0.0;
