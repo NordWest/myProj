@@ -110,6 +110,18 @@ void detAii(double *Aii, double *T1, double *T2)
 */
 }
 
+void kiselev1(double ksi1, double eta1, double Ai[], double *ksi2, double *eta2)
+{
+    qDebug() << QString("ksi1: %1\teta1: %2\n").arg(ksi1).arg(eta1);
+
+    *ksi2 = (Ai[0]*ksi1 + Ai[1]*eta1 + Ai[2])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
+    *eta2 = (Ai[3]*ksi1 + Ai[4]*eta1 + Ai[5])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
+
+    qDebug() << QString("ksi2: %1\teta2: %2\n").arg(*ksi2).arg(*eta2);
+    qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(fabs(*ksi2-ksi1)*86400).arg(fabs(*eta2-eta1)*86400);
+
+}
+
 
 int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 {
@@ -150,8 +162,9 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     QList <errBudgetFile*> ebSeriesList;
 //command line  ///////////////////////////////////////
-    double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
     double *xT0 = new double[3];
+    double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
+    double p1, q1, dKsi, dEta, cosD;
     double *xTi = new double[3];
     double *r1 = new double[3];
     double *r2 = new double[3];
@@ -293,28 +306,45 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     */
 
 
-            detRt(xTi, grad2rad(errBtemp->errList.at(p)->RAoc), grad2rad(errBtemp->errList.at(p)->DEoc));
-            detT0(Ti, xTi);
-            detAii(Ai, Ti, T0);
+            //detRt(xTi, grad2rad(errBtemp->errList.at(p)->RAoc), grad2rad(errBtemp->errList.at(p)->DEoc));
+            //detT0(Ti, xTi);
+            //detAii(Ai, Ti, T0);
 
             for(j=0; j<m; j++)
             {
                 for(i=0; i<n; i++)
                 {
                     detTan6const(&ksi1, &eta1, i, j, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
-                    qDebug() << QString("ksi1: %1\teta1: %2\n").arg(ksi1).arg(eta1);
-                    r1[0] = ksi1;
-                    r1[1] = eta1;
-                    r1[2] = 1;
-                    ksi2 = (Ai[0]*ksi1 + Ai[1]*eta1 + Ai[2])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
-                    eta2 = (Ai[3]*ksi1 + Ai[4]*eta1 + Ai[5])/(Ai[7]*ksi1 + Ai[8]*eta1 + Ai[9]);
+
+                    //kiselev1(ksi1, eta1, Ai, &ksi2, &eta2);
+
+                    ///
+                    cosD = cos(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
+                    //qDebug() << QString("cosD: %1\n").arg(cosD);
+                    p1 = (errBtemp->errList.at(posMean)->RAoc - errBtemp->errList.at(p)->RAoc)*cosD;
+                    q1 = errBtemp->errList.at(posMean)->DEoc - errBtemp->errList.at(p)->DEoc;
+
+                    //qDebug() << QString("p1: %1\tq1: %2\n").arg(p1*86400).arg(q1*86400);
+
+                    dKsi = -p1*ksi1*ksi1 -q1*ksi1*eta1;
+                    dEta = -p1*ksi1*eta1 -q1*eta1*eta1;
+                    //qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(dKsi*86400).arg(dEta*86400);
+                    ksi2 = ksi1 - dKsi;
+                    eta2 = eta1 - dEta;
+                    ///
+
                     detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
-                    qDebug() << QString("ksi2: %1\teta2: %2\n").arg(ksi2).arg(eta2);
+
+                    //qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(fabs(ksi2-ksi1)*86400).arg(fabs(eta2-eta1)*86400);
+                    //qDebug() << QString("dX: %1\tdY: %2 sec\n").arg(fabs(x2-i)).arg(fabs(y2-j));
+
+
+
 
                     //iF = spline2dcalc(interI, i, j);
                     iF = fitsT.imgArr->getImgPix(i, j);
                     pos = fitsM.imgArr->detPos(x2, y2);
-                    qDebug() << QString("x2: %1\ty2: %2\tpos: %3\n").arg(x2).arg(y2).arg(pos);
+                    //qDebug() << QString("x2: %1\ty2: %2\tpos: %3\n").arg(x2).arg(y2).arg(pos);
                     fitsM.imgArr->setVal(fitsM.imgArr->getImgPix(x2, y2)+iF, pos);
                     nums[pos]++;
                 }
@@ -329,7 +359,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
             {
                 pos = fitsM.imgArr->detPos(i, j);
                 iF = fitsM.imgArr->getImgPix(i, j);
-                qDebug() << QString("pos: %1\tiF: %2\tnums: %3\n").arg(pos).arg(iF).arg(nums[pos]);
+                //qDebug() << QString("pos: %1\tiF: %2\tnums: %3\n").arg(pos).arg(iF).arg(nums[pos]);
                 fitsM.imgArr->setVal(iF/(1.0*nums[pos]), pos);
             }
         }
