@@ -4394,7 +4394,7 @@ double fitsdata::getScaleY()
 {
     if(WCSdata[12])
     {
-        return fabs(WCSdata[9]);
+        return fabs(WCSdata[11]);
     }
     else
     {

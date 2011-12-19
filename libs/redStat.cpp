@@ -89,8 +89,8 @@ void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebS
         //if((tResFile->ocList.size()<=1)||((fabs(dT1-dT0)<dExpCoef*dT0)&&((expTemp<expMax)||(expMax<=0))))
         if((expTemp>expMax)&&(expMax>0))
         {
-            ebSeriesList->append(tResFile);
             tResFile = new errBudgetFile;
+            ebSeriesList->append(tResFile);
             mjd1 = tResRec->MJD;
             tResFile->errList << tResRec;
             expTemp = 0.0;

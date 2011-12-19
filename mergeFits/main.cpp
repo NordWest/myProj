@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 //command line  ///////////////////////////////////////
     double *xT0 = new double[3];
     double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
-    double p1, q1, dKsi, dEta, cosD;
+    double p1, q1, dKsi, dEta, cosD, scX, scY, tanD;
     double *xTi = new double[3];
     double *r1 = new double[3];
     double *r2 = new double[3];
@@ -261,16 +261,16 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
 
 
-        //spline2dinterpolant coefY;
-        //spline2dinterpolant coefN;
+        spline2dinterpolant coefY;
+        spline2dinterpolant coefN;
 
-        xarr.setlength(n);
-        yarr.setlength(m);
+        xarr.setlength(n+1);
+        yarr.setlength(m+1);
 
         for(i=0; i<n; i++) xarr(i) = i;
         for(i=0; i<m; i++) yarr(i) = i;
 
-        fI.setlength(n, m);
+        fI.setlength(m+1, n+1);
 
 
         szp = errBtemp->errList.size();
@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
         for(p=0; p<szp; p++)
         {
-            if(i==posMean) continue;
+            if(p==posMean) continue;
 
             fitsT.clear();
             //fitsT.clear();
@@ -289,63 +289,73 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
             }
 
 
-    /*
+
             for(j=0; j<m; j++)
             {
                 for(i=0; i<n; i++)
                 {
-                    fI(i, j) = fitsT.imgArr->getImgPixValue(i, j);
+                    fI(j, i) = fitsT.imgArr->getImgPix(i, j);
                 }
             }
-    */
 
-    /*
-            spline2dbuildbicubic(xarr, yarr, fI, n, m, coefI);
+
+
+            spline2dbuildbilinear(xarr, yarr, fI, m, n, coefI);
             qDebug() << QString("\n%1\n").arg(p);
             spline2dinterpolant interI(coefI);
-    */
 
 
             //detRt(xTi, grad2rad(errBtemp->errList.at(p)->RAoc), grad2rad(errBtemp->errList.at(p)->DEoc));
             //detT0(Ti, xTi);
             //detAii(Ai, Ti, T0);
+            cosD = cos(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
+            tanD = tan(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
+            //qDebug() << QString("cosD: %1\n").arg(cosD);
+            p1 = (errBtemp->errList.at(p)->RAoc - errBtemp->errList.at(posMean)->RAoc)*cosD;
+            q1 = errBtemp->errList.at(p)->DEoc - errBtemp->errList.at(posMean)->DEoc;
+            qDebug() << QString("p1: %1\tq1: %2\n").arg(p1*86400).arg(q1*86400);
+            scX = fitsT.getScaleX();
+            scY = fitsT.getScaleY();
+            qDebug() << QString("dX0: %1\tdY0: %2\n").arg(p1/scX).arg(q1/scY);
 
             for(j=0; j<m; j++)
             {
                 for(i=0; i<n; i++)
                 {
-                    detTan6const(&ksi1, &eta1, i, j, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
+                    detTan6const(&ksi1, &eta1, i, j, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
 
                     //kiselev1(ksi1, eta1, Ai, &ksi2, &eta2);
 
                     ///
-                    cosD = cos(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
-                    //qDebug() << QString("cosD: %1\n").arg(cosD);
-                    p1 = (errBtemp->errList.at(posMean)->RAoc - errBtemp->errList.at(p)->RAoc)*cosD;
-                    q1 = errBtemp->errList.at(posMean)->DEoc - errBtemp->errList.at(p)->DEoc;
 
-                    //qDebug() << QString("p1: %1\tq1: %2\n").arg(p1*86400).arg(q1*86400);
 
-                    dKsi = -p1*ksi1*ksi1 -q1*ksi1*eta1;
-                    dEta = -p1*ksi1*eta1 -q1*eta1*eta1;
+                    //
+
+                    //dKsi = -p1*ksi1*ksi1 -q1*ksi1*eta1;
+                    //dEta = -p1*ksi1*eta1 -q1*eta1*eta1;
+                    dKsi = -p1 + p1*tanD*eta1 - p1*ksi1*ksi1 - q1*ksi1*eta1;
+                    dEta = -q1 - p1*tanD*ksi1 - p1*ksi1*eta1 - q1*eta1*eta1;
                     //qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(dKsi*86400).arg(dEta*86400);
-                    ksi2 = ksi1 - dKsi;
-                    eta2 = eta1 - dEta;
+                    //qDebug() << QString("dX: %1\tdY: %2\n").arg(dKsi/scX).arg(dEta/scY);
+                    ksi2 = ksi1 + dKsi;
+                    eta2 = eta1 + dEta;
                     ///
 
-                    detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
+                    detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
 
-                    //qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(fabs(ksi2-ksi1)*86400).arg(fabs(eta2-eta1)*86400);
+                    //detTan6const(&ksi1, &eta1, x2, y2, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
+
+                    //qDebug() << QString("dKsi1: %1\tdEta1: %2 sec\n").arg(fabs(ksi2-ksi1)*86400).arg(fabs(eta2-eta1)*86400);
                     //qDebug() << QString("dX: %1\tdY: %2 sec\n").arg(fabs(x2-i)).arg(fabs(y2-j));
 
 
 
 
-                    //iF = spline2dcalc(interI, i, j);
-                    iF = fitsT.imgArr->getImgPix(i, j);
-                    pos = fitsM.imgArr->detPos(x2, y2);
+                    iF = spline2dcalc(interI, x2, y2);
+                    //iF = fitsT.imgArr->getImgPix(x2, y2);
+                    pos = fitsM.imgArr->detPos(i, j);
                     //qDebug() << QString("x2: %1\ty2: %2\tpos: %3\n").arg(x2).arg(y2).arg(pos);
-                    fitsM.imgArr->setVal(fitsM.imgArr->getImgPix(x2, y2)+iF, pos);
+                    fitsM.imgArr->setVal(fitsM.imgArr->getImgPix(i, j)+iF, pos);
                     nums[pos]++;
                 }
             }
