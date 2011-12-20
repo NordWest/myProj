@@ -316,10 +316,7 @@ mpeph/astro.cpp -text
 mpeph/astro.h -text
 mpeph/main.cpp -text
 mpeph/mpeph.cpp -text
-mpeph/mpeph.cpp.save -text
 mpeph/mpeph.h -text
-mpeph/mpeph.h.save -text
-mpeph/mpeph.ini -text
 mpeph/mpeph.pro -text
 mpephPost/astro.cpp -text
 mpephPost/astro.h -text
