@@ -41,8 +41,9 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
             }
             else
             {
-                orSeriesList->append(tResFile);
                 tResFile = new objResidualFile;
+                orSeriesList->append(tResFile);
+
             }
             //mjd1 = tResRec->mJD;
             tResFile->ocList << tResRec;

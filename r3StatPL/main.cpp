@@ -880,7 +880,7 @@ int main(int argc, char *argv[])    //r3StatPL
                             pNum = 0;
                             mpoCat.record->getNumStr(tcstr);
                             objNum = QString(tcstr);
-                            if(objNum.toInt()==0)
+                            if((objNum.toInt()==0)||(objNum.toInt()>319999))
                             {
                                 pNum = 1;
                                 mpoCat.record->getProvnumStr(tcstr);

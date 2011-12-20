@@ -9979,7 +9979,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                 //int obj_num;
                 if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 objNum = mObj->mpcObj->num;
-                if(objNum.size()>5)
+                if((objNum.size()>5)&&(objNum.toInt()<320000))
                 {
                     if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
                     tStr = objNum;
@@ -10107,7 +10107,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                 if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 outstr ="";
                 objNum = mObj->sbot->Num;
-                if(objNum.size()>5)
+                if((objNum.size()>5)&&(objNum.toInt()<320000))
                 {
                     if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
                     tStr = objNum;
