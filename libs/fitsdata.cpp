@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 1
+#define FD_LOG_LEVEL 0
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -2455,6 +2455,7 @@ void fitsdata::detTan()
 
 void fitsdata::detPpix(marksGrid *mGr, int apeDiam)
 {
+    //updateHist();
     //if(FD_LOG_LEVEL) qDebug() << "fitsdata::detPpix\n";
     if(!is_empty)
     {
@@ -9917,6 +9918,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
         break;
     case OBJ_TYPE_MPEPH:
         {
+            if(FD_LOG_LEVEL) qDebug() << QString("\nOBJ_TYPE_MPEPH\n");
             mObj->ocObj = new ocRec;
             ocRec *oc = mObj->ocObj;
 
@@ -9972,9 +9974,10 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
 
             if(FD_LOG_LEVEL) qDebug() << QString("mpcreport: %1\n").arg(whatOut.mpcreport);
             if(whatOut.mpcreport==1)
-            {
+            {if(FD_LOG_LEVEL) qDebug() << QString("eqRec OMC: %1\t%2\n").arg(oc->ocRaCosDe).arg(oc->ocDe);
                 outstr ="";
                 //int obj_num;
+                if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 objNum = mObj->mpcObj->num;
                 if(objNum.size()>5)
                 {
@@ -10015,6 +10018,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
         }
     case OBJ_TYPE_SSTAR:
         {
+        if(FD_LOG_LEVEL) qDebug() << QString("\nOBJ_TYPE_SSTAR\n");
             mObj->ssResRec = new sstarRes;
 
             orRec.name = QString(mObj->sstar->getLSPM()).simplified();
@@ -10052,6 +10056,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
         }
     case OBJ_TYPE_SKYBOT:
         {
+        if(FD_LOG_LEVEL) qDebug() << QString("\nOBJ_TYPE_SKYBOT\n");
             mObj->ocObj = new ocRec;
             ocRec *oc = mObj->ocObj;
 
@@ -10099,8 +10104,19 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
             if(FD_LOG_LEVEL) qDebug() << QString("mpcreport: %1\n").arg(whatOut.mpcreport);
             if(whatOut.mpcreport==1)
             {
+                if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 outstr ="";
-                oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
+                objNum = mObj->sbot->Num;
+                if(objNum.size()>5)
+                {
+                    if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
+                    tStr = objNum;
+                    objNum.clear();
+                    packString(tStr, &objNum, 5);
+                    if(FD_LOG_LEVEL) qDebug() << QString("packed objNum: %1\n").arg(objNum);
+                }
+                oc->rec2MPC(&outstr, ebRec->obsCode, objNum, 0, outPar.mpcObsType);
+                //oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
 
                 if(FD_LOG_LEVEL) qDebug() << QString("sumMpcFile: %1\n").arg(resFolder+"/"+"mpc"+rejSuff+".txt");
                 QFile astFile(resFolder+"/"+"mpc"+rejSuff+".txt");
@@ -10130,10 +10146,13 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
         break;
     }
 
+    qDebug() << QString("whatOut.objresreport: %1\n").arg(whatOut.objresreport);
+
     if(whatOut.objresreport)
     {
         oresFile.setFileName(resFolder+"/objRes"+rejSuff+".txt");
-        oresFile.open(QIODevice::WriteOnly | QIODevice::Append);
+        int isOpen = oresFile.open(QIODevice::WriteOnly | QIODevice::Append);
+        qDebug() << QString("isOpen: %1\n").arg(isOpen);
         orStm.setDevice(&oresFile);
 
         orRec.rec2s(&outstr);

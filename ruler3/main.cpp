@@ -283,6 +283,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         qDebug() << QString("File %1 is not opened\n").arg(fileName);
         return 1;
     }
+    fitsd->updateHist();
 
 /////////////////////////////
     //fitsd->initInst(telescopeFile, insNum);
@@ -408,6 +409,7 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
 
     fitsd->ipixMarks->clearMarks();
     copyImgGrid(fitsd->catMarks, fitsd->ipixMarks);
+
     //fitsd->moveMassCenter(fitsd->ipixMarks, mesPar.apRadius*2);
     //fitsd->measureMarksGrid(fitsd->ipixMarks, mesPar);
 

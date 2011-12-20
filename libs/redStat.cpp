@@ -4195,7 +4195,7 @@ int mpephRec::fromString(QString inStr)
     QString elS;
     QStringList opers;
     opers = inStr.split("|");
-    qDebug() << QString("opers.size()= %1\n").arg(opers.size());
+    //qDebug() << QString("opers.size()= %1\n").arg(opers.size());
     if(opers.size()<11) return 1;
     elS = opers.at(0);ra = hms_to_deg(elS, ":");
     elS = opers.at(1);de = damas_to_deg(elS, ":");
@@ -4235,7 +4235,7 @@ int skybotRec::fromString(QString iStr)
     QString elS;
     QStringList opers;
     opers = iStr.split("|");
-    qDebug() << QString("opers.size()= %1\n").arg(opers.size());
+    //qDebug() << QString("opers.size()= %1\n").arg(opers.size());
     if(opers.size()<21) return 1;
     Num = opers.at(0).simplified();
     Name = opers.at(1).simplified();
