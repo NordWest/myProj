@@ -320,6 +320,15 @@ mpeph/mpeph.cpp.save -text
 mpeph/mpeph.h -text
 mpeph/mpeph.h.save -text
 mpeph/mpeph.pro -text
+mpephPost/astro.cpp -text
+mpephPost/astro.h -text
+mpephPost/main.cpp -text
+mpephPost/mpeph.cpp -text
+mpephPost/mpeph.cpp.save -text
+mpephPost/mpeph.h -text
+mpephPost/mpeph.h.save -text
+mpephPost/mpeph.ini -text
+mpephPost/mpeph.pro -text
 multiFits/main.cpp -text
 multiFits/multiFits.pro -text
 napoint/main.cpp -text
