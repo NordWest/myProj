@@ -1,5 +1,5 @@
 #include "mpeph.h"
-#include "astro.h"
+#include "./../astro/astro.h"
 /*о командной строчке замолвите словечко...
 mpeph.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
 1 -num - это значит задается номер астероида (как в примере)
@@ -15,7 +15,7 @@ cat| 05 54 58.197 | +33 12 50.61 | 54188.7768690278
 Поскольку все затевалось для нее, пришлось действовать "запутанным образом"
 */
 
-cdsfind::cdsfind(QCoreApplication *app)//конструктор
+mpeph::mpeph(QCoreApplication *app)//конструктор
 {	
 	cdsfapp = app;
 	QString msgstr;
@@ -119,7 +119,7 @@ cdsfind::cdsfind(QCoreApplication *app)//конструктор
 	
 };
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1
-void cdsfind::slotProcessingData(bool error)// обработка ответа на запрос
+void mpeph::slotProcessingData(bool error)// обработка ответа на запрос
 {
     //qDebug() << QString("slotProcessingData\n");
 
@@ -222,7 +222,7 @@ void cdsfind::slotProcessingData(bool error)// обработка ответа �
 		}
 };
 
-void cdsfind::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
+void mpeph::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
 {
     //qDebug() << QString("slotStateChanged");
 	if (eventMessages)
@@ -258,13 +258,13 @@ void cdsfind::slotStateChanged(int state)//этот слот печатает в
 	}
 };
 
-/*void cdsfind::slotSslErrors(QList<QSslError> sslErr)
+/*void mpeph::slotSslErrors(QList<QSslError> sslErr)
 {
 	QTextStream stream(stdout);
 	stream << "ssl error has occured." << "\n";
 };*/
 
-void cdsfind::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
+void mpeph::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
 {
    // qDebug() << QString("slotRequestFinished\n");
 

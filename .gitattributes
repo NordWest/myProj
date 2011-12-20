@@ -312,8 +312,6 @@ mpcStat/main.cpp -text
 mpcStat/mpcStat.pro -text
 mpcStat/multidim.cpp -text
 mpcStat/multidim.h -text
-mpeph/astro.cpp -text
-mpeph/astro.h -text
 mpeph/main.cpp -text
 mpeph/mpeph.cpp -text
 mpeph/mpeph.h -text
