@@ -180,12 +180,25 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         QByteArray params;
         QNetworkRequest request;
         request.setUrl(apiUrl);
+
+        if (msgout==1) stream << "useProxy...\n";
+        if (useProxy==1)
+        {
+                //http->setProxy(proxyName, proxyPort);//если есть прокси, устанавливаем соответсвующие параметры
+            manager.setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, proxyName, proxyPort));
+        }
+
+        request.setRawHeader("POST", "");
         request.setRawHeader("Host", "www.imcce.fr");
         request.setRawHeader("Cache-Control", "no-cache");
         request.setRawHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         request.setRawHeader("Accept-Language","ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3");
         request.setRawHeader("Accept-Encoding","gzip, deflate");
         request.setRawHeader("Accept-Charset","KOI8-R,utf-8;q=0.7,*;q=0.7");
+        request.setRawHeader("Cookie","PHPSESSID=nourh153q93687mjj39f3efsf6");
+        if (useProxy==1) request.setRawHeader("Proxy-Connection", "keep-alive");
+        else request.setRawHeader("Connection", "keep-alive");
+
         request.setRawHeader("Connection", "keep-alive");
         request.setRawHeader("Referer", "http://www.imcce.fr/en/ephemerides/formulaire/form_ephepos.php");
         request.setRawHeader("Content-Type","multipart/from-data; boundary=103334937612997731731256962411");
@@ -202,14 +215,14 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         params.append("Content-Disposition: ");
         params.append("form-data; name=\"rv\"\r\n");
         params.append("\r\n");
-        params.append("0");
+        params.append("1");
         params.append("\r\n");
 
         params.append("--103334937612997731731256962411\r\n");
         params.append("Content-Disposition: ");
         params.append("form-data; name=\"custom_window\"\r\n");
         params.append("\r\n");
-        params.append("y");
+        params.append("n");
         params.append("\r\n");
 
         params.append("--103334937612997731731256962411\r\n");
@@ -231,7 +244,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         params.append("Content-Disposition: ");
         params.append("form-data; name=\"kindjob\"\r\n");
         params.append("\r\n");
-        params.append("1");
+        params.append("0");
         params.append("\r\n");
 
 
@@ -326,7 +339,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         //params.append("2455878.18525462970\r\n");
         //params.append("2455879.28525462970\r\n");
         params.append("\r\n");
-
+/*
         params.append("--103334937612997731731256962411\r\n");
         params.append("Content-Disposition: ");
         params.append("form-data; name=\"an\"\r\n");
@@ -375,7 +388,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         params.append("\r\n");
         params.append("1");
         params.append("\r\n");
-
+*/
         params.append("--103334937612997731731256962411\r\n");
         params.append("Content-Disposition: ");
         params.append("form-data; name=\"pas\"\r\n");
@@ -406,7 +419,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 
         params.append("--103334937612997731731256962411--");
 
-        //if (msgout==1) stream << params <<"\n";
+        if (msgout==1) stream << params <<"\n";
 
         //request.setRawHeader("baundary","103334937612997731731256962411");
         request.setHeader(QNetworkRequest::ContentLengthHeader, params.length());
