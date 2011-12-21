@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
     int interType = 0; //0-none; 1-bilinear; 2-bicubic
     double muRaCosD = 0;    //mas/min
     double muDe = 0;         //mas/min
+    double dEMax = 9;
 
 //command line  ///////////////////////////////////////
 
@@ -192,6 +193,10 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
         else if(QString::compare(optName, "muDe", Qt::CaseSensitive)==0)
         {
             muDe = optVal.toDouble();
+        }
+        else if(QString::compare(optName, "dEMax", Qt::CaseSensitive)==0)
+        {
+            dEMax = optVal.toDouble();
         }
         else
         {
@@ -217,7 +222,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
 
     QString resFolder = QString(argv[2]);
 
-    detErrBSeriesList(errB.errList, &ebSeriesList, 9);
+    detErrBSeriesList(errB.errList, &ebSeriesList, dEMax);
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
     for(si=0; si< serSz; si++)
