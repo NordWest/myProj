@@ -9910,6 +9910,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
     if(FD_LOG_LEVEL) qDebug() << QString("objType: %1\n").arg(mObj->objType);
     if(FD_LOG_LEVEL) qDebug() << QString("orRec OMC: %1\t%2\n").arg(orRec.ksiOC).arg(orRec.etaOC);
 
+    int pNum;
 
 
     switch(mObj->objType)
@@ -9979,6 +9980,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                 //int obj_num;
                 if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 objNum = mObj->mpcObj->num;
+                pNum = 0;
                 if((objNum.size()>5)&&(objNum.toInt()<320000))
                 {
                     if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
@@ -9987,7 +9989,8 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                     packString(tStr, &objNum, 5);
                     qDebug() << QString("packed objNum: %1\n").arg(objNum);
                 }
-                oc->rec2MPC(&outstr, ebRec->obsCode, objNum, 0, outPar.mpcObsType);
+                else pNum = 1;
+                oc->rec2MPC(&outstr, ebRec->obsCode, objNum, pNum, outPar.mpcObsType);
 
                 if(FD_LOG_LEVEL) qDebug() << QString("mpcFile: %1\n").arg(resFolder+"/"+"mpc"+rejSuff+".txt");
                 QFile astFile(resFolder+"/"+"mpc.txt");
@@ -10107,6 +10110,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                 if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mObj << "\n";
                 outstr ="";
                 objNum = mObj->sbot->Num;
+                pNum = 0;
                 if((objNum.size()>5)&&(objNum.toInt()<320000))
                 {
                     if(FD_LOG_LEVEL) qDebug() << QString("objNum: %1\n").arg(objNum);
@@ -10115,6 +10119,7 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
                     packString(tStr, &objNum, 5);
                     if(FD_LOG_LEVEL) qDebug() << QString("packed objNum: %1\n").arg(objNum);
                 }
+                else pNum = 1;
                 oc->rec2MPC(&outstr, ebRec->obsCode, objNum, 0, outPar.mpcObsType);
                 //oc->rec2MPC(&outstr, ebRec->obsCode, mObj->mpcObj->num, 0, outPar.mpcObsType);
 
