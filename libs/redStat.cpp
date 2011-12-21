@@ -3806,28 +3806,25 @@ void objSeries::getMean(QList <objResRec*> *ocList)
     for(i=0; i<sz; i++)
     {
         orTemp = serieList.at(i);
-        if(orTemp->ocList.size()>1)
+
+        colList.clear();
+
+        if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
         {
-            colList.clear();
+            sz1 = colList.size();
 
-            if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
+            if(sz1)
             {
-                sz1 = colList.size();
-
-                if(sz1)
-                {
-                    orRec = new objResRec;
-                    orRec->fromColList(colList);
-                    orRec->name = objName;
-                    orRec->catName = catName;
-                    orRec->catMagName = catMagName;
-                    ocList->append(orRec);
-                }
+                orRec = new objResRec;
+                orRec->fromColList(colList);
+                orRec->name = objName;
+                orRec->catName = catName;
+                orRec->catMagName = catMagName;
+                ocList->append(orRec);
             }
         }
-        else ocList->append(orTemp->ocList.at(1));
+        else ocList->append(orTemp->ocList.at(0));
     }
-
 }
 
 void objSeries::getMoveModel(QList <ocRec*> *ocList)
