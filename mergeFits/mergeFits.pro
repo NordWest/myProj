@@ -8,8 +8,8 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/ruler3/mergeFits
-#TARGET = mergeFits
+#TARGET = ./../../lab/ruler3/mergeFits
+TARGET = mergeFits
 CONFIG   -= app_bundle
 
 TEMPLATE = app

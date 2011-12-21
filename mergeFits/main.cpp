@@ -151,37 +151,37 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         return 1;
     }
 
-    QList <catFinder*> starCatList;
-    QString obsCode;
-    int szi, i, posMean, j, szj, p, szp, pos;
+    int szi, i, posMean, j, p, szp, pos;
     int serSz, si;
-    QString dateCode;
-    QString resFile;
     double tMean, tmin, ti;
+
 
 
     QList <errBudgetFile*> ebSeriesList;
 //command line  ///////////////////////////////////////
-    double *xT0 = new double[3];
-    double ra, de, x1, y1, x2, y2, cosPP, ksi1, eta1, ksi2, eta2, iF;
-    double p1, q1, dKsi, dEta, cosD, scX, scY, tanD;
-    double *xTi = new double[3];
-    double *r1 = new double[3];
-    double *r2 = new double[3];
 
-    double *T0 = new double[9];
-    double *Ti = new double[9];
-    double *TiT = new double[9];
-    double *Ai = new double[9];
+    double x2, y2, ksi1, eta1, ksi2, eta2, iF;
+    double p1, q1, dKsi, dEta, cosD, scX, scY, tanD, dEtaT, dKsiT;
 
     real_1d_array xarr;		//Массивы координат опорных точек функции f(x, y) по обеим осям
     real_1d_array yarr;
 
     real_2d_array fI;		//Массивы значений
-    //real_2d_array fY;
-    //real_2d_array fN;
 
     spline2dinterpolant coefI;
+
+/////////////// ini
+
+    QString iniFileName = "./mergeFits.ini";
+
+    QSettings sett(iniFileName, QSettings::IniFormat);
+
+    int interType = sett.value("general/interType", 0).toInt(); //0-none; 1-bilinear; 2-bicubic
+    double muRaCosD = sett.value("general/muRaCosD", 0).toDouble(); //mas/min
+    double muDe = sett.value("general/muDe", 0).toDouble();         //mas/min
+
+
+//////////////
 
     errBudgetFile errB;
     errBudgetFile *errBtemp;
@@ -189,7 +189,6 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     QString resFolder = QString(argv[2]);
 
-    //sortErrBList(errB.errList);
     detErrBSeriesList(errB.errList, &ebSeriesList, 9);
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
@@ -207,6 +206,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     QString obsName;
     int *nums;
+    fitsdata fitsM, fitsT;
 
     for(si=0; si< serSz; si++)
     {
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
         qDebug() << QString("posMean: %1\ttmin: %2\n").arg(posMean).arg(tmin);
 
-        fitsdata fitsM, fitsT;
+
 
         fitsM.clear();
 
@@ -246,68 +246,65 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
         int n = fitsM.workFrame.width();
         int m = fitsM.workFrame.height();
 
+        tMean = fitsM.MJD;
+
         szi = n*m;
         nums = new int[szi];
         for(i=0; i<szi; i++) nums[i]=1;
 
+        if(interType>0)
+        {
+            xarr.setlength(n);
+            yarr.setlength(m);
 
+            for(i=0; i<n; i++) xarr(i) = i;
+            for(i=0; i<m; i++) yarr(i) = i;
 
-        detRt(xT0, grad2rad(errBtemp->errList.at(posMean)->RAoc), grad2rad(errBtemp->errList.at(posMean)->DEoc));
-        /*xT0[0] = cos(errBtemp->errList.at(posMean)->RAoc)*cos(errBtemp->errList.at(posMean)->DEoc);
-        xT0[1] = sin(errBtemp->errList.at(posMean)->RAoc)*cos(errBtemp->errList.at(posMean)->DEoc);
-        xT0[2] = sin(errBtemp->errList.at(posMean)->DEoc);*/
-
-        detT0(T0, xT0);
-
-
-
-        spline2dinterpolant coefY;
-        spline2dinterpolant coefN;
-
-        xarr.setlength(n+1);
-        yarr.setlength(m+1);
-
-        for(i=0; i<n; i++) xarr(i) = i;
-        for(i=0; i<m; i++) yarr(i) = i;
-
-        fI.setlength(m+1, n+1);
+            fI.setlength(m, n);
+        }
 
 
         szp = errBtemp->errList.size();
-
 
         for(p=0; p<szp; p++)
         {
             if(p==posMean) continue;
 
             fitsT.clear();
-            //fitsT.clear();
             if(fitsT.openFile(errBtemp->errList.at(p)->originName))
             {
                 qDebug() << "openFile error\n";
                 return 1;
             }
 
+            ti = fitsT.MJD;
 
-
-            for(j=0; j<m; j++)
+            if(interType>0)
             {
-                for(i=0; i<n; i++)
+
+                for(j=0; j<m; j++)
                 {
-                    fI(j, i) = fitsT.imgArr->getImgPix(i, j);
+                    for(i=0; i<n; i++)
+                    {
+                        fI(j, i) = fitsT.imgArr->getImgPix(i, j);
+                    }
                 }
+
+                switch(interType)
+                {
+                case 1:
+                    spline2dbuildbilinear(xarr, yarr, fI, m, n, coefI);
+                    break;
+                case 2:
+                    spline2dbuildbicubic(xarr, yarr, fI, m, n, coefI);
+                    break;
+                }
+                //spline2dinterpolant interI(coefI);
             }
 
-
-
-            spline2dbuildbilinear(xarr, yarr, fI, m, n, coefI);
             qDebug() << QString("\n%1\n").arg(p);
-            spline2dinterpolant interI(coefI);
 
 
-            //detRt(xTi, grad2rad(errBtemp->errList.at(p)->RAoc), grad2rad(errBtemp->errList.at(p)->DEoc));
-            //detT0(Ti, xTi);
-            //detAii(Ai, Ti, T0);
             cosD = cos(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
             tanD = tan(grad2rad((errBtemp->errList.at(p)->DEoc + errBtemp->errList.at(posMean)->DEoc)/2.0));
             //qDebug() << QString("cosD: %1\n").arg(cosD);
@@ -318,41 +315,32 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
             scY = fitsT.getScaleY();
             qDebug() << QString("dX0: %1\tdY0: %2\n").arg(p1/scX).arg(q1/scY);
 
+            dKsiT = muRaCosD*(tMean - ti)*1440.0;
+            dEtaT = muDe*(tMean - ti)*1440.0;
+
+            qDebug() << QString("dKsiT: %1\tdEtaT: %2\n").arg(dKsiT).arg(dEtaT);
+
+            dKsiT = mas_to_grad(dKsiT);
+            dEtaT = mas_to_grad(dEtaT);
+
             for(j=0; j<m; j++)
             {
                 for(i=0; i<n; i++)
                 {
                     detTan6const(&ksi1, &eta1, i, j, errBtemp->errList.at(posMean)->xParams, errBtemp->errList.at(posMean)->yParams);
 
-                    //kiselev1(ksi1, eta1, Ai, &ksi2, &eta2);
-
-                    ///
-
-
-                    //
-
-                    //dKsi = -p1*ksi1*ksi1 -q1*ksi1*eta1;
-                    //dEta = -p1*ksi1*eta1 -q1*eta1*eta1;
                     dKsi = -p1 + p1*tanD*eta1 - p1*ksi1*ksi1 - q1*ksi1*eta1;
                     dEta = -q1 - p1*tanD*ksi1 - p1*ksi1*eta1 - q1*eta1*eta1;
-                    //qDebug() << QString("dKsi: %1\tdEta: %2 sec\n").arg(dKsi*86400).arg(dEta*86400);
-                    //qDebug() << QString("dX: %1\tdY: %2\n").arg(dKsi/scX).arg(dEta/scY);
-                    ksi2 = ksi1 + dKsi;
-                    eta2 = eta1 + dEta;
+
+                    ksi2 = ksi1 + dKsi + dKsiT;
+                    eta2 = eta1 + dEta + dEtaT;
                     ///
 
                     detXcYc6const(&x2, &y2, ksi2, eta2, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
 
-                    //detTan6const(&ksi1, &eta1, x2, y2, errBtemp->errList.at(p)->xParams, errBtemp->errList.at(p)->yParams);
+                    if(interType>0) iF = spline2dcalc(coefI, x2, y2);
+                    else iF = fitsT.imgArr->getImgPix(x2, y2);
 
-                    //qDebug() << QString("dKsi1: %1\tdEta1: %2 sec\n").arg(fabs(ksi2-ksi1)*86400).arg(fabs(eta2-eta1)*86400);
-                    //qDebug() << QString("dX: %1\tdY: %2 sec\n").arg(fabs(x2-i)).arg(fabs(y2-j));
-
-
-
-
-                    iF = spline2dcalc(interI, x2, y2);
-                    //iF = fitsT.imgArr->getImgPix(x2, y2);
                     pos = fitsM.imgArr->detPos(i, j);
                     //qDebug() << QString("x2: %1\ty2: %2\tpos: %3\n").arg(x2).arg(y2).arg(pos);
                     fitsM.imgArr->setVal(fitsM.imgArr->getImgPix(i, j)+iF, pos);
