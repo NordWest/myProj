@@ -15,7 +15,7 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
     objResRec* tResRec;
     objResidualFile* tResFile;
     tResFile = new objResidualFile;
-    orSeriesList->append(tResFile);
+    //orSeriesList->append(tResFile);
     tResRec = orList.at(0);
     mjd1 = tResRec->mJD;
     tResFile->ocList << tResRec;
@@ -41,9 +41,8 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
             }
             else
             {
-                tResFile = new objResidualFile;
                 orSeriesList->append(tResFile);
-
+                tResFile = new objResidualFile;
             }
             //mjd1 = tResRec->mJD;
             tResFile->ocList << tResRec;
@@ -2409,6 +2408,7 @@ int eqFile::countCols(QString colNums)
                                     break;
                                     case 8:
                                     cols[k]->mean += ocList[j]->muRaCosDe;
+
                                     cols[k]->num++;
                                     break;
                                     case 9:
