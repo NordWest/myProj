@@ -123,10 +123,12 @@ void kiselev1(double ksi1, double eta1, double Ai[], double *ksi2, double *eta2)
 }
 
 
-int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
+int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
 {
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
+
+    if(argc<3) return 1;
 
     setlocale(LC_NUMERIC, "C");
 
@@ -154,11 +156,9 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     int szi, i, posMean, j, p, szp, pos;
     int serSz, si;
     double tMean, tmin, ti;
-
-
+    QString optName, optVal, optStr;
 
     QList <errBudgetFile*> ebSeriesList;
-//command line  ///////////////////////////////////////
 
     double x2, y2, ksi1, eta1, ksi2, eta2, iF;
     double p1, q1, dKsi, dEta, cosD, scX, scY, tanD, dEtaT, dKsiT;
@@ -170,8 +170,37 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
 
     spline2dinterpolant coefI;
 
-/////////////// ini
+    int interType = 0; //0-none; 1-bilinear; 2-bicubic
+    double muRaCosD = 0;    //mas/min
+    double muDe = 0;         //mas/min
 
+//command line  ///////////////////////////////////////
+
+    for(i=2; i<argc; i++)
+    {
+        optStr = QString(argv[i]);
+        optName = optStr.section("=", 0, 0);
+        optVal = optStr.section("=", 1, 1);
+        if(QString::compare(optName, "interType", Qt::CaseSensitive)==0)
+        {
+            interType = optVal.toInt();
+        }
+        else if(QString::compare(optName, "muRaCosD", Qt::CaseSensitive)==0)
+        {
+            muRaCosD = optVal.toDouble();
+        }
+        else if(QString::compare(optName, "muDe", Qt::CaseSensitive)==0)
+        {
+            muDe = optVal.toDouble();
+        }
+        else
+        {
+            qDebug() << QString("\nWARN: wrong param: %1\n").arg(optName);
+        }
+    }
+
+/////////////// ini
+/*
     QString iniFileName = "./mergeFits.ini";
 
     QSettings sett(iniFileName, QSettings::IniFormat);
@@ -179,8 +208,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder
     int interType = sett.value("general/interType", 0).toInt(); //0-none; 1-bilinear; 2-bicubic
     double muRaCosD = sett.value("general/muRaCosD", 0).toDouble(); //mas/min
     double muDe = sett.value("general/muDe", 0).toDouble();         //mas/min
-
-
+*/
 //////////////
 
     errBudgetFile errB;
