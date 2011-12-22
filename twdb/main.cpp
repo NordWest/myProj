@@ -52,6 +52,7 @@ void approxLine(double* ld, double*const lz, double& uwe, int fo, int length, do
         for(int k=0;k<fo;k++) C[k+x*fo] = pow(x,k);
     }
     iLSM(fo,length,10,ce,lz,C,ld,uwe,D,flag,rn,W);
+    //qDebug() << QString("length: %1\trn: %2\tuwe: %3\n").arg(length).arg(rn).arg(uwe);
 }
 
 double surface(double* b, int bsize)
