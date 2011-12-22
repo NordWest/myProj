@@ -1,5 +1,7 @@
 #include "redStat.h"
 
+#define REDSTAT_LOG_LEVEL 0
+
 void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax, double expMin)
 {
     int i, szi;
@@ -177,7 +179,7 @@ void detPlateName(QString *plateName, QString originName, int plNameType)
        break;
     }
 
-    qDebug() << QString("originName: %1\tplateName: %2\n").arg(originName).arg(plateName->toAscii().data());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("originName: %1\tplateName: %2\n").arg(originName).arg(plateName->toAscii().data());
 }
 
 void detVersName(QString *versName, QString originName)
@@ -294,9 +296,9 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
 
 void ocRec::s2rec(QString str)
 {
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
 	QStringList sL = str.split("|");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
         /*if(sL.size()!=16&&sL.size()!=18) return;
 	if(sL.size()==16)
 	{
@@ -439,11 +441,11 @@ void colRec::rec2s(QString *str)
 
 void colRec::s2rec(QString str)
 {
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
 	QStringList sL = str.split("|");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
 	if(sL.size()!=5) return;
-//	//qDebug() << "\nsL0\t" << sL[0] << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsL0\t" << sL[0] << "\n";
 	QString tstr = sL[0].mid(1);
 	colNum = tstr.toInt();
 	mean = sL[1].toDouble();
@@ -519,9 +521,9 @@ void moveModelRec::rec2s(QString *str)
 
 void moveModelRec::s2rec(QString str)
 {
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
 	QStringList sL = str.split("|");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
         if(sL.size()!=15) return;
 	
 	
@@ -695,9 +697,9 @@ void sstarRes::rec2s(QString *str)
 
 void sstarRes::s2rec(QString str)
 {
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
         QStringList sL = str.split("|");
-        //qDebug() << "\nsize=" << sL.size() << "\n";
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
         if(sL.size()!=19) return;
 
         mJD = sL[0].toDouble();
@@ -828,11 +830,11 @@ void objResRec::rec2s(QString *str)
 
 void objResRec::s2rec(QString str)
 {
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
     //QStringList parts = str.split("#");
     QStringList sL = str.section("#", 0, 0).split("|");
         //QStringList sL = str.split("|");
-        //qDebug() << "\nsize=" << sL.size() << "\n";
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
         if(sL.size()!=19) return;
 
         mJD = sL[0].toDouble();
@@ -1125,9 +1127,9 @@ int errBudgetRec::s2rec(QString str)
 {
     QStringList parts = str.split("#");
     if(parts.size()!=5) return 1;
-//	//qDebug() << "\n" << str << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
         QStringList sL = parts.at(0).split("|");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
         if(sL.size()!=7) return 1;
 
         MJD = sL[0].toDouble();
@@ -1215,7 +1217,7 @@ void usnoRec::s2rec(QString str)
 {
     QStringList cols;
     cols = str.split("|");
-    //qDebug() << QString("cols: %1\n").arg(cols.size());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("cols: %1\n").arg(cols.size());
     if(cols.size()<53) return;
     r0 = cols.at(0).toDouble();
     x0 = cols.at(1).toDouble();
@@ -1400,7 +1402,7 @@ void ucac3Rec::rec2s(QString *str)
 void ucac3Rec::s2rec(QString str)
 {
     QStringList opers = str.split("|");
-    ////qDebug() << QString("opers num = %1\n").arg(opers.size());
+    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
     ra = hms_to_deg(opers.at(0), ":");
     dec = damas_to_deg(opers.at(1), ":");
     im1 = opers.at(2).toDouble();
@@ -1443,10 +1445,10 @@ void ucac3Rec::s2rec(QString str)
 
 void ucac3Rec::s2recCDS(QString strNames, QString strVal)
 {
-    //qDebug() << QString("catStr: %1\n").arg(str);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("catStr: %1\n").arg(str);
     QStringList oNames = strNames.split("|");
     QStringList oVal = strVal.split("|");
-    //qDebug() << QString("opers num = %1\n").arg(opers.size());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
     int i, oSize;
     QString cStr;
     oSize = oVal.size();
@@ -1794,7 +1796,7 @@ void ppmxl_rec::s2rec(QString str)
 {
     QStringList opers = str.split("|");
     if(opers.size()<26) return;
-    ////qDebug() << QString("opers num = %1\n").arg(opers.size());
+    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
     ppmxl_id = opers.at(0);
     ra = opers.at(1).toDouble();
     de = opers.at(2).toDouble();
@@ -1826,10 +1828,10 @@ void ppmxl_rec::s2rec(QString str)
 
 void ppmxl_rec::s2recCDS(QString strNames, QString strVal)
 {
-    //qDebug() << QString("catStr: %1\n").arg(str);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("catStr: %1\n").arg(str);
     QStringList oNames = strNames.split("|");
     QStringList oVal = strVal.split("|");
-    //qDebug() << QString("opers num = %1\n").arg(opers.size());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
 
     int i, oSize;
     QString cStr;
@@ -2067,7 +2069,7 @@ void eqFile::clear()
 void eqFile::init(const char *fname)
 {
 //	ocList.clear();
-    qDebug() << "\neqFile::init: " << fname << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\neqFile::init: " << fname << "\n";
 	clear();
 	fName.clear();
 	fName.insert(0, fname);
@@ -2075,7 +2077,7 @@ void eqFile::init(const char *fname)
         QFile dataFile(fname);
         if(!dataFile.open(QIODevice::ReadOnly| QIODevice::Text))
         {
-            qDebug() << QString("can't open: %1\n").arg(fName);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("can't open: %1\n").arg(fName);
             return;
         }
 	QTextStream dataStream;
@@ -2091,21 +2093,21 @@ void eqFile::init(const char *fname)
                 if(dataLine==NULL) continue;
 		if(dataLine[0]=='#')		//mm-string
 		{
-                      //  qDebug() << "\nline #\n";
+                      //  if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline #\n";
 			mmRec = new moveModelRec(dataLine);
 //			ocr->s2rec(dataLine);
 //			mmList << mmr;
 		}
 		else if(dataLine[0]=='%')	//col-string
 		{
-                       // qDebug() << "\nline \%\n";
+                       // if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline \%\n";
 			colr = new colRec(dataLine);
 //			ocr->s2rec(dataLine);
 			colList << colr;
 		}
 		else						//oc-string
 		{
-                       // qDebug() << "\nline\n";
+                       // if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline\n";
 			ocr = new ocRec(dataLine);
 //			ocr->s2rec(dataLine);
 			ocList << ocr;
@@ -2187,7 +2189,7 @@ void eqFile::initOld(const char *fname)
 		}
 		else						//oc-string
 		{
-//			//qDebug() << "\nline\n";
+//			//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline\n";
 			ocr = new ocRec(dataLine);
 //			ocr->s2rec(dataLine);
 			ocList << ocr;
@@ -2275,7 +2277,7 @@ int eqFile::setColRec(colRec* cRec)
 {
 	colRec *pRec;
 	int rpos = getColRecNum(cRec->colNum);
-//	//qDebug() << "rpos= " << rpos << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "rpos= " << rpos << "\n";
 	if(rpos==-1)
 	{
 		pRec = new colRec;
@@ -2409,6 +2411,7 @@ int eqFile::countCols(QString colNums)
                                     case 8:
                                     cols[k]->mean += ocList[j]->muRaCosDe;
 
+
                                     cols[k]->num++;
                                     break;
                                     case 9:
@@ -2514,7 +2517,7 @@ int eqFile::countCols(QString colNums)
                     cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
                     str.clear();
                     cols[k]->rec2s(&str);
-//                    //qDebug() << k << ": " << str << "\n";
+//                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
                     setColRec(cols[k]);
             }
 
@@ -2561,7 +2564,7 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
     QFile s3File("s3file.txt");
     s3File.open(QIODevice::Append);
     QTextStream s3Stm(&s3File);
-    qDebug() << "\ndo3Sigma\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ndo3Sigma\n";
     s3Stm << "\ndo3Sigma\n";
     if(num1<3) return;
 
@@ -2579,15 +2582,15 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
             sigmaEta = getColNum(5)->rmsOne;
 
             sz = ocList.size();
-            qDebug() << QString("\n\nocList:\n");
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n\nocList:\n");
             for(i=0; i<sz; i++)
             {
-                qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
                 s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
             }
 
-            qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
-            qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
             s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
             s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
@@ -2595,7 +2598,7 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
             maxOCKsi = sigmaMul*sigmaKsi;
             maxOCEta = sigmaMul*sigmaEta;
 
-            qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
             s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
 
 
@@ -2604,7 +2607,7 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
             {
                 if((fabs(meanRa-ocList[i]->ocRaCosDe)>maxOCKsi)||(fabs(meanDec-ocList[i]->ocDe)>maxOCEta))
                 {
-                    qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
                     s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
                     if(rejList!=NULL) rejList->append(ocList.at(i));
                     ocList.removeAt(i);
@@ -2612,7 +2615,7 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
             }
             num1 = ocList.size();
 
-            qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
             s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
 
@@ -2695,8 +2698,8 @@ int eqFile::countMM(int fp, int ft, int vflag)
         lsm(2, sz, Zy, C, Y, uweY, Dy, Weights);
         rnX = rnY = sz;
 */
-        //qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
-        //qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
         uZx[0] = sqrt(uweX*Dx[0]);
         uZx[1] = sqrt(uweX*Dx[3]);
         uZy[0] = sqrt(uweY*Dy[0]);
@@ -2766,11 +2769,11 @@ void eqFile::findSeries(QList <eqFile*> *eqList)
         dt0 = dt1;
         timeC = ocList.at(i)->MJday;
         dt1 = timeC-timeT;
-        qDebug() << QString("timeC= %1\tdt0= %2\tdt1= %3\n").arg(timeC, 12, 'f', 5).arg(dt0).arg(dt1);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("timeC= %1\tdt0= %2\tdt1= %3\n").arg(timeC, 12, 'f', 5).arg(dt0).arg(dt1);
         //if(dt1>1.5*dt0)
         if(dt1>dtMax)
         {
-            qDebug() << QString("\nnew serie\n");
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnew serie\n");
             eqTemp = new eqFile;
             *eqList << eqTemp;
             j++;
@@ -2780,7 +2783,7 @@ void eqFile::findSeries(QList <eqFile*> *eqList)
         timeT = timeC;
     }
 
-    qDebug() << QString("eqList size: %1\n").arg(eqList->size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("eqList size: %1\n").arg(eqList->size());
 }
 
 void eqFile::removeMes(QString mesureTimeCode)
@@ -2798,7 +2801,7 @@ void eqFile::getSeriesRec(eqSeriesRec *eqsRec)
     countCols("0,1,2,3,4,5,6,13,14,15,16,17,18,19");
     sortColList();
     countMM();
-    qDebug() << "mmRec: " << mmRec << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mmRec: " << mmRec << "\n";
 
     colRec* cRec;
 
@@ -2845,12 +2848,12 @@ void eqFile::getSeriesRec(eqSeriesRec *eqsRec)
     cRec = getColNum(19);
     if(cRec!=NULL) eqsRec->expTime = cRec->mean;
 
-    qDebug() << QString("\n19 mean\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n19 mean\n");
 
     if(mmRec!=NULL)
     {
-        qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
-        qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
         eqsRec->ocRaMM = grad_to_mas(eqsRec->ra - mmRec->xTm);
         eqsRec->ocDeMM = grad_to_mas(eqsRec->de - mmRec->yTm);
     }
@@ -2885,7 +2888,7 @@ void eqFile::getSeriesRec(ocRec *eqsRec)
     countCols("0,1,2,3,4,5,6,13,14,15,16,17,18,19");
     sortColList();
     countMM();
-    qDebug() << "mmRec: " << mmRec << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mmRec: " << mmRec << "\n";
 
     colRec* cRec;
 
@@ -2946,12 +2949,12 @@ void eqFile::getSeriesRec(ocRec *eqsRec)
     if(cRec!=NULL) eqsRec->expTime = cRec->mean;
     else eqsRec->expTime = 0.0;
 
-    qDebug() << QString("\n19 mean\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n19 mean\n");
 /*
     if(mmRec!=NULL)
     {
-        qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
-        qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
         eqsRec->ocRaMM = grad_to_mas(eqsRec->ra - mmRec->xTm);
         eqsRec->ocDeMM = grad_to_mas(eqsRec->de - mmRec->yTm);
     }
@@ -3003,7 +3006,7 @@ void residualFile::init(const char *fname)
 
 {
 //	resList.clear();
-    qDebug() << "\nresidualFile::init: " << fname << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nresidualFile::init: " << fname << "\n";
 	clear();
 	fName.clear();
 	fName.insert(0, fname);
@@ -3019,7 +3022,7 @@ void residualFile::init(const char *fname)
 	{
 		dataLine = dataStream.readLine();
 		
-//		//qDebug() << "\nline \#\n";
+//		//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline \#\n";
 		rr = new residualsRec(dataLine);
 //		ocr->s2rec(dataLine);
 		resList << rr;
@@ -3077,9 +3080,9 @@ void residualFile::detStat()
 
 void residualFile::remSigma(double sg)
 {
-    qDebug() << QString("remSigma: %1\n").arg(sg);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigma: %1\n").arg(sg);
     int i, recNum, recNum0;
-    qDebug() << QString("stars before %1\n").arg(resList.size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars before %1\n").arg(resList.size());
     if(resList.size()==0) return;
 
     double maxResKsi, maxResEta, resKsi, resEta;
@@ -3088,12 +3091,12 @@ void residualFile::remSigma(double sg)
         recNum = resList.size();
         detStat();
 
-        qDebug() << QString("Ksi: %1\t%2\t%3\n").arg(meanKsi).arg(rmsOneKsi).arg(rmsMeanKsi);
-        qDebug() << QString("Eta: %1\t%2\t%3\n").arg(meanEta).arg(rmsOneEta).arg(rmsMeanEta);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Ksi: %1\t%2\t%3\n").arg(meanKsi).arg(rmsOneKsi).arg(rmsMeanKsi);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Eta: %1\t%2\t%3\n").arg(meanEta).arg(rmsOneEta).arg(rmsMeanEta);
         maxResKsi = sg*rmsOneKsi;
         maxResEta = sg*rmsOneEta;
-        qDebug() << QString("maxKsi: %1\n").arg(maxResKsi);
-        qDebug() << QString("maxEta: %1\n").arg(maxResEta);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("maxKsi: %1\n").arg(maxResKsi);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("maxEta: %1\n").arg(maxResEta);
         for(i=recNum-1; i>0; i--)
         {
             //resKsi = fabs(meanKsi - resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)));
@@ -3102,15 +3105,15 @@ void residualFile::remSigma(double sg)
 
             if(resKsi>maxResKsi||resEta>maxResEta)
             {
-                qDebug() << QString("remove oc: %1\t%2\n").arg(resKsi).arg(resEta);
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remove oc: %1\t%2\n").arg(resKsi).arg(resEta);
                 resList.removeAt(i);
             }
         }
 
         recNum0 = resList.size();
-        qDebug() << QString("num: %1\tnum0: %2\n").arg(recNum).arg(recNum0);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("num: %1\tnum0: %2\n").arg(recNum).arg(recNum0);
     }while(recNum0>10&&(abs(recNum-recNum0)>(0.05*recNum)));
-    qDebug() << QString("stars remain %1\n").arg(resList.size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars remain %1\n").arg(resList.size());
 }
 
 void residualFile::saveAs(QString fname)
@@ -3150,7 +3153,7 @@ void objResidualFile::clear()
 void objResidualFile::init(QString fname)
 {
 //	resList.clear();
-    qDebug() << "\nresidualFile::init: " << fname << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nresidualFile::init: " << fname << "\n";
         clear();
         fName.clear();
         fName.insert(0, fname);
@@ -3166,7 +3169,7 @@ void objResidualFile::init(QString fname)
         {
                 dataLine = dataStream.readLine();
 
-//		//qDebug() << "\nline \#\n";
+//		//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline \#\n";
                 rr = new objResRec(dataLine);
 //		ocr->s2rec(dataLine);
                 ocList << rr;
@@ -3228,7 +3231,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
     //QFile s3File("s3file.txt");
     //s3File.open(QIODevice::Append);
     //QTextStream s3Stm(&s3File);
-    qDebug() << "\ndo3Sigma\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ndo3Sigma\n";
     //s3Stm << "\ndo3Sigma\n";
     if(num1<3) return;
 
@@ -3247,15 +3250,15 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
             sigmaEta = deCol.rmsOne;
 
             sz = ocList.size();
-            qDebug() << QString("\n\nocList:\n");
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n\nocList:\n");
             for(i=0; i<sz; i++)
             {
-                qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
                 //s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC, 7, 'f', 1).arg(ocList[i]->etaOC, 7, 'f', 1);
             }
 
-            qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
-            qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
             //s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
             //s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
@@ -3263,7 +3266,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
             maxOCKsi = sigmaMul*sigmaKsi;
             maxOCEta = sigmaMul*sigmaEta;
 
-            qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
             //s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
 
 
@@ -3272,7 +3275,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
             {
                 if((fabs(meanRa-ocList[i]->ksiOC)>maxOCKsi)||(fabs(meanDec-ocList[i]->etaOC)>maxOCEta))
                 {
-                    qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
                     //s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ksiOC).arg(ocList[i]->etaOC);
                     if(rejList!=NULL) rejList->append(ocList.at(i));
                     ocList.removeAt(i);
@@ -3280,7 +3283,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
             }
             num1 = ocList.size();
 
-            qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
             //s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
 
@@ -3291,7 +3294,7 @@ void objResidualFile::do3sigma(double proofP, double sigmaMul, QList <objResRec*
 
 int objResidualFile::countCols(QList <colRec*> *colList, QString colNums)
 {
-    qDebug() << QString("\nobjResidualFile::countCols: %1\n").arg(colNums);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nobjResidualFile::countCols: %1\n").arg(colNums);
     QStringList columns = colNums.split(",");
     int i, sz;
 if(ocList.size()<2) return 1;
@@ -3311,7 +3314,7 @@ if(ocList.size()<2) return 1;
     }
 
     //sz1 = cols.size();
-    qDebug() << QString("cols.size= %1\n").arg(sz);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("cols.size= %1\n").arg(sz);
 
     return 0;
 }
@@ -3322,7 +3325,7 @@ int objResidualFile::getColNum(colRec* cRec, int cNum)
     double val;
 
     sz = ocList.size();
-    qDebug() << QString("ocList.size= %1\n").arg(sz);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocList.size= %1\n").arg(sz);
     double *vect = new double[sz];
     cRec->colNum = cNum;
     int num = 0;
@@ -3393,7 +3396,7 @@ int objResidualFile::getColNum(colRec* cRec, int cNum)
                 //cols[k]->num++;
                 break;
         default:
-                qDebug() << "\nobjResidualFile::countCols: Wrong col num\n";
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nobjResidualFile::countCols: Wrong col num\n";
                 return 1;
 
             }
@@ -3485,8 +3488,8 @@ int objResidualFile::countMoveModel(moveModelRec* mmRec, int fp, int ft, int vfl
     lsm(2, sz, Zy, C, Y, uweY, Dy, Weights);
     rnX = rnY = sz;
 */
-    //qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
-    //qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
     uZx[0] = sqrt(uweX*Dx[0]);
     uZx[1] = sqrt(uweX*Dx[3]);
     uZy[0] = sqrt(uweY*Dy[0]);
@@ -3525,7 +3528,7 @@ void objResidualFile::getSeriesRec(objResRec *orsRec)
     countCols("0,1,2,3,4,5,6,7,8,9,10,11,12,13,14");
     sortColList();
     //countMM();
-    //qDebug() << "mmRec: " << mmRec << "\n";
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "mmRec: " << mmRec << "\n";
 
     colRec* cRec;
 
@@ -3590,12 +3593,12 @@ void objResidualFile::getSeriesRec(objResRec *orsRec)
     if(cRec!=NULL) orsRec->Dpixmag = cRec->mean;
     else orsRec->Dpixmag = 0.0;
 
-    //qDebug() << QString("\n19 mean\n");
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n19 mean\n");
 /*
     if(mmRec!=NULL)
     {
-        qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
-        qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
         eqsRec->ocRaMM = grad_to_mas(eqsRec->ra - mmRec->xTm);
         eqsRec->ocDeMM = grad_to_mas(eqsRec->de - mmRec->yTm);
     }
@@ -3829,21 +3832,23 @@ void objSeries::getMean(QList <objResRec*> *ocList)
 
 void objSeries::getMoveModel(QList <ocRec*> *ocList)
 {
-    int i, sz;
+    int i, sz, sz1;
     objResidualFile* orTemp;
     sz = serieList.size();
     ocRec *ocR;
 
     moveModelRec mmRec;
     colRec cRec;
+    objResRec orRec;
+    QList <colRec*> colList;
 
     for(i=0; i<sz; i++)
     {
         orTemp = serieList.at(i);
-
+        ocR = new ocRec;
         if(!orTemp->countMoveModel(&mmRec))
         {
-            ocR = new ocRec;
+
             ocR->MJday = mmRec.Tm;
             ocR->ra = mmRec.xTm;
             ocR->de = mmRec.yTm;
@@ -3855,8 +3860,26 @@ void objSeries::getMoveModel(QList <ocRec*> *ocList)
                 ocR->mag0 = cRec.mean;
             }
 
-            ocList->append(ocR);
+
         }
+        else if(!orTemp->countCols(&colList, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14"))
+        {
+            sz1 = colList.size();
+
+            if(sz1)
+            {
+
+                orRec.fromColList(colList);
+                orRec.toOcRec(ocR);
+
+            }
+        }
+        else
+        {
+            orTemp->ocList.at(0)->toOcRec(ocR);
+        }
+
+        ocList->append(ocR);
     }
 }
 
@@ -3886,7 +3909,7 @@ int objResidualFile::setColRec(colRec* cRec)
 {
         colRec *pRec;
         int rpos = getColRecNum(cRec->colNum);
-//	//qDebug() << "rpos= " << rpos << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "rpos= " << rpos << "\n";
         if(rpos==-1)
         {
                 pRec = new colRec;
@@ -4080,7 +4103,7 @@ int objResidualFile::countCols(QString colNums)
                     cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
                     str.clear();
                     cols[k]->rec2s(&str);
-//                    //qDebug() << k << ": " << str << "\n";
+//                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
                     setColRec(cols[k]);
             }
 
@@ -4127,7 +4150,7 @@ errBudgetFile::~errBudgetFile()
 
 void errBudgetFile::init(const char *fname)
 {
-    qDebug() << "\nerrBudgetFile::init: " << fname << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nerrBudgetFile::init: " << fname << "\n";
 	errList.clear();
 
         fName.clear();
@@ -4193,7 +4216,7 @@ int mpephRec::fromString(QString inStr)
     QString elS;
     QStringList opers;
     opers = inStr.split("|");
-    //qDebug() << QString("opers.size()= %1\n").arg(opers.size());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers.size()= %1\n").arg(opers.size());
     if(opers.size()<11) return 1;
     elS = opers.at(0);ra = hms_to_deg(elS, ":");
     elS = opers.at(1);de = damas_to_deg(elS, ":");
@@ -4206,7 +4229,7 @@ int mpephRec::fromString(QString inStr)
     elS = opers.at(5);elong=elS.toDouble();//elongation [deg]
     elS = opers.at(9);num=QString(elS);//object number
     elS = opers.at(10);name=QString(elS);//object name
-    ////qDebug() << "end\n";
+    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << "end\n";
     return 0;
 }
 
@@ -4233,7 +4256,7 @@ int skybotRec::fromString(QString iStr)
     QString elS;
     QStringList opers;
     opers = iStr.split("|");
-    //qDebug() << QString("opers.size()= %1\n").arg(opers.size());
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers.size()= %1\n").arg(opers.size());
     if(opers.size()<21) return 1;
     Num = opers.at(0).simplified();
     Name = opers.at(1).simplified();
@@ -4338,7 +4361,7 @@ void sstarFile::clear()
 
 int sstarFile::init(QString fileName)
 {
-    qDebug() << "\nsstarFile::init:" << fileName << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsstarFile::init:" << fileName << "\n";
     QFile inFile(fileName);
     inFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream indata(&inFile);
@@ -4350,7 +4373,7 @@ int sstarFile::init(QString fileName)
         tRec->s2rec(indata.readLine());
         ocList << tRec;
     }
-    qDebug() << QString("\nocList.size= %1\n").arg(ocList.size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nocList.size= %1\n").arg(ocList.size());
 }
 
 void sstarFile::save()
@@ -4419,7 +4442,7 @@ int sstarFile::setColRec(colRec* cRec)
 {
         colRec *pRec;
         int rpos = getColRecNum(cRec->colNum);
-//	//qDebug() << "rpos= " << rpos << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "rpos= " << rpos << "\n";
         if(rpos==-1)
         {
                 pRec = new colRec;
@@ -4613,7 +4636,7 @@ int sstarFile::countCols(QString colNums)
                     cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
                     str.clear();
                     cols[k]->rec2s(&str);
-//                    //qDebug() << k << ": " << str << "\n";
+//                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
                     setColRec(cols[k]);
             }
 
@@ -4671,7 +4694,7 @@ void sstarFile::do3sigma(double proofP, double sigmaMul)
             sigmaKsi = getColNum(6)->rmsOne;
             sigmaEta = getColNum(7)->rmsOne;
 
-            //qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi).arg(sigmaEta);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi).arg(sigmaEta);
 
             maxOCKsi = sigmaMul*sigmaKsi;
             maxOCEta = sigmaMul*sigmaEta;
@@ -4684,7 +4707,7 @@ void sstarFile::do3sigma(double proofP, double sigmaMul)
             }
             num1 = ocList.size();
 
-            qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
 
     }while(abs(num0-num1)>(proofP*num1));
@@ -4775,8 +4798,8 @@ int sstarFile::countMM(int fp, int ft, int vflag)
         lsm(2, sz, Zy, C, Y, uweY, Dy, Weights);
         rnX = rnY = sz;
 /
-        //qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
-        //qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
         uZx[0] = sqrt(uweX*Dx[0]);
         uZx[1] = sqrt(uweX*Dx[3]);
         uZy[0] = sqrt(uweY*Dy[0]);
@@ -4832,7 +4855,7 @@ reductionStat::~reductionStat()
 
 int reductionStat::init(QString *ebFileName, QString *resFileName, QString *objFileName)
 {
-    qDebug() << "\nreductionStat::init\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nreductionStat::init\n";
     if(ebFileName!=NULL)
     {
         //ebFile = new errBudgetFile;
@@ -4871,7 +4894,7 @@ int reductionStat::init(QString *ebFileName, QString *resFileName, QString *objF
 
 void reductionStat::getMeasurementsList(QStringList mesCodeList, reductionStat *selRed)
 {
-    qDebug() << QString("reductionStat::getMeasurementsList\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("reductionStat::getMeasurementsList\n");
     int i, szi;
     szi = mesCodeList.size();
     measurementRec* mesRec;
@@ -4892,7 +4915,7 @@ void reductionStat::getMeasurementsList(QStringList mesCodeList, reductionStat *
 
 void reductionStat::getMeasurementsList(QList <measurementRec*> mesList, reductionStat *selRed)
 {
-    qDebug() << QString("reductionStat::getMeasurementsList\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("reductionStat::getMeasurementsList\n");
     int i, szi;
     szi = mesList.size();
     measurementRec* mesRec;
@@ -4913,7 +4936,7 @@ void reductionStat::getMeasurementsList(QList <measurementRec*> mesList, reducti
 
 void reductionStat::saveMesList(QString ebFileName, QString resFileName, QString objFileName)
 {
-    qDebug() << QString("reductionStat::saveMesList\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("reductionStat::saveMesList\n");
     ebFile->saveAs(ebFileName);
     resFile->saveAs(resFileName);
     if(objFileName!="") objFile->saveAs(objFileName);
@@ -4937,7 +4960,7 @@ void reductionStat::removeMesList(QStringList mesList)
 
 void reductionStat::findMeasurements()
 {
-    qDebug() << "\nreductionStat::findMeasurements\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nreductionStat::findMeasurements\n";
     int i, szi, j, szj;
     if(ebFile==NULL) return;
     szi = ebFile->errList.size();
@@ -4952,20 +4975,20 @@ void reductionStat::findMeasurements()
 
     for(i=0; i<szi; i++)
     {
-        //qDebug() << QString("i= %1\n").arg(i);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("i= %1\n").arg(i);
         sRec = new measurementRec;
         eRec = ebFile->errList.at(i);
         sRec->errBud = new errBudgetRec;
         sRec->errBud->copy(*eRec);
         sRec->mesureTimeCode = sRec->errBud->mesureTimeCode;
-        //qDebug() << QString("mesureTimeCode: %1\n").arg(sRec->mesureTimeCode);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mesureTimeCode: %1\n").arg(sRec->mesureTimeCode);
         if(resFile!=NULL)
         {
             szj = resFile->resList.size();
-            //qDebug() << QString("resFileSize = %1\n").arg(szj);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resFileSize = %1\n").arg(szj);
             for(j=0; j<szj; j++)
             {
-                //qDebug() << QString("j= %1\n").arg(j);
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("j= %1\n").arg(j);
                 if(resFile->resList.at(j)->mesureTimeCode==sRec->mesureTimeCode)
                 {
                     rRec = new residualsRec;
@@ -4977,16 +5000,16 @@ void reductionStat::findMeasurements()
         if(objFile!=NULL)
         {
             szj = objFile->ocList.size();
-            //qDebug() << QString("mpeFile = %1\n").arg(szj);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mpeFile = %1\n").arg(szj);
             for(j=0; j<szj; j++)
             {
                 if(objFile->ocList.at(j)->mesureTimeCode==sRec->mesureTimeCode)
                 {
                     objRec = new objResRec;
-                    //qDebug() << "copying...\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "copying...\n";
                     objRec->copy(*objFile->ocList.at(j));
                     sRec->objList << objRec;
-                    //qDebug() << "copyed...\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "copyed...\n";
                 }
             }
         }
@@ -4994,27 +5017,27 @@ void reductionStat::findMeasurements()
         if(mpeFile!=NULL)
         {
             szj = mpeFile->ocList.size();
-            //qDebug() << QString("mpeFile = %1\n").arg(szj);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mpeFile = %1\n").arg(szj);
             for(j=0; j<szj; j++)
             {
                 if(mpeFile->ocList.at(j)->mesureTimeCode==sRec->mesureTimeCode)
                 {
                     oRec = new ocRec;
-                    //qDebug() << "copying...\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "copying...\n";
                     oRec->copy(*mpeFile->ocList.at(j));
                     sRec->mpeList << oRec;
-                    //qDebug() << "copyed...\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "copyed...\n";
                 }
             }
         }
         if(ssFile!=NULL)
         {
             szj = ssFile->ocList.size();
-            //qDebug() << QString("ssFile = %1\n").arg(szj);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ssFile = %1\n").arg(szj);
             for(j=0; j<szj; j++)
             {
-                //qDebug() << QString("j= %1\n").arg(j);
-                //qDebug() << QString("ssFile.mesureTimeCode: %1\n").arg(ssFile->ocList.at(j)->mesureTimeCode);
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("j= %1\n").arg(j);
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ssFile.mesureTimeCode: %1\n").arg(ssFile->ocList.at(j)->mesureTimeCode);
                 if(ssFile->ocList.at(j)->mesureTimeCode.lastIndexOf(sRec->mesureTimeCode)==0)
                 {
                     ssRec = new sstarRes;
@@ -5024,7 +5047,7 @@ void reductionStat::findMeasurements()
             }
         }
         */
-        //qDebug() << QString("sRec->sstarList = %1\n").arg(sRec->sstarList.size());
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("sRec->sstarList = %1\n").arg(sRec->sstarList.size());
         msRec = new measurementStatRec;
         sRec->detStat(msRec);
         mesList << sRec;
@@ -5072,7 +5095,7 @@ void measurementRec::detStat(measurementStatRec *stRec)
 /*
 void measurementRec::detMarksList(QList <marksP*> u3List)
 {
-    qDebug() << "findCloserMarks\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "findCloserMarks\n";
     int i, j, szU3, szRes;
     marksP *mkNew;
 
@@ -5081,20 +5104,20 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
 
 //    mgRes->clearMarks();
 //    mgRes->ctype = mgEkv->ctype;
- //   qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
+ //   if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
     szU3 = u3List.size();
     szRes = resList.size();
     double dist, distMin;//, distMax;
     int posMin;
 
- //   qDebug() << QString("mgEkv size = %1\n").arg(mgEkv->marks.size());
-  //  qDebug() << QString("mgIP size = %1\n").arg(mgIP->marks.size());
+ //   if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mgEkv size = %1\n").arg(mgEkv->marks.size());
+  //  if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mgIP size = %1\n").arg(mgIP->marks.size());
 
     double dMax = mas_to_grad(1);
 
     for(i=0; i<szRes; i++)
     {
-   //     qDebug() << QString("i: %1\n").arg(i);
+   //     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("i: %1\n").arg(i);
         distMin = dMax;
         posMin = -1;
         //szE = mgEkv->marks.size();
@@ -5102,53 +5125,53 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
 
         for(j=0; j<szU3; j++)
         {
-   //         qDebug() << QString("j: %1\n").arg(j);
-//            qDebug() << QString("resList[i]->ra: %1\tu3List[j]->u3Rec->ra: %2\n").arg(resList[i]->ra).arg(u3List[j]->u3Rec->ra);
-//            qDebug() << QString("resList[i]->de: %1\tu3List[j]->u3Rec->dec: %2\n").arg(resList[i]->de).arg(u3List[j]->u3Rec->dec);
+   //         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("j: %1\n").arg(j);
+//            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resList[i]->ra: %1\tu3List[j]->u3Rec->ra: %2\n").arg(resList[i]->ra).arg(u3List[j]->u3Rec->ra);
+//            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resList[i]->de: %1\tu3List[j]->u3Rec->dec: %2\n").arg(resList[i]->de).arg(u3List[j]->u3Rec->dec);
             dist = sqrt(pow(resList[i]->ra - u3List[j]->mEkv[0], 2.0) + pow(resList[i]->de - u3List[j]->mEkv[1], 2.0));
-            //qDebug() << QString("dist= %1\n").arg(dist);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("dist= %1\n").arg(dist);
             if(dist<distMin)
             {
                 distMin = dist;
                 posMin = j;
             }
         }
-        qDebug() << QString("posMin: %1\tdistMin: %2\tdMax: %3\n").arg(posMin).arg(grad_to_mas(distMin)).arg(grad_to_mas(dMax));
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("posMin: %1\tdistMin: %2\tdMax: %3\n").arg(posMin).arg(grad_to_mas(distMin)).arg(grad_to_mas(dMax));
         if((posMin!=-1)&&(distMin<dMax))
         {
             mkNew = new marksP(OBJ_TYPE_UCAC3);
 
             mkNew->resRec = new residualsRec;
 
-   //         qDebug() << "mkNew: " << mkNew << ":";
+   //         if(REDSTAT_LOG_LEVEL>0) qDebug() << "mkNew: " << mkNew << ":";
             mkNew->copy(u3List.at(posMin));
             mkNew->resRec->copy(*resList.at(i));
-   /*         qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
-            qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
-            qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
+   /*         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
             /*mkNew->mEkv[0] = mgEkv->marks.at(posMin)->mEkv[0];
             mkNew->mEkv[1] = mgEkv->marks.at(posMin)->mEkv[1];
             mkNew->mEkv[2] = mgEkv->marks.at(posMin)->mEkv[2];
             mkNew->mTan[0] = mgEkv->marks.at(posMin)->mTanImg[0];
             mkNew->mTan[1] = mgEkv->marks.at(posMin)->mTanImg[1];*/
-     //       qDebug() << mkNew << "\n";
-            //qDebug() << "mgIP->marks.at(i)->P: " << mgIP->marks.at(i)->P << "\n";
+     //       if(REDSTAT_LOG_LEVEL>0) qDebug() << mkNew << "\n";
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << "mgIP->marks.at(i)->P: " << mgIP->marks.at(i)->P << "\n";
 //            mkNew->copyImg(*mgIP->marks.at(i));
-      /*      qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
-            qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
-            qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
+      /*      if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
          /*   mkNew->mTanImg[0] = mgIP->marks.at(i)->mTanImg[0];
             mkNew->mTanImg[1] = mgIP->marks.at(i)->mTanImg[1];
             mkNew->mTanImg[2] = mgIP->marks.at(i)->mTanImg[2];
            /
-           // qDebug() << QString("mkNew->mTanImg[2] = %1\n").arg(mkNew->mTanImg[2]);
-            //qDebug() << QString("mkNew->P[18] = %1\n").arg(mkNew->P[18]);
-            //qDebug() << "mkNew->P: " << mkNew->P << "\n";
+           // if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNew->mTanImg[2] = %1\n").arg(mkNew->mTanImg[2]);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNew->P[18] = %1\n").arg(mkNew->P[18]);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << "mkNew->P: " << mkNew->P << "\n";
             u3MarksList << mkNew;
             u3List.removeAt(posMin);
 
         }
-        //qDebug() << QString("mgIP->marks.removeAt(i)\n");
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mgIP->marks.removeAt(i)\n");
        // if(!is_empty) mgIP->marks.removeAt(i);
     }
 
@@ -5156,14 +5179,14 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
 */
 measurementRec* reductionStat::getMeasurement(QString mesTimeCode)
 {
-    //qDebug() << QString("\ngetMeasurement\n");
-    //qDebug() << QString("get mesureTimeCode: %1\n").arg(mesTimeCode);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\ngetMeasurement\n");
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("get mesureTimeCode: %1\n").arg(mesTimeCode);
     int i, sz0;
     sz0 = mesList.size();
-    //qDebug() << QString("mes size: %1\n").arg(sz0);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mes size: %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
-        //qDebug() << QString("mesureTimeCode: %1\n").arg(mesList.at(i)->mesureTimeCode);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mesureTimeCode: %1\n").arg(mesList.at(i)->mesureTimeCode);
         if(mesTimeCode==mesList.at(i)->mesureTimeCode) return mesList.at(i);
     }
     return NULL;
@@ -5171,7 +5194,7 @@ measurementRec* reductionStat::getMeasurement(QString mesTimeCode)
 
 measurementStatRec* reductionStat::getMeasurementStat(QString mesTimeCode)
 {
-    qDebug() << QString("\ngetMeasurementStat\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\ngetMeasurementStat\n");
     int i, sz0;
     sz0 = statList.size();
     for(i=0; i<sz0; i++)
@@ -5184,44 +5207,44 @@ measurementStatRec* reductionStat::getMeasurementStat(QString mesTimeCode)
 
 void plateStatRec::getMinUWE(measurementStatRec* minRec)
 {
-    qDebug() << "\ngetMinUWE\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE\n";
     int i, sz0;
     int posMin;
     double UWEmin, uwe;
 
-    qDebug()<< "minRec: " << minRec << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug()<< "minRec: " << minRec << "\n";
 
     UWEmin = 10000;
     posMin = -1;
     sz0 = mStatList.size();
-    qDebug() << QString("mStatList.size= %1\n").arg(sz0);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mStatList.size= %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
         uwe = sqrt(pow(mStatList.at(i)->UWEx, 2.0) + pow(mStatList.at(i)->UWEy, 2.0));
-        qDebug() << QString("uwe= %1\n").arg(uwe);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("uwe= %1\n").arg(uwe);
         if(uwe<UWEmin)
         {
             UWEmin = uwe;
             posMin = i;
         }
     }
-    qDebug() << QString("posMin= %1\n").arg(posMin);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("posMin= %1\n").arg(posMin);
     if(posMin!=-1)
     {
         minRec->copy(mStatList.at(posMin));
-        qDebug() << "\ngetMinUWE res: " << minRec << " " << minRec->mesureTimeCode << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE res: " << minRec << " " << minRec->mesureTimeCode << "\n";
     }
     else
     {
         minRec = NULL;
-        qDebug() << "\ngetMinUWE res: " << minRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE res: " << minRec << "\n";
     }
 
 }
 
 int plateStatRec::getMinUWEpos()
 {
-    qDebug() << "\ngetMinUWE\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE\n";
     int i, sz0;
     int posMin;
     double UWEmin, uwe;
@@ -5229,36 +5252,36 @@ int plateStatRec::getMinUWEpos()
     UWEmin = 10000;
     posMin = -1;
     sz0 = mStatList.size();
-    qDebug() << QString("mStatList.size= %1\n").arg(sz0);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mStatList.size= %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
         uwe = sqrt(pow(mStatList.at(i)->UWEx, 2.0) + pow(mStatList.at(i)->UWEy, 2.0));
-        qDebug() << QString("uwe= %1\n").arg(uwe);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("uwe= %1\n").arg(uwe);
         if(uwe<UWEmin)
         {
             UWEmin = uwe;
             posMin = i;
         }
     }
-    qDebug() << QString("posMin= %1\n").arg(posMin);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("posMin= %1\n").arg(posMin);
     return posMin;
     /*
     if(posMin!=-1)
     {
         minRec = mStatList.at(posMin);
-        qDebug() << "\ngetMinUWE res: " << minRec << " " << minRec->mesureTimeCode << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE res: " << minRec << " " << minRec->mesureTimeCode << "\n";
     }
     else
     {
         minRec = NULL;
-        qDebug() << "\ngetMinUWE res: " << minRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetMinUWE res: " << minRec << "\n";
     }
 */
 }
 
 int plateStatRec::getVersNamePos(QString versName)
 {
-    qDebug() << "\ngetVersNamePos\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ngetVersNamePos\n";
     int i, sz0;
     //int posMin;
     //double UWEmin, uwe;
@@ -5266,7 +5289,7 @@ int plateStatRec::getVersNamePos(QString versName)
     //UWEmin = 10000;
    // posMin = -1;
     sz0 = mStatList.size();
-    qDebug() << QString("mStatList.size= %1\n").arg(sz0);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mStatList.size= %1\n").arg(sz0);
     QString tVers;
     for(i=0; i<sz0; i++)
     {
@@ -5278,14 +5301,14 @@ int plateStatRec::getVersNamePos(QString versName)
         }
         /*
         uwe = sqrt(pow(mStatList.at(i)->UWEx, 2.0) + pow(mStatList.at(i)->UWEy, 2.0));
-        qDebug() << QString("uwe= %1\n").arg(uwe);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("uwe= %1\n").arg(uwe);
         if(uwe<UWEmin)
         {
             UWEmin = uwe;
             posMin = i;
         }*/
     }
-    //qDebug() << QString("posMin= %1\n").arg(posMin);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("posMin= %1\n").arg(posMin);
     return -1;
 }
 
@@ -5304,7 +5327,7 @@ void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* 
 
     //versName = msRec->originName.section(".", -1, -1);
     //if(versName=="aver") versName = msRec->originName.section(".", -2, -2);
-    qDebug() << QString("plateName: %1\tversName: %2\n").arg(plateName).arg(versName);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plateName: %1\tversName: %2\n").arg(plateName).arg(versName);
 
     dat2YMD(mjd2jd(mesRec->errBud->MJD), &year, &mth, &day);
     pyear = partOfYear(year, mth, day);
@@ -5329,7 +5352,7 @@ void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* 
 
 void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList)
 {
-    qDebug() << QString("saveReport0\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("saveReport0\n");
     int pMin, i, j, k, szi, szj, szRes;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5348,9 +5371,9 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        qDebug() << "msRec: " << msRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
         if(plSz==0)
         {
             dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
@@ -5360,19 +5383,19 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
         {
 
         //plStat.platesList.at(i)->getMinUWE(msRec);
-            qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
             if(isMinUWE)
             {
             pMin = platesList.at(i)->getMinUWEpos();
                 if(pMin!=-1)
-                //qDebug() << "msRec: " << msRec << "\n";
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
                 //if(msRec!=NULL)
                 {
                     msRec = platesList.at(i)->mStatList.at(pMin);
 
-                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
                     mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                    qDebug() << "mesRec: " << mesRec << "\n";
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
                     if(mesList!=NULL) mesList->append(mesRec);
 
                     appendRep0Rec(&dataStr, msRec, mesRec, plNameType);
@@ -5380,7 +5403,7 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
                     msRec->getVersName(&versName);
                     //versName = msRec->originName.section(".", -1, -1);
                     //if(versName=="aver") versName = msRec->originName.section(".", -2, -2);
-                    qDebug() << QString("plateName: %1\tversName: %2\n").arg(platesList.at(i)->plateName).arg(versName);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plateName: %1\tversName: %2\n").arg(platesList.at(i)->plateName).arg(versName);
 
                     dat2YMD(mjd2jd(mesRec->errBud->MJD), &year, &mth, &day);
                     pyear = partOfYear(year, mth, day);
@@ -5397,7 +5420,7 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
 
                     ///////////////////////////////
                     /*szRes = mesRec->resList.size();
-                    qDebug() << QString("szRes: %1\n").arg(szRes);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("szRes: %1\n").arg(szRes);
                     for(j=0; j<szRes; j++)
                     {
                         for(k=0; k<magEq.diapsNum-1; k++)
@@ -5425,9 +5448,9 @@ void platesStat::saveReport0(QString r0name, int isMinUWE, int plNameType, reduc
                 {
                     msRec = platesList.at(i)->mStatList.at(j);
 
-                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
                     mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                    qDebug() << "mesRec: " << mesRec << "\n";
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
                     if(mesList!=NULL) mesList->append(mesRec);
 
                     appendRep0Rec(&dataStr, msRec, mesRec, plNameType);
@@ -5447,9 +5470,9 @@ void platesStat::excludeMes(QStringList excMes)
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        qDebug() << "msRec: " << msRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
         if(plSz==0)
         {
             dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
@@ -5459,7 +5482,7 @@ void platesStat::excludeMes(QStringList excMes)
         {
 
         //plStat.platesList.at(i)->getMinUWE(msRec);
-            //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
 
 
             for(j=0; j<versNum; j++)
@@ -5467,19 +5490,19 @@ void platesStat::excludeMes(QStringList excMes)
                 pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
                 //if(pMin!=-1) break;
 
-                qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
 
 
                 if(pMin!=-1)
-                //qDebug() << "msRec: " << msRec << "\n";
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
                 //if(msRec!=NULL)
                 {
                     msRec = platesList.at(i)->mStatList.at(pMin);
 
-                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
                     if(excMes.contains(msRec->mesureTimeCode, Qt::CaseSensitive))
                     {
-                        qDebug() << QString("excluded\n");
+                        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("excluded\n");
                         pMin = -1;
                         continue;
                     }
@@ -5492,7 +5515,7 @@ void platesStat::excludeMes(QStringList excMes)
 
 void platesStat::dropObj(reductionStat rStat)
 {
-    qDebug() << "dropObj\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "dropObj\n";
     int i, j, szi, plSz;
     szi = platesList.size();
     measurementStatRec* msRec;
@@ -5500,7 +5523,7 @@ void platesStat::dropObj(reductionStat rStat)
     for(i=0; i<szi; i++)
     {
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
         for(j=plSz-1; j>=0; j--)
         {
             msRec = platesList.at(i)->mStatList.at(j);
@@ -5512,7 +5535,7 @@ void platesStat::dropObj(reductionStat rStat)
 
 void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesList)
 {
-    qDebug() << QString("selMinUWE\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("selMinUWE\n");
     int pMin, i, szi;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5525,9 +5548,9 @@ void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesLis
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        qDebug() << "msRec: " << msRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
 
 
         //plStat.platesList.at(i)->getMinUWE(msRec);
@@ -5537,9 +5560,9 @@ void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesLis
         {
             msRec = platesList.at(i)->mStatList.at(pMin);
 
-            qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
             mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-            qDebug() << "mesRec: " << mesRec << "\n";
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
             if(mesList!=NULL) mesList->append(mesRec);
 
 
@@ -5550,7 +5573,7 @@ void platesStat::selMinUWE(reductionStat *rStat, QList <measurementRec*> *mesLis
 
 void platesStat::selMesList(reductionStat *rStat, QList <measurementRec*> *mesList)
 {
-    qDebug() << QString("selMesList\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("selMesList\n");
     int i, szi, j, szj;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5565,9 +5588,9 @@ void platesStat::selMesList(reductionStat *rStat, QList <measurementRec*> *mesLi
         {
             msRec = platesList.at(i)->mStatList.at(j);
 
-            qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
             mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-            qDebug() << "mesRec: " << mesRec << "\n";
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
             if(mesList!=NULL) mesList->append(mesRec);
 
 
@@ -5580,7 +5603,7 @@ void platesStat::selMesList(reductionStat *rStat, QList <measurementRec*> *mesLi
 
 void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList <measurementRec*> *mesList, int minObj)
 {
-    qDebug() << QString("selVersSeq\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("selVersSeq\n");
     int pMin, i, j, szi;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5594,9 +5617,9 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        //qDebug() << "msRec: " << msRec << "\n";
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        //qDebug() << QString("plSz: %1").arg(plSz);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
         if(plSz==0)
         {
         //    dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
@@ -5606,7 +5629,7 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
         {
 
         //plStat.platesList.at(i)->getMinUWE(msRec);
-            //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
 
             isapp = 0;
             mo = minObj;
@@ -5619,21 +5642,21 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
                     pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
                     //if(pMin!=-1) break;
 
-                    qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
 
 
                     if(pMin!=-1)
-                    //qDebug() << "msRec: " << msRec << "\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
                     //if(msRec!=NULL)
                     {
                         msRec = platesList.at(i)->mStatList.at(pMin);
                         //msRec->ocNum
-                        qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
 
                         mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
                         osize = mesRec->objList.size();
                         if(osize<mo) continue;
-                        //qDebug() << "mesRec: " << mesRec << "\n";
+                        //if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
                         //if(detObj&&(mesRec->objList.size()==0)) break;
                         if(mesList!=NULL)
                         {
@@ -5660,7 +5683,7 @@ void platesStat::selVersSeq(QStringList versSeqList, reductionStat *rStat, QList
 
 void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType)
 {
-    qDebug() << QString("saveReport0\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("saveReport0\n");
     int pMin, i, j, k, szi, szj, szRes;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5675,7 +5698,7 @@ void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType
     msRec = new measurementStatRec;
 
     szi = mesList.size();
-    qDebug() << QString("mesList size: %1\n").arg(szi);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mesList size: %1\n").arg(szi);
     for(i=0; i<szi; i++)
     {
         mesRec = mesList[i];
@@ -5691,7 +5714,7 @@ void saveReport0(QString r0name, QList <measurementRec*> mesList, int plNameType
 
 void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList excMes, int plNameType, reductionStat *rStat, QList <measurementRec*> *mesList)
 {
-    qDebug() << QString("saveReport0Seq\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("saveReport0Seq\n");
     int pMin, i, j, k, szi, szj, szRes;
     measurementStatRec* msRec;
     measurementRec* mesRec;
@@ -5714,9 +5737,9 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
     for(i=0; i<szi; i++)
     {
         //msRec = NULL;
-        qDebug() << "msRec: " << msRec << "\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
         plSz=platesList.at(i)->mStatList.size();
-        qDebug() << QString("plSz: %1").arg(plSz);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plSz: %1").arg(plSz);
         if(plSz==0)
         {
             dataStr = QString("%1\n").arg(platesList.at(i)->plateName);
@@ -5726,7 +5749,7 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
         {
 
         //plStat.platesList.at(i)->getMinUWE(msRec);
-            //qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isMinUWE: %1").arg(isMinUWE);
 
 
             for(j=0; j<versNum; j++)
@@ -5734,24 +5757,24 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
                 pMin = platesList.at(i)->getVersNamePos(versSeqList.at(j));
                 //if(pMin!=-1) break;
 
-                qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("versName: %1\tpmin: %2\n").arg(versSeqList.at(j)).arg(pMin);
 
 
                 if(pMin!=-1)
-                //qDebug() << "msRec: " << msRec << "\n";
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << "msRec: " << msRec << "\n";
                 //if(msRec!=NULL)
                 {
                     msRec = platesList.at(i)->mStatList.at(pMin);
 
-                    qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("msRec mesureTimeCode: %1\n").arg(msRec->mesureTimeCode);
                     if(excMes.contains(msRec->mesureTimeCode, Qt::CaseSensitive))
                     {
-                        qDebug() << QString("excluded\n");
+                        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("excluded\n");
                         pMin = -1;
                         continue;
                     }
                     mesRec = rStat->getMeasurement(msRec->mesureTimeCode);
-                    qDebug() << "mesRec: " << mesRec << "\n";
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mesRec: " << mesRec << "\n";
                     if(mesList!=NULL) mesList->append(mesRec);
 
                     appendRep0Rec(&dataStr, msRec, mesRec, plNameType);
@@ -5760,7 +5783,7 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
                     msRec->getVersName(&versName);
                     //versName = msRec->originName.section(".", -1, -1);
                     //if(versName=="aver") versName = msRec->originName.section(".", -2, -2);
-                    qDebug() << QString("plateName: %1\tversName: %2\n").arg(platesList.at(i)->plateName).arg(versName);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plateName: %1\tversName: %2\n").arg(platesList.at(i)->plateName).arg(versName);
 
                     dat2YMD(mjd2jd(mesRec->errBud->MJD), &year, &mth, &day);
                     pyear = partOfYear(year, mth, day);
@@ -5777,7 +5800,7 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
 
                     ///////////////////////////////
                     /*szRes = mesRec->resList.size();
-                    qDebug() << QString("szRes: %1\n").arg(szRes);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("szRes: %1\n").arg(szRes);
                     for(j=0; j<szRes; j++)
                     {
                         for(k=0; k<magEq.diapsNum-1; k++)
@@ -5810,7 +5833,7 @@ void platesStat::saveReport0Seq(QString r0name, QString versSeq, QStringList exc
 
 void platesStat::init(QList <measurementStatRec*> mesStatList, int plNameType)
 {
-    qDebug() << "\nplatesStat::init\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init\n";
     QString plateName;
     int i, sz0, j, sz1;
     int isNew;
@@ -5837,7 +5860,7 @@ void platesStat::init(QList <measurementStatRec*> mesStatList, int plNameType)
            break;
         }
         */
-        //qDebug() << QString("plateName: %1\n").arg(plateName);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plateName: %1\n").arg(plateName);
         //plateName = mesStatList.at(i)->originName.section("\\", -2, -2);
         sz1 = platesList.size();
         for(j=0; j<sz1; j++)
@@ -5853,24 +5876,24 @@ void platesStat::init(QList <measurementStatRec*> mesStatList, int plNameType)
         {
             plRec = new plateStatRec;
             plRec->plateName = plateName.toUpper();
-            //qDebug() << QString("new plate: %1\n").arg(plRec->plateName);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("new plate: %1\n").arg(plRec->plateName);
             plRec->mStatList << mesStatList.at(i);
             platesList << plRec;
         }
     }
 
-    qDebug() << "\nplatesStat::init ended\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init ended\n";
 }
 
 void platesStat::initPlatesNamesFile(QString plnFileName)
 {
-    qDebug() << "\ninitPlatesNamesFile\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ninitPlatesNamesFile\n";
     //QTextCodec *codec1 = QTextCodec::codecForName("KOI8-R");
     //Q_ASSERT( codec1 );
     QFile pnFile(plnFileName);
     if(!pnFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "\npnFile not open\n";
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << "\npnFile not open\n";
         return;
     }
     QTextStream pnStream(&pnFile);
@@ -5880,7 +5903,7 @@ void platesStat::initPlatesNamesFile(QString plnFileName)
     {
         dStr = pnStream.readLine();
         plName = dStr.section(" ", 0, 0);
-        qDebug() << QString("plName: %1\n").arg(plName);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("plName: %1\n").arg(plName);
         pushPlateName(plName);
     }
 }
@@ -5929,7 +5952,7 @@ void measurementStatRec::copy(measurementStatRec *source)
 ///////////////////////////////////
 void objectsStat::init(reductionStat *redStat, int plNameType)
 {
-    qDebug() << "\nplatesStat::init\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init\n";
     //QString plateName;
     int i, sz0, k, sz2;
     int isNew;
@@ -5938,12 +5961,12 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
     //measurementStatRec *msRec;
 
     sz2 = redStat->objFile->ocList.size();
-    qDebug() << QString("objFile.size= %1\n").arg(sz2);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("objFile.size= %1\n").arg(sz2);
     for(k=0; k<sz2; k++)
     {
         isNew = 1;
         sz0 = objList.size();
-        //qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
         for(i=0; i<sz0; i++)
         {
             if(QString::compare(redStat->objFile->ocList.at(k)->name, objList.at(i)->objName, Qt::CaseSensitive)==0)
@@ -5968,17 +5991,17 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
     }
 /*
     sz2 = redStat->ssFile->ocList.size();
-    qDebug() << QString("ssFile.size= %1\n").arg(sz2);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ssFile.size= %1\n").arg(sz2);
     for(k=0; k<sz2; k++)
     {
 
         isNew = 1;
         sz0 = objList.size();
-        qDebug() << QString("objList sz0= %1\n").arg(sz0);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("objList sz0= %1\n").arg(sz0);
         for(i=0; i<sz0; i++)
         {
-            //qDebug() << QString("sz2= %1\n").arg(redStat.ssFile->ocList.size());
-            //qDebug() << QString("k= %1\ti= %2\n").arg(k).arg(i);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("sz2= %1\n").arg(redStat.ssFile->ocList.size());
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("k= %1\ti= %2\n").arg(k).arg(i);
             if(QString::compare(redStat->ssFile->ocList.at(k)->lspmName, objList.at(i)->objName)==0)
             {
                 isNew = 0;
@@ -5991,7 +6014,7 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
                 break;
             }
         }
-        //qDebug() << QString("isNew = %1\n").arg(isNew);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isNew = %1\n").arg(isNew);
         if(isNew)
         {
             objStat = new objStatRec;
@@ -6006,13 +6029,13 @@ void objectsStat::init(reductionStat *redStat, int plNameType)
     }
 */
     sz0 = objList.size();
-    qDebug() << QString("objList.size= %1\n").arg(sz0);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("objList.size= %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
         objList.at(i)->init(plNameType);
     }
 
-    qDebug() << "\nobjStat::init ended\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nobjStat::init ended\n";
 }
 
 void objStatRec::init(int plNameType)
@@ -6023,7 +6046,7 @@ void objStatRec::init(int plNameType)
 
 void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*> *rejList, double pfc)
 {
-    qDebug() << "objStatRec::do3Sigma\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "objStatRec::do3Sigma\n";
     double *vectx, *vecty;
     int i, j;
     int sz0, sz1;
@@ -6036,7 +6059,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
     colRec *cRecRa = new colRec;
     colRec *cRecDe = new colRec;
 
-    qDebug() << QString("objName: %1\n").arg(objName);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("objName: %1\n").arg(objName);
 
     sz0 = mStatList.size();
  /*   for(i=0; i<sz0; i++)
@@ -6047,7 +6070,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
         //sstarList << mesR->sstarList;
     }*/
     sz1 = objList.size();
-    qDebug() << QString("mpeList.size: %1\n").arg(sz1);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mpeList.size: %1\n").arg(sz1);
     if(sz1>3)
     {
         vectx = new double[sz1];
@@ -6061,27 +6084,27 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
                 vectx[i] = objList.at(i)->ksiOC;
                 vecty[i] = objList.at(i)->etaOC;
                 objList.at(i)->rec2s(&tstr);
-                //qDebug() << tstr << "\n";
+                //if(REDSTAT_LOG_LEVEL>0) qDebug() << tstr << "\n";
 
             }
             countColStat(cRecRa, vectx, sz0);
             countColStat(cRecDe, vecty, sz0);
 
             cRecRa->rec2s(&tstr);
-            qDebug() << QString("statRa: %1\n").arg(tstr);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("statRa: %1\n").arg(tstr);
             cRecDe->rec2s(&tstr);
-            qDebug() << QString("statDe: %1\n").arg(tstr);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("statDe: %1\n").arg(tstr);
 
             maxOcX = cRecRa->rmsOne*sigma;
             maxOcY = cRecDe->rmsOne*sigma;
 
-            qDebug() << QString("maxOcX: %1\tmaxOcY= %2\n").arg(maxOcX).arg(maxOcY);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("maxOcX: %1\tmaxOcY= %2\n").arg(maxOcX).arg(maxOcY);
 
             for(i=sz0-1; i>=0; i--)
             {
                 if((fabs(cRecRa->mean-objList.at(i)->ksiOC)>maxOcX)||(fabs(cRecDe->mean-objList.at(i)->etaOC)>maxOcY))
                 {
-                    qDebug() << QString("remove mes: %1\tocX: %2\tocY: %3\n").arg(objList.at(i)->mesureTimeCode).arg(objList.at(i)->ksiOC).arg(objList.at(i)->etaOC);
+                    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remove mes: %1\tocX: %2\tocY: %3\n").arg(objList.at(i)->mesureTimeCode).arg(objList.at(i)->ksiOC).arg(objList.at(i)->etaOC);
                     if(rStat!=NULL) rStat->removeMes(objList.at(i)->mesureTimeCode);
                     removeMes(objList.at(i)->mesureTimeCode);
                     if(rejList!=NULL) *rejList << objList.at(i);
@@ -6096,7 +6119,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
     }
 /*
     sz1 = sstarList.size();
-    qDebug() << QString("sstarList.size: %1\n").arg(sz1);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("sstarList.size: %1\n").arg(sz1);
     if(sz1>3)
     {
         vectx = new double[sz1];
@@ -6110,7 +6133,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
                 vectx[i] = sstarList.at(i)->ksiOC;
                 vecty[i] = sstarList.at(i)->etaOC;
                 sstarList.at(i)->rec2s(&tstr);
-                qDebug() << tstr << "\n";
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << tstr << "\n";
             }
             countColStat(cRecRa, vectx, sz0);
             countColStat(cRecDe, vecty, sz0);
@@ -6135,7 +6158,7 @@ void objStatRec::do3Sigma(reductionStat *rStat, double sigma, QList <objResRec*>
     }
 */
 
-    qDebug() << "END objStatRec::do3Sigma\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "END objStatRec::do3Sigma\n";
 }
 
 void objStatRec::removeMes(QString mesTimeCode)
@@ -6182,7 +6205,7 @@ void objStatRec::getSstarList(reductionStat *rStat, QList <sstarRes*> *sstarList
 /*
 void eqPlatesStat::init(reductionStat *redStat, int plNameType)
 {
-    qDebug() << "\nplatesStat::init\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init\n";
     //QString plateName;
     int i, sz0, j, sz1, k, sz2;
     int isNew;
@@ -6194,7 +6217,7 @@ void eqPlatesStat::init(reductionStat *redStat, int plNameType)
     {
         isNew = 1;
         sz0 = asterList.size();
-        //qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
         for(i=0; i<sz0; i++)
         {
             if(redStat->mpeFile->ocList.at(k)->name==asterList.at(i)->asterName)
@@ -6214,7 +6237,7 @@ void eqPlatesStat::init(reductionStat *redStat, int plNameType)
         }
     }
 
-    qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat->ssFile->ocList.size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat->ssFile->ocList.size());
 
 
     sz0 = asterList.size();
@@ -6222,13 +6245,13 @@ void eqPlatesStat::init(reductionStat *redStat, int plNameType)
     {
 
         asterList.at(i)->init(plNameType);
-        //qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat.ssFile->ocList.size());
 
     }
-    qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat->ssFile->ocList.size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("redStat.ssFile->ocList.size= %1\n").arg(redStat->ssFile->ocList.size());
 
 
-    qDebug() << "\nplatesStat::init ended\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init ended\n";
 }
 
 //void init(reductionStat redStat);
@@ -6242,7 +6265,7 @@ void eqStatRec::init(int plNameType)
 //
 void ssPlatesStat::init(reductionStat *redStat)
 {
-    qDebug() << "\nssPlatesStat::init\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nssPlatesStat::init\n";
     int i, sz0, j, sz1, k, sz2;
     int isNew;
     ssStatRec *ssStat;
@@ -6256,16 +6279,16 @@ void ssPlatesStat::init(reductionStat *redStat)
 
         isNew = 1;
         sz0 = ssList.size();
-        qDebug() << QString("sz0= %1\n").arg(sz0);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("sz0= %1\n").arg(sz0);
         for(i=0; i<sz0; i++)
         {
-            //qDebug() << QString("sz2= %1\n").arg(redStat.ssFile->ocList.size());
-            //qDebug() << QString("k= %1\ti= %2\n").arg(k).arg(i);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("sz2= %1\n").arg(redStat.ssFile->ocList.size());
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("k= %1\ti= %2\n").arg(k).arg(i);
             if(redStat->ssFile->ocList.at(k)->lspmName == ssList.at(i)->ssName)
             {
                 isNew = 0;
 
-                    //qDebug() << "\nocList.at(k): " << redStat.mpeFile->ocList.size() << "\n";
+                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nocList.at(k): " << redStat.mpeFile->ocList.size() << "\n";
 
 
 
@@ -6276,7 +6299,7 @@ void ssPlatesStat::init(reductionStat *redStat)
                 break;
             }
         }
-        //qDebug() << QString("isNew = %1\n").arg(isNew);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("isNew = %1\n").arg(isNew);
         if(isNew)
         {
             ssStat = new ssStatRec;
@@ -6290,13 +6313,13 @@ void ssPlatesStat::init(reductionStat *redStat)
     }
 
     sz0 = ssList.size();
-    qDebug() << QString("ssList.size= %1\n").arg(sz0);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ssList.size= %1\n").arg(sz0);
     for(i=0; i<sz0; i++)
     {
         ssList.at(i)->init();
     }
 
-    qDebug() << "\nplatesStat::init ended\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nplatesStat::init ended\n";
 }
 
 void ssStatRec::init()
@@ -6329,7 +6352,7 @@ void eqSeriesRec::rec2sBase(QString *recStr)
 void eqSeriesRec::s2rec(QString recStr)
 {
     QStringList sL = recStr.split("|");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
     /*if(sL.size()!=16&&sL.size()!=18) return;
     if(sL.size()==16)
     {
@@ -6374,7 +6397,7 @@ void eqSeriesRec::s2rec(QString recStr)
 void eqSeriesRec::s2recBase(QString recStr)
 {
     QStringList sL = recStr.split(" ");
-//	//qDebug() << "\nsize=" << sL.size() << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
     /*if(sL.size()!=16&&sL.size()!=18) return;
     if(sL.size()==16)
     {
@@ -6465,7 +6488,7 @@ void eqSeriesFile::clear()
 void eqSeriesFile::init(const char *fname)
 {
 //	ocList.clear();
-    qDebug() << "\neqFile::init: " << fname << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "\neqFile::init: " << fname << "\n";
         clear();
         fName.clear();
         fName.insert(0, fname);
@@ -6473,7 +6496,7 @@ void eqSeriesFile::init(const char *fname)
         QFile dataFile(fname);
         if(!dataFile.open(QIODevice::ReadOnly| QIODevice::Text))
         {
-            qDebug() << QString("can't open: %1\n").arg(fName);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("can't open: %1\n").arg(fName);
             return;
         }
         QTextStream dataStream;
@@ -6489,21 +6512,21 @@ void eqSeriesFile::init(const char *fname)
                 if(dataLine==NULL) continue;
                 if(dataLine[0]=='#')		//mm-string
                 {
-                      //  qDebug() << "\nline #\n";
+                      //  if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline #\n";
                         mmRec = new moveModelRec(dataLine);
 //			ocr->s2rec(dataLine);
 //			mmList << mmr;
                 }
                 else if(dataLine[0]=='%')	//col-string
                 {
-                       // qDebug() << "\nline \%\n";
+                       // if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline \%\n";
                         colr = new colRec(dataLine);
 //			ocr->s2rec(dataLine);
                         colList << colr;
                 }
                 else						//oc-string
                 {
-                       // qDebug() << "\nline\n";
+                       // if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline\n";
                         ocr = new ocRec(dataLine);
 //			ocr->s2rec(dataLine);
                         ocList << ocr;
@@ -6585,7 +6608,7 @@ void eqSeriesFile::initOld(const char *fname)
                 }
                 else						//oc-string
                 {
-//			//qDebug() << "\nline\n";
+//			//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline\n";
                         ocr = new ocRec(dataLine);
 //			ocr->s2rec(dataLine);
                         ocList << ocr;
@@ -6662,7 +6685,7 @@ int eqSeriesFile::setColRec(colRec* cRec)
 {
         colRec *pRec;
         int rpos = getColRecNum(cRec->colNum);
-//	//qDebug() << "rpos= " << rpos << "\n";
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "rpos= " << rpos << "\n";
         if(rpos==-1)
         {
                 pRec = new colRec;
@@ -6900,7 +6923,7 @@ int eqSeriesFile::countCols(QString colNums)
                     cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
                     str.clear();
                     cols[k]->rec2s(&str);
-//                    //qDebug() << k << ": " << str << "\n";
+//                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
                     setColRec(cols[k]);
             }
 
@@ -6958,7 +6981,7 @@ void eqSeriesFile::do3sigma(double proofP, double sigmaMul)
             sigmaKsi = getColNum(4)->rmsOne;
             sigmaEta = getColNum(5)->rmsOne;
 
-            //qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi).arg(sigmaEta);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi).arg(sigmaEta);
 
             maxOCKsi = 3.0*sigmaKsi;
             maxOCEta = 3.0*sigmaEta;
@@ -6971,7 +6994,7 @@ void eqSeriesFile::do3sigma(double proofP, double sigmaMul)
             }
             num1 = ocList.size();
 
-            //qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
 
     }while(abs(num0-num1)>(proofP*num1));
@@ -7052,8 +7075,8 @@ int eqSeriesFile::countMM(int fp, int ft, int vflag)
         lsm(2, sz, Zy, C, Y, uweY, Dy, Weights);
         rnX = rnY = sz;
 /
-        //qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
-        //qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zx: %1 %2\tuweX: %3\n").arg(Zx[0]).arg(Zx[1]/1440.0).arg(uweX);
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Zy: %1 %2\tuweY: %3\n").arg(Zy[0]).arg(Zy[1]/1440.0).arg(uweY);
         uZx[0] = sqrt(uweX*Dx[0]);
         uZx[1] = sqrt(uweX*Dx[3]);
         uZy[0] = sqrt(uweY*Dy[0]);
@@ -7122,10 +7145,10 @@ void eqSeriesFile::findSeries(QList <eqFile*> *eqList)
         dt0 = dt1;
         timeC = ocList.at(i)->MJday;
         dt1 = timeC-timeT;
-        qDebug() << QString("timeC= %1\tdt0= %2\tdt1= %3\n").arg(timeC, 12, 'f', 5).arg(dt0).arg(dt1);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("timeC= %1\tdt0= %2\tdt1= %3\n").arg(timeC, 12, 'f', 5).arg(dt0).arg(dt1);
         if(dt1>1.5*dt0)
         {
-            qDebug() << QString("\nnew serie\n");
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnew serie\n");
             eqTemp = new eqFile;
             *eqList << eqTemp;
             j++;
@@ -7135,7 +7158,7 @@ void eqSeriesFile::findSeries(QList <eqFile*> *eqList)
         timeT = timeC;
     }
 
-    qDebug() << QString("eqList size: %1\n").arg(eqList->size());
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("eqList size: %1\n").arg(eqList->size());
 }
 
 void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
@@ -7143,7 +7166,7 @@ void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
     countCols("0,1,2,3,4,5,6,13,14,15,16,17,18,19");
     sortColList();
     countMM();
-    qDebug() << "mmRec: " << mmRec << "\n";
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << "mmRec: " << mmRec << "\n";
 
     colRec* cRec;
 
@@ -7190,12 +7213,12 @@ void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
     cRec = getColNum(19);
     if(cRec!=NULL) eqsRec->expTime = cRec->mean;
 
-    qDebug() << QString("\n19 mean\n");
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\n19 mean\n");
 
     if(mmRec!=NULL)
     {
-        qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
-        qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ra: %1\tmmRa: %2\n").arg(eqsRec->ra).arg(mmRec->xTm);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("de: %1\tmmDe: %2\n").arg(eqsRec->de).arg(mmRec->yTm);
         eqsRec->ocRaMM = grad_to_mas(eqsRec->ra - mmRec->xTm);
         eqsRec->ocDeMM = grad_to_mas(eqsRec->de - mmRec->yTm);
     }
@@ -7238,7 +7261,7 @@ int countColStat(colRec *cRec, double *vect, int sz)
     for(i=0; i<sz; i++) mean += vect[i];
     mean /= 1.0*sz;
 
-    qDebug() << QString("mean: %1\n").arg(mean);
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mean: %1\n").arg(mean);
 
     for(i=0; i<sz; i++) rmsOne += pow(mean - vect[i], 2.0);
     rmsOne = sqrt(rmsOne/(sz-1.0));

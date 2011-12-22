@@ -755,7 +755,7 @@ int main(int argc, char *argv[])    //r3StatPL
         objectsStat objStat;
         objStat.init(&rStat, plNameType);
         szi = objStat.objList.size();
-        qDebug() << QString("obj num: %1\n").arg(szi);
+        qDebug() << QString("object tot number: %1\n").arg(szi);
 
         QFile mpcAggFile, mpcFile;
         QFile ssAggFile, ssFile;
@@ -774,6 +774,8 @@ int main(int argc, char *argv[])    //r3StatPL
         int serieNum = 0;
         int eqSerieNum = 0;
         int ssSerieNum = 0;
+        int ocTotNum = 0;
+        int ocRejTotNum = 0;
 
 
         mpccat mpoCat;
@@ -801,19 +803,24 @@ int main(int argc, char *argv[])    //r3StatPL
                 objRejTemp.ocList.clear();
                 //ssF.clear();
                 //szj = objPStat.objList.at(i);
-                qDebug() << QString("objName: %1\n").arg(objStat.objList.at(i)->objName);
+                objName = objStat.objList.at(i)->objName.simplified();
+                catName = objStat.objList.at(i)->catName.simplified();
+                catMagName = objStat.objList.at(i)->catMagName.simplified();
+                qDebug() << QString("\nobjName: %1\ncatName: %2\ncatMagNum: %3\n").arg(objName).arg(catName).arg(catMagName);
                 if(objSigma>0.0)
                 {
                     objStat.objList.at(i)->do3Sigma(NULL, objSigma, &objRejTemp.ocList);
 
                 }
+                ocRejTotNum += objRejTemp.ocList.size();
                 //objStat.objList.at(i)->getOCList(&rStat, &objTemp.ocList);
                 objTemp.ocList << objStat.objList.at(i)->objList;
 
-                qDebug() << QString("or size: %1\n").arg(objTemp.ocList.size());
-                objName = objStat.objList.at(i)->objName.simplified();
-                catName = objStat.objList.at(i)->catName.simplified();
-                catMagName = objStat.objList.at(i)->catMagName.simplified();
+                szj = objTemp.ocList.size();
+                ocTotNum += szj;
+                qDebug() << QString("OC size: %1\n").arg(szj);
+                qDebug() << QString("OC rejected size: %1\n").arg(objRejTemp.ocList.size());
+
                 if(QString().compare(catName, "mpeph")==0)
                 {
                     tfName = QString("%1/%2").arg(mpeDir).arg(objName);
@@ -823,7 +830,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     tfName = QString("%1/%2").arg(sstarDir).arg(objName);
                 }
                 else tfName = QString("%1/%2").arg(reportObjDir).arg(objName);
-                szj = objTemp.ocList.size();
+
 
                 if(szj>0)
                 {
@@ -833,7 +840,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     {
                         serTemp.serieList.clear();
                         orList.clear();
-                        detOrSeriesList(objTemp.ocList, &serTemp.serieList, 9, 2);
+                        detOrSeriesList(objTemp.ocList, &serTemp.serieList, 9);
                         serieNum += serTemp.serieList.size();
                         serTemp.objName = objName;
                         serTemp.catName = catName;
@@ -1034,6 +1041,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
             }
 
+            qDebug() << QString("ocTotNum: %1\tocRejTotNum: %2\n").arg(ocTotNum).arg(ocRejTotNum);
             qDebug() << QString("serieNum: %1\teqSerieNum: %2\tssSerieNum: %3\n").arg(serieNum).arg(eqSerieNum).arg(ssSerieNum);
 
         if(saveAgg)
