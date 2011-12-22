@@ -372,6 +372,7 @@ int main(int argc, char *argv[])    //r3StatPL
     int d3s2 = sett->value("reportObj/d3s2", 0).toInt();
     int d3s3 = sett->value("reportObj/d3s3", 0).toInt();
     int d3s4 = sett->value("reportObj/d3s4", 0).toInt();
+    double dEMax = sett->value("reportObj/dEMax", 4.0).toDouble();
 
     int isMinUWE = sett->value("report0/isMinUWE", 0).toInt();
     int isVersSeq = sett->value("report0/isVersSeq", 0).toInt();
@@ -840,7 +841,7 @@ int main(int argc, char *argv[])    //r3StatPL
                     {
                         serTemp.serieList.clear();
                         orList.clear();
-                        detOrSeriesList(objTemp.ocList, &serTemp.serieList, 9);
+                        detOrSeriesList(objTemp.ocList, &serTemp.serieList, dEMax);
                         serieNum += serTemp.serieList.size();
                         serTemp.objName = objName;
                         serTemp.catName = catName;
