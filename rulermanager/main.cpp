@@ -27,53 +27,19 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForCStrings(codec1);
 
     //command line  ///////////////////////////////////////
-        QString optName, optVal, optStr, logFolder;
+        QStringList commLine;
         QString tFile;
         QString rmCfg = QString("rulermanager.ini");
-        QString cfgFileName = "ruler3.ini";
-        QString resFolder = "./results";
-        QString scFile = "./syscorr.ini";
+
         int i;
 
-
-        int isCFG = 0;
-        int isRD = 0;
-        int isSC = 0;
-        int isLF = 0;
 
         QString listFile = QString(argv[1]);
 
         for(i=2; i<argc; i++)
         {
-            optStr = QString(argv[i]);
-            optName = optStr.section("=", 0, 0);
-            optVal = optStr.section("=", 1, 1);
-            if(QString::compare(optName, "config", Qt::CaseSensitive)==0)
-            {
-                isCFG = 1;
-                cfgFileName = optVal;
-            }
-            else if(QString::compare(optName, "resFolder", Qt::CaseSensitive)==0)
-            {
-                isRD=1;
-                resFolder = optVal;
-            }
-            else if(QString::compare(optName, "syscorr", Qt::CaseSensitive)==0)
-            {
-                isSC = 1;
-                scFile = optVal;
+            commLine << QString(argv[i]);
 
-            }
-            else if(QString::compare(optName, "logFolder", Qt::CaseSensitive)==0)
-            {
-                isLF=1;
-                logFolder = optVal;
-            }
-            else
-            {
-                qDebug() << "\nERR: Wrong command line param: config | resFolder | syscorr";
-                return 1;
-            }
         }
 
 
@@ -107,10 +73,7 @@ int main(int argc, char *argv[])
          outerArguments.clear();
          r3Process.setWorkingDirectory(r3_prog_folder);
          outerArguments << tFile;
-         if(isCFG) outerArguments << QString("config=%1").arg(cfgFileName);
-         if(isRD) outerArguments << QString("resFolder=%1").arg(resFolder);
-         if(isSC) outerArguments << QString("syscorr=%1").arg(scFile);
-         if(isLF) outerArguments << QString("logFolder=%1").arg(logFolder);
+         outerArguments << commLine;
 
          qDebug() << QString("%1 %2\n").arg(r3_prog).arg(outerArguments.join(" "));
 
