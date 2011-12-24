@@ -342,6 +342,9 @@ obsCoordinator/obsCoordinator.pro.user -text
 oclTest/main.cpp -text
 oclTest/oclTest.pro -text
 oclTest/oclTest.pro.user -text
+or2eq/main.cpp -text
+or2eq/or2eq.pro -text
+or2eq/or2eq.pro.user -text
 phaseRed/main.cpp -text
 phaseRed/phaseRed.pro -text
 pics2fits/main.cpp -text
