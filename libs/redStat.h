@@ -100,6 +100,7 @@ public:
         void copy(const ocRec &source);
         ocRec& operator=(const ocRec &source);
 	
+        void fromMpeph(mpephRec *meRec);
 	
         int vers;                                       //РХО ЯРПНЙХ.
         //0 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime

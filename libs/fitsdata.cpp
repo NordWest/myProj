@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 0
+#define FD_LOG_LEVEL 1
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -10460,26 +10460,44 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 }
 
 //objects   ////////////////////////////////
-void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime)
+int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, procData mpephProcData)
 {
+    QStringList outerArguments;
+
+    switch(objType)
+    {
+    case 0:
+        outerArguments << QString("-num");
+        break;
+    case 1:
+        outerArguments << QString("-name");
+        break;
+    default:
+        break;
+    }
+
+    outerArguments << QString("\"%1\"").arg(objStr.simplified());
+    QString sMjd = QString("%1").arg(mJD, 11, 'f',7);
+    outerArguments << QString("%1").arg(sMjd);
+
     QProcess outerProcess;
-    //QString ast_eph_prog;
-    outerProcess.setWorkingDirectory(ast_eph_prog_folder);
+
+    outerProcess.setWorkingDirectory(mpephProcData.folder);
     outerProcess.setProcessChannelMode(QProcess::MergedChannels);
     outerProcess.setReadChannel(QProcess::StandardOutput);
 
-    if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << ast_eph_prog << " " << outerArguments.join("|") << "\n";
+    if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << mpephProcData.name << " " << outerArguments.join("|") << "\n";
 
-    outerProcess.start(ast_eph_prog, outerArguments);
+    outerProcess.start(mpephProcData.name, outerArguments);
 
-    outerProcess.waitForFinished(mpeWaitTime);
+    outerProcess.waitForFinished(mpephProcData.waitTime);
     QTextStream objStream(outerProcess.readAllStandardOutput());
 
-    marksP *mT;
+    //marksP *mT;
 
     ////
     QString objDataStr;
-    mT = new marksP(OBJ_TYPE_MPEPH);
+    //mT = new marksP(OBJ_TYPE_MPEPH);
     while (!objStream.atEnd())
     {
         objDataStr = objStream.readLine();
@@ -10488,12 +10506,15 @@ void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast
 
         //mT->mpcObj = new mpephRec;
         //mT->objType = 0;
-        if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mT->mpcObj << "\n";
-        if(mT->mpcObj->fromString(objDataStr))
+        if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mpcObj << "\n";
+        if(mpcObj->fromString(objDataStr))
         {
             if(FD_LOG_LEVEL) qDebug() << "\nfromString error\n";
             continue;
         }
+        else return 0;
+
+        /*
         if((mT->mpcObj->Vmag<mag0)||(mT->mpcObj->Vmag>mag1))
         {
             if(FD_LOG_LEVEL) qDebug() << QString("\nVmag problem: %1\n").arg(mT->mpcObj->Vmag);
@@ -10510,14 +10531,55 @@ void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast
         //objMarks->marks << mT;
         objMarks->addMark(mT);
         //mT = new marksP(OBJ_TYPE_MPEPH);
+        */
     }
 
-    if(FD_LOG_LEVEL) qDebug() << QString("getMpephObject find %1 objects\n").arg(objMarks->marks.size());
+    //if(FD_LOG_LEVEL) qDebug() << QString("getMpephObject find %1 objects\n").arg(objMarks->marks.size());
 
-    if(FD_LOG_LEVEL) qDebug() << "end getMpephObject\n";
+    //if(FD_LOG_LEVEL) qDebug() << "end getMpephObject\n";
     //detTanObj();
+    return 1;
+
 }
 
+void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objType, double mag0, double mag1, procData mpephProcData)
+{
+    int i, sz;
+    marksP *mT;
+
+
+    ////
+    QString objDataStr;
+    mpephRec mpcObj;
+
+    sz = objList.size();
+
+    for(i=0; i<sz; i++)
+    {
+        if(!getMpephObject(&mpcObj, mJD, objList.at(i), objType, mpephProcData))
+        {
+            if((mT->mpcObj->Vmag>=mag0)&&(mT->mpcObj->Vmag<mag1))
+            {
+                mT = new marksP(OBJ_TYPE_MPEPH);
+                mpcObj.copyTo(mT->mpcObj);
+                mT->mEkv[0] = mT->mpcObj->ra;//fitsd->objMarks->addEkvMark(ra, de, mag);
+                mT->mEkv[1] = mT->mpcObj->de;
+                mT->mEkv[2] = mT->mpcObj->Vmag;
+                mT->catName = QString("mpeph");
+                mT->catMagName = QString("Vmag");
+
+                if(FD_LOG_LEVEL) qDebug() << QString("Object: %1\tra: %2\tde:%3\tmagn:%4\n").arg(mT->mpcObj->name).arg(deg_to_hms(mT->mEkv[0], " ", 5)).arg(deg_to_damas(mT->mEkv[1], " ", 5)).arg(mT->mEkv[2]);
+
+                objMarks->addMark(mT);
+            }
+            else if(FD_LOG_LEVEL) qDebug() << QString("\nVmag problem: %1\n").arg(mT->mpcObj->Vmag);
+
+        }
+    }
+
+
+}
+/*
 void getMpephNum(marksGrid *objMarks, double MJD, QString mpeNum, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime)
 {
     QStringList outerArguments;
@@ -10537,7 +10599,7 @@ void getMpephName(marksGrid *objMarks, double MJD, QString mpeName, QString ast_
     outerArguments << QString("%1").arg(sMjd);
     getMpephObject(objMarks, outerArguments, ast_eph_prog, ast_eph_prog_folder, mag0, mag1, mpeWaitTime);
 }
-
+*/
 void getLspmObject(marksGrid *objMarks, double MJD, QString lspmName, QString lspm_prog, QString lspm_prog_folder, QString lspm_cat_file, int lspmWaitTime)
 {
     QProcess outerProcess;

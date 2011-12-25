@@ -79,6 +79,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QString dateStr, timeStr;
         QProcess outerProcess;
         QStringList outerArguments;
+        QStringList objList;
+        procData mpephProcData;
         QString optName, optVal, optStr, pnStr, headerFileName;
         QString logFileName, filePath, wcsFileName;
         QString resFolder, logFolder;
@@ -190,10 +192,10 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
 //processes
-        QString mpeph_prog = sett->value("processes/mpeph_prog", "./mpeph").toString();
-        QString mpeph_prog_folder = sett->value("processes/mpeph_prog_folder", "./").toString();
-        int mpeph_wait_time = sett->value("processes/mpeph_wait_time", -1).toInt();
-        if(mpeph_wait_time>0) mpeph_wait_time *= 1000;
+        mpephProcData.name = sett->value("processes/mpeph_prog", "./mpeph").toString();
+        mpephProcData.folder = sett->value("processes/mpeph_prog_folder", "./").toString();
+        mpephProcData.waitTime = sett->value("processes/mpeph_wait_time", -1).toInt();
+        if(mpephProcData.waitTime>0) mpephProcData.waitTime *= 1000;
         QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient").toString();
         QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
         int skybot_wait_time = sett->value("processes/skybot_wait_time", -1).toInt();
@@ -498,25 +500,32 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         if(skybotFind)
         {
             qDebug() << QString("skybotFindType\n");
-            QStringList objNames;
+            //QStringList objNames;
 
             if(tryMpeph)
             {
-                findSkybotNamesList(&objNames, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
-                sz = objNames.size();
-                for(i=0; i<sz; i++) getMpephName(fitsd->objMarks, fitsd->MJD, objNames.at(i), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                findSkybotNamesList(&objList, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
+                getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
+
             }
             else findSkybot(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
 
         }
         else if(tryMpeph)
         {
-            qDebug() << "tryMpeph\n";
             if(!fitsd->headList.getKeyName(headObjName, &descS))
             {
+
                 desc2NumName(descS, &oNum, &oName);
-                if(mpephType) getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
-                else getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+
+                if(mpephType)
+                {
+                    objList.append(oName);
+                    //getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                }
+                else objList.append(QString("%1").arg(oNum));
+                //getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
             }
         }
         qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());

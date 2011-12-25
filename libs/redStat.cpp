@@ -415,7 +415,10 @@ ocRec& ocRec::operator=(const ocRec &source)
     return *this;
 }
 
-
+void ocRec::fromMpeph(mpephRec *meRec)
+{
+    //MJday = meRec->
+}
 
 /////////////////////////////////////////////////////////////////////
 
@@ -6330,6 +6333,7 @@ void ssStatRec::init()
 */
 
 /*
+
 void eqSeriesRec::rec2sS(QString *recStr)
 {
     recStr->clear();

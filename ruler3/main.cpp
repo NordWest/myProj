@@ -69,6 +69,8 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         QString resFolder, logFolder;
         sysCorrParam *sysCorr = NULL;
         QString cfgFileName = "ruler3.ini";
+        QStringList objList;
+        procData mpephProcData;
         int sz, i, oNum;
         int resRed = 0;
         QString descS, oName;
@@ -108,18 +110,12 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         }
 
 
-
-
-
 ///////// 1. Reading settings ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //stream << "started....\n";
 
     //BEGIN settings
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
-
-
-
 
     QString redparamIni = sett->value("general/redparamIni", "./conf/redParam.ini").toString();
     int aper = sett->value("general/aperture", 20).toInt();
@@ -188,10 +184,10 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
                 double mag1 = sett->value("catalogs/mag1", 16.0).toDouble();
 
         //process
-                QString mpeph_prog = sett->value("processes/mpeph_prog", "./mpeph.exe").toString();
-                QString mpeph_prog_folder = sett->value("processes/mpeph_prog_folder", "./").toString();
-                int mpeph_wait_time = sett->value("processes/mpeph_wait_time", -1).toInt();
-                if(mpeph_wait_time>0) mpeph_wait_time *= 1000;
+                mpephProcData.name = sett->value("processes/mpeph_prog", "./mpeph.exe").toString();
+                mpephProcData.folder = sett->value("processes/mpeph_prog_folder", "./").toString();
+                mpephProcData.waitTime = sett->value("processes/mpeph_wait_time", -1).toInt();
+                if(mpephProcData.waitTime>0) mpephProcData.waitTime *= 1000;
                 QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient.exe").toString();
                 QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
                 int skybot_wait_time = sett->value("processes/skybot_wait_time", -1).toInt();
@@ -201,8 +197,6 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
         //observatory
                 QString observatoryCat = sett->value("observatory/observatoryCat", "./Obs.txt").toString();
                 obsCode = sett->value("observatory/obsCode", "084").toString();
-
-
 
     ///////////////////////////////////////////
     /////
@@ -424,13 +418,13 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             if(skybotFind)
             {
                 qDebug() << QString("skybotFindType\n");
-                QStringList objNames;
+                //QStringList objNames;
 
                 if(tryMpeph)
                 {
-                    findSkybotNamesList(&objNames, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
-                    sz = objNames.size();
-                    for(i=0; i<sz; i++) getMpephName(fitsd->objMarks, fitsd->MJD, objNames.at(i), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                    findSkybotNamesList(&objList, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
+                    getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
+
                 }
                 else findSkybot(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
 
@@ -439,11 +433,20 @@ int main(int argc, char *argv[])//ruler3.exe file.fits [conf.ini]
             {
                 if(!fitsd->headList.getKeyName(headObjName, &descS))
                 {
+
                     desc2NumName(descS, &oNum, &oName);
-                    if(mpephType) getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
-                    else getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+
+                    if(mpephType)
+                    {
+                        objList.append(oName);
+                        //getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                    }
+                    else objList.append(QString("%1").arg(oNum));
+                    //getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
+                    getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
                 }
             }
+            qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());
             fitsd->detTanObj();
     ///////////
             fitsd->cleanObjects(aper);

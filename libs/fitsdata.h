@@ -147,9 +147,12 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
 int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff);
 
 //objects   ////////////////////////////////
-void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
-void getMpephNum(marksGrid *objMarks, double MJD, QString mpeNum, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
-void getMpephName(marksGrid *objMarks, double MJD, QString mpeName, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
+int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, procData mpephProcData);
+//void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
+//void getMpephNum(marksGrid *objMarks, double MJD, QString mpeNum, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
+//void getMpephName(marksGrid *objMarks, double MJD, QString mpeName, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
+
+void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objType, double mag0, double mag1, procData mpephProcData);
 
 void getLspmObject(marksGrid *objMarks, double MJD, QString lspmName, QString lspm_prog, QString lspm_prog_folder, QString lspm_cat_file, int lspmWaitTime=-1);
 void findLspmCat(marksGrid *objMarks, double ra, double de, double MJD, QString lspm_prog, QString lspm_prog_folder, QString lspm_cat_file, double fov, double mag0, double mag1, int lspmWaitTime=-1);
