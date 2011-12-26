@@ -163,8 +163,12 @@ int main(int argc, char *argv[])//twdb iniFile resFolder
     }
     delete[]lineZ;delete[]lineD;delete[]lineC;
     //return 0;
-    int msize = QString(argv[3]).toInt();
-    int fl = QString(argv[4]).toInt();
+    int msize;
+    int fl;
+    if(argc>3) msize = QString(argv[3]).toInt();
+    else msize = 3;
+    if(argc>4) fl = QString(argv[4]).toInt();
+    else fl = 0;
     double *bx = new double[(2*msize+1)*(2*msize+1)];
     //for(int i=0;i<(2*msize+1)*(2*msize+1);i++)bx[i]=i;
     double me;

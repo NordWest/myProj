@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        oFileName = QString("%1_eq.txt").arg(fi.completeBaseName());
+        oFileName = QString("%1/%2_eq.txt").arg(fi.absolutePath()).arg(fi.completeBaseName());
     }
 
     QString cfgFileName = "or2eq.ini";
