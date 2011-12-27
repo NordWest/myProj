@@ -28,6 +28,7 @@ Q_OBJECT
         QString centre;
         QString keph;
 	int timescale;
+        //QTextStream stream;
 	
 private slots:// самый минимум слотов. нам ведь нужно чтобы прога могла "узнать":  
     void slotProcessingData(bool error);//получить и обработать данные;

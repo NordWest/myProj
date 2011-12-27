@@ -10462,6 +10462,8 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 //objects   ////////////////////////////////
 int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, procData mpephProcData)
 {
+    int i;
+    qDebug() << "\ngetMpephObject\n";
     QStringList outerArguments;
 
     switch(objType)
@@ -10483,24 +10485,38 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
     QProcess outerProcess;
 
     outerProcess.setWorkingDirectory(mpephProcData.folder);
-    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+    outerProcess.setProcessChannelMode(QProcess::SeparateChannels);
     outerProcess.setReadChannel(QProcess::StandardOutput);
 
     if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << mpephProcData.name << " " << outerArguments.join("|") << "\n";
 
     outerProcess.start(mpephProcData.name, outerArguments);
 
-    outerProcess.waitForFinished(mpephProcData.waitTime);
+    if(!outerProcess.waitForFinished(mpephProcData.waitTime))
+    {
+        if(FD_LOG_LEVEL) qDebug() << "\nmpephProc finish error\n";
+    }
     QTextStream objStream(outerProcess.readAllStandardOutput());
+    QString objDataStr;
+    QStringList orList;
+    QString oresStr();
 
     //marksP *mT;
-
+    //objStream.seek(0);
+    /*if(FD_LOG_LEVEL)
+    {
+        qDebug() << QString("objStream: |%1|\n\n").arg(oresStr);
+        //objStream.seek(0);
+    }*/
     ////
-    QString objDataStr;
+    //orList = oresStr.split("\n");
+
     //mT = new marksP(OBJ_TYPE_MPEPH);
     while (!objStream.atEnd())
+    //for(i=0; i<orList.size(); i++)
     {
-        objDataStr = objStream.readLine();
+        //objDataStr = objStream.readLine();
+        objDataStr = orList.at(i);
         if(FD_LOG_LEVEL) qDebug() << QString("objDataStr: %1").arg(objDataStr);
 
 
@@ -10546,7 +10562,7 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
 {
     int i, sz;
     marksP *mT;
-
+    mT = new marksP(OBJ_TYPE_MPEPH);
 
     ////
     QString objDataStr;
@@ -10560,7 +10576,8 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
         {
             if((moTemp.Vmag>=mag0)&&(moTemp.Vmag<mag1))
             {
-                mT = new marksP(OBJ_TYPE_MPEPH);
+                if(FD_LOG_LEVEL) qDebug() << QString("\nadding object: \n").arg(moTemp.name);
+                //
                 moTemp.copyTo(mT->mpcObj);
                 mT->mEkv[0] = mT->mpcObj->ra;//fitsd->objMarks->addEkvMark(ra, de, mag);
                 mT->mEkv[1] = mT->mpcObj->de;
@@ -10576,7 +10593,7 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
 
         }
     }
-
+    if(FD_LOG_LEVEL) qDebug() << QString("\nobjMarks size: %1\n").arg(objMarks->marks.size());
 
 }
 /*

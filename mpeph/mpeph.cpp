@@ -22,7 +22,8 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         QString mjdfname;
         QString sScale;
         DATEOBS dObs;
-	QTextStream stream(stdout);
+        QTextStream stream(stdout);
+        //stream.setDevice(QIODevice(stdout));
 	//все настройки в файле mpeph.ini мы их читаем 
 	settings = new QSettings("mpeph.ini",QSettings::IniFormat);
 	hostName = settings->value("general/hostName").toString();// понятно... имя хоста, вдруг изменят. Поэтому разумно его держать в настройках
@@ -121,10 +122,11 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1
 void mpeph::slotProcessingData(bool error)// обработка ответа на запрос
 {
-    //qDebug() << QString("slotProcessingData\n");
+    //if (msgout==1) qDebug() << QString("slotProcessingData\n");
+    QTextStream stream(stdout);
 
-        QTextStream stream(stdout);
         if (msgout==1) stream << "slotProcessingData...\n";
+        //if (msgout==1) stream << QString("error: %1\n").arg(error);
 	if (error)//если ошибка - сообщить в консоль и выйти из приложения
 	{
 		if (msgout==1)stream << "error has occured.\n";
@@ -136,7 +138,7 @@ void mpeph::slotProcessingData(bool error)// обработка ответа н�
 			QByteArray httpData = http->readAll();//чтение данных (ответа)
 	        QString str(httpData);// переделываем данные в строку
 			//
-			//stream << str << "\n";
+                        //stream << str << "\n";
 			//
                 int si, k, ex;
                 QStringList sl;
@@ -227,7 +229,8 @@ void mpeph::slotStateChanged(int state)//этот слот печатает в �
     //qDebug() << QString("slotStateChanged");
 	if (eventMessages)
 	{
-		QTextStream stream(stdout);
+                QTextStream stream(stdout);
+
                 if (msgout==1) stream << "slotStateChanged...\n";
 		QString str_state;
 		switch(state)
@@ -266,14 +269,15 @@ void mpeph::slotStateChanged(int state)//этот слот печатает в �
 
 void mpeph::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
 {
-   // qDebug() << QString("slotRequestFinished\n");
-
+   //if (msgout==1) qDebug() << QString("slotRequestFinished\n");
+    QTextStream stream(stdout);
+if (msgout==1) stream << "slotRequestFinished...\n";
 	if(error)
 	{
-	    QTextStream stream(stdout);
-            if (msgout==1) stream << "slotRequestFinished...\n";
+
+
 		if (msgout==1) stream << http->errorString() << "\n";
 	}
-      //  cdsfapp->quit();
+        //cdsfapp->quit();
 };
 
