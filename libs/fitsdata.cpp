@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 1
+#define FD_LOG_LEVEL 0
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -10550,18 +10550,18 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
 
     ////
     QString objDataStr;
-    mpephRec mpcObj;
+    mpephRec moTemp;
 
     sz = objList.size();
 
     for(i=0; i<sz; i++)
     {
-        if(!getMpephObject(&mpcObj, mJD, objList.at(i), objType, mpephProcData))
+        if(!getMpephObject(&moTemp, mJD, objList.at(i), objType, mpephProcData))
         {
-            if((mT->mpcObj->Vmag>=mag0)&&(mT->mpcObj->Vmag<mag1))
+            if((moTemp.Vmag>=mag0)&&(moTemp.Vmag<mag1))
             {
                 mT = new marksP(OBJ_TYPE_MPEPH);
-                mpcObj.copyTo(mT->mpcObj);
+                moTemp.copyTo(mT->mpcObj);
                 mT->mEkv[0] = mT->mpcObj->ra;//fitsd->objMarks->addEkvMark(ra, de, mag);
                 mT->mEkv[1] = mT->mpcObj->de;
                 mT->mEkv[2] = mT->mpcObj->Vmag;
