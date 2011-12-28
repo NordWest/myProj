@@ -31,8 +31,8 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 	replyDir = settings->value("general/replyDir").toString();// это папка, в которую выдается файлик с результатом
 	proxyPort = settings->value("general/proxyPort").toInt();// не по порядку правда - это порт прокси
 	useProxy = settings->value("general/useProxy").toInt();// 0 - не используем прокси, 1 - используем
-        useNetworkCfg = settings->value("general/useNetworkCfg", 0).toInt();
-        if(useNetworkCfg)
+        useNetworkIni = settings->value("general/useNetworkIni", 0).toInt();
+        if(useNetworkIni)
         {
             QSettings *netSett = new QSettings("network.ini",QSettings::IniFormat);
             proxyName = netSett->value("general/proxyName").toString();
@@ -56,9 +56,10 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 	if (msgout==1) stream << "mpeph has started...\n";
 	////////////////////////////////////////////////////
         http = new QHttp(this);//создаем объект для http запросов
-        if (msgout==1) stream << "useProxy...\n";
+
 	if (useProxy==1) 
-	{
+        {
+            if (msgout==1) stream << "useProxy...\n";
 		http->setProxy(proxyName, proxyPort);//если есть прокси, устанавливаем соответсвующие параметры
 	}
         if (msgout==1) stream << "setHost...\n";

@@ -10499,7 +10499,7 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
     QTextStream objStream(outerProcess.readAllStandardOutput());
     QString objDataStr;
     QStringList orList;
-    QString oresStr();
+    //QString oresStr();
 
     //marksP *mT;
     //objStream.seek(0);
@@ -10515,8 +10515,8 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
     while (!objStream.atEnd())
     //for(i=0; i<orList.size(); i++)
     {
-        //objDataStr = objStream.readLine();
-        objDataStr = orList.at(i);
+        objDataStr = objStream.readLine();
+        //objDataStr = orList.at(i);
         if(FD_LOG_LEVEL) qDebug() << QString("objDataStr: %1").arg(objDataStr);
 
 

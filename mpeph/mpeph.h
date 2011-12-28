@@ -15,7 +15,7 @@ Q_OBJECT
 	QString proxyName;
 	int proxyPort;
 	int useProxy;
-        int useNetworkCfg;
+        int useNetworkIni;
 	int eventMessages;
 	int msgout;
 	QString obscode;
