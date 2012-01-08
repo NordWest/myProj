@@ -10478,14 +10478,14 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
         break;
     }
 
-    outerArguments << QString("\"%1\"").arg(objStr.simplified());
+    outerArguments << QString("%1").arg(objStr.simplified());
     QString sMjd = QString("%1").arg(mJD, 11, 'f',7);
     outerArguments << QString("%1").arg(sMjd);
 
     QProcess outerProcess;
 
     outerProcess.setWorkingDirectory(mpephProcData.folder);
-    outerProcess.setProcessChannelMode(QProcess::SeparateChannels);
+    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
     outerProcess.setReadChannel(QProcess::StandardOutput);
 
     if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << mpephProcData.name << " " << outerArguments.join("|") << "\n";

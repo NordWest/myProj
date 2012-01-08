@@ -70,6 +70,16 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 	connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(slotRequestFinished(int, bool)));
 	//
         if (msgout==1) stream << "arguments...\n";
+        /*int argSz = cdsfapp->arguments().size();
+        QString argI;
+        for(i=1; i<argSz; i++)
+        {
+            argI = cdsfapp->arguments().at(i);
+            if(QString().compare(argI[0], "-")==0)
+            {
+
+            }
+        }*/
 	ntype = cdsfapp->arguments().at(1);// это первый аргумент (тип ввода информации об астероиде: номер или имя)
 	if(ntype=="-num")astNumber = cdsfapp->arguments().at(2); else astDes = cdsfapp->arguments().at(2);//или номер, или имя
 	//BEGIN find mjd
