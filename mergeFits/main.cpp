@@ -215,14 +215,24 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
     double muDe = sett.value("general/muDe", 0).toDouble();         //mas/min
 */
 //////////////
-
-    errBudgetFile errB;
+    measurementRec* mesRec;
     errBudgetFile *errBtemp;
-    errB.init(argv[1]);
 
+    QDir workDir(argv[1]);
+    QString ebFileName = QString(workDir.absolutePath() + "err_budget.txt");
+    QString resFileName = QString(workDir.absolutePath() + "residuals.txt");
+
+    reductionStat rStat;
+    rStat.init(&ebFileName, &resFileName);
+
+/*
+    errBudgetFile errB;
+
+    errB.init(argv[1]);
+*/
     QString resFolder = QString(argv[2]);
 
-    detErrBSeriesList(errB.errList, &ebSeriesList, dEMax);
+    detErrBSeriesList(rStat.ebFile->errList, &ebSeriesList, dEMax);
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
     for(si=0; si< serSz; si++)
