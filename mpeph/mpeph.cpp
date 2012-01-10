@@ -22,6 +22,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         QString mjdfname;
         QString sScale;
         DATEOBS dObs;
+        int i;
         QTextStream stream(stdout);
         //stream.setDevice(QIODevice(stdout));
 	//все настройки в файле mpeph.ini мы их читаем 
@@ -70,24 +71,26 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 	connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(slotRequestFinished(int, bool)));
 	//
         if (msgout==1) stream << "arguments...\n";
-        /*int argSz = cdsfapp->arguments().size();
-        QString argI;
-        for(i=1; i<argSz; i++)
-        {
-            argI = cdsfapp->arguments().at(i);
-            if(QString().compare(argI[0], "-")==0)
-            {
+        int argSz = cdsfapp->arguments().size();
+        QStringList argL;
 
-            }
-        }*/
 	ntype = cdsfapp->arguments().at(1);// это первый аргумент (тип ввода информации об астероиде: номер или имя)
-	if(ntype=="-num")astNumber = cdsfapp->arguments().at(2); else astDes = cdsfapp->arguments().at(2);//или номер, или имя
+
+        for(i=2; i<argSz-1; i++)
+        {
+            argL << cdsfapp->arguments().at(i);
+        }
+
+        if(ntype=="-num")astNumber = argL.join(" "); else astDes = argL.join(" ");//или номер, или имя
+
+        //if(ntype=="-num")astNumber = cdsfapp->arguments().at(2); else astDes = cdsfapp->arguments().at(2);//или номер, или имя
+
 	//BEGIN find mjd
 	QString sMJD;
 	double mjd;
 	if(simplemode==0)
 	{
-                mjdfname = cdsfapp->arguments().at(3);// имя файла с моментом mjd
+                mjdfname = cdsfapp->arguments().at(argSz-1);// имя файла с моментом mjd
 		QFile mjdFile(mjdfname);
 		mjdFile.open(QIODevice::ReadOnly | QIODevice::Text);
 		QTextStream mjdStream;
@@ -113,14 +116,14 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         //END find mjd
         QString requestStr = "/cgi-bin/ephepos.cgi/calcul";// создаем http запрос (теория DE405, шкала времени UTC)
 
-            dObs = getDATEOBSfromMJD(mjd);// конвертируем mjd в "нормальную" дату
-                requestStr = requestStr +
-		"?an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
-		"&mois="+QString( "%1" ).arg( dObs.month,4,10,QLatin1Char( '0' ))+
-		"&jour="+QString( "%1" ).arg( dObs.day,4,10,QLatin1Char( '0' ))+
-		"&heure="+QString( "%1" ).arg( dObs.hour,4,10,QLatin1Char( '0' ))+
-		"&minute="+QString( "%1" ).arg( dObs.min,4,10,QLatin1Char( '0' ))+
-		"&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));
+        dObs = getDATEOBSfromMJD(mjd);// конвертируем mjd в "нормальную" дату
+        requestStr = requestStr +
+        "?an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
+        "&mois="+QString( "%1" ).arg( dObs.month,4,10,QLatin1Char( '0' ))+
+        "&jour="+QString( "%1" ).arg( dObs.day,4,10,QLatin1Char( '0' ))+
+        "&heure="+QString( "%1" ).arg( dObs.hour,4,10,QLatin1Char( '0' ))+
+        "&minute="+QString( "%1" ).arg( dObs.min,4,10,QLatin1Char( '0' ))+
+        "&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));
 
         QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
         if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
