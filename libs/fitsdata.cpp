@@ -9814,8 +9814,8 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
                     else
                     {
                         if(mObj!=NULL) makeObjErrReports(mObj, redMake, refMarks->ebRec, resFolder, outLim, whatOut, outPar);
-                        ko++;
-                        if(ko<szObj) mObj = objMarks->marks.at(ko);
+                        //ko++;
+                        if(ko<szObj) mObj = objMarks->marks.at(ko+1);
                         else mObj=NULL;
                         //if(FD_LOG_LEVEL) qDebug() << "mobj: " << mObj << "\n";
                     }
@@ -11032,10 +11032,10 @@ void rsSelector5(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double 
     for(i=szRef-1;i>=0&&rsindex.count()>nMin;i--)
     {
        j = rsindex.at(i);
-       if(FD_LOG_LEVEL) qDebug() << QString("i= %1\tj= %2\n").arg(i).arg(j);
+       if(FD_LOG_LEVEL>1) qDebug() << QString("i= %1\tj= %2\n").arg(i).arg(j);
        //sdata = refMarks->marks.at(j)->sdata;
        iDist = marksImgDist(mP, refMarks->marks.at(j));
-       if(FD_LOG_LEVEL) qDebug() << QString("iDist= %1\n").arg(iDist);
+       if(FD_LOG_LEVEL>1) qDebug() << QString("iDist= %1\n").arg(iDist);
        if(iDist>dMax) rsindex.remove(i);
     }
     szRef = rsindex.count();
