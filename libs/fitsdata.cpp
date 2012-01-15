@@ -9657,6 +9657,10 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
         sel6.targEnum = settings->value("rsSelector6/targEnum", 0).toInt();
         sel6.minStarsNum = settings->value("rsSelector6/minStarsNum", 0).toInt();
 
+        rsSelector7Sett sel7;
+        sel7.dMax = settings->value("rsSelector7/dMax", 100000).toDouble();
+        sel7.minStarsNum = settings->value("rsSelector7/minStarsNum", 0).toInt();
+
 ////
         QStringList allSett;
         allSett << settings->allKeys();
@@ -9744,6 +9748,8 @@ int fitsdata::ruler3(QString iniFile, QString resFolder, refractionParam *refPar
                     case 6:
                         rsSelector6(refMarks, rsindex, sel6.targEnum, sel6.minStarsNum);
                         break;
+                    case 7:
+                        rsSelector7(refMarks, rsindex, workFrame.center().x(), workFrame.center().y(), sel7.dMax, sel7.minStarsNum);
 
                     }
                 }
@@ -11097,6 +11103,56 @@ void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int m
            }
        }
     }
+    if(FD_LOG_LEVEL) qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
+}
+
+
+void rsSelector7(marksGrid *refMarks, QVector<int> &rsindex, double cX, double cY, double dMax, double nMin)
+{
+    if(FD_LOG_LEVEL) qDebug() << QString("refStarSelector7\n");
+    int szRef;
+    int i, j;
+    double dm, iDist;
+    int posMax;
+    szRef = rsindex.count();
+    marksP mP;
+    mP.mTanImg[0] = cX;
+    mP.mTanImg[1] = cY;
+
+    if(FD_LOG_LEVEL) qDebug() << QString("szRef before= %1\n").arg(szRef);
+/*
+    for(i=szRef-1;i>=0&&rsindex.count()>nMin;i--)
+    {
+       j = rsindex.at(i);
+       if(FD_LOG_LEVEL>1) qDebug() << QString("i= %1\tj= %2\n").arg(i).arg(j);
+       //sdata = refMarks->marks.at(j)->sdata;
+       iDist = marksImgDist(mP, refMarks->marks.at(j));
+       if(FD_LOG_LEVEL>1) qDebug() << QString("iDist= %1\n").arg(iDist);
+       if(iDist>dMax) rsindex.remove(i);
+    }
+    szRef = rsindex.count();
+    if(FD_LOG_LEVEL) qDebug() << QString("rsindex.count0= %1\n").arg(szRef);*/
+    while(szRef>nMin)
+    {
+        posMax = -1;
+        dm = 0;
+        for(i=0;i<szRef;i++)
+        {
+            j = rsindex.at(i);
+            iDist = marksImgDist(&mP, refMarks->marks.at(j));
+            if(iDist>dm)
+            {
+                dm = iDist;
+                posMax = i;
+            }
+
+        }
+        if((dm<dMax)||(posMax==-1)) break;
+        rsindex.remove(posMax);
+
+        szRef = rsindex.count();
+    }
+
     if(FD_LOG_LEVEL) qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
 }
 

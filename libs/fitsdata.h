@@ -89,6 +89,7 @@ void rsSelector3(marksGrid *refMarks, QVector<int> &rsindex, double objMag, doub
 void rsSelector4(marksGrid *refMarks, QVector<int> &rsindex, double muMax, int minRefStars);
 void rsSelector5(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double dMax, double nMin, double nMax);
 void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int minRefStarsNum);
+void rsSelector7(marksGrid *refMarks, QVector<int> &rsindex, double cX, double cY, double dMax, double nMin);
 
 struct procData
 {
@@ -215,6 +216,12 @@ struct rsSelector6Sett
     QString colSep;
     int corrModel;
     int targEnum;
+    int minStarsNum;
+};
+
+struct rsSelector7Sett
+{
+    double dMax;
     int minStarsNum;
 };
 
