@@ -1,8 +1,8 @@
-//это заголовочный файл класса mpeph. Пусть название класса не смущает.
+//это заголовочный файл класса ephemcc. Пусть название класса не смущает.
 #include <QtCore>
 #include <QtNetwork>
 
-class mpeph: public QObject
+class ephemcc: public QObject
 {
 Q_OBJECT
 
@@ -36,5 +36,5 @@ private slots:// самый минимум слотов. нам ведь нуж�
 	//void slotSslErrors(QList<QSslError> sslErr);
 	void slotRequestFinished(int id, bool error);//узнать, что выполнение запроса завершено;
  public:
-	mpeph(QCoreApplication *app);
+        ephemcc(QCoreApplication *app);
 };

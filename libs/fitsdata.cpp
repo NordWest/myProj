@@ -7510,6 +7510,7 @@ void fitsdata::findCloserObjects(double dMax)
 
    // mgRes->clearMarks();
  //   if(FD_LOG_LEVEL) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
+    objMarks->sortMagn();
     szE = objMarks->marks.size();
     szIP = ipixMarks->marks.size();
     double dist, distMin;//, distMax;

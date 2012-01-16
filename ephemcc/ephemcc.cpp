@@ -1,7 +1,7 @@
-#include "mpeph.h"
+#include "ephemcc.h"
 #include "./../astro/astro.h"
 /*о командной строчке замолвите словечко...
-mpeph.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
+ephemcc.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
 1 -num - это значит задается номер астероида (как в примере)
   -name - это значит задается имя (Ceres, 2005_NB7).
 2 номер или имя астероида
@@ -15,7 +15,7 @@ cat| 05 54 58.197 | +33 12 50.61 | 54188.7768690278
 Поскольку все затевалось для нее, пришлось действовать "запутанным образом"
 */
 
-mpeph::mpeph(QCoreApplication *app)//конструктор
+ephemcc::ephemcc(QCoreApplication *app)//конструктор
 {	
 	cdsfapp = app;
 	QString msgstr;
@@ -25,9 +25,9 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
         int i;
         QTextStream stream(stdout);
         //stream.setDevice(QIODevice(stdout));
-	//все настройки в файле mpeph.ini мы их читаем 
-	settings = new QSettings("mpeph.ini",QSettings::IniFormat);
-	hostName = settings->value("general/hostName").toString();// понятно... имя хоста, вдруг изменят. Поэтому разумно его держать в настройках
+	//все настройки в файле ephemcc.ini мы их читаем 
+	settings = new QSettings("ephemcc.ini",QSettings::IniFormat);
+        hostName = QString("vo.imcce.fr");//settings->value("general/hostName").toString();// понятно... имя хоста, вдруг изменят. Поэтому разумно его держать в настройках
 	proxyName = settings->value("general/proxyName").toString();// ну это прокси
 	replyDir = settings->value("general/replyDir").toString();// это папка, в которую выдается файлик с результатом
 	proxyPort = settings->value("general/proxyPort").toInt();// не по порядку правда - это порт прокси
@@ -54,7 +54,7 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
 	msgout = settings->value("general/msgout").toInt();//std out
 	simplemode = settings->value("general/simplemode").toInt();
 	/////////////////////////////////////////////прочитали настройки
-	if (msgout==1) stream << "mpeph has started...\n";
+	if (msgout==1) stream << "ephemcc has started...\n";
 	////////////////////////////////////////////////////
         http = new QHttp(this);//создаем объект для http запросов
 
@@ -114,27 +114,39 @@ mpeph::mpeph(QCoreApplication *app)//конструктор
   //      uploadfile_dat
 	if(timescale==1) mjd = mjd - 14/86400;//если использовалась шкала GPS, переходим в UTC (в таком виде это справедливо с 2006 г) 
         //END find mjd
-        QString requestStr = "/cgi-bin/ephepos.cgi/calcul";// создаем http запрос (теория DE405, шкала времени UTC)
+        QStringList reqList;
+        QString requestStr = "/webservices/miriade/ephemcc_query.php?";// создаем http запрос (теория DE405, шкала времени UTC)
 
-        dObs = getDATEOBSfromMJD(mjd);// конвертируем mjd в "нормальную" дату
-        requestStr = requestStr +
-        "?an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
+        //getDATEOBSfromMJD(&dObs, mjd);// конвертируем mjd в "нормальную" дату
+        reqList << QString("-ep=%1").arg(mjd2jd(mjd),13,'f',5);
+        /*requestStr = requestStr +
+        "an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
         "&mois="+QString( "%1" ).arg( dObs.month,4,10,QLatin1Char( '0' ))+
         "&jour="+QString( "%1" ).arg( dObs.day,4,10,QLatin1Char( '0' ))+
         "&heure="+QString( "%1" ).arg( dObs.hour,4,10,QLatin1Char( '0' ))+
         "&minute="+QString( "%1" ).arg( dObs.min,4,10,QLatin1Char( '0' ))+
-        "&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));
+        "&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));*/
 
-        QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
-        if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
-        requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale;
+
+        reqList << QString("-mime=text");
+
+        //QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
+        //if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
+        reqList << QString("-name=%1").arg(astDes);
+
+        reqList << QString("-observer=%1").arg(obsCode);
+        //reqList << QString("-observer=%1").arg(obsCode);
+        reqList << QString("-theory=DE405");//.arg(obsCode);
+
+        requestStr += reqList.join("&");
+        //requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale;
     //                if(simplemode==3) requestStr = requestStr + "&uploadfile_dat="+mjdfname;
         if (msgout==1) stream << requestStr<<"\n";//печатать запрос в консоли
 	http->get(requestStr);// посылаем запрос методом get
 	
 };
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1
-void mpeph::slotProcessingData(bool error)// обработка ответа на запрос
+void ephemcc::slotProcessingData(bool error)// обработка ответа на запрос
 {
     //if (msgout==1) qDebug() << QString("slotProcessingData\n");
     QTextStream stream(stdout);
@@ -152,8 +164,9 @@ void mpeph::slotProcessingData(bool error)// обработка ответа н�
 			QByteArray httpData = http->readAll();//чтение данных (ответа)
 	        QString str(httpData);// переделываем данные в строку
 			//
+                        stream <<str.mid(str.indexOf("#!")) << "\n";
                         //stream << str << "\n";
-			//
+                        /*
                 int si, k, ex;
                 QStringList sl;
                 QStringList nList;
@@ -233,12 +246,14 @@ void mpeph::slotProcessingData(bool error)// обработка ответа н�
 			{
 				stream << spos << "\n";
 			}
-			if (msgout==1) stream << "mpeph has finished...\n";
+			if (msgout==1) stream << "ephemcc has finished...\n";
+                        */
+
                         cdsfapp->quit();//выходим из проги
-		}
+                }
 };
 
-void mpeph::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
+void ephemcc::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
 {
     //qDebug() << QString("slotStateChanged");
 	if (eventMessages)
@@ -275,13 +290,13 @@ void mpeph::slotStateChanged(int state)//этот слот печатает в �
 	}
 };
 
-/*void mpeph::slotSslErrors(QList<QSslError> sslErr)
+/*void ephemcc::slotSslErrors(QList<QSslError> sslErr)
 {
 	QTextStream stream(stdout);
 	stream << "ssl error has occured." << "\n";
 };*/
 
-void mpeph::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
+void ephemcc::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
 {
    //if (msgout==1) qDebug() << QString("slotRequestFinished\n");
     QTextStream stream(stdout);

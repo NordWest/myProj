@@ -1,15 +1,15 @@
 TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/comfunc.cpp \
-        mpeph.cpp
-HEADERS += mpeph.h \
+        ephemcc.cpp
+HEADERS += ephemcc.h \
     ../libs/comfunc.h \
     ../mb/mb.h
 HEADERS += ./../astro/astro.h
 
-#win32:TARGET = ./../../bin/mpeph
-#unix:TARGET = ./../bin/mpeph
-TARGET = mpeph
+#win32:TARGET = ./../../bin/ephemcc
+#unix:TARGET = ./../bin/ephemcc
+TARGET = ephemcc
 QT += network
 CONFIG += console exceptions warn_off release
 win32:LIBS += ./../libs/win32/cfitsio.lib
