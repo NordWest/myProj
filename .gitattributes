@@ -44,6 +44,11 @@ damPack/damPack.pro -text
 damPack/main.cpp -text
 deleCompile/deleCompile.pro -text
 deleCompile/main.cpp -text
+ephemcc/ephemcc.cpp -text
+ephemcc/ephemcc.h -text
+ephemcc/ephemcc.ini -text
+ephemcc/ephemcc.pro -text
+ephemcc/main.cpp -text
 epsPlot/epsPlot.pro -text
 epsPlot/main.cpp -text
 epsReports/epsReports.pro -text
