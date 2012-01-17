@@ -303,11 +303,11 @@ medianplus/main.cpp -text
 medianplus/medianplus.pro -text
 mergeFits/main.cpp -text
 mergeFits/mergeFits.pro -text
-miriadeEph/ephemcc.cpp -text
-miriadeEph/ephemcc.h -text
-miriadeEph/ephemcc.ini -text
-miriadeEph/ephemcc.pro -text
 miriadeEph/main.cpp -text
+miriadeEph/miriadeeph.cpp -text
+miriadeEph/miriadeeph.h -text
+miriadeEph/miriadeeph.ini -text
+miriadeEph/miriadeeph.pro -text
 mpcStat/apvt.h -text
 mpcStat/ccdmeasurements.cpp -text
 mpcStat/ccdmeasurements.h -text
