@@ -44,11 +44,6 @@ damPack/damPack.pro -text
 damPack/main.cpp -text
 deleCompile/deleCompile.pro -text
 deleCompile/main.cpp -text
-ephemcc/ephemcc.cpp -text
-ephemcc/ephemcc.h -text
-ephemcc/ephemcc.ini -text
-ephemcc/ephemcc.pro -text
-ephemcc/main.cpp -text
 epsPlot/epsPlot.pro -text
 epsPlot/main.cpp -text
 epsReports/epsReports.pro -text
@@ -308,6 +303,11 @@ medianplus/main.cpp -text
 medianplus/medianplus.pro -text
 mergeFits/main.cpp -text
 mergeFits/mergeFits.pro -text
+miriadeEph/ephemcc.cpp -text
+miriadeEph/ephemcc.h -text
+miriadeEph/ephemcc.ini -text
+miriadeEph/ephemcc.pro -text
+miriadeEph/main.cpp -text
 mpcStat/apvt.h -text
 mpcStat/ccdmeasurements.cpp -text
 mpcStat/ccdmeasurements.h -text
