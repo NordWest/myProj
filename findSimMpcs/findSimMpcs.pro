@@ -20,14 +20,14 @@ SOURCES += main.cpp \
     ../libs/coord.cpp \
     ../libs/comfunc.cpp \
     ../libs/DynArr.cpp \
-    ../libs/astro.cpp
+    ../astro/astro.cpp
 
-HEADERS += ../libs/mb.h \
+HEADERS += ../mb/mb.h \
     ../libs/mpcs.h \
     ../libs/coord.h \
     ../libs/comfunc.h \
     ../libs/DynArr.h \
-    ../libs/astro.h
+    ../astro/astro.h
 
 win32:LIBS += ./../libs/win32/libmb.a
 unix:LIBS += ./../libs/unix/libmb.a

@@ -2,7 +2,7 @@
 //это консольное приложение с циклом обработки сообщений или событий (event loop)
 #include <QCoreApplication>
 #include <QtCore>
-#include "ephemcc.h"
+#include "miriadeeph.h"
 
 
 
@@ -12,12 +12,12 @@ int main(int argc, char *argv[])
 		if (argc==1) // если нет аргументов в командной строке, то выходим с выводом сообщения в консоль
 		{
 			QTextStream stream(stdout);
-                        stream << "ephemcc: command line needed." << "\n";
+                        stream << "miriadeEph: command line needed." << "\n";
 			return 1;
 		}
 		else// какие-никакие, а аргументы есть.
 		{
-                        ephemcc *mpeProc = new ephemcc(&app);// создаем объект каласса ephemcc и передаем указатель на объект приложение, это поможет легко добраться до аргументов командной строки и посылать сообщения.
+                        miriadeEph *mpeProc = new miriadeEph(&app);// создаем объект каласса miriadeEph и передаем указатель на объект приложение, это поможет легко добраться до аргументов командной строки и посылать сообщения.
 			return app.exec();// все, готово дело, запускаем цикл обработки сообщений.
 		}
 	   

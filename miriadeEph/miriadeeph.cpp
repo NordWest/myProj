@@ -1,7 +1,7 @@
-#include "ephemcc.h"
+#include "miriadeeph.h"
 #include "./../astro/astro.h"
 /*о командной строчке замолвите словечко...
-ephemcc.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
+miriadeEph.exe -num 308369 pc.txt astpos.txt - вот командная строка, это пример, конечно
 1 -num - это значит задается номер астероида (как в примере)
   -name - это значит задается имя (Ceres, 2005_NB7).
 2 номер или имя астероида
@@ -15,7 +15,7 @@ cat| 05 54 58.197 | +33 12 50.61 | 54188.7768690278
 Поскольку все затевалось для нее, пришлось действовать "запутанным образом"
 */
 
-ephemcc::ephemcc(QCoreApplication *app)//конструктор
+miriadeEph::miriadeEph(QCoreApplication *app)//конструктор
 {	
 	cdsfapp = app;
 	QString msgstr;
@@ -25,36 +25,37 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
         int i;
         QTextStream stream(stdout);
         //stream.setDevice(QIODevice(stdout));
-	//все настройки в файле ephemcc.ini мы их читаем 
-	settings = new QSettings("ephemcc.ini",QSettings::IniFormat);
+	//все настройки в файле miriadeEph.ini мы их читаем 
+        settings = new QSettings("miriadeeph.ini",QSettings::IniFormat);
         hostName = QString("vo.imcce.fr");//settings->value("general/hostName").toString();// понятно... имя хоста, вдруг изменят. Поэтому разумно его держать в настройках
-	proxyName = settings->value("general/proxyName").toString();// ну это прокси
-	replyDir = settings->value("general/replyDir").toString();// это папка, в которую выдается файлик с результатом
-	proxyPort = settings->value("general/proxyPort").toInt();// не по порядку правда - это порт прокси
-	useProxy = settings->value("general/useProxy").toInt();// 0 - не используем прокси, 1 - используем
+        proxyName = settings->value("general/proxyName", "proxy.gao.spb.ru").toString();// ну это прокси
+        replyDir = settings->value("general/replyDir", "./").toString();// это папка, в которую выдается файлик с результатом
+        proxyPort = settings->value("general/proxyPort", 3128).toInt();// не по порядку правда - это порт прокси
+        useProxy = settings->value("general/useProxy", 0).toInt();// 0 - не используем прокси, 1 - используем
         useNetworkIni = settings->value("general/useNetworkIni", 0).toInt();
         if(useNetworkIni)
         {
             QSettings *netSett = new QSettings("network.ini",QSettings::IniFormat);
-            proxyName = netSett->value("general/proxyName").toString();
-            proxyPort = netSett->value("general/proxyPort").toInt();
-            useProxy = netSett->value("general/useProxy").toInt();
+            proxyName = netSett->value("general/proxyName", "proxy.gao.spb.ru").toString();
+            proxyPort = netSett->value("general/proxyPort", 3128).toInt();
+            useProxy = netSett->value("general/useProxy", 0).toInt();
         }
 	eventMessages = settings->value("general/eventMessages").toInt();//0 - не выдаем текстовые сообщения о состоянии запроса, 1 - выдаем
-	obsCode = settings->value("general/obsCode").toString();// код обсерватории
-        centre = settings->value("general/centre").toString();//Reference center - тип положения наблюдателя. 1-гелиоцентр, 2-геоцентр, 3-хз, 4- по коду обсерватории (UAI_code)
+        //obsCode = settings->value("general/obsCode").toString();// код обсерватории
+        //centre = settings->value("general/centre").toString();//Reference center - тип положения наблюдателя. 1-гелиоцентр, 2-геоцентр, 3-хз, 4- по коду обсерватории (UAI_code)
         if(centre.toInt()<0||centre.toInt()>4) centre = QString("4");                      //если такого пункта нет в ini-файле, то параметр будет по старинке равер 4
 
-        keph = settings->value("general/keph").toString();//Номер эфемериды:1-DE200 / LE200; 2-VSOP82 / ELP2000-82; 3-DE403 / LE403; 4-VSOP87 / ELP2000-82B; 5-DE405 / LE405; 6-DE406 / LE406; 7-INPOP06
-        if(keph=="") keph = QString("5");                      //если такого пункта нет в ini-файле, то параметр будет по старинке равер 5
+        //keph = settings->value("general/keph").toString();//Номер эфемериды:1-DE200 / LE200; 2-VSOP82 / ELP2000-82; 3-DE403 / LE403; 4-VSOP87 / ELP2000-82B; 5-DE405 / LE405; 6-DE406 / LE406; 7-INPOP06
+        //if(keph=="") keph = QString("5");                      //если такого пункта нет в ini-файле, то параметр будет по старинке равер 5
 //        qDebug() << "keph=" << keph << "\n";
-        timescale = settings->value("general/timescale").toInt();// 0 - UTC, 1 - GPS,2 - TT
-        if(timescale==2) sScale = QString("TT");
-        else sScale = QString("UTC");
+        //timescale = settings->value("general/timescale").toInt();// 0 - UTC, 1 - GPS,2 - TT
+        //if(timescale==2) sScale = QString("TT");
+        //else sScale = QString("UTC");
 	msgout = settings->value("general/msgout").toInt();//std out
 	simplemode = settings->value("general/simplemode").toInt();
-	/////////////////////////////////////////////прочитали настройки
-	if (msgout==1) stream << "ephemcc has started...\n";
+
+        /////////////////////////////////////////////прочитали настройки
+	if (msgout==1) stream << "miriadeEph has started...\n";
 	////////////////////////////////////////////////////
         http = new QHttp(this);//создаем объект для http запросов
 
@@ -71,8 +72,9 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
 	connect(http, SIGNAL(requestFinished(int, bool)), this, SLOT(slotRequestFinished(int, bool)));
 	//
         if (msgout==1) stream << "arguments...\n";
-        int argSz = cdsfapp->arguments().size();
-        QStringList argL;
+
+
+/*
 
 	ntype = cdsfapp->arguments().at(1);// это первый аргумент (тип ввода информации об астероиде: номер или имя)
 
@@ -82,11 +84,11 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
         }
 
         if(ntype=="-num")astNumber = argL.join(" "); else astDes = argL.join(" ");//или номер, или имя
-
+*/
         //if(ntype=="-num")astNumber = cdsfapp->arguments().at(2); else astDes = cdsfapp->arguments().at(2);//или номер, или имя
 
 	//BEGIN find mjd
-	QString sMJD;
+/*	QString sMJD;
 	double mjd;
 	if(simplemode==0)
 	{
@@ -110,15 +112,35 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
 		sMJD = cdsfapp->arguments().at(3);
 		mjd = getMJDfromStrFTN(sMJD, 0);
 	}
-
+*/
   //      uploadfile_dat
-	if(timescale==1) mjd = mjd - 14/86400;//если использовалась шкала GPS, переходим в UTC (в таком виде это справедливо с 2006 г) 
+//	if(timescale==1) mjd = mjd - 14/86400;//если использовалась шкала GPS, переходим в UTC (в таком виде это справедливо с 2006 г)
         //END find mjd
         QStringList reqList;
         QString requestStr = "/webservices/miriade/ephemcc_query.php?";// создаем http запрос (теория DE405, шкала времени UTC)
 
+        settings->beginGroup("params");
+        QStringList parKeys;
+
+        parKeys << settings->allKeys();
+        int szPar = parKeys.size();
+        //if (msgout==1) stream << QString("szPar: \n").arg(i).arg(parKeys.at(i));
+        for(i=0; i<szPar; i++)
+        {
+            //parKeys.at(i)if (msgout==1) stream << QString("par[%1]: %2\n").arg(i).arg(parKeys.at(i));
+            reqList << QString("-%1=%2").arg(parKeys.at(i)).arg(settings->value(parKeys.at(i)).toString());
+        }
+
+        int argSz = cdsfapp->arguments().size();
+
+        for(i=1; i<argSz; i++)
+        {
+            reqList << cdsfapp->arguments().at(i);
+        }
+
+
         //getDATEOBSfromMJD(&dObs, mjd);// конвертируем mjd в "нормальную" дату
-        reqList << QString("-ep=%1").arg(mjd2jd(mjd),13,'f',5);
+        //reqList << QString("-ep=%1").arg(mjd2jd(mjd),13,'f',5);
         /*requestStr = requestStr +
         "an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
         "&mois="+QString( "%1" ).arg( dObs.month,4,10,QLatin1Char( '0' ))+
@@ -128,15 +150,15 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
         "&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));*/
 
 
-        reqList << QString("-mime=text");
+        //reqList << QString("-mime=text");
 
         //QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
         //if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
-        reqList << QString("-name=%1").arg(astDes);
+        //reqList << QString("-name=%1").arg(astDes);
 
-        reqList << QString("-observer=%1").arg(obsCode);
         //reqList << QString("-observer=%1").arg(obsCode);
-        reqList << QString("-theory=DE405");//.arg(obsCode);
+        //reqList << QString("-observer=%1").arg(obsCode);
+        //reqList << QString("-theory=DE405");//.arg(obsCode);
 
         requestStr += reqList.join("&");
         //requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale;
@@ -146,7 +168,7 @@ ephemcc::ephemcc(QCoreApplication *app)//конструктор
 	
 };
 //?-to=4&-from=-2&-this=-2&-out.max=unlimited&-out.form=%7C+-Separated-Values&-order=I&-c=20+54+05.689+%2B37+01+17.38&-c.eq=J2000&-oc.form=dec&-c.r=+10&-c.u=arcmin&-c.geom=r&-source=I%2F304%2Fout&-out=CMC14&CMC14=&-out=f_CMC14&f_CMC14=&-out=RAJ2000&-sort=RAJ2000&RAJ2000=&-out=DEJ2000&DEJ2000=&-out=MJD-51263&MJD-51263=&-out=r%27mag&r%27mag=&-out=u_r%27mag&u_r%27mag=&-out=Nt&Nt=&-out=Na&Na=&-out=Np&Np=&-out=e_RAdeg&e_RAdeg=&-out=e_DEdeg&e_DEdeg=&-out=e_r%27mag&e_r%27mag=&-out=Jmag&Jmag=&-out=Hmag&Hmag=&-out=Ksmag&Ksmag=&-out.all=1&-file=.&-meta=2&-meta.foot=1
-void ephemcc::slotProcessingData(bool error)// обработка ответа на запрос
+void miriadeEph::slotProcessingData(bool error)// обработка ответа на запрос
 {
     //if (msgout==1) qDebug() << QString("slotProcessingData\n");
     QTextStream stream(stdout);
@@ -246,14 +268,14 @@ void ephemcc::slotProcessingData(bool error)// обработка ответа �
 			{
 				stream << spos << "\n";
 			}
-			if (msgout==1) stream << "ephemcc has finished...\n";
+			if (msgout==1) stream << "miriadeEph has finished...\n";
                         */
 
                         cdsfapp->quit();//выходим из проги
                 }
 };
 
-void ephemcc::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
+void miriadeEph::slotStateChanged(int state)//этот слот печатает в консоли состояние запроса, если соответствующий флаг установлен
 {
     //qDebug() << QString("slotStateChanged");
 	if (eventMessages)
@@ -290,13 +312,13 @@ void ephemcc::slotStateChanged(int state)//этот слот печатает в
 	}
 };
 
-/*void ephemcc::slotSslErrors(QList<QSslError> sslErr)
+/*void miriadeEph::slotSslErrors(QList<QSslError> sslErr)
 {
 	QTextStream stream(stdout);
 	stream << "ssl error has occured." << "\n";
 };*/
 
-void ephemcc::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
+void miriadeEph::slotRequestFinished(int id, bool error)//запрос завершен, если с ошибкой, то выдается сообщение о ее природе
 {
    //if (msgout==1) qDebug() << QString("slotRequestFinished\n");
     QTextStream stream(stdout);

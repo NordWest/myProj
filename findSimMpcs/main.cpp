@@ -1,7 +1,7 @@
 #include <QtCore>
 
 #include "./../libs/mpcs.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 
 int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 {

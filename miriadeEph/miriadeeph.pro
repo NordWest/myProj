@@ -1,15 +1,15 @@
 TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/comfunc.cpp \
-        ephemcc.cpp
-HEADERS += ephemcc.h \
+        miriadeeph.cpp
+HEADERS += miriadeeph.h \
     ../libs/comfunc.h \
     ../mb/mb.h
 HEADERS += ./../astro/astro.h
 
-#win32:TARGET = ./../../bin/ephemcc
-#unix:TARGET = ./../bin/ephemcc
-TARGET = ephemcc
+#win32:TARGET = ./../../bin/miriadeEph
+#unix:TARGET = ./../bin/miriadeEph
+TARGET = miriadeEph
 QT += network
 CONFIG += console exceptions warn_off release
 win32:LIBS += ./../libs/win32/cfitsio.lib
