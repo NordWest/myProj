@@ -277,9 +277,9 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     outstr += discAster;
     outstr += note1;
     outstr += objType;
-    outstr = outstr +getStrFromDATEOBS(dateObs," ", 0, 5) +" ";
-    outstr = outstr +deg_to_hms(ra, " ",2);
-    outstr = outstr + " " +deg_to_damas(de, " ",1)+"          ";
+    outstr = outstr +getStrFromDATEOBS(dateObs," ", 0, 6);
+    outstr = outstr +deg_to_hms(ra, " ",3);
+    outstr = outstr + deg_to_damas(de, " ",2)+"         ";
     outstr = outstr  +QString( "%1" ).arg(mag0,5,'f',2);
     outstr = outstr  +"       "+obsName;
     str->append(outstr);

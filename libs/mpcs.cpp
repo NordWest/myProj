@@ -102,7 +102,7 @@ int mpc_tail::get_tail(char *tail)
 {
 	if(tail==NULL) return 1;
 
-        sprintf(tail, "          %5s%1s%6s%3s", this->Smagn, this->bukva, this->SnumOfPubl, this->SnumOfObservatory);
+        sprintf(tail, "         %5s%1s%6s%3s", this->Smagn, this->bukva, this->SnumOfPubl, this->SnumOfObservatory);
 
 	return 0;
 }
@@ -418,12 +418,12 @@ void mpcs::s2rec(char *arec)
 	switch(this->sizestr)
 	{
 	case 81:
-		slovoG(arec, slo, 23, 31);
+                slovoG(arec, slo, 23, 32);
 		numb = atof(slo);
 
 		dat2JD(&this->record->eJD, year, mth, numb);
 
-		slovoG(arec, s, 31, 32);
+                //slovoG(arec, s, 31, 32);
 		slovoG(arec, slo, 32, 34);
 		year = atoi(slo);
 		slovoG(arec, slo, 35, 37);
@@ -555,7 +555,7 @@ void mpcs::rec2s(char *arec)
 	this->record->tail->get_tail(tl);
 
 
-        sprintf(arec, "%s%4d %02d %08.5f %02d %02d %05.2f %s%02d %02d %04.1f%24s%s", hd, y, m, d, hour, min, sec, s2, grad, l, ll, tl, this->record->tnull);
+        sprintf(arec, "%s%4d %02d %09.6f%02d %02d %06.3f%s%02d %02d %05.2f%23s%s", hd, y, m, d, hour, min, sec, s2, grad, l, ll, tl, this->record->tnull);
 
 	delete [] zero1;
 	delete [] zero2;

@@ -1,7 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/redStat.h"
 #include "./../libs/mpcs.h"
-#include "./../libs/astro.h"
+#include "./../astro/astro.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,11 +12,19 @@ int main(int argc, char *argv[])
     eqFile.init(argv[1]);
 
     ocRec *ocRecord;
+    mpc *mpcRecord;
+    mpccat mpoCat;
 
     mpcs mpFile;
     mpFile.init(argv[2]);
 
-    mpc *mpcRecord;
+    if(mpoCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
+
+    objName = objStat.objList.at(i)->objName.simplified();
+    catName = objStat.objList.at(i)->catName.simplified();
+    catMagName = objStat.objList.at(i)->catMagName.simplified();
+
+
 
     int i, szi;
     szi = eqFile.ocList.size();
@@ -24,6 +32,7 @@ int main(int argc, char *argv[])
     for(i=0;i<szi;i++)
     {
         ocRecord = eqFile.ocList.at(i);
+        ocRecord->rec2MPC();
         mpcRecord = new mpc;
         mpcRecord->d = ocRecord->de;
         mpcRecord->eJD = mjd2jd(ocRecord->MJday);

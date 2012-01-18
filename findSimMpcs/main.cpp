@@ -65,8 +65,12 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 */
     for(i=0; i<sz0; i++)
     {
-        mpc0.getmpc(i);
+        if(mpc0.getmpc(i)) qDebug() << "\nERROR reading mpc0\n";
         rec0 = mpc0.record;
+
+        //qDebug() << QString("i: %1").arg(i);
+        //qDebug() << QString("eJD|%1\n").arg(rec0->eJD);
+        //qDebug() << QString("num|%1\n").arg(rec0->num);
 
         //rec0->eJD
         for(j=0;j<sz1;j++)
@@ -74,7 +78,8 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
             mpc1.getmpc(j);
             rec1 = mpc1.record;
 
-            //qDebug() << QString("|%1:\t%2\n").arg(rec0->eJD).arg(rec1->eJD);
+            //qDebug() << QString("eJD|%1:\t%2\t%3\n").arg(rec0->eJD).arg(rec1->eJD).arg(fabs(rec0->eJD-rec1->eJD));
+            //qDebug() << QString("num|%1:\t%2\n").arg(rec0->num).arg(rec1->num);
 
             if((fabs(rec0->eJD-rec1->eJD)<dtime)&&(rec0->num==rec1->num)&&(rec0->numOfObservatory==rec1->numOfObservatory))
             //if(fabs(rec0->eJD-rec1->eJD)<dtime)
