@@ -10,11 +10,12 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
     setlocale(LC_NUMERIC, "C");
 
-    mpcs mpc0, mpc1, mpcres;
+    mpcs mpc0, mpc1, mpc0res, mpc1res;
 
     mpc0.init(argv[1]);
     mpc1.init(argv[2]);
-    mpcres.init(argv[3]);
+    mpc0res.init(QString("%1_res.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data());
+    mpc1res.init(QString("%1_res.txt").arg(QFileInfo(argv[2]).completeBaseName()).toAscii().data());
 
     int i, j, sz0, sz1;
     int obsNum;
@@ -32,8 +33,9 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
         qDebug() << QString("obsName= %1\tobsNumName= %2\tobsNum= %3\n").arg(obsName).arg(obsNumName).arg(obsNum);
     }
     //if(namenum) obsNum = obsName
-    int useDtime = sett->value("general/useDtime", 0).toInt();
+    //int useDtime = sett->value("general/useDtime", 0).toInt();
     double dtime = sett->value("general/dtime", 0.0).toDouble();
+    dtime /= 1440.0;
 
 
     sz0 = mpc0.nstr;
@@ -85,9 +87,13 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
             //if(fabs(rec0->eJD-rec1->eJD)<dtime)
             {
                 recr = new mpc;
+                recr->set_mpc(rec0);
+                mpc0res.addmpc(recr);
+                recr = new mpc;
                 recr->set_mpc(rec1);
-                mpcres.addmpc(recr);
+                mpc1res.addmpc(recr);
                 qDebug() << QString("dr: %1\n").arg(fabs(rec0->eJD-rec1->eJD));
+                break;
                 //getDATEOBSfromMJD(&dobs, jd2mjd(recr->eJD));
             }
         }
