@@ -10603,6 +10603,99 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
     if(FD_LOG_LEVEL) qDebug() << QString("\nobjMarks size: %1\n").arg(objMarks->marks.size());
 
 }
+
+
+
+//  miriade
+
+int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData, QString objType)
+{
+    qDebug() << "\ngetMiriadeObject\n";
+    QStringList outerArguments;
+
+    outerArguments << QString("-name=\"%1\"").arg(objStr.simplified());
+
+
+    QString sJD = QString("%1").arg(mjd2jd(mJD), 11, 'f',7);
+    outerArguments << QString("-ep=%1").arg(sJD);
+
+    QProcess outerProcess;
+
+    outerProcess.setWorkingDirectory(miriadeProcData.folder);
+    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+    outerProcess.setReadChannel(QProcess::StandardOutput);
+
+    if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
+
+    outerProcess.start(miriadeProcData.name, outerArguments);
+
+    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+    {
+        if(FD_LOG_LEVEL) qDebug() << "\nmpephProc finish error\n";
+    }
+    QTextStream objStream(outerProcess.readAllStandardOutput());
+    QString objDataStr;
+
+    while (!objStream.atEnd())
+    //for(i=0; i<orList.size(); i++)
+    {
+        objDataStr = objStream.readLine();
+        //objDataStr = orList.at(i);
+        if(objDataStr.at(0)=='#') continue;
+        if(FD_LOG_LEVEL) qDebug() << QString("objDataStr: %1").arg(objDataStr);
+
+        if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mpcObj << "\n";
+        if(mpcObj->fromMiriStr(objDataStr))
+        {
+            if(FD_LOG_LEVEL) qDebug() << "\nfromString error\n";
+            continue;
+        }
+        else return 0;
+    }
+
+    return 1;
+}
+
+void getMiriadeGrid(marksGrid *objMarks, double mJD, QStringList objList, double mag0, double mag1, procData miriadeProcData, QString objType)
+{
+    int i, sz;
+    marksP *mT;
+    mT = new marksP(OBJ_TYPE_MPEPH);
+
+    ////
+    mpephRec moTemp;
+
+    sz = objList.size();
+
+    for(i=0; i<sz; i++)
+    {
+        if(!getMiriadeObject(&moTemp, mJD, objList.at(i), miriadeProcData))
+        {
+            if((moTemp.Vmag>=mag0)&&(moTemp.Vmag<mag1))
+            {
+                if(FD_LOG_LEVEL) qDebug() << QString("\nadding object: \n").arg(moTemp.name);
+                //
+                moTemp.copyTo(mT->mpcObj);
+                mT->mEkv[0] = mT->mpcObj->ra;//fitsd->objMarks->addEkvMark(ra, de, mag);
+                mT->mEkv[1] = mT->mpcObj->de;
+                mT->mEkv[2] = mT->mpcObj->Vmag;
+                mT->catName = QString("mpeph");
+                mT->catMagName = QString("Vmag");
+
+                if(FD_LOG_LEVEL) qDebug() << QString("Object: %1\tra: %2\tde:%3\tmagn:%4\n").arg(mT->mpcObj->name).arg(deg_to_hms(mT->mEkv[0], " ", 5)).arg(deg_to_damas(mT->mEkv[1], " ", 5)).arg(mT->mEkv[2]);
+
+                objMarks->addMark(mT);
+            }
+            else if(FD_LOG_LEVEL) qDebug() << QString("\nVmag problem: %1\n").arg(mT->mpcObj->Vmag);
+
+        }
+    }
+    if(FD_LOG_LEVEL) qDebug() << QString("\nobjMarks size: %1\n").arg(objMarks->marks.size());
+
+}
+
+
+
 /*
 void getMpephNum(marksGrid *objMarks, double MJD, QString mpeNum, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime)
 {

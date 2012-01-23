@@ -29,23 +29,40 @@ int main(int argc, char *argv[])
     QString cfgFileName = "or2eq.ini";
 
     procData mpephProcData;
+    procData miriProcData;
 
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
+
+//objects   ////
+    //int lspmFind = sett->value("objects/lspmFind", 0).toInt();
+    //int skybotFind = sett->value("objects/skybotFind", 0).toInt();
+    //int tryMpeph = sett->value("general/tryMpeph", 0).toInt();
+    int useMiriade = sett->value("general/useMiriade", 0).toInt();
+    //int mpephType = sett->value("objects/mpephType", 0).toInt();
+    //double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
+    //double magObj1 = sett->value("objects/mag1", 16.0).toDouble();
+    //QString headObjName = sett->value("objects/headObjName", "OBJECT").toString();
 
     mpephProcData.name = sett->value("processes/mpeph_prog", "./mpeph").toString();
     mpephProcData.folder = sett->value("processes/mpeph_prog_folder", "./").toString();
     mpephProcData.waitTime = sett->value("processes/mpeph_wait_time", -1).toInt();
     if(mpephProcData.waitTime>0) mpephProcData.waitTime *= 1000;
+    miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
+    miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
+    miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
+    if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
 
-    int i, sz;
+    int i, sz, getRes;
     QString tStr;
     sz = orFile.ocList.size();
 
     for(i=0; i<sz; i++)
     {
         orTemp = orFile.ocList.at(i);
+        if(useMiriade) getRes = getMiriadeObject(&mpeRec, orTemp->mJD, orTemp->name, miriProcData);
+        else getRes = getMpephObject(&mpeRec, orTemp->mJD, orTemp->name, 1, mpephProcData);
 
-        if(!getMpephObject(&mpeRec, orTemp->mJD, orTemp->name, 1, mpephProcData))
+        if(!getRes)
         {
             ocTemp = new ocRec;
             orTemp->toOcRec(ocTemp);
@@ -57,6 +74,9 @@ int main(int argc, char *argv[])
             ocTemp->Vr = mpeRec.Vr;
             ocTemp->muRaCosDe = mpeRec.muRaCosDe;
             ocTemp->muDe = mpeRec.muDe;
+            ocTemp->topDist = mpeRec.topDist;
+            if(useMiriade) ocTemp->catName = QString("miriade");
+            else ocTemp->catName = QString("mpeph");
             ocTemp->rec2s(&tStr);
             qDebug() << tStr << "\n";
             eqResFile.ocList.append(ocTemp);

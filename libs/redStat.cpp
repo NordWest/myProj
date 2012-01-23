@@ -831,14 +831,14 @@ void objResRec::rec2s(QString *str)
         str->append(QString("#%1").arg(mesParams));
 };
 
-void objResRec::s2rec(QString str)
+int objResRec::s2rec(QString str)
 {
 //	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
     //QStringList parts = str.split("#");
     QStringList sL = str.section("#", 0, 0).split("|");
         //QStringList sL = str.split("|");
         //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
-        if(sL.size()!=19) return;
+        if(sL.size()!=19) return 1;
 
         mJD = sL[0].toDouble();
 
@@ -867,6 +867,8 @@ void objResRec::s2rec(QString str)
         mesureTimeCode = sL.at(18);
 
         mesParams = str.section("#", 1, 1);
+
+        return 0;
 };
 
 void objResRec::setMesParams(double *P, int pSize)
@@ -3172,8 +3174,10 @@ void objResidualFile::init(QString fname)
         {
                 dataLine = dataStream.readLine();
 
+                if(dataLine.size()< 10) continue;
 //		//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline \#\n";
-                rr = new objResRec(dataLine);
+                rr = new objResRec;
+                if(rr->s2rec(dataLine)) continue;
 //		ocr->s2rec(dataLine);
                 ocList << rr;
 
@@ -4230,6 +4234,30 @@ int mpephRec::fromString(QString inStr)
     elS = opers.at(8);Vr=elS.toDouble();//v_r [km/s]
     elS = opers.at(4);phase=elS.toDouble();//phase [deg]
     elS = opers.at(5);elong=elS.toDouble();//elongation [deg]
+    elS = opers.at(9);num=QString(elS);//object number
+    elS = opers.at(10);name=QString(elS);//object name
+    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << "end\n";
+    return 0;
+}
+
+int mpephRec::fromMiriStr(QString inStr)
+{
+    QString elS;
+    QStringList opers;
+    opers = inStr.split(" ", QString::SkipEmptyParts);
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers.size()= %1\n").arg(opers.size());
+    if(opers.size()<14) return 1;
+    hms_to_deg(&ra, QString("%1:%2:%3").arg(opers.at(1)).arg(opers.at(2)).arg(opers.at(3)), ":");
+    damas_to_deg(&de, QString("%1:%2:%3").arg(opers.at(4)).arg(opers.at(5)).arg(opers.at(6)), ":");
+
+    elS = opers.at(7);topDist=elS.toDouble();//topocentric distance from theory of motion or catalogue
+    elS = opers.at(8);Vmag = elS.toDouble();
+    elS = opers.at(9);phase=elS.toDouble();//phase [deg]
+    elS = opers.at(10);elong=elS.toDouble();//elongation [deg]
+    elS = opers.at(11);muRaCosDe=elS.toDouble()*1000.0*60.0;//mu_ra*cos(dec) [mas/min]
+    elS = opers.at(12);muDe=elS.toDouble()*1000.0*60.0;//mu_de [mas/min]
+    elS = opers.at(13);Vr=elS.toDouble();//v_r [km/s]
+
     elS = opers.at(9);num=QString(elS);//object number
     elS = opers.at(10);name=QString(elS);//object name
     ////if(REDSTAT_LOG_LEVEL>0) qDebug() << "end\n";

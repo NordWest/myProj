@@ -155,6 +155,9 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
 
 void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objType, double mag0, double mag1, procData mpephProcData);
 
+int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData, QString objType="");
+void getMiriadeGrid(marksGrid *objMarks, double mJD, QStringList objList, double mag0, double mag1, procData miriadeProcData, QString objType="");
+
 void getLspmObject(marksGrid *objMarks, double MJD, QString lspmName, QString lspm_prog, QString lspm_prog_folder, QString lspm_cat_file, int lspmWaitTime=-1);
 void findLspmCat(marksGrid *objMarks, double ra, double de, double MJD, QString lspm_prog, QString lspm_prog_folder, QString lspm_cat_file, double fov, double mag0, double mag1, int lspmWaitTime=-1);
 /*

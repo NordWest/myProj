@@ -81,6 +81,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         QStringList outerArguments;
         QStringList objList;
         procData mpephProcData;
+        procData miriProcData;
         QString optName, optVal, optStr, pnStr, headerFileName;
         QString logFileName, filePath, wcsFileName;
         QString resFolder, logFolder;
@@ -180,6 +181,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int lspmFind = sett->value("objects/lspmFind", 0).toInt();
         int skybotFind = sett->value("objects/skybotFind", 0).toInt();
         int tryMpeph = sett->value("objects/tryMpeph", 0).toInt();
+        int useMiriade = sett->value("objects/useMiriade", 0).toInt();
         int mpephType = sett->value("objects/mpephType", 0).toInt();
         double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
         double magObj1 = sett->value("objects/mag1", 16.0).toDouble();
@@ -196,6 +198,10 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         mpephProcData.folder = sett->value("processes/mpeph_prog_folder", "./").toString();
         mpephProcData.waitTime = sett->value("processes/mpeph_wait_time", -1).toInt();
         if(mpephProcData.waitTime>0) mpephProcData.waitTime *= 1000;
+        miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
+        miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
+        miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
+        if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
         QString skybot_prog = sett->value("processes/skybot_prog", "./skybotclient").toString();
         QString skybot_prog_folder = sett->value("processes/skybot_prog_folder", "./").toString();
         int skybot_wait_time = sett->value("processes/skybot_wait_time", -1).toInt();
@@ -505,7 +511,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             if(tryMpeph)
             {
                 findSkybotNamesList(&objList, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
-                getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
+                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, mpephProcData);
+                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
 
             }
             else findSkybot(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
@@ -518,14 +525,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
                 desc2NumName(descS, &oNum, &oName);
 
-                if(mpephType)
-                {
-                    objList.append(oName);
-                    //getMpephNum(fitsd->objMarks, fitsd->MJD, QString("%1").arg(oNum), mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
-                }
+                if(mpephType) objList.append(oName);
                 else objList.append(QString("%1").arg(oNum));
-                //getMpephName(fitsd->objMarks, fitsd->MJD, oName, mpeph_prog, mpeph_prog_folder, magObj0, magObj1, mpeph_wait_time);
-                getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
+
+                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, mpephProcData);
+                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
             }
         }
         qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());
@@ -537,7 +541,6 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
     fitsd->findCloserStars(aper);
 
     fitsd->ruler3(redparamIni, resFolder, refParam, sysCorr);
-
 
     qDebug() << QString("\nend ruler3PL\n");
 

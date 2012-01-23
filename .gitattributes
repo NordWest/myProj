@@ -158,6 +158,7 @@ libs/ast.cpp -text
 libs/ast.h -text
 libs/ast1line.cpp -text
 libs/ast1line.h -text
+libs/astro.h -text
 libs/astro_f.cpp -text
 libs/astro_f.h -text
 libs/astro_t2f.cpp -text
@@ -219,6 +220,7 @@ libs/kompl.h -text
 libs/longnam.h -text
 libs/mathbase.cpp -text
 libs/mathbase.h -text
+libs/mb.h -text
 libs/mpcOC.cpp -text
 libs/mpcOC.h -text
 libs/mpccat.cpp -text

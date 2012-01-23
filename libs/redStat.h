@@ -461,6 +461,7 @@ struct mpephRec
     QString num, name;
 
     int fromString(QString inStr);
+    int fromMiriStr(QString inStr);
     void copyTo(mpephRec *targ);
 };
 
@@ -570,7 +571,7 @@ public:
     void clear();
 
     void rec2s(QString *str);
-    void s2rec(QString str);
+    int s2rec(QString str);
 
     void setMesParams(double *P, int pSize);
 
