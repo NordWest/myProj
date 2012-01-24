@@ -310,6 +310,9 @@ miriadeEph/miriadeeph.cpp -text
 miriadeEph/miriadeeph.h -text
 miriadeEph/miriadeeph.ini -text
 miriadeEph/miriadeeph.pro -text
+mpcOC/main.cpp -text
+mpcOC/mpcOC.ini -text
+mpcOC/mpcOC.pro -text
 mpcStat/apvt.h -text
 mpcStat/ccdmeasurements.cpp -text
 mpcStat/ccdmeasurements.h -text
