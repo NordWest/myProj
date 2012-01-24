@@ -48,6 +48,8 @@ public:
 
 };
 
+
+
 class mpcqt
 {
     QString fileName;

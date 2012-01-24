@@ -225,6 +225,8 @@ libs/mpcOC.cpp -text
 libs/mpcOC.h -text
 libs/mpccat.cpp -text
 libs/mpccat.h -text
+libs/mpcfile.cpp -text
+libs/mpcfile.h -text
 libs/mpcqt.cpp -text
 libs/mpcqt.h -text
 libs/mpcs.cpp -text
