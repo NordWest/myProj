@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     //int lspmFind = sett->value("objects/lspmFind", 0).toInt();
     //int skybotFind = sett->value("objects/skybotFind", 0).toInt();
     //int tryMpeph = sett->value("general/tryMpeph", 0).toInt();
+    QString mpcOrbCat = sett->value("general/mpcOrbCat", "mpcorb.dat").toString();
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
     //int mpephType = sett->value("objects/mpephType", 0).toInt();
     //double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
@@ -67,6 +68,9 @@ int main(int argc, char *argv[])
     miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
     if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
 
+
+    mpccat mpCat;
+    if(mpCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
 
     QString objName;
     bool isNum;
@@ -98,6 +102,7 @@ int main(int argc, char *argv[])
         if(!getRes)
         {
             ocTemp = new ocRec;
+            ocTemp->name =
             ocTemp->MJday = mjd;
             ocTemp->ra = ra;
             ocTemp->de = de;

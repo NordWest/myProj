@@ -75,7 +75,10 @@ double mpcRec::dec()
 
 double mpcRec::magn()
 {
-    return(dataStr.mid(65, 5).toDouble());
+    QString tStr;
+    tStr = dataStr.mid(65, 5);
+    qDebug() << QString("magn: %1\n").arg(tStr);
+    return(tStr.toDouble());
 }
 
 void mpcRec::getObsCode(QString &obsCode)
