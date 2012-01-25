@@ -1,4 +1,6 @@
 #include <QtCore/QCoreApplication>
+#include "./../libs/mpcfile.h"
+#include "./../libs/comfunc.h"
 #include "./../libs/fitsdata.h"
 #include "./../libs/redStat.h"
 #include <QString>
@@ -6,14 +8,28 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    objResidualFile orFile;
+    mpcFile mpFile;
     eqFile eqResFile;
     objResRec *orTemp;
     ocRec *ocTemp;
     mpephRec mpeRec;
     QString fileName = QString(argv[1]);
+    int i, sz, getRes;
+    QString tStr;
 
-    orFile.init(fileName);
+
+    mpFile.init(fileName);
+    qDebug() << QString("mpc size: %1\n").arg(mpFile.size());
+/*
+    for(i=0; i<mpFile.size(); i++)
+    {
+        mpFile.at(i)->getProvDest(tStr);
+        qDebug() << QString("%1: %2\n").arg(i).arg(tStr);
+    }
+
+    }*/
+
+
     QFileInfo fi(fileName);
     QString oFileName;
     if(argc>2)
@@ -51,8 +67,63 @@ int main(int argc, char *argv[])
     miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
     if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
 
-    int i, sz, getRes;
-    QString tStr;
+
+    QString objName;
+    bool isNum;
+    int objNum;
+    double mjd, ra, de, magn;
+    char *upstr = new char[256];
+    sz = mpFile.size();
+    for(i=0; i<sz; i++)
+    {
+        mpFile.at(i)->getMpNumber(objName);
+        //objName.simplified();
+        objNum = objName.toInt(&isNum);
+
+        if(!isNum)
+        {
+            mpFile.at(i)->getProvDest(objName);
+            upackDigStr(upstr, objName.toAscii().data());
+            objName = QString(upstr);
+        }
+        qDebug() << QString("%1: %2\n").arg(i).arg(objNum);
+        mjd = mpFile.at(i)->mjd();
+        ra = mpFile.at(i)->ra();
+        de = mpFile.at(i)->dec();
+        magn = mpFile.at(i)->magn();
+
+        if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, QString("%1").arg(objNum), miriProcData);
+        else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
+
+        if(!getRes)
+        {
+            ocTemp = new ocRec;
+            ocTemp->MJday = mjd;
+            ocTemp->ra = ra;
+            ocTemp->de = de;
+            ocTemp->mag0 = magn;
+            ocTemp->ocRaCosDe = grad_to_mas(ra*cos(grad2rad(de)) - mpeRec.ra*cos(grad2rad(mpeRec.de)));
+            ocTemp->ocDe = grad_to_mas(de - mpeRec.de);
+            ocTemp->elong = mpeRec.elong;
+            ocTemp->ocMag = magn - mpeRec.Vmag;
+            ocTemp->phase = mpeRec.phase;
+            ocTemp->Vr = mpeRec.Vr;
+            ocTemp->muRaCosDe = mpeRec.muRaCosDe;
+            ocTemp->muDe = mpeRec.muDe;
+            ocTemp->topDist = mpeRec.topDist;
+            if(useMiriade) ocTemp->catName = QString("miriade");
+            else ocTemp->catName = QString("mpeph");
+            ocTemp->rec2s(&tStr);
+            qDebug() << tStr << "\n";
+            eqResFile.ocList.append(ocTemp);
+        }
+        else qDebug() << "\ngetMpephObject\n";
+
+
+        qDebug() << QString("%1: %2\n").arg(i).arg(tStr);
+    }
+
+    /*
     sz = orFile.ocList.size();
 
     for(i=0; i<sz; i++)
@@ -82,7 +153,7 @@ int main(int argc, char *argv[])
         }
         else qDebug() << "\ngetMpephObject\n";
     }
-
+*/
     qDebug() << QString("save %1\n").arg(oFileName);
     eqResFile.saveAs(oFileName);
 

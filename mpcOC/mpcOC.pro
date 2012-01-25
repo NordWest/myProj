@@ -39,8 +39,6 @@ HEADERS += ../libs/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h \
-    ../libs/mpcs.h \
-    ../libs/mpcqt.h \
     ../libs/mpcfile.h
 
 
@@ -70,8 +68,6 @@ SOURCES += main.cpp \
     ../libs/alglib/alglibmisc.cpp \
     ../libs/alglib/alglibinternal.cpp \
     ../libs/sysCorr.cpp \
-    ../libs/mpcs.cpp \
-    ../libs/mpcqt.cpp \
     ../libs/mpcfile.cpp
 
 
@@ -81,6 +77,7 @@ win32:LIBS += ./../libs/win32/cfitsio.lib \
 unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+
 
 
 
