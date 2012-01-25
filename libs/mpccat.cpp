@@ -395,8 +395,8 @@ int mpccat::GetRecName(char *name)
 	
 	return 0;
 }
+*/
 
-/*
 int mpccat::GetRecNum(int num)
 {
 	int pos = 0;
@@ -415,7 +415,7 @@ int mpccat::GetRecNum(int num)
 	
 	return -1;
 }
-
+/*
 int mpccat::AddRec(int pos)
 {
 	char *new_str;

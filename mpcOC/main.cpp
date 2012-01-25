@@ -3,6 +3,7 @@
 #include "./../libs/comfunc.h"
 #include "./../libs/fitsdata.h"
 #include "./../libs/redStat.h"
+#include "./../libs/mpccat.h"
 #include <QString>
 
 int main(int argc, char *argv[])
@@ -70,7 +71,11 @@ int main(int argc, char *argv[])
 
 
     mpccat mpCat;
-    if(mpCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
+    if(mpCat.init(mpcOrbCat.toAscii().data()))
+    {
+        qDebug() << QString("mpoCat init error!\n");
+        return 1;
+    }
 
     QString objName;
     bool isNum;
@@ -90,6 +95,10 @@ int main(int argc, char *argv[])
             upackDigStr(upstr, objName.toAscii().data());
             objName = QString(upstr);
         }
+        else
+        {
+            if(mpCat.GetRecNum(objNum)!=-1) objName = QString(mpCat.record->name);
+        }
         qDebug() << QString("%1: %2\n").arg(i).arg(objNum);
         mjd = mpFile.at(i)->mjd();
         ra = mpFile.at(i)->ra();
@@ -102,7 +111,7 @@ int main(int argc, char *argv[])
         if(!getRes)
         {
             ocTemp = new ocRec;
-            ocTemp->name =
+            ocTemp->name = objName;
             ocTemp->MJday = mjd;
             ocTemp->ra = ra;
             ocTemp->de = de;
@@ -118,6 +127,7 @@ int main(int argc, char *argv[])
             ocTemp->topDist = mpeRec.topDist;
             if(useMiriade) ocTemp->catName = QString("miriade");
             else ocTemp->catName = QString("mpeph");
+            ocTemp->catMagName = QString("Vmag");
             ocTemp->rec2s(&tStr);
             qDebug() << tStr << "\n";
             eqResFile.ocList.append(ocTemp);
