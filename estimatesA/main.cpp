@@ -36,6 +36,8 @@ int main(int argc, char *argv[])//.exe fname typeoftask colSep "colNums,"
 		//BEGIN arguments
 
                 QString fname = QString(argv[1]);
+                QFileInfo fi(fname);
+                QString rejName = QString("%1%2_rej.txt").arg(fi.absolutePath()).arg(fi.completeBaseName());
                 int typeoftask = QString(argv[2]).toInt();
                 QString colSep = "|";
 
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])//.exe fname typeoftask colSep "colNums,"
                     case 2:
                         {
                             eqData.do3sigma(0.05, 3.0, &ocRej);
-                            QFile oFile(fname);
+                            QFile oFile(rejName);
                             oFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
                             QTextStream oStm(&oFile);
                             for(i=0; i<ocRej.size(); i++)

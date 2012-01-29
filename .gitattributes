@@ -350,7 +350,6 @@ obsCoordinator/mainwindow.cpp -text
 obsCoordinator/mainwindow.h -text
 obsCoordinator/mainwindow.ui -text
 obsCoordinator/obsCoordinator.pro -text
-obsCoordinator/obsCoordinator.pro.user -text
 oclTest/main.cpp -text
 oclTest/oclTest.pro -text
 oclTest/oclTest.pro.user -text

@@ -40,8 +40,6 @@ HEADERS += ../libs/astro.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h \
     ../libs/mpcfile.h \
-    ../libs/mpccat.h \
-    ../libs/fbStream.h \
     ../libs/orbcat.h
 
 
@@ -72,8 +70,6 @@ SOURCES += main.cpp \
     ../libs/alglib/alglibinternal.cpp \
     ../libs/sysCorr.cpp \
     ../libs/mpcfile.cpp \
-    ../libs/mpccat.cpp \
-    ../libs/fbStream.cpp \
     ../libs/orbcat.cpp
 
 
@@ -83,6 +79,8 @@ win32:LIBS += ./../libs/win32/cfitsio.lib \
 unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+
+
 
 
 

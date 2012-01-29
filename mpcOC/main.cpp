@@ -3,7 +3,7 @@
 #include "./../libs/comfunc.h"
 #include "./../libs/fitsdata.h"
 #include "./../libs/redStat.h"
-#include "./../libs/mpccat.h"
+#include "./../libs/orbcat.h"
 #include <QString>
 
 int main(int argc, char *argv[])
@@ -70,12 +70,13 @@ int main(int argc, char *argv[])
     if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
 
 
-    mpccat mpCat;
+    OrbCat mpCat;
     if(mpCat.init(mpcOrbCat.toAscii().data()))
     {
         qDebug() << QString("mpoCat init error!\n");
         return 1;
     }
+    qDebug() << QString("mpCat size: %1\n").arg(mpCat.nstr);
 
     QString objName;
     bool isNum;
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
         //objName.simplified();
         objNum = objName.toInt(&isNum);
 
-        if(!isNum)
+        if(!isNum||objNum<=0)
         {
             mpFile.at(i)->getProvDest(objName);
             upackDigStr(upstr, objName.toAscii().data());
@@ -98,14 +99,15 @@ int main(int argc, char *argv[])
         else
         {
             if(mpCat.GetRecNum(objNum)!=-1) objName = QString(mpCat.record->name);
+            else objName = QString("noname");
         }
-        qDebug() << QString("%1: %2\n").arg(i).arg(objNum);
+        qDebug() << QString("%1: %2 - %3\n").arg(i).arg(objNum).arg(objName);
         mjd = mpFile.at(i)->mjd();
         ra = mpFile.at(i)->ra();
         de = mpFile.at(i)->dec();
         magn = mpFile.at(i)->magn();
 
-        if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, QString("%1").arg(objNum), miriProcData);
+        if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData);
         else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
 
         if(!getRes)

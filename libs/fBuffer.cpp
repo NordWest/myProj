@@ -417,8 +417,12 @@ int fBuffer::init(char* fn, int sizestr)
 
 //	fseek(FNN, 0, SEEK_SET);
 	this->nstr = 0;
+        fseek(FNN, 0, SEEK_END);
+        long cpos = ftell(FNN);
+        this->nstr = cpos/(this->sizestr+1);
 //	fgets(this->str, 1000, FNN);
 //	this->sizestr = strlen(this->str);
+        /*
 	while(fread(this->str, this->sizestr+1, 1, FNN))
 	{
 		strcpy(&str[this->sizestr+1], "\0");
@@ -426,7 +430,7 @@ int fBuffer::init(char* fn, int sizestr)
 		
 		this->nstr++;
 	}
-
+*/
 	this->is_edited = 0;
 
 	fclose(FNN);

@@ -1353,9 +1353,11 @@ void MainWindow::MakeExposureButtonClicked()
 
                  if(mesEndExp&&!isAb)
                  {
-                     wakeUpDlg wuDlg;
+                     dockTimePosWidget->show();
+                     setFocus();
+                     //wakeUpDlg wuDlg;
                      //wuDlg.setFocus();
-                     wuDlg.exec();
+                     //wuDlg.exec();
                  }
 		 //QMouseEvent event(QEvent::MouseButtonPress, QPoint::QPoint(1,1), Qt::LeftButton, 0, 0);
 		 //QApplication::sendEvent(imageLabel, &event);

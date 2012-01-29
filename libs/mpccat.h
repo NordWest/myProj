@@ -151,7 +151,7 @@ public:
 
 //	int GetRec(int pos);
 	int GetRecName(char *name);
-	int GetRecNum(int num);
+//	int GetRecNum(int num);
 //	int AddRec(int pos);
 //	int AddRec();
 

@@ -395,7 +395,7 @@ int mpccat::GetRecName(char *name)
 	
 	return 0;
 }
-*/
+/
 
 int mpccat::GetRecNum(int num)
 {
