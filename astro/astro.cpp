@@ -227,7 +227,7 @@ double getMJDfromYMD(QString strT)
 	date_obs.sec = (mm - date_obs.min)*60;
 	double mjd = getJD(date_obs) - 2400000.5;
 	return mjd;
-};
+}
 
 double jd2mjd(double jd)
 {

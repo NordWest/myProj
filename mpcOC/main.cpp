@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            if(mpCat.GetRecNum(objNum)!=-1) objName = QString(mpCat.record->name);
+            if(mpCat.GetRec(objNum-1)!=-1) objName = QString(mpCat.record->name);
             else objName = QString("noname");
         }
         qDebug() << QString("%1: %2 - %3\n").arg(i).arg(objNum).arg(objName);

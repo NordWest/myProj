@@ -55,10 +55,12 @@ void mpcRec::getNote2(QString &note2)
 
 double mpcRec::mjd()
 {
+    double jday;
     QString tStr;
     tStr = dataStr.mid(15, 17);
-
-    return(getMJDfromYMD(tStr));
+    dat2JD(&jday, tStr.section(" ", 0, 0, QString::SectionSkipEmpty).toInt(), tStr.section(" ", 1, 1, QString::SectionSkipEmpty).toInt(), tStr.section(" ", 2, 2, QString::SectionSkipEmpty).toDouble());
+    double res = jd2mjd(jday);
+    return(res);
 }
 
 double mpcRec::ra()
@@ -101,6 +103,17 @@ int mpcRec::fromStr(QString dStr)
     return 0;
 }
 
+int mpcRec::fromRec(mpcRec& source)
+{
+    dataStr.clear();
+    dataStr.insert(0, source.toStr());
+}
+
+QString mpcRec::toStr()
+{
+    return QString(dataStr);
+}
+
 mpcRec::mpcRec()
 {
     dataStr.clear();
@@ -123,6 +136,7 @@ mpcFile::mpcFile()
 
 int mpcFile::init(QString fName)
 {
+    fileName = QString(fName);
     QFile iniFile(fName);
     if(!iniFile.open(QIODevice::ReadOnly)) return 1;
     QTextStream iniStm(&iniFile);
@@ -140,6 +154,31 @@ int mpcFile::init(QString fName)
     }
 }
 
+int mpcFile::saveAs(QString fName)
+{
+    fileName = QString(fName);
+    return(save());
+}
+
+int mpcFile::save()
+{
+    QFile outFile(fileName);
+    if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) return 1;
+    QTextStream outStm(&outFile);
+    mpcRec *mpR;
+
+    int szi, i;
+
+    szi = recList.size();
+
+    for(i=0; i<szi; i++)
+    {
+        outStm << recList.at(i)->toStr() << "\n";
+    }
+
+    outFile.close();
+}
+
 mpcRec* mpcFile::at(int i)
 {
     if(i<0||i>recList.size()) return NULL;
@@ -151,3 +190,8 @@ int mpcFile::size()
     return(recList.size());
 }
 
+void mpcFile::addRec(mpcRec& nRec)
+{
+    mpcRec *sRec = new mpcRec(nRec.toStr());
+    recList << sRec;
+}

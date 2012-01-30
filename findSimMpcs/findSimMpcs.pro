@@ -16,18 +16,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    ../libs/mpcs.cpp \
-    ../libs/coord.cpp \
-    ../libs/comfunc.cpp \
-    ../libs/DynArr.cpp \
-    ../astro/astro.cpp
+    ../libs/mpcfile.cpp \
+    ../libs/comfunc.cpp
 
 HEADERS += ../mb/mb.h \
-    ../libs/mpcs.h \
-    ../libs/coord.h \
+    ../libs/mpcfile.h \
     ../libs/comfunc.h \
-    ../libs/DynArr.h \
-    ../astro/astro.h
+    ../libs/astro.h
 
-win32:LIBS += ./../libs/win32/libmb.a
-unix:LIBS += ./../libs/unix/libmb.a
+win32:LIBS += ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libmb.a \
+                ./../libs/unix/libastro.a
