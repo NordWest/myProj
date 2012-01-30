@@ -25,12 +25,15 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
     double mjd0, mjd1, dT, dTmin;
     QString objNum0, objNum1;
 
+    QFile logFile("log.txt");
+    logFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream logStm(&logFile);
+
     QSettings *sett = new QSettings("./findSimMpcs.ini", QSettings::IniFormat);
 
     bool ook;
     QString obsName = sett->value("general/obsName", "-1").toString();
     QString objNum = sett->value("general/objNum", "-1").toString();
-    QString obsNumName;
     QString obsCode0, obsCode1;
     /*obsNum = obsName.toInt(&ook);
     if((obsNum!=-1)||(!ook))
@@ -48,7 +51,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
     sz0 = mpc0.size();
     sz1 = mpc1.size();
 
-    qDebug() << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
+    logStm << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
 
 
     //DATEOBS dobs;
@@ -83,7 +86,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
         rec0->getObsCode(obsCode0);
         rec0->getMpNumber(objNum0);
         mjd0 = rec0->mjd();
-        qDebug() << QString("%1 | %2 | %3\n").arg(obsCode0).arg(objNum0).arg(mjd0, 13, 'f', 5);
+        //qDebug() << QString("%1 | %2 | %3\n").arg(obsCode0).arg(objNum0).arg(mjd0, 13, 'f', 5);
         if(((QString().compare(obsCode0, obsName)==0)||(QString().compare("-1", obsName)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
         {
             if(sz1==0)
@@ -130,6 +133,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
             }
             if((posMin!=-1)&&(dTmin<dtime))
             {
+                logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0->mjd(), 13, 'f', 5).arg(dTmin*1440);
                 rec1 = mpc1.at(posMin);
                 mpc0res.addRec(*rec0);
                 mpc1res.addRec(*rec1);
@@ -141,6 +145,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
     mpc1res.save();
 
 //
+    logFile.close();
 
     return 0;//a.exec();
 }
