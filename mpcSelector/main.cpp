@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     int objNum;
     int isObs, isObj, isTime, k, r, i;
     QString mpNum, obsCode;
-    double mjd0, mjd1;
+    double mjd0, mjd1, mjd;
 
     QString cfgFileName = "mpcSelector.ini";
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
 
-    if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0);
-    if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1);
+    if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0, 0);
+    if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
 
     QString fileName = QString(argv[1]);
     QString fileNameRes = QString(argv[2]);
