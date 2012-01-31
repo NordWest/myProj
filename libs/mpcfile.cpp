@@ -67,12 +67,14 @@ double mpcRec::ra()
 {
     QString tStr;
     tStr = dataStr.mid(32, 12);
-    return(mas_to_grad(hms_to_mas(dataStr.mid(32, 12), " ")));
+    return(hms2grad(tStr.mid(0, 2).toInt(), tStr.mid(3, 2).toInt(), tStr.mid(6, 6).toDouble()));
 }
 
 double mpcRec::dec()
 {
-    return(mas_to_grad(damas_to_mas(dataStr.mid(44, 12), " ")));
+    QString tStr;
+    tStr = dataStr.mid(44, 12);
+    return(gms2grad(QString().compare(tStr.mid(0,1), "+")==0, tStr.mid(1,2).toInt(), tStr.mid(4,2).toInt(), tStr.mid(7,5).toDouble()));
 }
 
 double mpcRec::magn()

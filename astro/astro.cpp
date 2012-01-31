@@ -28,7 +28,7 @@ double ang_b_dir(double a1, double d1, double a2, double d2)
 double hms_to_mas(QString ra, QString spl_symb)
 {
  ra = ra.trimmed(); 
- QStringList ra_list = ra.split(spl_symb);
+ QStringList ra_list = ra.split(spl_symb, QString::SkipEmptyParts);
  QString nums = ra_list.at(0);
  double h = nums.toDouble();
  nums = ra_list.at(1);
@@ -43,7 +43,7 @@ double damas_to_mas(QString de, QString spl_symb)
  de = de.trimmed();
  double sign;
  if (de[0]=='-') sign = -1; else sign = 1; 
- QStringList de_list = de.split(spl_symb);
+ QStringList de_list = de.split(spl_symb, QString::SkipEmptyParts);
  QString nums = de_list.at(0);
  double deg = nums.toDouble();
  deg = fabs(deg);		

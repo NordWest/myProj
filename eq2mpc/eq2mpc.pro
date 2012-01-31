@@ -18,14 +18,12 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/redStat.cpp \
     ../libs/multidim.cpp \
-    ../libs/astro.cpp \
     ../libs/sscat.cpp \
     ../libs/comfunc.cpp \
+    ../libs/mpccat.cpp \
     ../libs/fBuffer.cpp \
-    ../libs/ccdmeasurements.cpp \
-    ../libs/mpcs.cpp \
-    ../libs/coord.cpp \
-    ../libs/DynArr.cpp
+    ../libs/fbStream.cpp \
+    ../libs/orbcat.cpp
 
 HEADERS += \
     ../libs/redStat.h \
@@ -34,10 +32,18 @@ HEADERS += \
     ../libs/astro.h \
     ../libs/sscat.h \
     ../libs/comfunc.h \
+    ../libs/mpccat.h \
     ../libs/fBuffer.h \
-    ../libs/ccdmeasurements.h \
-    ../libs/mpcs.h \
-    ../libs/coord.h \
-    ../libs/DynArr.h
-win32:LIBS += ./../libs/win/libmb.a
-unix:LIBS += ./../libs/unix/libmb.a
+    ../libs/fbStream.h \
+    ../libs/orbcat.h
+
+win32:LIBS += ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libmb.a \
+            ./../libs/unix/libastro.a
+
+
+
+
+
+

@@ -1,48 +1,66 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/redStat.h"
-#include "./../libs/mpcs.h"
-#include "./../astro/astro.h"
+//#include "./../libs/mpcfile.h"
+#include "./../libs/astro.h"
+#include "./../libs/mpccat.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
+    setlocale(LC_NUMERIC, "C");
 
     eqFile eqFile;
     eqFile.init(argv[1]);
+    int i, szi;
 
     ocRec *ocRecord;
-    mpc *mpcRecord;
-    mpccat mpoCat;
 
-    mpcs mpFile;
-    mpFile.init(argv[2]);
+    mpccat mpoCat;
+    QString objName, objNum, tStr;
+
+    //mpcs mpFile;
+    QString resFileName = QString(argv[2]);
+
+    QString cfgFileName = "eq2mpc.ini";
+    QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
+    QString mpcOrbCat = sett->value("general/mpcOrbCat", "mpcorb.dat").toString();
+    QString obsCode = sett->value("general/obsCode", "084").toString();
 
     if(mpoCat.init(mpcOrbCat.toAscii().data())) qDebug() << QString("mpoCat init error!\n");
 
-    objName = objStat.objList.at(i)->objName.simplified();
-    catName = objStat.objList.at(i)->catName.simplified();
-    catMagName = objStat.objList.at(i)->catMagName.simplified();
+    QFile resFile(resFileName);
+    if(!resFile.open(QIODevice::WriteOnly | QIODevice::Append))
+    {
+        qDebug() << QString("File %1 not open. stop\n").arg(resFileName);
+        return 1;
+    }
+    QTextStream resStm(&resFile);
 
+    char *tstr = new char[256];
 
-
-    int i, szi;
     szi = eqFile.ocList.size();
 
     for(i=0;i<szi;i++)
     {
         ocRecord = eqFile.ocList.at(i);
-        ocRecord->rec2MPC();
-        mpcRecord = new mpc;
-        mpcRecord->d = ocRecord->de;
-        mpcRecord->eJD = mjd2jd(ocRecord->MJday);
-        mpcRecord->magn = ocRecord->mag0;
-        mpcRecord->num = ocRecord->de;
-        mpcRecord->d = ocRecord->de;
-        mpcRecord->d = ocRecord->de;
+
+        objName = ocRecord->name.simplified();
+        //catName = objStat.objList.at(i)->catName.simplified();
+        //catMagName = objStat.objList.at(i)->catMagName.simplified();
+
+        mpoCat.GetRecName(objName.toAscii().data());
+        mpoCat.record->getNumStr(tstr);
+        objNum = QString(tstr);
+
+
+        ocRecord->rec2MPC(&tStr, obsCode, objNum);
+
+        resStm << tStr << "\n";
+
     }
 
 
+    resFile.close();
 
 
     return 0;//a.exec();

@@ -4,6 +4,7 @@
 #include <QtCore>
 
 #include "astro.h"
+#include "comfunc.h"
 
 class mpcRec
 {

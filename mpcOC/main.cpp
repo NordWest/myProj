@@ -9,6 +9,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    setlocale(LC_NUMERIC, "C");
     mpcFile mpFile;
     eqFile eqResFile;
     objResRec *orTemp;

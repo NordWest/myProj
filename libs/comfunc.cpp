@@ -858,6 +858,12 @@ int hms2rad(double *rad, int sn, int h, int m, double s)
 	if(!sn) *rad = -*rad;
 	return 0;
 }
+
+double hms2grad(int h, int m, double s)
+{
+        return(((s/60.0 + m*1.0)/60.0 + h*1.0)*15.0);
+}
+
 void hms2rad(double *rad, char* str)
 {
 	char *slo = new char[32];
@@ -897,6 +903,13 @@ int gms2rad(double *rad, int sn, int g, int m, double s)
 	*rad = ((s/60.0 + m*1.0)/60.0 + g*1.0)*PI/180.0;
 	if(!sn) *rad = -*rad;
 	return 0;
+}
+
+double gms2grad(int plus, int g, int m, double s)
+{
+        double grad = ((s/60.0 + m*1.0)/60.0 + g*1.0);
+        if(!plus) grad *= -1.0;
+        return grad;
 }
 
 void gms2rad(double *rad, char *str)

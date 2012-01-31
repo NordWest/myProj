@@ -132,8 +132,10 @@ double round( double val, int signs );
 
 int hms2rad(double *rad, int sign, int h, int m, double s);
 void hms2rad(double *rad, char* str);
+double hms2grad(int h, int m, double s);
 double hms2rad(char* str);
 int gms2rad(double *rad, int sign, int g, int m, double s);
+double gms2grad(int plus, int g, int m, double s);
 void gms2rad(double *rad, char *str);
 double gms2rad(char *str);
 int rad2hms(double rad, int *sign, int *h, int *m, double *s);

@@ -2573,12 +2573,14 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
     s3Stm << "\ndo3Sigma\n";
     if(num1<3) return;
 
+    if((getColRecNum(4)!=-1)&&(getColRecNum(5)!=-1)) reCountCols();
+    else countCols("4,5");
+
     do
     {
             num0 = num1;
 
-            if((getColRecNum(4)!=-1)&&(getColRecNum(5)!=-1)) reCountCols();
-            else countCols("4,5");
+
 
             meanRa = getColNum(4)->mean;
             meanDec = getColNum(5)->mean;
@@ -2623,6 +2625,8 @@ void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
             s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
+            if((getColRecNum(4)!=-1)&&(getColRecNum(5)!=-1)) reCountCols();
+            else countCols("4,5");
 
     }while(abs(num0-num1)>(proofP*num1));
 
