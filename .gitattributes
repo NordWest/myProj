@@ -316,6 +316,7 @@ mpcOC/main.cpp -text
 mpcOC/mpcOC.ini -text
 mpcOC/mpcOC.pro -text
 mpcSelector/main.cpp -text
+mpcSelector/mpcSelector.ini -text
 mpcSelector/mpcSelector.pro -text
 mpcStat/apvt.h -text
 mpcStat/ccdmeasurements.cpp -text

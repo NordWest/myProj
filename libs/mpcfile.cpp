@@ -165,7 +165,7 @@ int mpcFile::save()
     QFile outFile(fileName);
     if(!outFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) return 1;
     QTextStream outStm(&outFile);
-    mpcRec *mpR;
+    //mpcRec *mpR;
 
     int szi, i;
 
