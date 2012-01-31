@@ -60,10 +60,18 @@ int main(int argc, char *argv[])
         isTime = 1;
 
         mpR.getMpNumber(mpNum);
-        for(i=0; i<objNum && objNumList.at(i).size()>0;i++)isObj = (QString().compare(mpNum, objNumList.at(i))==0);
+        for(i=0; i<objNum && objNumList.at(i).size()>0;i++)
+        {
+            isObj = (QString().compare(mpNum, objNumList.at(i))==0);
+            if(isObj) break;
+        }
 
         mpR.getObsCode(obsCode);
-        for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
+        for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
+        {
+            isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
+            if(isObs) break;
+        }
 
         mjd = mpR.mjd();
 
