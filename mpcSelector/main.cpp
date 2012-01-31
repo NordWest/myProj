@@ -10,16 +10,20 @@ int main(int argc, char *argv[])
     mpcRec mpR;
     int obsNum;
     int objNum;
-    int isObs, isObj, k, r, i;
+    int isObs, isObj, isTime, k, r, i;
     QString mpNum, obsCode;
+    double mjd0, mjd1;
 
     QString cfgFileName = "mpcSelector.ini";
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
     QStringList obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
     QStringList objNumList = sett->value("general/objNumList", "").toString().split("|");
-    QString timeS0 = sett->value("general/time0", "-1").toString();
-    QString timeS1 = sett->value("general/time1", "-1").toString();
+    QString timeS0 = sett->value("general/time0", "").toString();
+    QString timeS1 = sett->value("general/time1", "").toString();
+
+    if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0);
+    if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1);
 
     QString fileName = QString(argv[1]);
     QString fileNameRes = QString(argv[2]);
@@ -53,6 +57,7 @@ int main(int argc, char *argv[])
 
         isObj = 1;
         isObs = 1;
+        isTime = 1;
 
         mpR.getMpNumber(mpNum);
         for(i=0; i<objNum && objNumList.at(i).size()>0;i++)isObj = (QString().compare(mpNum, objNumList.at(i))==0);
@@ -60,7 +65,11 @@ int main(int argc, char *argv[])
         mpR.getObsCode(obsCode);
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
 
-        if(isObj&&isObs)
+        mjd = mpR.mjd();
+
+        isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
+
+        if(isObj&&isObs&&isTime)
         {
             resStm << mpR.toStr() << "\n";
             r++;
