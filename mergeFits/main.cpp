@@ -222,6 +222,8 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
     QString ebFileName = QString(workDir.absolutePath() + "err_budget.txt");
     QString resFileName = QString(workDir.absolutePath() + "residuals.txt");
 
+    qDebug() << QString("ebFileName: %1\nresFileName: %2\n").arg(ebFileName).arg(resFileName);
+
     reductionStat rStat;
     rStat.init(&ebFileName, &resFileName);
 
