@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
 
 //command line  ///////////////////////////////////////
 
-    for(i=2; i<argc; i++)
+    for(i=3; i<argc; i++)
     {
         optStr = QString(argv[i]);
         optName = optStr.section("=", 0, 0);
