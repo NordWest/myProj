@@ -232,6 +232,7 @@ int main(int argc, char *argv[]) //mergeFits err_budget.txt resFolder [commands]
 */
     QString resFolder = QString(argv[2]);
 
+    qDebug() << QString("errB num: %1\tdEMax: %2\n").arg(rStat.ebFile->errList.size()).arg(dEMax);
     detErrBSeriesList(rStat.ebFile->errList, &ebSeriesList, dEMax);
     serSz = ebSeriesList.size();
     qDebug() << QString("find %1 series\n").arg(serSz);
