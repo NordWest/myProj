@@ -53,7 +53,7 @@ public:
 	observ();
 	~observ();
 
-        int detSanRADEC(double *raS, double *decS);
+        int detSunRADEC(double *raS, double *decS);
 
 /*
 	mpcs *lmpc;

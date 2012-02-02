@@ -600,6 +600,8 @@ rulermanagerGUI/main.cpp -text
 rulermanagerGUI/rulermanager.pro -text
 rulermanagerGUI/rulerprocess.cpp -text
 rulermanagerGUI/rulerprocess.h -text
+sAreaTest/main.cpp -text
+sAreaTest/sAreaTest.pro -text
 sateph/astro.cpp -text
 sateph/astro.h -text
 sateph/main.cpp -text

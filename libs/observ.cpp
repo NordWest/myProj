@@ -156,7 +156,7 @@ int observ::det_observ(double tUTC)
 	return 0;
 }
 
-int observ::detSanRADEC(double *raS, double *decS)
+int observ::detSunRADEC(double *raS, double *decS)
 {
     double Xs, Ys, Zs;
     if(this->place->detR(&Xs, &Ys, &Zs, this->otime, SUN_NUM, 0, this->center, sk)) return 1;

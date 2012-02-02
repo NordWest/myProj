@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>settWindow</class>
  <widget class="QTabWidget" name="settWindow">
@@ -13,15 +13,17 @@
   <property name="windowTitle">
    <string>TabWidget</string>
   </property>
-  <widget class="QWidget" name="tab">
+  <widget class="QWidget" name="general">
    <attribute name="title">
     <string>Tab 1</string>
    </attribute>
   </widget>
-  <widget class="QWidget" name="tab">
+  <widget class="QWidget" name="list">
    <attribute name="title">
     <string>Tab 2</string>
    </attribute>
   </widget>
  </widget>
+ <resources/>
+ <connections/>
 </ui>
