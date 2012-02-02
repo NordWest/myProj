@@ -91,11 +91,7 @@ void rsSelector5(marksGrid *refMarks, QVector<int> &rsindex, marksP *mP, double 
 void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int minRefStarsNum);
 void rsSelector7(marksGrid *refMarks, QVector<int> &rsindex, double cX, double cY, double dMax, double nMin);
 
-struct procData
-{
-    QString name, folder;
-    int waitTime;
-};
+
 
 class catFinder
 {

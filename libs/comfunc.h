@@ -281,7 +281,11 @@ void FFT(const double& dIn, const double *dOut, int dSz, int nn, int beginData);
 
 void sortX(double *x, double *dx, int num);
 
-
+struct procData
+{
+    QString name, folder;
+    int waitTime;
+};
 
 
 

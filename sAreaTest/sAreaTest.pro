@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     ../libs/fBuffer.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscatFB.cpp \
-    ../libs/fbStream.cpp
+    ../libs/fbStream.cpp \
+    ../libs/redStat.cpp
 
 HEADERS += \
     ../libs/sscat.h \
@@ -45,12 +46,15 @@ HEADERS += \
     ../libs/sscatFB.h \
     ../libs/fbStream.h \
     ../libs/mb.h \
-    ../libs/astro.h
+    ../libs/astro.h \
+    ../libs/redStat.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+
+
 
 
 
