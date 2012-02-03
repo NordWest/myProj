@@ -840,7 +840,7 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
     {
             this->detR(&xt, &yt, &zt, Time, SUN_NUM, proizv, 0, 0);
 
-            printf("sun_pos: %f %f %f\n", xt, yt, zt);
+            //printf("sun_pos: %f %f %f\n", xt, yt, zt);
 
             *x -= xt;
             *y -= yt;

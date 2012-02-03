@@ -305,6 +305,9 @@ double mpcrec::getEpoch()
 	strncpy(upstr, "\0", 1);
 	strncpy(&upstr[0], "\0", 1);
 
+        char *yearStr = new char[4];
+        strcpy(yearStr,"");
+
 	for(int i=0; i<5; i++)
 	{
 		strncpy(sim, &this->epoch[i], 1);
@@ -320,25 +323,34 @@ double mpcrec::getEpoch()
 
 	}
 
-	strncpy(sim, upstr, 4);
-	strcpy(&sim[4], "\0");
-	int year = atoi(sim);
+        strncpy(sim, &this->epoch[0], 1);
+        strcpy(&sim[1], "\0");
+        upackDigStr(sim, sim1);
+        strncat(yearStr, sim1, 2);
+        strncat(yearStr, &this->epoch[1], 2);
+        int year = atoi(yearStr);
 
-	strncpy(sim, &upstr[4], 2);
-	strcpy(&sim[2], "\0");
-	int month = atoi(sim);
+        strcpy(yearStr,"");
+        strncpy(sim, &this->epoch[3], 1);
+        strcpy(&sim[1], "\0");
+        upackDigStr(sim, sim1);
+        //strncat(yearStr, sim1, 2);
+        int month = atoi(sim1);//strncat(yearStr, &this->epoch[1], 2);
 
-	strncpy(sim, &upstr[6], 2);
-	strcpy(&sim[2], "\0");
-	double day = atoi(sim)+0.5;
+        strcpy(yearStr,"");
+        strncpy(sim, &this->epoch[4], 1);
+        strcpy(&sim[1], "\0");
+        upackDigStr(sim, sim1);
+        double day = atoi(sim1)+0.5;
 
-	double jday;
+        double jday;
 
 	dat2JD(&jday, year, month, day);
 
 	delete [] sim;
 	delete [] sim1;
 	delete [] upstr;
+        delete [] yearStr;
 
 	return jday;
 }
