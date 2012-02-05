@@ -25,6 +25,11 @@ public:
     void getBand(QString &bandStr);
     void getObsCode(QString &obsCode);
 
+    void setPos(double mjdt, double radeg, double deDeg);
+    void setMagn(double magn);
+    void setName(QString name);
+    void setProvDest(QString pName);
+
     int fromStr(QString dStr);
     int fromRec(mpcRec& source);
     QString toStr();

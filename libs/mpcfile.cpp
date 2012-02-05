@@ -127,6 +127,28 @@ mpcRec::mpcRec(QString nStr)
     dataStr.insert(0, nStr);
 }
 
+void mpcRec::setPos(double mjdt, double radeg, double deDeg)
+{
+    QString strT(dataStr);
+    dataStr.clear();
+    dataStr = QString("%1%2%3%4%5").arg(strT.mid(0));
+}
+
+void mpcRec::setMagn(double magn)
+{
+
+}
+
+void mpcRec::setName(QString name)
+{
+
+}
+
+void mpcRec::setProvDest(QString pName)
+{
+
+}
+
 
 ///////////////////////////////////////////////////////////
 

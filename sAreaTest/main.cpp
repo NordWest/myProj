@@ -5,6 +5,7 @@
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
+#include "./../libs/mpcfile.h"
 
 
 int main(int argc, char *argv[])
@@ -12,7 +13,31 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+    int nbd;
+    int szi, i, j;
+    mpccat mpCat;
+    orbit orb_elem;
+    double Sdist, Edist, x, y, z, magn, ra, de, utc0, utct, step;
+    double xM, yM, zM;
+    QString tRa, tDe;
+    double dRa, dDe;
+    QString sJD, tStr, objName;
+    QStringList objList;
+    QList <double*> raL;
+    QList <double*> deL;
+    QList <double*> raML;
+    QList <double*> deML;
+    QList <double*> timeL;
+    double *times, *ravect, *devect;
+
+
+    QSettings sett("./saTest.ini", QSettings::IniFormat);
+
+    QString mpcCatName = sett.value("general/mpcCatName", "mpcorb.dat").toString();
+    QString deleCatName = sett.value("general/deleCatName", "dele.cat").toString();
+
     observ obsPos;
+    mpcRec mpcr;
 
     procData miriadeProcData;
     miriadeProcData.name = "./miriadeEph";
@@ -22,10 +47,10 @@ int main(int argc, char *argv[])
     QProcess outerProcess;
     QStringList outerArguments;
     //QTextStream objStream;
-    QString objDataStr;
+    QString objDataStr, strT;
     mpephRec mpcObj;
 
-    obsPos.init("./Obs.txt", "./../../data/cats/binp1940_2020.405");
+    obsPos.init("./Obs.txt", deleCatName.toAscii().data());
 
     obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, "500");
 
@@ -40,33 +65,23 @@ int main(int argc, char *argv[])
     iniFile.open(QIODevice::ReadOnly);
     QTextStream iniStm(&iniFile);
 
+    QFile recFile("rec.txt");
+    recFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream recStm(&recFile);
 
-    int nbd;
-    //IList iList;
-    mpccat mpCat;
-    orbit orb_elem;
-    double Sdist, Edist, x, y, z, magn, ra, de, utc0, utct, step;
-    double xM, yM, zM;
-    QString tRa, tDe;
-    double dRa, dDe;
-    QString sJD, tStr, objName;
-    QStringList objList;
+
+
+
 
     //iList.init("ini.lst");
     //iCat.init("ini.cat");
-    mpCat.init("./../../data/cats/MPCORB.DAT");
+    mpCat.init(mpcCatName.toAscii().data());
 
-    int szi, i, j;
+
     //szi = iList.nstr;
     step = 30;
     nbd = 1;
-    QList <double*> raL;
-    QList <double*> deL;
-    QList <double*> raML;
-    QList <double*> deML;
-    QList <double*> timeL;
 
-    double *times, *ravect, *devect;
 
 /*
     utc = 2454500.5;
@@ -125,7 +140,7 @@ int main(int argc, char *argv[])
 
 */
 
-        while(!iniStm.atEnd())
+    while(!iniStm.atEnd())
     {
         //if(iList.GetRec(i))logStm << QString("ilstt err\n");
 
@@ -155,7 +170,12 @@ int main(int argc, char *argv[])
             logStm << QString("utct: %1\n").arg(utct,13,'f',5);
             obsPos.det_observ(utct);
             orb_elem.detRecEkv(&x, &y, &z, utct);
+            getStrFTNfromMJD(&strT, jd2mjd(utct), 0.0);
+            recStm << QString("%1|%2|%3|%4|%5|%6\n").arg(utct,13,'f',5).arg(strT).arg(x,13,'f',5).arg(y,13,'f',5).arg(z,13,'f',5).arg(objName);
             detRDnumGC(&ra, &de, x, y, z, obsPos.ox, obsPos.oy, obsPos.oz, obsPos.obs->dcx, obsPos.obs->dcy, obsPos.obs->dcz);
+
+
+
             ravect[i] = ra;
             devect[i] = de;
             times[i] = utct;
@@ -351,6 +371,7 @@ int main(int argc, char *argv[])
         logFile.close();
         iniFile.close();
         resFile.close();
+        recFile.close();
 
     return 0;//a.exec();
 }
