@@ -750,6 +750,8 @@ ucac2find/main.cpp -text
 ucac2find/ucac2find.pro -text
 ucac3find/main.cpp -text
 ucac3find/ucac3find.pro -text
+utCorrTest/main.cpp -text
+utCorrTest/utCorrTest.pro -text
 wcs2mks/main.cpp -text
 wcs2mks/wcs2mks.pro -text
 wcsFinder/main.cpp -text
