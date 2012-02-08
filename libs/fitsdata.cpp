@@ -1605,6 +1605,51 @@ int HeadList::size()
     return headList.size();
 }
 
+void HeadList::readHeader(QString headStr)
+{
+    QStringList headVals;
+    int pos0, pos1;
+    clear();
+
+    if(FD_LOG_LEVEL) qDebug() << "headStr " << headStr << "\n";
+
+    //fitsHeader = headStr;
+    headVals = headStr.split("\n", QString::SkipEmptyParts);
+    int sz = headVals.size();
+    //if(FD_LOG_LEVEL) qDebug() << "headVals.size= " << sz << "\n";
+    //if(sz<10) return 1;
+    HeadRecord *headRec;
+    QTextCodec *codec1 = QTextCodec::codecForName("windows-1251");
+
+    for(int i=0; i<sz; i++)
+    {
+        headRec = new HeadRecord;
+        pos0 = headVals.at(i).indexOf(codec1->toUnicode("="));
+        //if(FD_LOG_LEVEL) qDebug() << QString("pos0= %1\n").arg(pos0);
+        if(pos0==-1) continue;
+            //headRec->keyName = QString("COMMENT");
+        else headRec->keyName = headVals.at(i).left(pos0);
+        pos0 = headVals.at(i).indexOf(codec1->toUnicode("'"));
+        pos1 = headVals.at(i).indexOf(codec1->toUnicode("'"), pos0+1);
+        if(pos0==-1||pos1==-1)
+        {
+            //headList << headRec;
+            delete headRec;
+            continue;
+        }
+        //if(FD_LOG_LEVEL) qDebug() << QString("pos0= %1\t pos1= %2\n").arg(pos0).arg(pos1);
+        headRec->keyValue = QString(headVals.at(i).mid(pos0+1, pos1-pos0-1));
+        //if(FD_LOG_LEVEL) qDebug() << QString("keyValue: %1").arg(headRec->keyValue);
+        headList << headRec;
+    }
+
+    //initExpList();
+    //if(expList->exps.size()==0) return -1;
+    //setExposure(expList->exps.size());
+    //initRaDeHeadList();
+    //return 0;
+}
+
 QString ExposureRec::timeStr()
 {
     return getStrFromDATEOBS(getDATEOBSfromMJD(expTime), " ", 2, 4);
@@ -4412,7 +4457,8 @@ double fitsdata::getMeanScale()
 
 int fitsdata::readHeader(QString headStr)
 {
-    QStringList headVals;
+    headList.readHeader(headStr);
+    /*QStringList headVals;
     int pos0, pos1;
     headList.clear();
 
@@ -4450,7 +4496,7 @@ int fitsdata::readHeader(QString headStr)
 
     //initExpList();
     //if(expList->exps.size()==0) return -1;
-    //setExposure(expList->exps.size());
+    //setExposure(expList->exps.size());*/
     initRaDeHeadList();
     return 0;
 }

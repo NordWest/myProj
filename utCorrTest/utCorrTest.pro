@@ -8,7 +8,8 @@ QT       += core
 
 QT       -= gui
 
-TARGET = utCorrTest
+unix:TARGET = ./../../lab/utCorrTest/utCorrTest
+win32:TARGET = utCorrTest
 CONFIG   += console  \
     exceptions \
     warn_off
@@ -39,7 +40,8 @@ SOURCES += main.cpp \
     ../libs/alglib/integration.cpp \
     ../libs/alglib/alglibmisc.cpp \
     ../libs/alglib/alglibinternal.cpp \
-    ../libs/sysCorr.cpp
+    ../libs/sysCorr.cpp \
+    ../libs/hronobasefile.cpp
 
 
 win32:LIBS += ./../libs/win32/cfitsio.lib \
@@ -73,4 +75,7 @@ HEADERS += ../astro/astro.h \
     ../libs/alglib/integration.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
-    ../libs/sysCorr.h
+    ../libs/sysCorr.h \
+    ../libs/hronobasefile.h
+
+

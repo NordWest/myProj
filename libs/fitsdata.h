@@ -335,6 +335,8 @@ public:
     int getKeyNum(HeadRecord* resRec, int pos);
     void clear();
     int size();
+
+    void readHeader(QString headStr);
 };
 
 struct ExposureRec
