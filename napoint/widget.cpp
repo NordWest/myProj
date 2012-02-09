@@ -189,7 +189,8 @@ Widget::Widget(QWidget *parent)
     gridLayout->addWidget(replyLabel,2,1);
     //
     fracStep->setChecked(true);
-    forwardMotion->setChecked(true);
+    //forwardMotion->setChecked(true);
+    backMotion->setChecked(true);
     nofStepsEdit->setInputMask("99999999");
     nofStepsEdit->setText("00000000");
     speedEdit->setInputMask("99999");
@@ -492,18 +493,18 @@ void Widget::moveButtonClicked()
     slRA<<"SD"+QString("%1").arg(speed_RA,5,'f',0,QLatin1Char( '0' ))+"*";
     if(ra2-ra1>0)
     {
-        slRA<<"DR*";
-        slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
         slRA<<"DL*";
+        slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
+        slRA<<"DR*";
         slRA<<"MV"+QString("%1").arg(luft_RA,8,'f',0,QLatin1Char( '0' ))+"*";
     }
     else
     {
-        slRA<<"DL*";
+        slRA<<"DR*";
         slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
     }
     //
-    slRA<<"DL*"<<"SD"+QString("%1").arg(speed_RAHM,5,'f',0,QLatin1Char( '0' ))+"*";
+    slRA<<"DR*"<<"SD"+QString("%1").arg(speed_RAHM,5,'f',0,QLatin1Char( '0' ))+"*";
     slRA<<"MV*"<<"ED*";
     QString str="";for(int i=0;i<slRA.count();i++)str+=slRA[i];
     QMessageBox::information(0,"napoint",str,QMessageBox::Ok,0,0);
@@ -629,18 +630,18 @@ void Widget::moveRaButtonClicked()
     slRA<<"SD"+QString("%1").arg(speed_RA,5,'f',0,QLatin1Char( '0' ))+"*";
     if(ra2-ra1>0)
     {
-        slRA<<"DR*";
-        slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
         slRA<<"DL*";
+        slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
+        slRA<<"DR*";
         slRA<<"MV"+QString("%1").arg(luft_RA,8,'f',0,QLatin1Char( '0' ))+"*";
     }
     else
     {
-        slRA<<"DL*";
+        slRA<<"DR*";
         slRA<<"MV"+QString("%1").arg((int)nOfStepsRA,8,'f',0,QLatin1Char( '0' ))+"*";
     }
     //
-    slRA<<"DL*"<<"SD"+QString("%1").arg(speed_RAHM,5,'f',0,QLatin1Char( '0' ))+"*";
+    slRA<<"DR*"<<"SD"+QString("%1").arg(speed_RAHM,5,'f',0,QLatin1Char( '0' ))+"*";
     slRA<<"MV*"<<"ED*";
     QString str="";for(int i=0;i<slRA.count();i++)str+=slRA[i];
     //QMessageBox::information(0,"napoint",str,QMessageBox::Ok,0,0);
