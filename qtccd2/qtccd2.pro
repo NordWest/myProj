@@ -25,7 +25,8 @@ SOURCES += main.cpp \
     wakeupdlg.cpp
 
 win32 {
- LIBS =  ./../libs/win32/cfitsio.lib  AccuTime.lib
+ LIBS +=  ./../libs/win32/cfitsio.lib  \
+        ./AccuTime.lib
 }
 win32:LIBS +=  ./../libs/win32/libmb.a
 TARGET = qtccd2
@@ -35,7 +36,7 @@ CONFIG += windows exceptions warn_off
 #serialport
 
 INCLUDEPATH +=./qextserialport-1.2win-alpha
-QMAKE_LIBDIR +=./qextserialport-1.2win-alpha/build
+QMAKE_LIBDIR +=D:/svnProj/qtccd2/qextserialport-build-desktop/build
 
 CONFIG(debug, debug|release):LIBS  += -lqextserialportd
 else:LIBS  += -lqextserialport

@@ -1,0 +1,16 @@
+EXPORTS
+	atEndCriticalSection
+	atBeginCriticalSection
+	atGetUnpackedUT
+	atGetUnpackedLocalTime
+	atGetUT
+	atGetLocalTime
+	atConfigureDriver
+	atSetActiveDriver
+	atGetActiveDriver
+	atGetDriverLibraryName
+	atGetDriverName
+	atCountAvailableDrivers
+	atConfigureLibrary
+	atShutdown
+	atInit

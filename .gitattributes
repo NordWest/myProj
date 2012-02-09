@@ -501,7 +501,9 @@ qextserialport-1.2win-alpha/win_qextserialport.cpp -text
 qextserialport-1.2win-alpha/win_qextserialport.h -text
 qovar/main.cpp -text
 qovar/qovar.pro -text
+qtccd2/AccuTime.def -text
 qtccd2/AccuTime.h -text
+qtccd2/AccuTime.lib -text
 qtccd2/astro.cpp -text
 qtccd2/astro.h -text
 qtccd2/autosetuptimerdlg.cpp -text
