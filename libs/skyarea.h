@@ -1,6 +1,7 @@
 //#pragma once
 #include <stdio.h>
 //#include <direct.h>
+#include <QtCore>
 
 #ifndef COMF_H
 #include "comfunc.h"
