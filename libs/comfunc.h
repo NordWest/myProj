@@ -319,20 +319,23 @@ public:
 class FileDynStrBin
 {
 public:
-	char *fn, *fn_tmp;
+        QString fileName;
 
 //	bufStr *buffer;
 
-	int nstr;
-	int sizestr;
+        //int nstr;
+        //int sizestr;
+        char *str;
 
-	char *str;
+        QStringList strList;
 
 	FileDynStrBin();
 	FileDynStrBin(int sizestr);
-	FileDynStrBin(char *fn, int sizestr);
+        FileDynStrBin(QString fn);
+        FileDynStrBin(char *fn);
 	~FileDynStrBin();
-	int init(char* fn, int sizestr);
+        int init(QString fn);
+        int init(char *fn);
 
 	int AddStr(char *nstr, int num);
 	int DelStr(int num);
@@ -341,6 +344,10 @@ public:
 	int Exchange(int i, int j);
 	int Update(char *nstr, int num);
 	int Free();
+        int nstr();
+
+        int saveAs(QString fn);
+        int save();
 };
 
 

@@ -157,12 +157,12 @@ TaskList::~TaskList()
 int TaskList::init(char *fname)
 {
 
-	return(FileDynStrBin::init(fname, TLIST_LEN));
+        return(FileDynStrBin::init(fname));
 }
 
 int TaskList::init(char *fname, int sizestr)
 {
-	return(FileDynStrBin::init(fname, sizestr));
+        return(FileDynStrBin::init(fname));
 }
 
 int TaskList::AddRec()
@@ -171,7 +171,7 @@ int TaskList::AddRec()
 	stmp = new char[SIMPLE_STR];
 
 	this->rec2s(stmp);
-	int res = this->AddStr(stmp, this->nstr);
+        int res = this->AddStr(stmp, nstr());
 
 //	delete [] stmp;
 
@@ -243,7 +243,7 @@ int TaskList::GetRec(int i)
 {
 	if(this->ReadStr(i)) return 1;
 
-	this->s2rec(this->str);
+        this->s2rec(str);
 
 	return 0;
 }
@@ -1550,7 +1550,7 @@ LogList::~LogList()
 
 int LogList::init(char *fname)
 {
-	if(FileDynStrBin::init(fname, LLIST_LEN)) return 1;
+        if(FileDynStrBin::init(fname)) return 1;
 	return 0;
 }
 
@@ -1580,7 +1580,7 @@ int LogList::GetObs(char *ename)
 	int i = 0;
 	int nobs = 0;
 
-	while(i<this->nstr)
+        while(i<nstr())
 	{
 		this->ReadStr(i);
 		this->s2rec(this->str);
@@ -1950,7 +1950,7 @@ CatList::~CatList()
 
 int CatList::init(char *fname)
 {
-	return(FileDynStrBin::init(fname, CATLIST_LEN));
+        return(FileDynStrBin::init(fname));
 }
 
 int CatList::Add(CatRecord *er)
@@ -1989,7 +1989,7 @@ int CatList::GetByName(char *ename)
 	int i = 0;
 	int nobs = 0;
 
-	while(i<this->nstr)
+        while(i<nstr())
 	{
 		this->Get(i);
 
@@ -2480,7 +2480,7 @@ int SkyArea::Grade()
 
 	double Sdist, Edist;
 
-	int ctask = this->task_list->nstr;
+        int ctask = this->task_list->nstr();
 
 	IList temp_ini;
 
@@ -3079,7 +3079,7 @@ void SkyArea::UpdateObsList()
 {
 	this->obs_list->Clear();
 
-	int sz = this->log_list->nstr;
+    int sz = this->log_list->nstr();
 	for(int i=0; i<sz; i++)
 	{
 		log_list->GetRec(i);

@@ -2942,26 +2942,34 @@ int FileDynStr::Update(char *nnstr, int num)
 
 FileDynStrBin::FileDynStrBin()
 {
-	this->str = new char[1024];
+    this->str = new char[1024];
+/*
 	this->fn = new char[255];
 	this->fn_tmp = new char[255];
 //	this->buffer = NULL;
 	this->sizestr = 0;
-	this->nstr = 0;
+        this->nstr = 0;*/
 }
 
 FileDynStrBin::FileDynStrBin(int sizestr)
 {
-	this->str = new char[sizestr];
+    this->str = new char[sizestr];
+    /*
+    this->str = new char[sizestr];
 	this->fn = new char[255];
 	this->fn_tmp = new char[255];
 //	this->buffer = new bufStr(sizestr);
 	this->sizestr = sizestr;
 	this->nstr = 0;
+        */
 }
 
-FileDynStrBin::FileDynStrBin(char *fn, int sizestr)
+FileDynStrBin::FileDynStrBin(QString fn)
 {
+    this->str = new char[1024];
+    fileName = QString(fn);
+    init(fileName);
+    /*
 	this->str = new char[sizestr];
 	this->fn = new char[255];
 	this->fn_tmp = new char[255];
@@ -2971,23 +2979,41 @@ FileDynStrBin::FileDynStrBin(char *fn, int sizestr)
 	strcat(this->fn_tmp, ".tmp");
 //	this->buffer = new bufStr(sizestr);
 	this->nstr = 0;
-	while(!this->ReadStr(this->nstr)) this->nstr++;
+        while(!this->ReadStr(this->nstr)) this->nstr++;*/
+}
+
+FileDynStrBin::FileDynStrBin(char *fn)
+{
+    this->str = new char[1024];
+    fileName = QString(fn);
+    init(fileName);
 }
 
 FileDynStrBin::~FileDynStrBin()
 {
-	delete [] this->str;
-	this->str = NULL;
+    strList.clear();
+    delete [] this->str;
+    this->str = NULL;
+    /*
+
 	delete [] this->fn;
 	this->fn = NULL;
 	delete [] this->fn_tmp;
 	this->fn_tmp = NULL;
 //	delete(this->buffer);
-	this->nstr = -1;
+        this->nstr = -1;*/
+}
+
+int FileDynStrBin::nstr()
+{
+    return(strList.size());
 }
 
 int FileDynStrBin::ReadStr(int num)
 {
+    strcpy(str, strList.at(num).toAscii().data());
+
+   /*
 //	if(num>this->nstr-1) return 1;
 	int i = -1;
 
@@ -3019,49 +3045,45 @@ int FileDynStrBin::ReadStr(int num)
 
 //	this->buffer->setrec(this->str, num);
 
-//	delete(FNN);
+//	delete(FNN);*/
 	return 0;
 }
 
-int FileDynStrBin::init(char* fn, int sizestr)
+int FileDynStrBin::init(QString fn)
 {
 //	this->buffer = new bufStr(sizestr);
-	this->sizestr = sizestr;
-	strcpy(this->fn, fn);
-	strcpy(this->fn_tmp, fn);
-	strcat(this->fn_tmp, ".tmp");
+    QFile inFile(fn);
+    if(!inFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << QString("File %1 not open\n").arg(fn);
+        return 1;
+    }
+    QTextStream inStm(&inFile);
 
-	FILE *FNN;
+    strList.clear();
 
-	if(sizestr==0)
-	{
-		FNN = fopen(this->fn, "r");
+    while(!inStm.atEnd())
+    {
+        strList << inStm.readLine();
+    }
 
-		fgets(this->str, 1000, FNN);
-		this->sizestr = strlen(this->str);
-		
-		fclose(FNN);
-	}
+    inFile.close();
 
-	FNN = fopen(this->fn, "rb");
-	if(FNN==NULL) FNN = fopen(this->fn, "wb+");
+    return 0;
+}
 
-	if(FNN==NULL) return 1;
-
-//	fseek(FNN, 0, SEEK_SET);
-	this->nstr = 0;
-//	fgets(this->str, 1000, FNN);
-//	this->sizestr = strlen(this->str);
-	while(fread(this->str, this->sizestr+1, 1, FNN)) this->nstr++;
-
-	fclose(FNN);
-
-	return 0;
+int FileDynStrBin::init(char *fn)
+{
+    fileName = QString(fn);
+    init(fileName);
 }
 
 int FileDynStrBin::AddStr(char *nnnstr, int num)
 {
-	if((num>this->nstr)||(num<0)) return 1;
+    if((num>nstr())||(num<0)) return 1;
+
+        strList.insert(num, QString(nnnstr));
+        /*
 
 	int i = 0;
 
@@ -3121,12 +3143,16 @@ int FileDynStrBin::AddStr(char *nnnstr, int num)
 		fclose(FNTMP);
 		FNTMP = NULL;
 	}
-
+*/
 	return 0;
 }
 
 int FileDynStrBin::DelStr(int num)
 {
+    if(num<0||num>nstr()) return 1;
+    strList.removeAt(num);
+
+    /*
 	int i = 0;
 	FILE *FN, *FNTMP;
 
@@ -3140,7 +3166,7 @@ int FileDynStrBin::DelStr(int num)
 	for(i=0; i<this->nstr; i++)
 	{
 		if(!fread(this->str, this->sizestr+1, 1, FN)) return 1;
-		if(i!=num) fwrite(this->str, this->sizestr+1, 1, FNTMP);
+                if(i!=num) fwrite(this->str, this->sizestr+1, 1, FNTMP);
 	}
 
 	FN = freopen(this->fn, "wb+", FN);
@@ -3151,12 +3177,15 @@ int FileDynStrBin::DelStr(int num)
 	this->nstr--;
 
 	fclose(FN);
-	fclose(FNTMP);
+        fclose(FNTMP);*/
 	return 0;
 }
 
 int FileDynStrBin::Free()
 {
+    strList.clear();
+
+    /*
 	FILE *FN;
 	FN = fopen(this->fn, "wb+");
 	fclose(FN);
@@ -3165,13 +3194,29 @@ int FileDynStrBin::Free()
 	fclose(FN);
 
 	this->nstr = 0;
-
+    */
 	return 0;
 }
 
 
 int FileDynStrBin::DelStr(char *delstr)
 {
+    int i;
+    int ns = nstr();
+
+    QString tStr(delstr);
+
+    for(i=ns-1; i>=0; i--)
+    {
+        if(QString().compare(strList.at(i), tStr)==0)
+        {
+            strList.removeAt(i);
+            return 0;
+        }
+    }
+
+    return 1;
+/*
 	int i = 0;
 	int res = 1;
 
@@ -3211,15 +3256,19 @@ int FileDynStrBin::DelStr(char *delstr)
 	fclose(FN);
 	fclose(FNTMP);
 	return res;
+        */
 }
 
 int FileDynStrBin::Exchange(int k, int l)
 {
-	if((k>=this->nstr)||(l>=this->nstr)) return 1;
+    if((k>=nstr())||(l>=nstr())) return 1;
 
 //	this->buffer->remrec(k);
 //	this->buffer->remrec(l);
 
+    strList.swap(k, l);
+
+    /*
 	char *k_str, *l_str;
 	k_str = new char[this->sizestr+8];
 	l_str = new char[this->sizestr+8];
@@ -3265,14 +3314,18 @@ int FileDynStrBin::Exchange(int k, int l)
 	k_str = NULL;
 	l_str = NULL;
 	FN = NULL;
-	FNTMP = NULL;
+        FNTMP = NULL;*/
+
+
 	return 0;
 }
 
 int FileDynStrBin::Update(char *nnstr, int num)
 {
-	if(num>this->nstr) return 1;
+    if(num>nstr()) return 1;
 
+    strList.replace(num, QString(nnstr));
+/*
 	int i = 0;
 
 	FILE *FN, *FNTMP;
@@ -3307,8 +3360,29 @@ int FileDynStrBin::Update(char *nnstr, int num)
 	}
 	
 	fclose(FN);
-	fclose(FNTMP);
+        fclose(FNTMP);*/
 	return 0;
+}
+
+int FileDynStrBin::saveAs(QString fn)
+{
+    fileName = QString(fn);
+    return(save());
+}
+
+int FileDynStrBin::save()
+{
+    QFile oFile(fileName);
+    if(!oFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        qDebug() << QString("File %1 not open\n").arg(fileName);
+        return 1;
+    }
+    QTextStream oStm(&oFile);
+
+    oStm << strList.join("\n");
+
+    return 0;
 }
 
 

@@ -168,7 +168,7 @@ void come5_rec::set_default()
 	this->set_w(0.0);
 }
 
-CommetOrbCat::CommetOrbCat(char *fn, int size) : FileDynStrBin(fn, size)
+CommetOrbCat::CommetOrbCat(char *fn, int size) : FileDynStrBin(fn)
 {
 	this->record = new come5_rec;
 }
@@ -185,7 +185,7 @@ CommetOrbCat::~CommetOrbCat()
 
 int CommetOrbCat::init(char *fname)
 {
-	return(FileDynStrBin::init(fname, COMET_E5_CAT));
+        return(FileDynStrBin::init(fname));
 }
 
 int CommetOrbCat::GetRec(int pos)
@@ -255,7 +255,7 @@ int CommetOrbCat::AddRec()
 	pos = this->GetRecName(this->record->name);
 
 	if(pos!=-1) this->Update(new_str, pos);
-	else this->AddStr(new_str, this->nstr);
+        else this->AddStr(new_str, this->nstr());
 
 	delete [] new_str;
 	return 0;
