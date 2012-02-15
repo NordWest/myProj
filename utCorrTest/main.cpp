@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     hbFile.initJournal();
     szi = hbFile.hronoList.size();
-/*
+
     QFile uFile("./utcCorr.txt");
     uFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream uStm(&uFile);
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     }
     uFile.close();
 
-*/
+
 
     QDirIterator it(hdrDir, QDirIterator::Subdirectories);
     QRegExp rx("*.hdr");
