@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
         tFile = fList.at(i);
         fi.setFile(tFile);
         if(sourceType==1) workDir = fi.absolutePath();
+        qDebug() << QString("workDir: %1\n").arg(workDir);
         mesProcess.setWorkingDirectory(workDir);
         outerArguments.clear();
         outerArguments << fi.fileName() << QString("%1").arg(expNum);
