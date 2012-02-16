@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         outerArguments.clear();
         outerArguments << tFile << QString("%1").arg(expNum);
         //if(sourceType==1)
-        outerArguments << pnStr << resDir;
+        outerArguments << pnStr << QDir(resDir).absolutePath();
 
 
         qDebug() << measure_prog << outerArguments.join(" ");
