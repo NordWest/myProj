@@ -26,9 +26,20 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    QSettings *sett = new QSettings("./conf/damPack.ini", QSettings::IniFormat);
+    setlocale(LC_NUMERIC, "C");
+    QString codecName;
 
-    QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
+
+    QSettings *sett = new QSettings("./conf/damPack.ini", QSettings::IniFormat);
 
     int sourceType = sett->value("general/sourceType", 0).toInt();  //0 - workDir; 1 - workList
     QString workDir = sett->value("general/workDir", "./").toString();//QDir::currentPath();
@@ -40,7 +51,7 @@ int main(int argc, char *argv[])
     QString get_http_prog = sett->value("general/get_http_prog", "getHttpHeader.exe").toString();
     QString get_http_prog_folder = sett->value("general/get_http_prog_folder", "c:/scansoft").toString();
     int getHttpWait = sett->value("general/getHttpWait", 100000).toInt();
-    QString instrName = sett->value("general/instrName", "na").toString();
+    //QString instrName = sett->value("general/instrName", "na").toString();
 
     QString measure_prog = sett->value("general/measure_prog", "measure").toString();
     QString measure_prog_folder = sett->value("general/measure_prog_folder", "c:/scansoft").toString();
@@ -175,7 +186,7 @@ int main(int argc, char *argv[])
 
         httpProcess.setWorkingDirectory(get_http_prog_folder);
         outerArguments.clear();
-        outerArguments << instrName << pnStr;
+        outerArguments << pnStr;
         qDebug() << get_http_prog << outerArguments.join(" ");
         httpProcess.start(get_http_prog, outerArguments);
 
@@ -190,7 +201,7 @@ int main(int argc, char *argv[])
         //catStream.flush();
         QTextStream httpStream(httpProcess.readAllStandardOutput());
 
-        if(ftemp->readHttpHeader(httpStream.readAll()))
+        if(ftemp->readHeader(httpStream.readAll()))
         {
             qDebug() << "header not found\n";
             continue;

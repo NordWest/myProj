@@ -15,17 +15,23 @@ SOURCES += main.cpp \
     ../libs/multidim.cpp \
     ../libs/identify.cpp \
     ../libs/ccdmeasurements.cpp \
-    ../libs/astro.cpp \
     ../libs/comfunc.cpp \
     ../libs/cmnk.cpp \
     ../libs/sscat.cpp \
     ../libs/fBuffer.cpp \
     ../libs/observatory.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/ap.cpp \
     ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp
+    ../libs/alglib/ap.cpp \
+    ../libs/alglib/interpolation.cpp \
+    ../libs/alglib/specialfunctions.cpp \
+    ../libs/alglib/solvers.cpp \
+    ../libs/alglib/optimization.cpp \
+    ../libs/alglib/linalg.cpp \
+    ../libs/alglib/integration.cpp \
+    ../libs/alglib/alglibmisc.cpp \
+    ../libs/alglib/alglibinternal.cpp \
+    ../libs/sysCorr.cpp
+
 HEADERS += ../libs/fitsdata.h \
     ../libs/redStat.h \
     ../libs/multidim.h \
@@ -34,17 +40,26 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/ccdmeasurements.h \
     ../libs/astro.h \
     ../libs/comfunc.h \
-    ../libs/astro.hpp \
+    ../libs/astro.h \
     ../libs/cmnk.h \
     ../libs/sscat.h \
     ../libs/fBuffer.h \
     ../libs/observatory.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/ap.h \
     ../libs/vectGrid3D.h \
-    ../libs/ialglib.h
-win32:LIBS += ./../libs/cfitsio.lib  \
-    ../libs/ablas.dll
-unix:LIBS += ./../libs/libcfitsio.a
-LIBS += ../libs/libmb.a
+    ../libs/alglib/ap.h \
+    ../libs/alglib/interpolation.h \
+    ../libs/alglib/specialfunctions.h \
+    ../libs/alglib/solvers.h \
+    ../libs/alglib/optimization.h \
+    ../libs/alglib/linalg.h \
+    ../libs/alglib/integration.h \
+    ../libs/alglib/alglibmisc.h \
+    ../libs/alglib/alglibinternal.h \
+    ../libs/sysCorr.h
+
+win32:LIBS += ./../libs/win32/cfitsio.lib \
+            ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libcfitsio.a \
+            ./../libs/unix/libmb.a \
+            ./../libs/unix/libastro.a
