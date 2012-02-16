@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     case 1:
         {
             QFile wListFile(workList);
-            wListFile.open(QIODevice::ReadOnly);
+            if(!wListFile.open(QIODevice::ReadOnly)) return 1;
             QTextStream wStr(&wListFile);
 
             while(!wStr.atEnd())
