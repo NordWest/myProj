@@ -141,6 +141,8 @@ int main(int argc, char *argv[])
 
     int fNum = fList.size();
 
+    QFileInfo fi;
+
 
 
     for(i=0; i<fNum; i++)
@@ -225,7 +227,8 @@ int main(int argc, char *argv[])
         expNum = eNumStr.toInt();
 
         tFile = fList.at(i);
-        if(sourceType==1) workDir = tFile.left(tFile.lastIndexOf("\\"));
+        fi.setFile(tFile);
+        if(sourceType==1) workDir = fi.absolutePath();
         mesProcess.setWorkingDirectory(workDir);
         outerArguments.clear();
         outerArguments << tFile << QString("%1").arg(expNum);
