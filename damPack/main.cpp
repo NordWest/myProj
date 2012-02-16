@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
             while(!wStr.atEnd())
             {
                 tStr = wStr.readLine();
+                if(tStr.at(0)=='#') continue;
                 fList << tStr.section(" ", 1, 1);
                 pnList << tStr.section(" ", 0, 0);
             }
