@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
         if(sourceType==1) workDir = fi.absolutePath();
         mesProcess.setWorkingDirectory(workDir);
         outerArguments.clear();
-        outerArguments << fi.fileName() << QString("%1").arg(expNum);
+        outerArguments << tFile << QString("%1").arg(expNum);
         //if(sourceType==1)
         outerArguments << pnStr << QDir(resDir).absolutePath();
 
