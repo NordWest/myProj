@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 
         //pnStr = curDir.section("/", -1, -1);
         qDebug() << QString("pnStr: %1\n").arg(pnStr);
+        if(pnStr.size()<5) continue;
 
         httpProcess.setWorkingDirectory(get_http_prog_folder);
         outerArguments.clear();
@@ -231,7 +232,7 @@ int main(int argc, char *argv[])
         if(sourceType==1) workDir = fi.absolutePath();
         mesProcess.setWorkingDirectory(workDir);
         outerArguments.clear();
-        outerArguments << tFile << QString("%1").arg(expNum);
+        outerArguments << fi.fileName() << QString("%1").arg(expNum);
         //if(sourceType==1)
         outerArguments << pnStr << QDir(resDir).absolutePath();
 
