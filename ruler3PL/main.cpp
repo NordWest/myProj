@@ -415,6 +415,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 //  utcorr
 
         uTime = QString("0.0");
+        int exStat = 0;
 
         if(useUtCorr)
         {
@@ -435,9 +436,10 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
             uTime = catStream.readAll().section("\n", -1, -1);
 
-            qDebug() << QString("Crash Exit: %1\n").arg((int)(outerProcess.exitStatus()==QProcess::CrashExit));
+            exStat = outerProcess.exitStatus()==QProcess::CrashExit;
+            qDebug() << QString("Crash Exit: %1\n").arg(exStat);
         }
-        if(!useUtCorr||outerProcess.exitStatus()==QProcess::CrashExit)
+        if(!useUtCorr||exStat)
         {
             fitsd->headList.getKeyName("U", &uTime);
         }
