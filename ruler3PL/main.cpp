@@ -435,6 +435,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
             uTime = catStream.readAll().section("\n", -1, -1);
 
+            qDebug() << QString("Crash Exit: %1\n").arg((int)(outerProcess.exitStatus()==QProcess::CrashExit));
         }
         if(!useUtCorr||outerProcess.exitStatus()==QProcess::CrashExit)
         {
@@ -544,7 +545,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         szi = fitsd->objMarks->marks.size();
         for(i=0; i<szi; i++)
         {
-            xyStm << QString("%1|%2\n").arg(fitsd->objMarks->marks.at(i)->mTan[0]).arg(fitsd->objMarks->marks.at(i)->mTan[1]);
+            xyStm << QString("%1|%2|%3\n").arg(fitsd->objMarks->marks.at(i)->mTan[0]).arg(fitsd->objMarks->marks.at(i)->mTan[1]).arg(fileName);
         }
         xyObjFile.close();
 
