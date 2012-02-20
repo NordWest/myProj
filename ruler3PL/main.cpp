@@ -544,7 +544,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         szi = fitsd->objMarks->marks.size();
         for(i=0; i<szi; i++)
         {
-            xyStm << QString("%1|%2").arg(fitsd->objMarks->marks.at(i)->mTan[0]).arg(fitsd->objMarks->marks.at(i)->mTan[1]);
+            xyStm << QString("%1|%2\n").arg(fitsd->objMarks->marks.at(i)->mTan[0]).arg(fitsd->objMarks->marks.at(i)->mTan[1]);
         }
         xyObjFile.close();
 
