@@ -94,7 +94,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int isSc = 0;
         QList <catFinder*> starCatList;
         QString obsCode;
-        int sz, i, oNum;
+        int sz, szi, i, oNum;
         int resRed = 0;
         int detHname = 0;
         int isLF = 0;
@@ -434,8 +434,9 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             QTextStream catStream(outerProcess.readAllStandardOutput());
 
             uTime = catStream.readAll().section("\n", -1, -1);
+
         }
-        else
+        if(!useUtCorr||outerProcess.exitStatus()==QProcess::CrashExit)
         {
             fitsd->headList.getKeyName("U", &uTime);
         }
@@ -534,6 +535,20 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         }
         qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());
         fitsd->detTanObj();
+///////////
+
+        QFile xyObjFile("./xyObj.txt");
+        xyObjFile.open(QIODevice::WriteOnly | QIODevice::Append);
+        QTextStream xyStm(&xyObjFile);
+
+        szi = fitsd->objMarks->marks.size();
+        for(i=0; i<szi; i++)
+        {
+            xyStm << QString("%1|%2").arg(fitsd->objMarks->marks.at(i)->mTan[0]).arg(fitsd->objMarks->marks.at(i)->mTan[1]);
+        }
+        xyObjFile.close();
+
+
 ///////////
 
     fitsd->cleanObjects(aper);

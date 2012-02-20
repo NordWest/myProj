@@ -24,6 +24,7 @@ struct hronoBaseRec
     void toString(QString *iStr);
 
     double getMjdReal();
+    double getMjdReal1();
     double getMjdHrono();
     double getJDNreal();
     double getJDNhrono();

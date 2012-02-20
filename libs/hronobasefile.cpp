@@ -32,6 +32,42 @@ void hronoBaseRec::toString(QString *iStr)
 
 double hronoBaseRec::getMjdReal()
 {
+    double jdUtc, jDay, pday, gm1, s0, s1, dS, dS1;
+    double Long = grad_to_rad(30.3274)/(2.0*PI);//day
+
+    double sTime = timeReal.hour()/24.0 + timeReal.minute()/1440.0 + timeReal.second()/86400.0 + timeReal.msec()/86400000.0;
+
+    gm1 = sTime - Long;
+    //if(FD_LOG_LEVEL) qDebug() << QString("sTime= %1\tgm1= %2\tLong= %3\n").arg(sTime).arg(gm1).(arg(Long);
+    //dat2JD(&jDay, date.year(), date.month(), date.day()+0.5);
+    jDay = dat2JDN(date.year(), date.month(), date.day());
+
+    s0 = gmst0jd(jDay);
+    s1 = gmst0jd(jDay+1);
+    dS = gm1 - s0;
+    dS1 = gm1 - s1;
+    //if(FD_LOG_LEVEL) qDebug() << QString("jDay= %1\ts0= %2\ts1= %3\tdS= %4\tdS1= %5\n").arg(jDay, 10, 'f', 4).arg(s0).arg(s1).arg(dS).arg(dS1);
+    //if(dS<0.0) dS +=1.0;
+    //if(dS<0.5) jDay+=1.0;
+
+//    if(FD_LOG_LEVEL) qDebug() << QString("dS= %1\tjDay= %2\n").arg(dS).arg(jDay, 10, 'f', 4);
+
+    GMST1_to_jdUT1(&jdUtc, gm1, jDay);
+ //   if(FD_LOG_LEVEL) qDebug() << QString("jdUTC= %1\tdS= %2\tdS1= %3\n").arg(jdUtc, 10, 'f', 4).arg(dS).arg(dS1);
+    //if(dS1<0.0)dS1+=1.0;
+  //  if(FD_LOG_LEVEL) qDebug() << QString("dS= %1\tdS1= %2\n").arg(dS).arg(dS1);
+    //if((dS1>0.5)&&(dS<0.5)) jdUtc-=(1.0-VIU);
+
+
+
+    //dateObs0.hour = utc*24.0;
+    //dateObs0.min = tList.at(1).toInt();
+    //dateObs0.sec = tList.at(2).toDouble();
+    return(jd2mjd(jdUtc));
+}
+
+double hronoBaseRec::getMjdReal1()
+{
     double jdUtc, jDay, pday;
     double Long = grad_to_rad(30.3274)/(2.0*PI);//day
 

@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     for(i=0; i<szi; i++)
     {
-        uStm << QString("%1|%2|%3|%4\n").arg(hbFile.hronoList.at(i)->date.toString("yyyy MM dd")).arg(hbFile.hronoList.at(i)->timeReal.toString("HH mm ss.zzz")).arg(hbFile.hronoList.at(i)->getMjdReal()).arg(hbFile.hronoList.at(i)->getU());
+        uStm << QString("%1|%2|%3|%4\n").arg(hbFile.hronoList.at(i)->date.toString("yyyy MM dd")).arg(hbFile.hronoList.at(i)->timeReal.toString("HH mm ss.zzz")).arg(hbFile.hronoList.at(i)->getMjdReal(), 12, 'f', 6).arg(hbFile.hronoList.at(i)->getU());
     }
     uFile.close();
 
@@ -62,13 +62,16 @@ int main(int argc, char *argv[])
     huFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream huStm(&huFile);
 
+
     QFile hFile;
     QTextStream hStream;//(&hFile);
     QString string, dateStr, timeStr, plName, uTimeHdr;
 
     HeadList hList;
     int year, month, day, hour, min, fuRes;
-    double sec, jdNum, jdDate, sTime, uCorr, uCorrHdr;
+    double sec, jdNum, jdDate, sTime, uCorr, uCorrHdr, gm1, jd0, pday, jdUtc, jDay, s0, s1, dS1, dS;
+
+    double Long = grad_to_rad(30.3274)/(2.0*PI);//day
 
     for(i=0; i<szi; i++)
     {
@@ -113,15 +116,48 @@ int main(int argc, char *argv[])
 
         jdNum = dat2JDN(year, month, day);
 
-        dat2JD(&jdDate, year, month, day+0.5);
         sTime = hour/24.0 + min/1440.0 + sec/86400.0;
 
+        gm1 = sTime - Long;
+        qDebug() << QString("sTime= %1\tgm1= %2\tLong= %3\n").arg(sTime).arg(gm1).arg(Long);
+        //dat2JD(&jDay, year, month, day);
+
+        s0 = gmst0jd(jdNum);
+        s1 = gmst0jd(jdNum+1);
+        dS = gm1 - s0;
+        dS1 = gm1 - s1;
+        qDebug() << QString("jDay= %1\ts0= %2\ts1= %3\tdS= %4\tdS1= %5\n").arg(jdNum, 10, 'f', 4).arg(s0).arg(s1).arg(dS).arg(dS1);
+        //if(dS<0.0) dS +=1.0;
+        //if(dS<0.5) jdNum+=1.0;
+
+    //    if(FD_LOG_LEVEL) qDebug() << QString("dS= %1\tjDay= %2\n").arg(dS).arg(jDay, 10, 'f', 4);
+
+        GMST1_to_jdUT1(&jdUtc, gm1, jdNum);
+        qDebug() << QString("jdUTC= %1\tdS= %2\tdS1= %3\n").arg(jdUtc, 10, 'f', 4).arg(dS).arg(dS1);
+        if(dS1<0.0)dS1+=1.0;
+        qDebug() << QString("dS= %1\tdS1= %2\n").arg(dS).arg(dS1);
+        //if((dS1>0.5)&&(dS<0.5)) jdUtc-=(1.0-VIU);
+
+
+/*
+        dat2JD(&jdDate, year, month, day);
+        sTime = hour/24.0 + min/1440.0 + sec/86400.0;
+
+        gm1 = sTime - Long;
+        jd0 = pdayUT1(jdDate, &pday);
+        GMST1_to_jdUT1(&jdUtc, gm1, jd0);
+*/
      //   qDebug() << QString("DATE-OBS: %3 %4 %5\tjdNum= %1\tsTime= %2\t%6\t%7\n").arg(jdNum).arg(sTime).arg(year).arg(month).arg(day).arg(jdDate, 10, 'f', 2).arg((int)mjd2jd(fitsd->expList->exps.at(0)->expTime));
+
+
+
+
+
 
 
         fuRes = hbFile.findU(&uCorr, jdNum, sTime, 7);
 
-        huStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(plName).arg(dateStr).arg(timeStr).arg(jd2mjd(jdDate)).arg(uCorr).arg(uCorrHdr).arg(uCorr-uCorrHdr);
+        huStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(plName).arg(dateStr).arg(timeStr).arg(jd2mjd(jdUtc), 12, 'f', 6).arg(uCorr).arg(uCorrHdr).arg(uCorr-uCorrHdr);
 
     }
     huFile.close();

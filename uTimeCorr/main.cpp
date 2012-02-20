@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
     //pnStr = codec1->toUnicode(argv[1]);
  //   qDebug() << QString("plate Name: %1\n").arg(pnStr);
 
-    //РћРќРљРЎР’РҐР Р­ Р“Р®Р¦РќРљРќР‘РќР™ РћРљР®РЇР РҐРњР™РҐ
+    //РћРќРљРЎР’РҐР Р­ Р“Р®Р¦РќРљРќР‘РќР™ РћРљР®РЇР РҐРњР™РҐ
         if(atoi(argv[1]))   //0-http; 1-file
         {
             if(fitsd->loadHeaderFile(codec1->toUnicode(argv[2])))
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
             outerProcess.waitForFinished(-1);
             QTextStream catStream(outerProcess.readAllStandardOutput());
 
-            //QByteArray httpData = catStream.readAll();// http->readAll();//Р’Р Р•РњРҐР• Р”Р®РњРњРЁРЈ (РќР Р‘Р•Р Р®)
+            //QByteArray httpData = catStream.readAll();// http->readAll();//Р’Р Р•РњРҐР• Р”Р®РњРњРЁРЈ (РќР Р‘Р•Р Р®)
 
 
             if(fitsd->readHttpHeader(catStream.readAll()))
@@ -478,5 +478,5 @@ int main(int argc, char *argv[])
 */
  //   qInstallMsgHandler(0);
 
-    return 0;
+    return fuRes;
 }
