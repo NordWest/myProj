@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
         dS = gm1 - s0;
         dS1 = gm1 - s1;
         qDebug() << QString("jDay= %1\ts0= %2\ts1= %3\tdS= %4\tdS1= %5\n").arg(jdNum, 10, 'f', 4).arg(s0).arg(s1).arg(dS).arg(dS1);
-        //if(dS<0.0) dS +=1.0;
-        //if(dS<0.5) jdNum+=1.0;
+        if(dS<0.0) dS +=1.0;
+        if(dS<0.5) jdNum+=1.0;
 
     //    if(FD_LOG_LEVEL) qDebug() << QString("dS= %1\tjDay= %2\n").arg(dS).arg(jDay, 10, 'f', 4);
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         qDebug() << QString("jdUTC= %1\tdS= %2\tdS1= %3\n").arg(jdUtc, 10, 'f', 4).arg(dS).arg(dS1);
         if(dS1<0.0)dS1+=1.0;
         qDebug() << QString("dS= %1\tdS1= %2\n").arg(dS).arg(dS1);
-        //if((dS1>0.5)&&(dS<0.5)) jdUtc-=(1.0-VIU);
+        if((dS1>0.5)&&(dS<0.5)) jdUtc-=(1.0-VIU);
 
 
 /*
@@ -155,9 +155,13 @@ int main(int argc, char *argv[])
 
 
 
-        fuRes = hbFile.findU(&uCorr, jdNum, sTime, 7);
+        //fuRes = hbFile.findU(&uCorr, jdNum, sTime, 7);
 
-        huStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(plName).arg(dateStr).arg(timeStr).arg(jd2mjd(jdUtc), 12, 'f', 6).arg(uCorr).arg(uCorrHdr).arg(uCorr-uCorrHdr);
+        fuRes = hbFile.findU_mjd(&uCorr, jd2mjd(jdUtc));
+
+
+
+        huStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(plName).arg(dateStr).arg(timeStr).arg(jd2mjd(jdUtc), 12, 'f', 6).arg(uCorr, 6, 'f', 2).arg(uCorrHdr, 6, 'f', 2).arg(uCorr-uCorrHdr, 6, 'f', 2);
 
     }
     huFile.close();

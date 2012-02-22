@@ -42,6 +42,8 @@ public:
     hronoBaseFile(QString baseFileName);
     void initJournal();
     int findU(double *uCorr, int jDN, double sTime, int dJDN = 7);
+    int findU_mjd(double *uCorr, double mJD, double dDay = 10);
+
 };
 
 #endif // HRONOBASEFILE_H

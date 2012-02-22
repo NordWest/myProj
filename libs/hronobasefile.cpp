@@ -220,6 +220,187 @@ int triAngle(double *ang, QList <double*> dList, int p0, int p1, int p2)
     return 0;
 }
 
+int hronoBaseFile::findU_mjd(double *uCorr, double mJD, double dDay)
+{
+
+    int i, j, szi, szj, k, posBase;
+    szi = hronoList.size();
+    double *dVect;// = new double[2];
+    QList <double*> dList;
+    QList <double*> resList;
+    double mjdT;
+
+    k=0;
+    dList.clear();
+    posBase = 0;
+    for(i=0; i<szi; i++)
+    {
+        mjdT = hronoList.at(i)->getMjdReal();
+        if(fabs(mJD-mjdT)<dDay)
+        {
+            dVect = new double[2];
+            dVect[0] = mjdT-mJD;
+
+            if(dVect[0]<0.0) posBase = k+1;
+            k++;
+
+            dVect[1] = hronoList.at(i)->getU();
+            dList << dVect;
+            //comList << hronoList.at(i)->comment;
+        }
+    }
+
+    int szL = dList.size();
+
+    if(szL==0)
+    {
+        *uCorr = 0;
+        return 1;
+    }
+    if(szL==1)
+    {
+        *uCorr = dList.at(0)[1];
+        return 0;
+    }
+
+    if(posBase==0)
+    {
+        *uCorr=0;
+        return 1;
+    }
+
+    resList.clear();
+    for(i=0; i<posBase; i++)
+    {
+        resList << dList.at(i);
+    }
+
+    int dnum;
+    double *C, *L, *We, *D;
+    int deg;
+    int rn;
+    double uwe, fl, maxdiv;
+    int *exclind;
+    double *z;
+
+    deg = 2;
+    maxdiv = 10;
+    fl = -2.0;
+
+
+    while(resList.size()>2)
+    {
+        dnum = resList.size();
+
+        C = new double[dnum*deg];
+        L = new double[dnum];
+        D = new double[deg*deg];
+        exclind = new int[dnum];
+        z = new double[deg];
+
+        for(i=0; i<dnum; i++)
+        {
+            for(j=0; j<deg; j++)
+            {
+                C[i*deg+j] = pow(resList[i][0], j);
+            }
+            L[i] = resList[i][1];
+        }
+
+        iLSM(deg, dnum, maxdiv, exclind, z, C, L, uwe, D, fl, rn);
+
+        if(rn<dnum|(fabs(z[1])>15))
+        {
+            resList.removeAt(0);
+            delete [] C;
+            delete [] L;
+            delete [] D;
+            delete [] exclind;
+            delete [] z;
+        }
+        else break;
+    }
+
+    int posBase1 = resList.size();
+
+    for(i=posBase; i<szL; i++)
+    {
+        resList.append(dList.at(i));
+    }
+
+
+    while(resList.size()>2)
+    {
+        dnum = resList.size();
+
+        C = new double[dnum*deg];
+        L = new double[dnum];
+        D = new double[deg*deg];
+        exclind = new int[dnum];
+        z = new double[deg];
+
+        for(i=0; i<dnum; i++)
+        {
+            for(j=0; j<deg; j++)
+            {
+                C[i*deg+j] = pow(resList[i][0], j);
+            }
+            L[i] = resList[i][1];
+        }
+
+        iLSM(deg, dnum, maxdiv, exclind, z, C, L, uwe, D, fl, rn);
+
+        if(rn<dnum)
+        {
+            resList.removeAt(dnum-1);
+            delete [] C;
+            delete [] L;
+            delete [] D;
+            delete [] exclind;
+            delete [] z;
+        }
+        else break;
+    }
+
+    dnum = resList.size();
+    if(dnum>5) deg = 3;
+    else deg = 2;
+
+    C = new double[dnum*deg];
+    L = new double[dnum];
+    D = new double[deg*deg];
+    exclind = new int[dnum];
+    z = new double[deg];
+    fl = 3.0;
+
+    for(i=0; i<dnum; i++)
+    {
+        for(j=0; j<deg; j++)
+        {
+            C[i*deg+j] = pow(resList[i][0], j);
+        }
+        L[i] = resList[i][1];
+    }
+
+    iLSM(deg, dnum, maxdiv, exclind, z, C, L, uwe, D, fl, rn);
+
+    if(rn<2)
+    {
+        *uCorr=resList[posBase1][1];
+        return 1;
+    }
+
+    *uCorr = z[0];
+
+    delete [] C;
+    delete [] L;
+    delete [] D;
+    delete [] exclind;
+    delete [] z;
+
+    return 0;
+
+}
 
 
 int hronoBaseFile::findU(double *uCorr, int jDN, double sTime, int dJDN)

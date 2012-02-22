@@ -2,11 +2,10 @@
 # Project created by QtCreator 2010-06-20T17:26:58
 # -------------------------------------------------
 QT -= gui
-win32:TARGET = ./../../bin/uTimeCorr
-unix:TARGET = ./../bin/uTimeCorr
+win32:TARGET = uTimeCorr
+unix:TARGET = uTimeCorr
 CONFIG += console \
-    warn_off \
-    release
+    warn_off
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
