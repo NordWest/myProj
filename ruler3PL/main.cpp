@@ -435,7 +435,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             outerProcess.waitForFinished(utcorr_wait_time);
             QTextStream catStream(outerProcess.readAllStandardOutput());
 
-            uTime = catStream.readAll().section("\n", -1, -1);
+            uTime = catStream.readAll().section("\n", -2, -2);
 
             exStat = (QString().compare(uTime, "err")==0);
             qDebug() << QString("Crash Exit: %1\n").arg(exStat);
