@@ -427,7 +427,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
             outerProcess.setReadChannel(QProcess::StandardOutput);
             qDebug() << QString("argc= %1\n").arg(argc);
-            outerArguments  << dateStr << timeStr;
+            //outerArguments  << dateStr << timeStr;
+            outerArguments  << QString("%1").arg(fitsd->MJD, 14, 'f', 8);//dateStr << timeStr;
             qDebug() << utcorr_prog << outerArguments.join(" ");
             outerProcess.start(utcorr_prog, outerArguments);
 
