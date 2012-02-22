@@ -384,6 +384,7 @@ public:
 
 int makeReduction(QString iniFile, QString resFolder);
 int initExpList(ExposureList *expList, HeadList headList, obsy *obsPos);
+void locStime2mjd(double *mjd, double sTime, double Long, DATEOBS dateObs0);
 
 int detCtype(QString catName);
 int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double mjd, double raOc, double deOc, double fov, double minM, double maxM, int sNum);

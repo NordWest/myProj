@@ -2,6 +2,50 @@
 #include "./../libs/hronobasefile.h"
 #include "./../libs/fitsdata.h"
 
+static QTextStream* clog = 0;
+void customMessageHandler(QtMsgType type, const char* msg)
+{
+    static const char* msgType[] =
+    {
+        "Debug    : ",
+        "Warning  : ",
+        "Critical : ",
+        "Fatal    : "
+    };
+
+    static QTextStream cout(stdout);
+    static QTextStream cerr(stderr);
+
+    //cout << msgType[type] << msg << endl;
+    cout << msg << endl;
+    if(clog && clog->device())
+        //*clog << type << msg;
+        *clog << msg;
+
+    if(type == QtFatalMsg)
+    {
+        cerr << "aborting..." << endl;
+
+#if defined(Q_CC_MSVC) && defined(QT_DEBUG) && defined(_CRT_ERROR) && defined(_DEBUG)
+        int reportMode = _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
+        _CrtSetReportMode(_CRT_ERROR, reportMode);
+        int ret = _CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, QT_VERSION_STR, msg);
+        if(ret == 0 && reportMode & _CRTDBG_MODE_WNDW)
+            return;
+        else if(ret == 1)
+            _CrtDbgBreak();
+#endif
+
+#if defined(Q_OS_UNIX) && defined(QT_DEBUG)
+        abort();
+#else
+        exit(1);
+#endif
+
+    }
+
+}
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -18,6 +62,11 @@ int main(int argc, char *argv[])
     QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
     Q_ASSERT( codec1 );
     QTextCodec::setCodecForCStrings(codec1);
+
+    QString logFileName("utcorr.log");
+    QFile* logFile = new QFile(logFileName);
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+        clog = new QTextStream(logFile);
 
     int i, szi;
 
@@ -37,7 +86,7 @@ int main(int argc, char *argv[])
 
     for(i=0; i<szi; i++)
     {
-        uStm << QString("%1|%2|%3|%4\n").arg(hbFile.hronoList.at(i)->date.toString("yyyy MM dd")).arg(hbFile.hronoList.at(i)->timeReal.toString("HH mm ss.zzz")).arg(hbFile.hronoList.at(i)->getMjdReal(), 12, 'f', 6).arg(hbFile.hronoList.at(i)->getU());
+        uStm << QString("%1|%2|%3|%4\n").arg(hbFile.hronoList.at(i)->date.toString("yyyy MM dd")).arg(hbFile.hronoList.at(i)->timeReal.toString("HH mm ss.zzz")).arg(hbFile.hronoList.at(i)->getMjdReal(), 10, 'f', 4).arg(hbFile.hronoList.at(i)->getU(), 10, 'f', 4);
     }
     uFile.close();
 
@@ -68,9 +117,10 @@ int main(int argc, char *argv[])
     QString string, dateStr, timeStr, plName, uTimeHdr;
 
     HeadList hList;
+    DATEOBS dateObs0;
     int year, month, day, hour, min, fuRes;
-    double sec, jdNum, jdDate, sTime, uCorr, uCorrHdr, gm1, jd0, pday, jdUtc, jDay, s0, s1, dS1, dS;
 
+    double sec, jdNum, jdDate, sTime, uCorr, uCorrHdr, gm1, jd0, pday, jdUtc, jDay, s0, s1, dS1, dS;
     double Long = grad_to_rad(30.3274)/(2.0*PI);//day
 
     for(i=0; i<szi; i++)
@@ -106,17 +156,21 @@ int main(int argc, char *argv[])
         hList.getKeyName("U", &uTimeHdr);
         uCorrHdr = uTimeHdr.trimmed().toDouble();
 
-        year = dateStr.section(" ", 0, 0, QString::SectionSkipEmpty).toInt();//atoi(argv[1]);
-        month = dateStr.section(" ", 1, 1, QString::SectionSkipEmpty).toInt();//atoi(argv[2]);
-        day = dateStr.section(" ", 2, 2, QString::SectionSkipEmpty).toInt();//atoi(argv[3]);
-        hour = timeStr.section(" ", 0, 0, QString::SectionSkipEmpty).toInt();//atoi(argv[4]);
-        min = timeStr.section(" ", 1, 1, QString::SectionSkipEmpty).toInt();//atoi(argv[5]);
-        sec = timeStr.section(" ", 2, 2, QString::SectionSkipEmpty).toDouble();//atof(argv[6]);
+        dateObs0.year = dateStr.section(" ", 0, 0, QString::SectionSkipEmpty).toInt();//atoi(argv[1]);
+        dateObs0.month = dateStr.section(" ", 1, 1, QString::SectionSkipEmpty).toInt();//atoi(argv[2]);
+        dateObs0.day = dateStr.section(" ", 2, 2, QString::SectionSkipEmpty).toInt();//atoi(argv[3]);
+        dateObs0.hour = timeStr.section(" ", 0, 0, QString::SectionSkipEmpty).toInt();//atoi(argv[4]);
+        dateObs0.min = timeStr.section(" ", 1, 1, QString::SectionSkipEmpty).toInt();//atoi(argv[5]);
+        dateObs0.sec = timeStr.section(" ", 2, 2, QString::SectionSkipEmpty).toDouble();//atof(argv[6]);
         //fitsd->expList->exps.at(0)->expTime;
 
-        jdNum = dat2JDN(year, month, day);
 
+
+        jdNum = dat2JDN(dateObs0.year, dateObs0.month, dateObs0.day);
+
+        //dat2JD(&jdDate, year, month, day+0.5);
         sTime = hour/24.0 + min/1440.0 + sec/86400.0;
+        //locStime2mjd(&mjd, sTime, Long, dateObs0);
 
         gm1 = sTime - Long;
         qDebug() << QString("sTime= %1\tgm1= %2\tLong= %3\n").arg(sTime).arg(gm1).arg(Long);
@@ -152,9 +206,6 @@ int main(int argc, char *argv[])
 
 
 
-
-
-
         //fuRes = hbFile.findU(&uCorr, jdNum, sTime, 7);
 
         fuRes = hbFile.findU_mjd(&uCorr, jd2mjd(jdUtc));
@@ -166,6 +217,14 @@ int main(int argc, char *argv[])
     }
     huFile.close();
 
+
+
+///////////
+    logFile->close();
+    delete clog;
+    clog = 0;
+    delete logFile;
+    qInstallMsgHandler(0);
 
 
     return 0;//a.exec();
