@@ -516,7 +516,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             if(tryMpeph)
             {
                 findSkybotNamesList(&objList, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
-                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, mpephProcData);
+                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, miriProcData);
                 else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
 
             }
@@ -533,7 +533,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 if(mpephType) objList.append(oName);
                 else objList.append(QString("%1").arg(oNum));
 
-                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, mpephProcData);
+                if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, miriProcData);
                 else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
             }
         }
