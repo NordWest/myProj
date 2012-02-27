@@ -10513,18 +10513,18 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 }
 
 //objects   ////////////////////////////////
-int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, procData mpephProcData)
+int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int useObjNum, procData mpephProcData)
 {
     int i;
     qDebug() << "\ngetMpephObject\n";
     QStringList outerArguments;
 
-    switch(objType)
+    switch(useObjNum)
     {
-    case 0:
+    case 1:
         outerArguments << QString("-num");
         break;
-    case 1:
+    case 0:
         outerArguments << QString("-name");
         break;
     default:
@@ -10611,7 +10611,7 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, pr
 
 }
 
-void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objType, double mag0, double mag1, procData mpephProcData)
+void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int useObjNum, double mag0, double mag1, procData mpephProcData)
 {
     int i, sz;
     marksP *mT;
@@ -10625,7 +10625,7 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objT
 
     for(i=0; i<sz; i++)
     {
-        if(!getMpephObject(&moTemp, mJD, objList.at(i), objType, mpephProcData))
+        if(!getMpephObject(&moTemp, mJD, objList.at(i), useObjNum, mpephProcData))
         {
             if((moTemp.Vmag>=mag0)&&(moTemp.Vmag<mag1))
             {

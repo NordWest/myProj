@@ -182,7 +182,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         int skybotFind = sett->value("objects/skybotFind", 0).toInt();
         int tryMpeph = sett->value("objects/tryMpeph", 0).toInt();
         int useMiriade = sett->value("objects/useMiriade", 0).toInt();
-        int mpephType = sett->value("objects/mpephType", 0).toInt();
+        //int mpephType = sett->value("objects/mpephType", 0).toInt();
+        int useObjNum = sett->value("objects/useObjNum", 0).toInt();
         double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
         double magObj1 = sett->value("objects/mag1", 16.0).toDouble();
         QString headObjName = sett->value("objects/headObjName", "OBJECT").toString();
@@ -517,7 +518,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             {
                 findSkybotNamesList(&objList, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
                 if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, miriProcData);
-                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 1, magObj0, magObj1, mpephProcData);
+                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, 0, magObj0, magObj1, mpephProcData);
 
             }
             else findSkybot(fitsd->objMarks, fitsd->WCSdata[2], fitsd->WCSdata[3], fitsd->MJD, skybot_prog, skybot_prog_folder, fov, obsCode, magObj0, magObj1, skybot_wait_time);
@@ -530,11 +531,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
                 desc2NumName(descS, &oNum, &oName);
 
-                if(mpephType) objList.append(oName);
+                if(!useObjNum) objList.append(oName);
                 else objList.append(QString("%1").arg(oNum));
 
                 if(useMiriade) getMiriadeGrid(fitsd->objMarks, fitsd->MJD, objList, magObj0, magObj1, miriProcData);
-                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, mpephType, magObj0, magObj1, mpephProcData);
+                else getMpephGrid(fitsd->objMarks, fitsd->MJD, objList, useObjNum, magObj0, magObj1, mpephProcData);
             }
         }
         qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());

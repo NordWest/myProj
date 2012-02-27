@@ -144,12 +144,12 @@ int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec
 int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff);
 
 //objects   ////////////////////////////////
-int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int objType, procData mpephProcData);
+int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int useObjNum, procData mpephProcData);
 //void getMpephObject(marksGrid *objMarks, QStringList outerArguments, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
 //void getMpephNum(marksGrid *objMarks, double MJD, QString mpeNum, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
 //void getMpephName(marksGrid *objMarks, double MJD, QString mpeName, QString ast_eph_prog, QString ast_eph_prog_folder, double mag0, double mag1, int mpeWaitTime=-1);
 
-void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int objType, double mag0, double mag1, procData mpephProcData);
+void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int useObjNum, double mag0, double mag1, procData mpephProcData);
 
 int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData, QString objType="");
 void getMiriadeGrid(marksGrid *objMarks, double mJD, QStringList objList, double mag0, double mag1, procData miriadeProcData, QString objType="");
