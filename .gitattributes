@@ -563,6 +563,8 @@ r3Stat/main.cpp -text
 r3Stat/r3Stat.pro -text
 r3StatPL/main.cpp -text
 r3StatPL/r3StatPL.pro -text
+reAver/main.cpp -text
+reAver/reAver.pro -text
 redStatSelect/main.cpp -text
 redStatSelect/redStatSelect.ini -text
 redStatSelect/redStatSelect.pro -text
