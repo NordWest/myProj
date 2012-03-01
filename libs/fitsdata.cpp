@@ -10356,7 +10356,49 @@ int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec*
         errStream << outstr;
     }
 
+    errFile.close();
 
+}
+
+int makeEphReports(marksGrid *objMarks, double mJD, QString resFolder, QString originName)
+{
+    if(FD_LOG_LEVEL) qDebug() << "\nmakeIpixReports\n";
+    QString outstr;
+    int resNum;
+    int i;
+    double ra,de,x,y,pixmag,ksi,eta, mag;
+    marksP *mT;
+
+    QFile errFile(QDir(resFolder).dirName()+"/objEph.txt");
+    errFile.open(QIODevice::Append| QIODevice::Text);
+    QTextStream errStream;
+    errStream.setDevice(&errFile);
+
+    resNum = objMarks->marks.size();
+
+    for(i=0; i<resNum; i++)
+    {
+        outstr.clear();
+
+        mT = objMarks->marks.at(i);
+
+        x = mT->mTanImg[0];
+        y = mT->mTanImg[1];
+        pixmag = mT->mTanImg[2];
+        ra = mT->mEkv[0];
+        de = mT->mEkv[1];
+        mag = mT->mEkv[2];
+        ksi = mT->mTan[0];
+        eta = mT->mTan[1];
+        //redMake->detTan(&ksi, &eta, x, y);
+        //getTangToDeg(&ra, &de, ksi, eta, ebRec->RAoc, ebRec->DEoc);
+        //redMake->detMagn(&mag, pixmag);
+
+        outstr = QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(mJD, 15, 'f', 7, QLatin1Char(' ')).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')).arg(ksi, 13, 'f', 8, QLatin1Char(' ')).arg(eta, 13, 'f', 8, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 16, 'e', 8, QLatin1Char(' ')).arg(originName);
+        errStream << outstr;
+    }
+
+    errFile.close();
 
 }
 

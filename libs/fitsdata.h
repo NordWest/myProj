@@ -142,6 +142,7 @@ struct ouputParams
 int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff, outputLimits outLim, whatOutput whatOut, ouputParams outPar);
 int makeObjErrReports(marksP *mObj, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, outputLimits outLim, whatOutput whatOut, ouputParams outPar);
 int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff);
+int makeEphReports(marksGrid *objMarks, double mJD, QString resFolder, QString originName);
 
 //objects   ////////////////////////////////
 int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int useObjNum, procData mpephProcData);

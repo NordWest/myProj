@@ -187,6 +187,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         double magObj0 = sett->value("objects/mag0", 6.0).toDouble();
         double magObj1 = sett->value("objects/mag1", 16.0).toDouble();
         QString headObjName = sett->value("objects/headObjName", "OBJECT").toString();
+        int saveObjEph = sett->value("objects/saveObjEph", 0).toInt();
 
 //  catalogs    /////
         QString catIni = sett->value("catalogs/catIni", "./catalogs.ini").toString();
@@ -542,6 +543,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         fitsd->detTanObj();
 ///////////
 
+        if(saveObjEph) makeEphReports(fitsd->objMarks, fitsd->MJD, "./", QFileInfo(fileName).absoluteFilePath());
+/*
         QFile xyObjFile("./xyObj.txt");
         xyObjFile.open(QIODevice::WriteOnly | QIODevice::Append);
         QTextStream xyStm(&xyObjFile);
@@ -553,7 +556,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         }
         xyObjFile.close();
 
-
+*/
 ///////////
 
     fitsd->cleanObjects(aper);
