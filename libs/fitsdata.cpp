@@ -9598,6 +9598,18 @@ void marksP::createP()
     P = new double[21];
 }
 
+int marksP::getObjName(QString &oName)
+{
+    if(mpcObj!=NULL) oName = mpcObj->name;
+    else if(resRec!=NULL) oName = "";
+    else if(u3Rec!=NULL) oName = "";
+    else if(sstar!=NULL) oName = QString(sstar->getLSPM());
+    else if(ssResRec!=NULL) oName = ssResRec->lspmName;
+    else if(sbot!=NULL) oName = sbot->Name;
+    else if(usnobRec!=NULL) oName = usnobRec->usnoName;
+    else if(ppmxlRec!=NULL) oName = ppmxlRec->ppmxl_id;
+}
+
 
 ////////////////////////////////////////////////
 
@@ -10363,7 +10375,7 @@ int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec*
 int makeEphReports(marksGrid *objMarks, double mJD, QString resFolder, QString originName)
 {
     if(FD_LOG_LEVEL) qDebug() << "\nmakeIpixReports\n";
-    QString outstr;
+    QString outstr, Name;
     int resNum;
     int i;
     double ra,de,x,y,pixmag,ksi,eta, mag;
@@ -10393,8 +10405,9 @@ int makeEphReports(marksGrid *objMarks, double mJD, QString resFolder, QString o
         //redMake->detTan(&ksi, &eta, x, y);
         //getTangToDeg(&ra, &de, ksi, eta, ebRec->RAoc, ebRec->DEoc);
         //redMake->detMagn(&mag, pixmag);
+        mT->getObjName(Name);
 
-        outstr = QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(mJD, 15, 'f', 7, QLatin1Char(' ')).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')).arg(ksi, 13, 'f', 8, QLatin1Char(' ')).arg(eta, 13, 'f', 8, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 16, 'e', 8, QLatin1Char(' ')).arg(originName);
+        outstr = QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11\n").arg(mJD, 15, 'f', 7, QLatin1Char(' ')).arg(Name, 10).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')).arg(ksi, 13, 'f', 8, QLatin1Char(' ')).arg(eta, 13, 'f', 8, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 16, 'e', 8, QLatin1Char(' ')).arg(originName);
         errStream << outstr;
     }
 

@@ -639,6 +639,8 @@ public:
 
         void createP();
 
+        int getObjName(QString &oName);
+
 
         marksP& operator=(const marksP &source);
 };
