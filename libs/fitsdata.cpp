@@ -4457,6 +4457,7 @@ double fitsdata::getMeanScale()
 
 int fitsdata::readHeader(QString headStr)
 {
+    fitsHeader = headStr;
     headList.readHeader(headStr);
     /*QStringList headVals;
     int pos0, pos1;
