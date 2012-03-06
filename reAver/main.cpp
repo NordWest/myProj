@@ -82,7 +82,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         QStringList objList;
         procData mpephProcData;
         procData miriProcData;
-        QString optName, optVal, optStr, pnStr, headerFileName;
+        QString optName, optVal, optStr, pnStr, headerFileName, fileName;
         QString logFileName, filePath, wcsFileName;
         QString resFolder, logFolder;
         sysCorrParam *sysCorr = NULL;
@@ -232,8 +232,13 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        wcsFileName =  QString(argv[1]);
-        QString fileName = wcsFileName.section(".", 0, -3);
+        fileName =  QString(argv[1]);
+        QFileInfo fi(fileName);
+
+        filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
+        if(filePath=="") filePath = QString("./");
+
+        wcsFileName = wcsFileName.section(".", 0, -3);
 
         QDir resDir("./");
         if(resDir.mkpath(resFolder))qDebug() << "\nresFolder created\n";
@@ -241,21 +246,43 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         //if(resDir.mkpath(logFolder))qDebug() << "\nlogFolder created\n";
         //else qDebug() << "\nlogFolder don't create\n";
 
-        QFileInfo fi(fileName);
-        filePath = fi.absoluteFilePath();//fileName.left(fileName.lastIndexOf("\\")+1);
-        if(filePath=="") filePath = QString("./");
+//////////////////////////
+
+        QDirIterator it(filePath, QDirIterator::Subdirectories);
+        QRegExp rx("*.lor.*.wcs");
+        rx.setPatternSyntax(QRegExp::Wildcard);
+
+         while (it.hasNext()) {
+             tFile = it.next();
+
+             if(rx.exactMatch(tFile)) dataFiles << tFile;
+
+             /*
+             if((tFile.lastIndexOf("/..")==tFile.lastIndexOf("/"))||(tFile.lastIndexOf("/.")==tFile.lastIndexOf("/"))||(tFile.right(1)==QString("."))) continue;
+
+             for(i=0;i<filList.size();i++)
+             {
+
+                if((tFile.lastIndexOf(filList.at(i))==tFile.size()-filList.at(i).size())&&(tFile.size()>filList.at(i).size()))
+                {
+                    dataFiles << tFile;
+                }
+                */
+        }
+
+//////////////////////////
+
+
+
+
         wcsFileName = QString("%1.wcs").arg(fileName);
+
+
+
         //QString logFileName = QString("%1/%2.log").arg(logFolder).arg(fi.fileName());
         //if(isLP) logFileName = QString("%1/%2.log").arg(QDir(logPath).absolutePath()).arg(fi.fileName());
         //else logFileName = QString("%1.log").arg(fi.absoluteFilePath());
-        if(isLF)
-        {
-            QDir().mkdir(logFolder);
-            QDir ldir(logFolder);
 
-            logFileName = QString("%1/%2.log").arg(ldir.absolutePath()).arg(fi.fileName());
-        }
-        else logFileName = QString("%1.log").arg(fi.absoluteFilePath());
 
         if(detHname) headerFileName = QString("%1.hdr").arg(fileName);
 
@@ -316,6 +343,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
 /////////////////////////////
 
         fitsdata *fitsd = new fitsdata();
+
+        marksGrid lorMarks;
+        marksGrid *expMarks;
+        QList <marksGrid*> expMarksL;
+
 
 ////////////////////////////////////////
 
@@ -411,11 +443,16 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         ExposureRec *expRec = new ExposureRec;
 
         int expRes = initExpList(expList, fitsd->headList, obsList->record);
+
+
+
         expList->getExp(expRec, expNum);
         fitsd->setMJD(expRec->expTime);
 
 //  utcorr
 
+        double uTimeC;
+        double fov;
         uTime = QString("0.0");
         int exStat = 0;
 
@@ -448,10 +485,11 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         }
 
         qDebug() << QString("uTimeCorr: %1\n").arg(uTime.trimmed().toDouble());
-        fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
+        uTimeC = uTime.trimmed().toDouble()/86400.0;
+        fitsd->MJD += uTimeC;
 
 /////////
-
+/*
         //refractionParam *refParam;
         if(isRedRef)
         {
@@ -459,6 +497,37 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
             refParam = new refractionParam;
             if(initPlateRefParam(refParam, fitsd, obsPos))refParam==NULL;
         }
+*/
+
+        /////////
+                fov = fovp*fitsd->detFov();
+
+                fitsd->catMarks->clearMarks();
+                qDebug() << "catMarks load\n";
+                if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
+                {
+                    qDebug() << QString("getMarksGrid error\n");
+                    logFile->close();
+                    delete clog;
+                    clog = 0;
+                    delete logFile;
+                    delete fitsd;
+                    if(isRemLog) QDir().remove(logFileName);
+                    qInstallMsgHandler(0);
+                    return 2;
+                }
+
+                qDebug() << QString("catMarks num: %1\n").arg(fitsd->catMarks->marks.size());
+
+                fitsd->detTan();
+
+        //////////
+
+
+
+
+
+
 
 ////////
 
@@ -481,29 +550,8 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         if(detRect) fitsd->detIpixWorkFrame();
         else fitsd->workFrame.setCoords(rectX0, rectY0, rectX1, rectY1);
 
-/////////
-        double fov = fovp*fitsd->detFov();
-
-        fitsd->catMarks->clearMarks();
-        qDebug() << "catMarks load\n";
-        if(getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1))
-        {
-            qDebug() << QString("getMarksGrid error\n");
-            logFile->close();
-            delete clog;
-            clog = 0;
-            delete logFile;
-            delete fitsd;
-            if(isRemLog) QDir().remove(logFileName);
-            qInstallMsgHandler(0);
-            return 2;
-        }
-
-        qDebug() << QString("catMarks num: %1\n").arg(fitsd->catMarks->marks.size());
-
-        fitsd->detTan();
-
-//////////
+////////////////////////////
+////////////////////////////
 
         if(lspmFind)
         {
