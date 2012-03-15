@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
 
     QString mpcCatName = sett.value("general/mpcCatName", "mpcorb.dat").toString();
     QString deleCatName = sett.value("general/deleCatName", "dele.cat").toString();
+    nbd = sett.value("general/nbd", 1).toInt();
+    step = sett.value("general/step", 1).toInt();
 
     observ obsPos;
     mpcRec mpcr;
@@ -79,8 +81,8 @@ int main(int argc, char *argv[])
 
 
     //szi = iList.nstr;
-    step = 30;
-    nbd = 1;
+    //step = 30;
+    //nbd = 1;
 
 
 /*
@@ -209,7 +211,7 @@ int main(int argc, char *argv[])
             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
             outerProcess.setReadChannel(QProcess::StandardOutput);
 
-            //logStm << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
+            logStm << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
 
             outerProcess.start(miriadeProcData.name, outerArguments);
 
@@ -220,7 +222,7 @@ int main(int argc, char *argv[])
             QTextStream objStream1(outerProcess.readAllStandardOutput());
 
             j=0;
-            while (!objStream1.atEnd())
+            while (!objStream1.atEnd()&&j<nbd)
             //for(i=0; i<orList.size(); i++)
             {
                 objDataStr = objStream1.readLine();
@@ -362,8 +364,8 @@ int main(int argc, char *argv[])
 
             dRa = fabs(raML.at(i)[j] - rad2grad(raL.at(i)[j]));
             dDe = fabs(deML.at(i)[j] - rad2grad(deL.at(i)[j]));
-            logStm << QString("dRa: %1\tdDe: %2\n").arg(grad_to_mas(dRa)/1000).arg(grad_to_mas(dDe)/1000);
-            resStm << QString("%1\t%2\t%3\t%4\n").arg(objList.at(i)).arg(step*j).arg(grad_to_mas(dRa)/1000).arg(grad_to_mas(dDe)/1000);
+            logStm << QString("dRa: %1\tdDe: %2\n").arg(grad_to_mas(dRa)/1000.0/60.0).arg(grad_to_mas(dDe)/1000/60.0);
+            resStm << QString("%1\t%2\t%3\t%4\n").arg(objList.at(i)).arg(step*j).arg(grad_to_mas(dRa)/1000/60.0).arg(grad_to_mas(dDe)/1000/60.0);
         }
     }
 
