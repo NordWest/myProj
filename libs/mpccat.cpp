@@ -341,7 +341,7 @@ double mpcrec::getEpoch()
         strncpy(sim, &this->epoch[4], 1);
         strcpy(&sim[1], "\0");
         upackDigStr(sim, sim1);
-        double day = atoi(sim1)+0.5;
+        double day = atoi(sim1);//-0.5;
 
         double jday;
 
