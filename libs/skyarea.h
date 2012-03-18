@@ -377,24 +377,24 @@ class RLRecord
 public:
 	int noftask;
 //	char *name;
-	char *num;
-	double exp;
+        QString num;
+        double exp;
 	char *tail;
 
-	double RA, DEC, magn;
+        double ra, dec, magn, muRa, muDe;
 
 	int nofobs;
 
 	RLRecord();
 	~RLRecord();
 
-	void get_RA(char *str);
-	void get_DEC(char *str);
+        void get_RA(QString str);
+        void get_DEC(QString str);
 
-	void set_name(char* sname);
+        void set_name(QString sname);
 	char* get_name();
 private:
-	char *name;
+        QString name;
 };
 
 class RList :public fBuffer	//Results list
@@ -596,7 +596,7 @@ public:
 
 //	char *install_dir;
 //	Visual properties
-	float timeSunSet, timeSunRise;	//JD times;
+        double timeSunSet, timeSunRise;	//JD times;
 //	double sunX, sunY, sunZ;
 	double sunRA, sunDE;
 //
@@ -613,7 +613,7 @@ public:
 //	OrbCat *orb_ini_catalog;
 	
 //Каталоги
-	OrbCat *orb_catalog;
+        OrbCat *orb_catalog;
 	mpccat *mpc_catalog;
 //	sscatFB *lspm_catalog;
 

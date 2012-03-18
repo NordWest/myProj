@@ -30,8 +30,9 @@ MainWindow::~MainWindow()
 void MainWindow::slotUpdateTable()
 {
     //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
-    double jDay;
+    double jDay, lam;
     int yr, mth, day, hr, min, sec;
+    lam = sa.obs_pos->obs->record->Long;
 
     sysTime = QTime().currentTime();
     timeStr = sysTime.toString("HH mm ss");
@@ -46,6 +47,8 @@ void MainWindow::slotUpdateTable()
     dat2JD_time(&jDay, yr, mth, day, hr, min, sec);
     jdTimeStr = QString("%1 | %2").arg(jDay, 13, 'f', 5).arg(sysDate.toJulianDay());
 
+    UTC2s(jDay, lam, &s);
+    starTimeStr = getStrFromS(s, ":", 0);
 
     slotStatBarUpdate();
     updater->start(1000);
@@ -56,6 +59,7 @@ void MainWindow::slotStatBarUpdate()
         //statusBar()->showMessage(timeStr);
         sysTimeEdit->setText(timeStr);
         jdTimeEdit->setText(jdTimeStr);
+        starTimeEdit->setText(starTimeStr);
 }
 
 void MainWindow::setMenu()
@@ -66,6 +70,19 @@ void MainWindow::setMenu()
     viewSettAct->setStatusTip(tr("view settings"));// iacia?aai "iianeaceo"
     fileMenu->addAction(viewSettAct);
     connect(viewSettAct, SIGNAL(triggered()), this, SLOT(slotViewSettWindow()));
+
+    viewMenu = menuBar()->addMenu(tr("view"));
+    viewNextAct = new QAction(tr("&view next"), this);
+    viewNextAct->setShortcut(tr("Ctrl+n"));//
+    viewNextAct->setStatusTip(tr("view next"));//
+    viewMenu->addAction(viewNextAct);
+    connect(viewNextAct, SIGNAL(triggered()), this, SLOT(slotViewNextObj()));
+    viewPrevAct = new QAction(tr("&view prev"), this);
+    viewPrevAct->setShortcut(tr("Ctrl+p"));//
+    viewPrevAct->setStatusTip(tr("view next"));//
+    viewMenu->addAction(viewPrevAct);
+    connect(viewPrevAct, SIGNAL(triggered()), this, SLOT(slotViewPrevObj()));
+
 }
 
 void MainWindow::setWidgets()
@@ -75,7 +92,7 @@ void MainWindow::setWidgets()
     statusBar()->addWidget(sysTimeEdit);
 
     jdTimeEdit = new QLineEdit(this);
-    jdTimeEdit->setMaximumWidth(200);
+    jdTimeEdit->setMaximumWidth(400);
     statusBar()->addWidget(jdTimeEdit);
 
     starTimeEdit = new QLineEdit(this);
@@ -84,9 +101,13 @@ void MainWindow::setWidgets()
 
     mainToolBar = qFindChild<QToolBar*>(this, "mainToolBar");
 
-    settButton = new QPushButton(tr("sett"));
-    mainToolBar->insertWidget(viewSettAct, settButton);
-    connect(settButton, SIGNAL(clicked()), this, SLOT(slotViewSettWindow()));
+    prevButton = new QPushButton(tr("prev"));
+    mainToolBar->insertWidget(viewPrevAct, prevButton);
+    connect(prevButton, SIGNAL(clicked()), this, SLOT(slotViewPrevObj()));
+
+    nextButton = new QPushButton(tr("next"));
+    mainToolBar->insertWidget(viewNextAct, nextButton);
+    connect(nextButton, SIGNAL(clicked()), this, SLOT(slotViewNextObj()));
 }
 
 void MainWindow::setSettings()
@@ -97,4 +118,14 @@ void MainWindow::setSettings()
 void MainWindow::slotViewSettWindow()
 {
     QMessageBox::information(0,"debug","view sett",QMessageBox::Ok);
+}
+
+void MainWindow::slotViewNextObj()
+{
+
+}
+
+void MainWindow::slotViewPrevObj()
+{
+
 }

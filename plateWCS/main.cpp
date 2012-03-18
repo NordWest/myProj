@@ -336,6 +336,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
 //  utcorr
 
         uTime = QString("0.0");
+        int exStat = 0;
 
         if(useUtCorr)
         {
@@ -347,16 +348,20 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
             outerProcess.setReadChannel(QProcess::StandardOutput);
             qDebug() << QString("argc= %1\n").arg(argc);
-            outerArguments  << dateStr << timeStr;
+            //outerArguments  << dateStr << timeStr;
+            outerArguments  << QString("%1").arg(fitsd->MJD, 14, 'f', 8);//dateStr << timeStr;
             qDebug() << utcorr_prog << outerArguments.join(" ");
             outerProcess.start(utcorr_prog, outerArguments);
 
             outerProcess.waitForFinished(utcorr_wait_time);
             QTextStream catStream(outerProcess.readAllStandardOutput());
 
-            uTime = catStream.readAll().section("\n", -1, -1);
+            uTime = catStream.readAll().section("\n", -2, -2);
+
+            exStat = (QString().compare(uTime, "err")==0);
+            qDebug() << QString("Crash Exit: %1\n").arg(exStat);
         }
-        else
+        if(!useUtCorr||exStat)
         {
             fitsd->headList.getKeyName("U", &uTime);
         }

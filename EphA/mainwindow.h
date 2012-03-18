@@ -33,17 +33,23 @@ public:
     QString jdTimeStr;
     QTime sysTime;
 
+    SkyArea sa;
+
 private slots:
     void slotUpdateTable();
     void slotStatBarUpdate();
 
     void slotViewSettWindow();
+    void slotViewNextObj();
+    void slotViewPrevObj();
 
 private:
     Ui::MainWindow *ui;
     QTimer *updater;
-    QPushButton *settButton;
+
     QToolBar *mainToolBar;
+    QPushButton *nextButton;
+    QPushButton *prevButton;
 
     QLineEdit *sysTimeEdit;
     QLineEdit *starTimeEdit;
@@ -52,6 +58,9 @@ private:
 
     QMenu *fileMenu;
     QAction *viewSettAct;
+    QMenu *viewMenu;
+    QAction *viewNextAct;
+    QAction *viewPrevAct;
 };
 
 #endif // MAINWINDOW_H

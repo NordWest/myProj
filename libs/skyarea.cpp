@@ -862,17 +862,17 @@ int IListOld::sort_prior()
 
 RLRecord::RLRecord()
 {
-	this->name = new char[128];
-	this->num = new char[128];
-	this->tail = new char[128];
-	strcpy(tail, "\x0D");
+//	this->name = new char[128];
+//	this->num = new char[128];
+//	this->tail = new char[128];
+//	strcpy(tail, "\x0D");
 }
 
 RLRecord::~RLRecord()
 {
-	delete [] this->name;
-	delete [] this->num;
-	delete [] tail;
+//	delete [] this->name;
+//	delete [] this->num;
+//	delete [] tail;
 }
 
 void RLRecord::get_RA(char *str)
@@ -880,8 +880,10 @@ void RLRecord::get_RA(char *str)
 	int h, m, sn;
 	double s;
 	char *csn;
+        QString str;
 	csn = new char[1];
 
+        deg_to_hms(&str, ra, " ", 1);
 	rad2hms(this->RA, &sn, &h, &m, &s);
 	if(h<10) sprintf(str, "0%1d %2d %6.3f", h, m, s);
 	else sprintf(str, "%2d %2d %6.3f", h, m, s);
@@ -2319,8 +2321,9 @@ SkyArea::SkyArea()
 
 SkyArea::~SkyArea()
 {
-	obs_list->Save();
-	delete(this->orb_catalog);
+//        obs_list->Save();
+        //if(orb_catalog!=NULL) delete(this->orb_catalog);
+        //orb_catalog = NULL;
 //	delete(this->orb_ini_catalog);
 //	delete(this->ini_list);
 	delete(this->task_list);
@@ -2328,12 +2331,12 @@ SkyArea::~SkyArea()
 	delete(this->exc_list);
 	delete(this->obs_list);
 	delete(this->obs_pos);
-	delete(this);
-	
-	delete [] err_log;
+//	delete(this);
+
+        delete [] err_log;
 //	delete [] this->fn_cat;
 	delete [] this->install_dir;
-	delete [] this->catalog_dir;
+        delete [] this->catalog_dir;
 }
 
 int SkyArea::init(char *fn_obs, char *fn_dele_bin)
@@ -2655,8 +2658,8 @@ int SkyArea::GetTaskIniFNames(char *ini_lst, char *ini_cat)
 	char *dp = new char[255];
 	task_list->record->get_dir_path(dp);
 
-	if(ini_lst!=NULL) sprintf(ini_lst, "%s%s\\ini.lst", this->install_dir, dp);
-	if(ini_cat!=NULL) sprintf(ini_cat, "%s%s\\ini.cat", this->install_dir, dp);
+        if(ini_lst!=NULL) sprintf(ini_lst, "%s%s/ini.lst", this->install_dir, dp);
+        if(ini_cat!=NULL) sprintf(ini_cat, "%s%s/ini.cat", this->install_dir, dp);
 	
 	delete [] dp;
 
@@ -3071,6 +3074,16 @@ int SkyArea::initVisualProp(double T)
 
 	detRiseSet(&tr, &ts, this->params->sunDE, this->obs_pos->obs->record->getFi());
 
+        params->timeSunRise = tr;
+        params->timeSunSet = ts;
+
+/*
+        params->timeSunRise = tr + this->params->sunRA;
+        params->timeSunSet = ts + this->params->sunRA;
+
+        if(params->timeSunRise>2.0*PI) params->timeSunRise -= 2.0*PI;
+        if(params->timeSunSet>2.0*PI) params->timeSunSet -= 2.0*PI;
+*/
 
 	return 0;
 }

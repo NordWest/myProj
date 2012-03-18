@@ -339,13 +339,13 @@ fBuffer::fBuffer(char *fn, int sizestr)
 
 fBuffer::~fBuffer()
 {
-	delete [] this->str;
+        //delete [] str;
 	this->str = NULL;
-	delete [] this->fn;
+        //delete [] fn;
 	this->fn = NULL;
-	delete [] this->fn_tmp;
+        //delete [] fn_tmp;
 	this->fn_tmp = NULL;
-	delete(this->buffer);
+        //delete(this->buffer);
 	this->nstr = -1;
 }
 

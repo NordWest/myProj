@@ -3613,6 +3613,17 @@ int detRiseSet(double *tr, double *ts, double de, double fi)
 {
 	*tr = atan2(-sqrt(cos(fi-de)), sqrt(cos(fi+de)));
 	*ts = atan2(sqrt(cos(fi-de)), sqrt(cos(fi+de)));
+
+    double at2 = atan2(cos(fi-de), cos(fi+de));
+
+    *tr = -2.0*sqrt(at2);
+    *ts = 2.0*sqrt(at2);
+
+    if(*tr<0) *tr += 2.0*PI;
+    if(*ts<0) *ts += 2.0*PI;
+
+    if(*tr>2.0*PI) *tr -= 2.0*PI;
+    if(*ts>2.0*PI) *ts -= 2.0*PI;
 /*
 	if((tt<=2.0*PI)&&(tt>=PI)) tr = tt;
 	if((tt<=2.0*PI)&&(tt>=PI)) ts = -tt;
