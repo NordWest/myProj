@@ -875,6 +875,37 @@ RLRecord::~RLRecord()
 //	delete [] tail;
 }
 
+int RLRecord::fromString(QString str)
+{
+    QStringList strL;
+    strL = str.split("|");
+
+    if(strL.size()!=9) return 1;
+
+    name = strL.at(0);
+    hms_to_deg(&ra, strL.at(1), " ");
+    damas_to_deg(&dec, strL.at(2), " ");
+    magn = strL.at(3).toDouble();
+    muRa = strL.at(4).toDouble();
+    muDe = strL.at(5).toDouble();
+    nofobs = strL.at(6).toInt();
+    taskName = strL.at(7);
+    exp = strL.at(8).toDouble();
+
+    return 0;
+}
+
+int RLRecord::toString(QString &str)
+{
+    QString raStr, deStr;
+    deg_to_hms(&raStr, ra, " ", 2);
+    deg_to_damas(&deStr, dec, " ", 2);
+    str.clear();
+    str.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(name).arg(raStr).arg(deStr).arg(magn).arg(muRa).arg(muDe).arg(nofobs).arg(taskName).arg(exp));
+}
+
+/*
+
 void RLRecord::get_RA(char *str)
 {
 	int h, m, sn;
@@ -915,42 +946,88 @@ char* RLRecord::get_name()
 {
 	return(this->name);
 }
-
+*/
 //	RList	/////////////////////////////////////
 
-RList::RList() : fBuffer(RLIST_LEN)
+RList::RList()// : fBuffer(RLIST_LEN)
 {
-	this->record = new RLRecord();
+    resList.clear();
+//	this->record = new RLRecord();
 //	this->record->name = new char[255];
 //	this->record->num = new char[255];
 }
 
 //RList::RList(int sizestr) : FileDynStrBin(sizestr)
+/*
 RList::RList(int sizestr) : fBuffer(sizestr)
 {
 	this->record = new RLRecord();
 //	this->record->name = new char[255];
 //	this->record->num = new char[255];
 }
-
+*/
 RList::~RList()
 {
-	delete(this->record);
-	this->record = NULL;
+    Clear();
+        //delete(this->record);
+        //this->record = NULL;
 }
 
-int RList::init(char *fname)
+int RList::init(QString fname)
 {
-        return(fBuffer::init(fname, RLIST_LEN));
+    fileName = fname;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+    QString tStr;
+    RLRecord *tRec;
+    tRec =  new RLRecord;
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+        if(tRec->fromString(tStr)) continue;
+        resList << tRec;
+        tRec =  new RLRecord;
+    }
+
+    delete tRec;
+
+
+    return 0;
 }
 
-int RList::GetRec(int i)
+int RList::save()
 {
-	this->ReadStr(i);
-	s2rec(this->str);
-	return 0;
+    int i, sz;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream iniStm(&iniFile);
+    QString tStr;
+
+    sz = resList.size();
+    for(i=0; i<sz; i++)
+    {
+        resList.at(i)->toString(tStr);
+        iniStm << tStr << "\n";
+    }
+    return 0;
 }
 
+int RList::saveAs(QString fname)
+{
+    fileName = fname;
+    return(save());
+}
+
+int RList::GetRec(RLRecord *resRec, int i)
+{
+    int sz = resList.size();
+    if(i<0||i>=sz) return 1;
+    resRec = resList.at(i);
+    return 0;
+}
+/*
 int RList::GetRecNum(int num)
 {
 	int i = 0;
@@ -964,77 +1041,70 @@ int RList::GetRecNum(int num)
 
 	return 1;
 }
-
-int RList::GetRec(char *name)
+*/
+int RList::GetRec(RLRecord *resRec, QString name)
 {
 	int i = 0;
+        int sz = resList.size();
+        RLRecord *tRec;
 
-	do
-	{
-		this->GetRec(i);
-		if(streqv(name, this->record->get_name())) return 0;
-		i++;
-	}while(i<this->nstr);
-
+        for(i=0;i<sz;i++)
+        {
+            tRec = resList.at(i);
+            if(QString().compare(tRec->name, name)==0)
+            {
+                resRec = tRec;
+                return 0;
+            }
+        }
 	return 1;
 }
 
-int RList::GetRec(char *name, int noftask)
+int RList::GetRec(RLRecord *resRec, QString name, QString taskName)
 {
-	int i = 0;
+    int i = 0;
+    int sz = resList.size();
+    RLRecord *tRec;
 
-	do
-	{
-		this->GetRec(i);
-		if(streqv(name, this->record->get_name())&&(this->record->noftask==noftask)) return 0;
-		i++;
-	}while(i<this->nstr);
-
-	return 1;
-}
-
-
-int RList::GetRecName(char *name)
-{
-	int i = 0;
-
-	do
-	{
-		this->GetRec(i);
-		if(strstr(this->record->get_name(), name)!=NULL) return 0;
-		i++;
-	}while(i<this->nstr);
-
-	return 1;
+    for(i=0;i<sz;i++)
+    {
+        tRec = resList.at(i);
+        if((QString().compare(tRec->name, name)==0)&&(QString().compare(tRec->taskName, taskName)==0))
+        {
+            resRec = tRec;
+            return 0;
+        }
+    }
+    return 1;
 }
 
 int RList::AddRec(RLRecord *nrec)
 {
-	char *nnstr;
-	nnstr = new char[SIMPLE_STR];
-	this->SetRec(nrec);
-	this->rec2s(nnstr);
-
-	if(this->AddStr(nnstr, this->nstr))return 1;
-	delete [] nnstr;
-	return 0;
+    RLRecord *tRec = new RLRecord;
+    QString tStr;
+    nrec->toString(tStr);
+    tRec->fromString(tStr);
+    resList.append(tRec);
+    return 0;
 }
 
-int RList::SetRec(RLRecord *nrec)
+int RList::updateRec(RLRecord *nrec)
 {
-	this->record->DEC = nrec->DEC;
-	this->record->exp = nrec->exp;
-	this->record->magn = nrec->magn;
-	strcpy(this->record->get_name(), nrec->get_name());
-	this->record->nofobs = nrec->nofobs;
-	this->record->noftask = nrec->noftask;
-	strcpy(this->record->num, nrec->num);
-	this->record->RA = nrec->RA;
+    RLRecord *tRec;
 
-	return 0;
+    if(GetRec(tRec, nrec->name, nrec->taskName)) return 1;
+
+    tRec->dec = nrec->dec;
+    tRec->ra = nrec->ra;
+    tRec->exp = nrec->exp;
+    tRec->magn = nrec->magn;
+    tRec->muDe = nrec->muDe;
+    tRec->muRa = nrec->muRa;
+    tRec->nofobs = nrec->nofobs;
+    return 0;
 }
 
-
+/*
 int RList::rec2s(char *nnstr)
 {
 	char *tstr;
@@ -1051,14 +1121,12 @@ int RList::rec2s(char *nnstr)
 	return 0;
 }
 
-
-int RList::Clear()
+*/
+void RList::Clear()
 {
-	this->Free();
-
-	return 0;
+    resList.clear();
 }
-
+/*
 int RList::s2rec(char *str)
 {
 	char *tstr;
@@ -1096,22 +1164,26 @@ int RList::s2rec(char *str)
 	delete [] tstr;
 	return 0;
 }
-
+*/
 int RList::sort_meridian(double s)
 {
-	int i, j, bnum;
+        int i, j, bnum, sz;
 	double bds, ds;
+        RLRecord *tRec;
 
-	for(i=0; i<this->nstr; i++)
+        sz = resList.size();
+
+        for(i=0; i<sz; i++)
 	{
 		bds = PI;
 		bnum = i;
 
-		for(j=i; j<this->nstr; j++)
+                for(j=i; j<sz; j++)
 		{
-			this->GetRec(j);
+                        //this->GetRec(j);
+                    tRec = resList.at(j);
 
-			ds = fabs(sin(this->record->RA)-sin(s));
+                        ds = fabs(sin(tRec->ra)-sin(s));
 
 			if(ds<bds)
 			{
@@ -1120,7 +1192,8 @@ int RList::sort_meridian(double s)
 			}
 
 		}
-		this->Exchange(i, bnum);
+                resList.swap(i, bnum);
+                //this->Exchange(i, bnum);
 	}
 
 	return 0;
@@ -1128,19 +1201,22 @@ int RList::sort_meridian(double s)
 
 int RList::sort_magnitude(int direct)
 {
-	int i, j, bnum;
+        int i, j, bnum, sz;
 	double bds, ds;
+        RLRecord *tRec;
 
-	for(i=0; i<this->nstr; i++)
+        sz = resList.size();
+
+        for(i=0; i<sz; i++)
 	{
 		bds = pow(-1.0, direct+1)*30.0;
 		bnum = i;
 
-		for(j=i; j<this->nstr; j++)
+                for(j=i; j<sz; j++)
 		{
-			this->GetRec(j);
+                        tRec = resList.at(j);
 
-			ds = this->record->magn;
+                        ds = tRec->magn;
 			if((pow(-1.0, direct)*ds)>(pow(-1.0, direct)*bds))
 			{
 				bds = ds;
@@ -1148,7 +1224,8 @@ int RList::sort_magnitude(int direct)
 			}
 
 		}
-		this->Exchange(i, bnum);
+                resList.swap(i, bnum);
+                //this->Exchange(i, bnum);
 	}
 
 	return 0;
@@ -1156,19 +1233,22 @@ int RList::sort_magnitude(int direct)
 
 int RList::sort_obs()
 {
-	int i, j, bnum;
+        int i, j, bnum, sz;
 	int bds, ds;
+        RLRecord *tRec;
 
-	for(i=0; i<this->nstr; i++)
+        sz = resList.size();
+
+        for(i=0; i<sz; i++)
 	{
 		bds = 0;
 		bnum = i;
 
-		for(j=i; j<this->nstr; j++)
+                for(j=i; j<sz; j++)
 		{
-			this->GetRec(j);
+                        tRec = resList.at(j);
 
-			ds = this->record->nofobs;
+                        ds = tRec->nofobs;
 			if(ds>bds)
 			{
 				bds = ds;
@@ -1176,7 +1256,8 @@ int RList::sort_obs()
 			}
 
 		}
-		this->Exchange(i, bnum);
+                resList.swap(i, bnum);
+                //this->Exchange(i, bnum);
 	}
 
 	return 0;
@@ -1184,19 +1265,23 @@ int RList::sort_obs()
 
 int RList::sort_RA_min2max(double RAmin)
 {
-	int i, j, bnum;
+        int i, j, bnum, sz;
 	double bds, ds, tvalue;
+        RLRecord *tRec;
 
-	for(i=0; i<this->nstr; i++)
+        sz = resList.size();
+
+        for(i=0; i<sz; i++)
 	{
 		bds = 2.0*PI;
 		bnum = i;
 
-		for(j=i; j<this->nstr; j++)
+                for(j=i; j<sz; j++)
 		{
-			this->GetRec(j);
+                        //this->GetRec(j);
+                        tRec = resList.at(j);
 
-			tvalue = this->record->RA;
+                        tvalue = tRec->ra;
 			if(tvalue<RAmin) tvalue+=2.0*PI;
 			ds = tvalue-RAmin;
 
@@ -1207,7 +1292,8 @@ int RList::sort_RA_min2max(double RAmin)
 			}
 
 		}
-		this->Exchange(i, bnum);
+                resList.swap(i, bnum);
+                //this->Exchange(i, bnum);
 	}
 
 	return 0;
@@ -1215,31 +1301,35 @@ int RList::sort_RA_min2max(double RAmin)
 
 int RList::sort_prior()
 {
-	int i, j, bnum;
+        int i, j, bnum, sz;
 	double bds, ds;
+        RLRecord *tRec;
+        sz = resList.size();
 
-	for(i=0; i<this->nstr; i++)
+        for(i=0; i<sz; i++)
 	{
 		bds = 0.0;
 		bnum = i;
 
-		for(j=i; j<this->nstr; j++)
+                for(j=i; j<sz; j++)
 		{
-			this->GetRec(j);
+                        //this->GetRec(j);
+                    tRec = resList.at(j);
 
-			ds = this->record->exp;
+                        ds = tRec->exp;
 			if(ds>bds)
 			{
 				bds = ds;
 				bnum = j;
 			}
 		}
-		this->Exchange(i, bnum);
+                resList.swap(i, bnum);
+                //this->Exchange(i, bnum);
 	}
 
 	return 0;
 }
-
+/*
 int RList::sort_num()
 {
 	int i, j, bnum;
@@ -1266,7 +1356,7 @@ int RList::sort_num()
 
 	return 0;
 }
-
+*/
 //////////////	ERecord	///////////////////
 
 ERecord::ERecord()
@@ -2264,7 +2354,7 @@ SkyArea::SkyArea(char *dele_header)
 
 //	this = new EA_obj();
 	this->ini_list = new IList(ILIST_LEN);
-	this->res_list = new RList(RLIST_LEN);
+        this->res_list = new RList();
 	this->exc_list = new EList(ELIST_LEN);
 	this->log_list = new LogList();
 	this->log_list_oneday = new LogList();
@@ -2296,7 +2386,7 @@ SkyArea::SkyArea()
 
 //	this = new EA_obj();
 	this->ini_list = new IList(ILIST_LEN);
-	this->res_list = new RList(RLIST_LEN);
+        this->res_list = new RList();
 	this->exc_list = new EList(ELIST_LEN);
 	this->log_list = new LogList();
 	this->log_list_oneday = new LogList();
@@ -2350,7 +2440,7 @@ int SkyArea::init(char *fn_obs, char *fn_dele_bin)
 //res
 	sprintf(tempstr, "%sres.lst\0", install_dir);
         this->res_list->init(tempstr);
-	res_list->is_buff = 1;
+//	res_list->is_buff = 1;
 //exc
 	sprintf(tempstr, "%sexc.lst\0", install_dir);
 	this->exc_list->init(tempstr);
@@ -2486,6 +2576,7 @@ int SkyArea::Grade()
         int ctask = this->task_list->nstr();
 
 	IList temp_ini;
+        RLRecord *resRec;
 
 	char *str_ini, *str_cat;
 	str_ini = new char[255];
@@ -2537,11 +2628,12 @@ int SkyArea::Grade()
 		for(k=0; k<ini_list->nstr; k++)
 		{
 			ini_list->GetRec(k);
+                        resRec = new RLRecord;
 
 			if(!ini_list->record->flag0) continue;
 			if(exc_list->IsExc(task_list->record->noftask, ini_list->record->name)) continue;
 		
-			this->res_list->record->nofobs = this->obs_list->GetNObs(this->ini_list->record->name);
+                        resRec->nofobs = this->obs_list->GetNObs(this->ini_list->record->name);
 
 			switch(this->cat_list->record->cat_type)
 			{
@@ -2551,10 +2643,11 @@ int SkyArea::Grade()
 	//				AfxMessageBox("c0");
 					continue;
 				}
-				this->res_list->record->set_name(this->ini_list->record->name);
-				sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
+                                resRec->name = QString(this->ini_list->record->name);
+                                //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
+                                resRec->num = planet_num(this->ini_list->record->name);
 
-				det_res_list(x, y, z, &Sdist, &Edist, 0);
+                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 0);
 
 				break;
 			case 1:
@@ -2567,10 +2660,11 @@ int SkyArea::Grade()
 
 				this->orb_elem->get(this->orb_catalog);
 				this->orb_elem->detRecEkv(&x, &y, &z, this->obs_pos->otime);
-				this->res_list->record->set_name(this->orb_catalog->record->name);
-				sprintf(this->res_list->record->num, "%8d", this->orb_catalog->record->number);
+                                resRec->name = QString(this->orb_catalog->record->name);
+                                //sprintf(resRec->num, "%8d", this->orb_catalog->record->number);
+                                resRec->num = this->orb_catalog->record->number;
 
-				det_res_list(x, y, z, &Sdist, &Edist, 1);
+                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 1);
 
 				break;
 			case 2:
@@ -2578,12 +2672,13 @@ int SkyArea::Grade()
 				if(tsscat->GetName(this->ini_list->record->name)) continue;
 //				if(tsscat->GetRecNameLSPM(this->ini_list->record->name)) continue;
 
-				this->res_list->record->RA = grad2rad(tsscat->record->RAdeg);
-				this->res_list->record->DEC = grad2rad(tsscat->record->DEdeg);
-				this->res_list->record->magn = tsscat->record->BJmag;
+                                resRec->ra = grad2rad(tsscat->record->RAdeg);
+                                resRec->dec = grad2rad(tsscat->record->DEdeg);
+                                resRec->magn = tsscat->record->BJmag;
 
-				this->res_list->record->set_name(this->ini_list->record->name);
-				sprintf(this->res_list->record->num, "        ");
+                                resRec->name = QString(this->ini_list->record->name);
+                                //sprintf(this->res_list->record->num, "        ");
+                                resRec->num = 0;
 				
 				break;
 			case 3:
@@ -2595,10 +2690,11 @@ int SkyArea::Grade()
 
 				this->orb_elem->get(this->orb_catalog);
 				this->orb_elem->detRecEkv(&x, &y, &z, this->obs_pos->otime);
-				this->res_list->record->set_name(this->orb_catalog->record->name);
-				sprintf(this->res_list->record->num, "%8d", this->orb_catalog->record->number);
+                                resRec->name = QString(this->orb_catalog->record->name);
+                                //sprintf(this->res_list->record->num, "%8d", this->orb_catalog->record->number);
+                                resRec->num = this->orb_catalog->record->number;
 
-				det_res_list(x, y, z, &Sdist, &Edist, 1);
+                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 1);
 				/*if(this->mpc_catalog->GetRecName(this->ini_list->record->name)==-1)
 				{
 					continue;
@@ -2614,16 +2710,16 @@ int SkyArea::Grade()
 				break;
 			}
 
-			this->res_list->record->noftask = this->task_list->record->noftask;
+                        resRec->taskName = QString(this->task_list->record->get_name());
 
-			this->res_list->record->exp = this->DetExp(this->params->ignore_task_rules);
+                        resRec->exp = this->DetExp(resRec, this->params->ignore_task_rules);
 
 //			this->res_list->record->exp = 1.0;
 
-			if(this->is_skyarea())
+                        if(this->is_skyarea(resRec))
 			{
 //				this->res_list->record->nofobs = this->obs_list->GetNObs(this->res_list->record->get_name());
-				this->res_list->AddRec(this->res_list->record);
+                                this->res_list->AddRec(resRec);
 			}
 		}
 
@@ -2666,18 +2762,21 @@ int SkyArea::GetTaskIniFNames(char *ini_lst, char *ini_cat)
 	return 0;
 }
 
-void SkyArea::det_res_list(double x, double y, double z, double *Sdist, double *Edist, int ctype)
+void SkyArea::det_res_list(RLRecord *resRec, double x, double y, double z, double *Sdist, double *Edist, int ctype)
 {
-	detRDnumGC(&this->res_list->record->RA, &this->res_list->record->DEC, x, y, z, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
+        detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
+
+        resRec->ra = rad2grad(resRec->ra);
+        resRec->dec = rad2grad(resRec->dec);
 
 	*Sdist = sqrt(x*x + y*y + z*z);
 	*Edist = sqrt((this->obs_pos->ox - x)*(this->obs_pos->ox - x) + (this->obs_pos->oy - y)*(this->obs_pos->oy - y) + (this->obs_pos->oz - z)*(this->obs_pos->oz - z));
 
-	if(ctype==3||ctype==1) this->res_list->record->magn = det_m(this->orb_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
-	if(ctype==0) this->res_list->record->magn = det_m(det_planet_H(atoi(this->res_list->record->num))-5.5, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==3||ctype==1) resRec->magn = det_m(this->orb_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->num)-5.5, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
 }
 
-double SkyArea::DetExp(int mode)
+double SkyArea::DetExp(RLRecord *resRec, int mode)
 {
 	double rexp = 1.0;
 
@@ -2685,8 +2784,8 @@ double SkyArea::DetExp(int mode)
 	rexp *= (this->obs_pos->otime<=this->ini_list->record->t1)&&(this->obs_pos->otime>=this->ini_list->record->t0);
 	rexp *= this->task_list->record->exp;
 //	rexp *= (this->res_list->record->RA<=this->ini_list->record->t1)&&(this->obs_pos->otime>=this->ini_list->record->t0);
-	if((mode!=1)&&(!isTaskSA(this->res_list->record->RA, this->res_list->record->DEC))) rexp *= 0.0;
-	if((mode!=2)&&(this->res_list->record->nofobs>=this->task_list->record->Ntot)) rexp *= 0.0;
+        if((mode!=1)&&(!isTaskSA(resRec->ra, resRec->dec))) rexp *= 0.0;
+        if((mode!=2)&&(resRec->nofobs>=this->task_list->record->Ntot)) rexp *= 0.0;
 	rexp *= 0.99999;
 
 //	if(
@@ -2713,16 +2812,16 @@ int SkyArea::set_opt(double RAmin, double RAmax, double DECmin, double DECmax, d
 	return 0;
 }
 
-int SkyArea::is_skyarea()
+int SkyArea::is_skyarea(RLRecord *resRec)
 {
 	double res = 0;
 	int cs = 0;
 	if(this->params->RAmax<=this->params->RAmin) cs = 1;
-	if((this->res_list->record->DEC<=this->params->DECmax)&&(this->res_list->record->DEC>=this->params->DECmin)&&(this->res_list->record->magn<=this->params->magn_max)&&(this->res_list->record->magn>=this->params->magn_min)) res = 1;
+        if((resRec->dec<=this->params->DECmax)&&(resRec->dec>=this->params->DECmin)&&(resRec->magn<=this->params->magn_max)&&(resRec->magn>=this->params->magn_min)) res = 1;
 	
-	if(cs) res *= (this->res_list->record->RA<this->params->RAmax)||(this->res_list->record->RA>this->params->RAmin);
-	else res *= (this->res_list->record->RA<this->params->RAmax)&&(this->res_list->record->RA>this->params->RAmin);
-	res *= this->res_list->record->exp;
+        if(cs) res *= (resRec->ra<this->params->RAmax)||(resRec->ra>this->params->RAmin);
+        else res *= (resRec->ra<this->params->RAmax)&&(resRec->ra>this->params->RAmin);
+        res *= resRec->exp;
 	return (fabs(res)>0.0);
 }
 
@@ -2731,7 +2830,7 @@ int SkyArea::RL_sort(int stype)
 	switch(stype)
 	{
 	case 0:
-		this->res_list->sort_num();
+                //this->res_list->sort_num();
 		break;
 	case 1:
 		this->res_list->sort_meridian(this->obs_pos->obs->stime);
@@ -2799,7 +2898,7 @@ int SkyArea::CutMaxObj()
 {
 	if(this->params->max_obj==0) return 0;
 
-	while(this->res_list->nstr>this->params->max_obj) this->res_list->DelStr(this->res_list->nstr-1);
+        while(this->res_list->resList.size()>this->params->max_obj) this->res_list->resList.removeLast();//this->res_list->resList.size()-1);
 
 	return 0;
 }

@@ -7,6 +7,10 @@
 #include "comfunc.h"
 #endif
 
+#ifndef ASTRO_H
+#include "astro.h"
+#endif
+
 #ifndef DA_H
 #include "DynArr.h"
 #endif
@@ -375,59 +379,65 @@ public:
 class RLRecord
 {
 public:
-	int noftask;
+        QString taskName;
 //	char *name;
-        QString num;
+        QString name;
+        int num;
         double exp;
-	char *tail;
+//	char *tail;
 
         double ra, dec, magn, muRa, muDe;
-
-	int nofobs;
+        int nofobs;
 
 	RLRecord();
 	~RLRecord();
 
+        int fromString(QString str);
+        int toString(QString &str);
+/*
         void get_RA(QString str);
         void get_DEC(QString str);
-
-        void set_name(QString sname);
-	char* get_name();
-private:
-        QString name;
+*/
+        //void set_name(QString sname);
+        //char* get_name();
 };
 
-class RList :public fBuffer	//Results list
+class RList// :public fBuffer	//Results list
 {
 public:
-	RLRecord *record;
+    QList <RLRecord *> resList;
+        //record;
+    QString fileName;
 
-	int GetRec(int i);
-	int GetRec(char *name);
-	int GetRec(char *name, int noftask);
+        int GetRec(RLRecord *resRec, int i);
+        int GetRec(RLRecord *resRec, QString name);
+        int GetRec(RLRecord *resRec, QString name, QString taskName);
 
-	int GetRecName(char *name);
-	int GetRecNum(int num);
+        //int GetRecName(char *name);
+        //int GetRecNum(int num);
 
 	int AddRec(RLRecord *nrec);
-	int SetRec(RLRecord *nrec);
+        int updateRec(RLRecord *nrec);
 
-	int Clear();
+        void Clear();
 
 	int sort_meridian(double s);
 	int sort_magnitude(int direct);		//1-vozrastanie; 0-ubyvanie
 	int sort_obs();
 	int sort_RA_min2max(double RAmin);
 	int sort_prior();
-	int sort_num();
+        //int sort_num();
 
 	RList();
-	RList(int sizestr);
+//	RList(int sizestr);
 	~RList();
-        int init(char *fname);
+        int init(QString fname);
+
+        int save();
+        int saveAs(QString fname);
 private:
-	int s2rec(char *str);
-	int rec2s(char *str);
+//	int s2rec(QString str);
+//	int rec2s(QString str);
 };
 
 class ERecord
@@ -649,11 +659,11 @@ public:
 	int prep_wcat();
 
 	int set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max);
-	int is_skyarea();
+        int is_skyarea(RLRecord *resRec);
 	double isTaskSA(double RA, double DEC);
 	int SetAutoRA();
 	void SetTaskAutoRA();
-	void det_res_list(double x, double y, double z, double *Sdist, double *Edist, int ctype);
+        void det_res_list(RLRecord *resRec, double x, double y, double z, double *Sdist, double *Edist, int ctype);
 	int AddIniList(IList *iniadd, int noft);
 	int RemIniList(LRecord *remrec, int noft);
 	int UpdateIniList(LRecord *remrec0, LRecord *remrec1);
@@ -670,7 +680,7 @@ public:
 
 	int GetTaskIniFNames(char *ini_lst, char *ini_cat);
 
-	double DetExp(int mode);
+        double DetExp(RLRecord *resRec, int mode);
 
 	saParams *params;
 

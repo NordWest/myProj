@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 
     sa.Grade();
 
-    sa.res_list->Save();
+    sa.res_list->save();
 
     //delete sa;
 
