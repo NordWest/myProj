@@ -732,6 +732,34 @@ int orbit::detRecEclVel(double *Vx, double *Vy, double *Vz, double t)
 	return 1;
 }
 
+int orbit::detRecEkvVel(double *Vx, double *Vy, double *Vz, double t)
+{
+        double Vr, Vn, vui, u;
+        double x, y, z, r, r0;
+
+        if(this->elem->isElips())
+        {
+                this->detPolarOrbVel(&Vr, &Vn, t);
+                //printf("polar orb vel: %f\t%f\n", Vr, Vn);
+                this->detRecEkv(&x, &y, &z, t);
+                this->detPolarOrb(&r, &vui, t);
+
+                r0 = sqrt(x*x + y*y + z*z);
+
+                //printf("r0= %f\tr= %f\n", r0, r);
+
+                u = this->elem->w + vui;
+
+                *Vx = x*Vr/r + (-sin(u)*cos(this->elem->Node) - cos(u)*sin(elem->Node)*cos(elem->inc))*Vn;
+                *Vy = y*Vr/r + (-sin(u)*sin(this->elem->Node) + cos(u)*cos(elem->Node)*cos(elem->inc))*Vn;
+                *Vz = z*Vr/r + cos(u)*sin(elem->inc)*Vn;
+
+                return 0;
+        }
+
+        return 1;
+}
+
 
 ////////////private
 

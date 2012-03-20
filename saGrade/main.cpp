@@ -49,13 +49,15 @@ int main(int argc, char *argv[])
     qDebug() << QString("s: %1\n").arg(s);
 
     sa.initVisualProp(jDay);
-    sa.set_opt(0, grad2rad(360), grad2rad(-10), grad2rad(90), 4, 18);
+    sa.set_opt(0, 360, -10, 90, 4, 18);
 
     //deg_to_damas(&strT0, le de, QString spl_symb, int ndig);
 
     qDebug() << QString("s: %1\ntr: %2\nts: %3\n").arg(s).arg(rad2grad(sa.params->timeSunRise)).arg(rad2grad(sa.params->timeSunSet));
 
     sa.params->ignore_task_rules = 1;
+
+    //sa.UpdateTaskCatalog(3);
 
     sa.Grade();
 

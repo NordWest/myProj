@@ -169,7 +169,8 @@ public:
 	int detRecEkv(double *x, double *y, double *z, double t);
 
 	int detPolarOrbVel(double *Vr, double *Vn, double t);
-	int detRecEclVel(double *Vx, double *Vy, double *Vz, double t);
+        int detRecEclVel(double *Vx, double *Vy, double *Vz, double t);
+        int detRecEkvVel(double *Vx, double *Vy, double *Vz, double t);
 
 	double get_a();
 

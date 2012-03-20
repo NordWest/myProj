@@ -882,6 +882,7 @@ int RLRecord::fromString(QString str)
 
     if(strL.size()!=9) return 1;
 
+    //mJD = getMJDfromYMD(strL.at(0));
     name = strL.at(0);
     hms_to_deg(&ra, strL.at(1), " ");
     damas_to_deg(&dec, strL.at(2), " ");
@@ -889,6 +890,7 @@ int RLRecord::fromString(QString str)
     muRa = strL.at(4).toDouble();
     muDe = strL.at(5).toDouble();
     nofobs = strL.at(6).toInt();
+
     taskName = strL.at(7);
     exp = strL.at(8).toDouble();
 
@@ -901,6 +903,7 @@ int RLRecord::toString(QString &str)
     deg_to_hms(&raStr, ra, " ", 2);
     deg_to_damas(&deStr, dec, " ", 2);
     str.clear();
+    //str.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10").arg(getStrFromDATEOBS(getDATEOBSfromMJD(mJD), " ", 0, 5)).arg(raStr).arg(deStr).arg(magn).arg(muRa).arg(muDe).arg(nofobs).arg(name).arg(taskName).arg(exp));
     str.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(name).arg(raStr).arg(deStr).arg(magn).arg(muRa).arg(muDe).arg(nofobs).arg(taskName).arg(exp));
 }
 
@@ -986,6 +989,12 @@ int RList::init(QString fname)
     while(!iniStm.atEnd())
     {
         tStr = iniStm.readLine();
+        if(tStr.at(0)=='@')
+        {
+            tStr.remove(0, 1);
+            mJD = tStr.toDouble();
+            continue;
+        }
         if(tRec->fromString(tStr)) continue;
         resList << tRec;
         tRec =  new RLRecord;
@@ -1004,6 +1013,8 @@ int RList::save()
     iniFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream iniStm(&iniFile);
     QString tStr;
+
+    iniStm << QString("\@%1\n").arg(mJD);
 
     sz = resList.size();
     for(i=0; i<sz; i++)
@@ -2568,8 +2579,11 @@ int SkyArea::Grade()
 	this->exc_list->UpdateExc(this->obs_pos->otime);
 	int i, k;
 	double x, y, z;
+        double vx, vy, vz;
 
 	if(this->params->isAutoRA) this->SetAutoRA();
+
+        res_list->mJD = jd2mjd(this->timeCur);
 
 	double Sdist, Edist;
 
@@ -2613,12 +2627,12 @@ int SkyArea::Grade()
 			break;
 		case 3:
 			
-			this->orb_catalog = new OrbCat();
+                        /*this->orb_catalog = new OrbCat();
 			this->orb_catalog->is_buff = 1;
 			this->orb_catalog->init(str_cat);
-			this->orb_catalog->is_buff = 1;
-			//this->mpc_catalog = new mpccat();
-			//this->mpc_catalog->init(str_cat, 0);
+                        this->orb_catalog->is_buff = 1;*/
+                        this->mpc_catalog = new mpccat();
+                        this->mpc_catalog->init(str_cat);
 			break;
 		}
 
@@ -2632,7 +2646,8 @@ int SkyArea::Grade()
 
 			if(!ini_list->record->flag0) continue;
 			if(exc_list->IsExc(task_list->record->noftask, ini_list->record->name)) continue;
-		
+
+
                         resRec->nofobs = this->obs_list->GetNObs(this->ini_list->record->name);
 
 			switch(this->cat_list->record->cat_type)
@@ -2643,11 +2658,18 @@ int SkyArea::Grade()
 	//				AfxMessageBox("c0");
 					continue;
 				}
+
+                                if(this->obs_pos->place->detR(&vx, &vy, &vz, this->obs_pos->otime, this->ini_list->record->name, 1, CENTER_SUN, SK_EKVATOR))
+                                {
+        //				AfxMessageBox("c0");
+                                        continue;
+                                }
+
                                 resRec->name = QString(this->ini_list->record->name);
                                 //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
                                 resRec->num = planet_num(this->ini_list->record->name);
 
-                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 0);
+                                det_res_list(resRec, x, y, z, vx, vy, vz, &Sdist, &Edist, this->cat_list->record->cat_type);
 
 				break;
 			case 1:
@@ -2664,7 +2686,7 @@ int SkyArea::Grade()
                                 //sprintf(resRec->num, "%8d", this->orb_catalog->record->number);
                                 resRec->num = this->orb_catalog->record->number;
 
-                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 1);
+                                det_res_list(resRec, x, y, z, 0, 0, 0, &Sdist, &Edist, this->cat_list->record->cat_type);
 
 				break;
 			case 2:
@@ -2682,19 +2704,23 @@ int SkyArea::Grade()
 				
 				break;
 			case 3:
-				if(this->orb_catalog->GetRecName(this->ini_list->record->name)==-1)
+                            if(this->mpc_catalog->GetRecName(QString(this->ini_list->record->name).simplified().toAscii().data()))
 				{
 	//				AfxMessageBox("c1");
 					continue;
 				}
 
-				this->orb_elem->get(this->orb_catalog);
+                                this->orb_elem->get(this->mpc_catalog);
 				this->orb_elem->detRecEkv(&x, &y, &z, this->obs_pos->otime);
-                                resRec->name = QString(this->orb_catalog->record->name);
-                                //sprintf(this->res_list->record->num, "%8d", this->orb_catalog->record->number);
-                                resRec->num = this->orb_catalog->record->number;
+                                this->orb_elem->detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
 
-                                det_res_list(resRec, x, y, z, &Sdist, &Edist, 1);
+                                resRec->name = QString(this->mpc_catalog->record->name);
+
+                                qDebug() << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(resRec->name).arg(x).arg(y).arg(z).arg(vx).arg(vy).arg(vz);
+                                //sprintf(this->res_list->record->num, "%8d", this->orb_catalog->record->number);
+                                resRec->num = atoi(this->mpc_catalog->record->number);
+                                det_res_list(resRec, x, y, z, vx, vy, vz, &Sdist, &Edist, this->cat_list->record->cat_type);
+
 				/*if(this->mpc_catalog->GetRecName(this->ini_list->record->name)==-1)
 				{
 					continue;
@@ -2708,7 +2734,9 @@ int SkyArea::Grade()
 				det_res_list(x, y, z, &Sdist, &Edist, 3);*/
 				
 				break;
-			}
+                        }
+
+
 
                         resRec->taskName = QString(this->task_list->record->get_name());
 
@@ -2733,7 +2761,7 @@ int SkyArea::Grade()
 			if(tsscat!=NULL)delete tsscat;
 			break;
 		case 3:
-			delete this->orb_catalog;
+                        delete this->mpc_catalog;
 			break;
 		}
 		
@@ -2762,17 +2790,23 @@ int SkyArea::GetTaskIniFNames(char *ini_lst, char *ini_cat)
 	return 0;
 }
 
-void SkyArea::det_res_list(RLRecord *resRec, double x, double y, double z, double *Sdist, double *Edist, int ctype)
+void SkyArea::det_res_list(RLRecord *resRec, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype)
 {
         detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
 
         resRec->ra = rad2grad(resRec->ra);
         resRec->dec = rad2grad(resRec->dec);
 
+        detRDnumGC(&resRec->muRa, &resRec->muDe, vx, vy, vz, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
+
+        resRec->muRa = grad_to_mas(rad2grad(resRec->muRa))/1000.0/86400.0/cos(grad2rad(resRec->dec));
+        resRec->muDe = grad_to_mas(rad2grad(resRec->muDe))/1000.0/86400.0;
+
 	*Sdist = sqrt(x*x + y*y + z*z);
 	*Edist = sqrt((this->obs_pos->ox - x)*(this->obs_pos->ox - x) + (this->obs_pos->oy - y)*(this->obs_pos->oy - y) + (this->obs_pos->oz - z)*(this->obs_pos->oz - z));
 
-        if(ctype==3||ctype==1) resRec->magn = det_m(this->orb_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==1) resRec->magn = det_m(this->orb_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==3) resRec->magn = det_m(this->mpc_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
         if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->num)-5.5, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
 }
 
@@ -2795,6 +2829,7 @@ double SkyArea::DetExp(RLRecord *resRec, int mode)
 
 int SkyArea::init_time(double UTC)
 {
+    this->timeCur = UTC;
 	if(this->obs_pos->det_observ(UTC)) return 1;
 
 	return 0;

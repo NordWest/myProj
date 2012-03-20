@@ -386,6 +386,7 @@ public:
         double exp;
 //	char *tail;
 
+        //double mJD;
         double ra, dec, magn, muRa, muDe;
         int nofobs;
 
@@ -408,6 +409,7 @@ public:
     QList <RLRecord *> resList;
         //record;
     QString fileName;
+    double mJD;
 
         int GetRec(RLRecord *resRec, int i);
         int GetRec(RLRecord *resRec, QString name);
@@ -663,7 +665,7 @@ public:
 	double isTaskSA(double RA, double DEC);
 	int SetAutoRA();
 	void SetTaskAutoRA();
-        void det_res_list(RLRecord *resRec, double x, double y, double z, double *Sdist, double *Edist, int ctype);
+        void det_res_list(RLRecord *resRec, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype);
 	int AddIniList(IList *iniadd, int noft);
 	int RemIniList(LRecord *remrec, int noft);
 	int UpdateIniList(LRecord *remrec0, LRecord *remrec1);
