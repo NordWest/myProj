@@ -30,7 +30,8 @@ SOURCES += main.cpp \
     ../libs/sscatFB.cpp \
     ../libs/fbStream.cpp \
     ../libs/redStat.cpp \
-    ../libs/mpcfile.cpp
+    ../libs/mpcfile.cpp \
+    ../libs/listfile.cpp
 
 HEADERS += \
     ../libs/sscat.h \
@@ -49,9 +50,16 @@ HEADERS += \
     ../libs/mb.h \
     ../libs/astro.h \
     ../libs/redStat.h \
-    ../libs/mpcfile.h
+    ../libs/mpcfile.h \
+    ../libs/listfile.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+
+
+
+
+
+

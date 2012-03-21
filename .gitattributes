@@ -217,6 +217,8 @@ libs/imgprofile.cpp -text
 libs/imgprofile.h -text
 libs/kompl.cpp -text
 libs/kompl.h -text
+libs/listfile.cpp -text
+libs/listfile.h -text
 libs/longnam.h -text
 libs/mathbase.cpp -text
 libs/mathbase.h -text

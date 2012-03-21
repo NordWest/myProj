@@ -53,6 +53,8 @@
 //#include "comfunc.h"
 #include "orbit.h"
 #include "orbcat.h"
+#include "listfile.h"
+
 //#include "atlstr.h"
 
 #define ILISTOLD_LEN 88
@@ -298,6 +300,75 @@ public:
 
 	int sort_prior();
 };
+
+class iniRecord : tRecord
+{
+public:
+        //int noftask;
+        QString name;
+        double exp;
+//        int flag0;					//0 - DE/LE; 1 - numbered; 2 - rapid stars
+        double t0, t1;
+        QString desc;
+
+        int fromString(QString tStr);
+        int toString(QString &tStr);
+
+        iniRecord& operator=(const iniRecord &rhs);
+//        char *tail;
+/*
+        //LRecord();
+        //~LRecord();
+
+        int set_desc(char *desc);
+        int set_name(char *nm);
+        char* get_desc();
+        void copyTo(LRecord *rec);
+        int IsEqv(LRecord *rec);*/
+};
+
+bool operator==( const iniRecord& lhs, const iniRecord& rhs );
+
+
+class IListR : listFile <iniRecord>
+{
+
+/*
+public:
+        QList <LRecord *> recList;
+
+        QString fileName;
+//	IListBuffer *ilBuf;
+
+        IList();
+//	IList(int sizestr);
+        ~IList();
+        int init(QString fname);
+
+//	int AddRec();
+        int AddRec(LRecord *nrec);
+        int AddRec(LRecord *nrec, int pos);
+
+        int GetRec(LRecord *nrec, int i);
+        int GetRec(LRecord *nrec, QString name);
+        //int GetRec(LRecord *rec);
+
+        //int DelRec(LRecord *rec);
+
+        int DelRec(char *name);
+
+        int UpdateRec(LRecord *nrec, int pos);
+        int UpdateRec(LRecord *nrec);
+
+//	int GetRecnc(char *name);
+/*
+        void rec2s(char *nnstr);
+        void s2rec(char *nnstr);
+/
+//	int sort_prior();
+*/
+};
+
 /*
 class LRecordOld
 {

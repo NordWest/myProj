@@ -684,6 +684,216 @@ int IList::sort_prior()
 
 /////////////////////////////////////////////////
 
+int iniRecord::fromString(QString tStr)
+{
+    QStringList strL;
+    strL = tStr.split("|");
+    if(strL.size()!=5) return 1;
+    name = strL.at(0);
+    exp = strL.at(1).toDouble();
+    t0 = strL.at(2).toDouble();
+    t1 = strL.at(3).toDouble();
+    desc = strL.at(4);
+}
+
+int iniRecord::toString(QString &tStr)
+{
+    tStr.clear();
+    tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(exp, 12, 'e').arg(t0, 14, 'f', 6).arg(t0, 14, 'f', 6).arg(desc));
+}
+
+bool operator== ( const iniRecord& lhs, const iniRecord& rhs )
+{
+    return(QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0);
+}
+
+iniRecord& iniRecord::operator=(const iniRecord &rhs) {
+    // Check for self-assignment!
+    if (this == &rhs)      // Same object?
+      return *this;        // Yes, so skip assignment, and just return *this.
+
+    //... // Deallocate, allocate new space, copy values...
+    this->desc = rhs.desc;
+    this->exp = rhs.exp;
+    this->name = rhs.name;
+    this->t0 = rhs.t0;
+    this->t1 = rhs.t1;
+
+    return *this;
+}
+/*
+iniRecord& operator= ( const iniRecord& ust )
+{
+    iniRecord res;
+
+
+    return(res);
+}
+*/
+/*
+IListR::IListR()
+{
+//	this->record = new LRecord;
+//	this->ilBuf = new IListBuffer;
+}
+
+IListR::~IListR()
+{
+    recList.clear();
+//	delete(this->record);
+//	delete(this->ilBuf);
+//	this->record = NULL;
+}
+
+int IListR::init(QString fname)
+{
+
+
+        return 0;
+}
+
+int IList::AddRec()
+{
+        char *stmp;
+        stmp = new char[SIMPLE_STR];
+
+        this->rec2s(stmp);
+        int res = this->AddStr(stmp, this->nstr);
+
+//	if(!res) this->nstr++;
+
+        delete [] stmp;
+
+        return(res);
+}
+
+int IList::AddRec(int pos)
+{
+        char *stmp;
+        stmp = new char[SIMPLE_STR];
+
+        this->rec2s(stmp);
+        int res = this->AddStr(stmp, pos);
+
+//	if(!res) this->nstr++;
+
+        delete [] stmp;
+
+        return(res);
+}
+
+int IList::AddRec(LRecord *nrec)
+{
+        if(this->GetRec(nrec)!=-1) return -1;
+        int rpos = this->GetRec(nrec);
+
+        nrec->copyTo(this->record);
+
+        if(rpos==-1) this->AddRec();
+        else this->UpdateRec(rpos);
+
+        return 0;
+}
+
+int IList::UpdateRec(int pos)
+{
+        char *nnstr;
+        nnstr = new char[SIMPLE_STR];
+
+        this->rec2s(nnstr);
+        this->Update(nnstr, pos);
+
+        return 0;
+}
+
+int IList::UpdateRec(LRecord *rec)
+{
+        char *nnstr;
+        nnstr = new char[SIMPLE_STR];
+
+        int pos = this->GetRec(rec);
+        if(pos==-1) return 1;
+        rec->copyTo(this->record);
+
+        this->rec2s(nnstr);
+        this->Update(nnstr, pos);
+
+        return 0;
+}
+
+
+
+int IList::GetRec(int i)
+{
+        if(this->ReadStr(i)) return 1;
+
+        this->s2rec(this->str);
+
+        return 0;
+}
+
+int IList::GetRec(char *nnstr)
+{
+        int i = 0;
+
+        while(!this->ReadStr(i))
+        {
+                this->s2rec(this->str);
+                if(streqv(this->record->name, nnstr)) return i;
+                i++;
+        }
+
+        return -1;
+}
+
+int IList::GetRec(LRecord *rec)
+{
+        int i = 0;
+
+        while(!this->ReadStr(i))
+        {
+                this->s2rec(this->str);
+                if(this->record->IsEqv(rec)) return i;
+                i++;
+        }
+
+        return -1;
+}
+
+int IList::DelRec(LRecord *rec)
+{
+        int rpos = this->GetRec(rec);
+
+        if(rpos>=0) this->DelStr(rpos);
+
+        return -1;
+}
+
+
+int IList::DelRec(char *name)
+{
+
+
+        int i = nstr;
+
+        while(!this->ReadStr(i))
+        {
+                this->s2rec(this->str);
+                if(streqv(this->record->name, name)) this->DelStr(i);
+                i--;
+        }
+
+        return 0;
+
+}
+*/
+
+/////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////
+
+
 IListOld::IListOld(int sizestr) : fBuffer(sizestr)
 {
 	this->record = new LRecord;
@@ -1001,6 +1211,8 @@ int RList::init(QString fname)
     }
 
     delete tRec;
+
+    iniFile.close();
 
 
     return 0;
@@ -2601,6 +2813,7 @@ int SkyArea::Grade()
 	int lspm_num;
 
 	sscatFB *tsscat;
+        QString nameStr;
 //	sscat *tsscat = new sscat;
 
 	for(i=0; i<ctask; i++)
@@ -2704,7 +2917,8 @@ int SkyArea::Grade()
 				
 				break;
 			case 3:
-                            if(this->mpc_catalog->GetRecName(QString(this->ini_list->record->name).simplified().toAscii().data()))
+                            nameStr = QString(this->ini_list->record->name).simplified();
+                            if(this->mpc_catalog->GetRecName(nameStr.toAscii().data()))
 				{
 	//				AfxMessageBox("c1");
 					continue;
