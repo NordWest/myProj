@@ -13,6 +13,51 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+
+
+    QString eassDir = QString("/home/nuts/Work/lab/EA_NA");
+    QString taskListFile = QString("%1/task.lst").arg(eassDir);
+    QString catListFile = QString("%1/cat.lst").arg(eassDir);
+
+    QString resDir = QString("./");
+    QString tListFile = QString("%1/task.lst").arg(resDir);
+
+
+    TaskList taskL;
+    taskL.init(taskListFile.toAscii().data());
+
+    taskList tList;
+//    tList.init(tListFile);
+ /*   tlRecord *ntRec;
+
+    int i, sz;
+
+    sz = taskL.nstr();
+
+    for(i=0;i<sz;i++)
+    {
+        taskL.GetRec(i);
+        ntRec = new tlRecord;
+        &ntRec = &taskL.record;
+        tList.addRec(ntRec);
+    }
+
+    tList.save();
+*/
+
+
+
+
+
+    return 0;
+}
+
+/*
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+    setlocale(LC_NUMERIC, "C");
+
     int nbd;
     int szi, i, j;
     mpccat mpCat;
@@ -140,7 +185,7 @@ int main(int argc, char *argv[])
 
     ////
 
-*/
+/
 
     while(!iniStm.atEnd())
     {
@@ -344,7 +389,7 @@ int main(int argc, char *argv[])
             }
             else break;
         }
-*/
+/
 
 
         szi = objList.size();
@@ -377,3 +422,4 @@ int main(int argc, char *argv[])
 
     return 0;//a.exec();
 }
+*/

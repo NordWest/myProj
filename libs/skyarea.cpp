@@ -3,6 +3,37 @@
 //#include "..\DAster\Eassistant\StdAfx.h"
 //#include "..\DAster\OMen\StdAfx.h"
 
+/*
+int addIniListNames(tlRecord task, QString inpStr, iniRecord iListMask)
+{
+    //char *
+
+    QString iniFileName, tStr;
+    task.getIniName(iniFileName);
+
+    iniRecord *tRec;
+
+    IListR iniList;
+    //iniList.init(iniFileName);
+
+
+
+    QFile iniFile(inpStr);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    while(!iniFile.atEnd())
+    {
+        tStr = iniStm.readLine();
+        tRec = new iniRecord;
+        tRec = iListMask;
+        tRec->name = tStr;
+    }
+
+    iniFile.close;
+}
+*/
+
 TLRecord::TLRecord()
 {
 	this->name = new char[33];
@@ -379,7 +410,6 @@ int TaskList::remTask(int noft)
 	
 }
 
-
 //////////////////////////////////////////////////////////
 
 LRecord::LRecord()
@@ -684,6 +714,15 @@ int IList::sort_prior()
 
 /////////////////////////////////////////////////
 
+iniRecord::iniRecord()
+{
+    name = "";
+    exp = 0.0;
+    t0 = -1;
+    t1 = -1;
+    desc = "";
+}
+
 int iniRecord::fromString(QString tStr)
 {
     QStringList strL;
@@ -694,9 +733,11 @@ int iniRecord::fromString(QString tStr)
     t0 = strL.at(2).toDouble();
     t1 = strL.at(3).toDouble();
     desc = strL.at(4);
+
+    return 0;
 }
 
-int iniRecord::toString(QString &tStr)
+void iniRecord::toString(QString &tStr)
 {
     tStr.clear();
     tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(exp, 12, 'e').arg(t0, 14, 'f', 6).arg(t0, 14, 'f', 6).arg(desc));
@@ -721,352 +762,106 @@ iniRecord& iniRecord::operator=(const iniRecord &rhs) {
 
     return *this;
 }
-/*
-iniRecord& operator= ( const iniRecord& ust )
-{
-    iniRecord res;
-
-
-    return(res);
-}
-*/
-/*
-IListR::IListR()
-{
-//	this->record = new LRecord;
-//	this->ilBuf = new IListBuffer;
-}
-
-IListR::~IListR()
-{
-    recList.clear();
-//	delete(this->record);
-//	delete(this->ilBuf);
-//	this->record = NULL;
-}
-
-int IListR::init(QString fname)
-{
-
-
-        return 0;
-}
-
-int IList::AddRec()
-{
-        char *stmp;
-        stmp = new char[SIMPLE_STR];
-
-        this->rec2s(stmp);
-        int res = this->AddStr(stmp, this->nstr);
-
-//	if(!res) this->nstr++;
-
-        delete [] stmp;
-
-        return(res);
-}
-
-int IList::AddRec(int pos)
-{
-        char *stmp;
-        stmp = new char[SIMPLE_STR];
-
-        this->rec2s(stmp);
-        int res = this->AddStr(stmp, pos);
-
-//	if(!res) this->nstr++;
-
-        delete [] stmp;
-
-        return(res);
-}
-
-int IList::AddRec(LRecord *nrec)
-{
-        if(this->GetRec(nrec)!=-1) return -1;
-        int rpos = this->GetRec(nrec);
-
-        nrec->copyTo(this->record);
-
-        if(rpos==-1) this->AddRec();
-        else this->UpdateRec(rpos);
-
-        return 0;
-}
-
-int IList::UpdateRec(int pos)
-{
-        char *nnstr;
-        nnstr = new char[SIMPLE_STR];
-
-        this->rec2s(nnstr);
-        this->Update(nnstr, pos);
-
-        return 0;
-}
-
-int IList::UpdateRec(LRecord *rec)
-{
-        char *nnstr;
-        nnstr = new char[SIMPLE_STR];
-
-        int pos = this->GetRec(rec);
-        if(pos==-1) return 1;
-        rec->copyTo(this->record);
-
-        this->rec2s(nnstr);
-        this->Update(nnstr, pos);
-
-        return 0;
-}
-
-
-
-int IList::GetRec(int i)
-{
-        if(this->ReadStr(i)) return 1;
-
-        this->s2rec(this->str);
-
-        return 0;
-}
-
-int IList::GetRec(char *nnstr)
-{
-        int i = 0;
-
-        while(!this->ReadStr(i))
-        {
-                this->s2rec(this->str);
-                if(streqv(this->record->name, nnstr)) return i;
-                i++;
-        }
-
-        return -1;
-}
-
-int IList::GetRec(LRecord *rec)
-{
-        int i = 0;
-
-        while(!this->ReadStr(i))
-        {
-                this->s2rec(this->str);
-                if(this->record->IsEqv(rec)) return i;
-                i++;
-        }
-
-        return -1;
-}
-
-int IList::DelRec(LRecord *rec)
-{
-        int rpos = this->GetRec(rec);
-
-        if(rpos>=0) this->DelStr(rpos);
-
-        return -1;
-}
-
-
-int IList::DelRec(char *name)
-{
-
-
-        int i = nstr;
-
-        while(!this->ReadStr(i))
-        {
-                this->s2rec(this->str);
-                if(streqv(this->record->name, name)) this->DelStr(i);
-                i--;
-        }
-
-        return 0;
-
-}
-*/
 
 /////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////
-
-
-IListOld::IListOld(int sizestr) : fBuffer(sizestr)
+tlRecord::tlRecord()
 {
-	this->record = new LRecord;
-//	this->ilBuf = new IListBuffer;
+    this->desc = "";
+    this->exp = 1.0;
+    this->name = "";
+    this->catName = "";
+    this->dirPath = "";
+    this->dRA = 180.0;
+    this->flag_active = 1;
+    this->NinN = 0;
+    this->Ntot = 0;
+    this->texc = 0;
 }
 
-IListOld::IListOld() : fBuffer(ILISTOLD_LEN)
+int tlRecord::fromString(QString tStr)
 {
-	this->record = new LRecord;
-//	this->ilBuf = new IListBuffer;
+    QStringList strL;
+    strL = tStr.split("|");
+    if(strL.size()!=10) return 1;
+    name = strL.at(0);
+    catName = strL.at(1);
+    flag_active = strL.at(2).toInt();
+    exp = strL.at(3).toDouble();
+    dRA = strL.at(4).toDouble();
+    NinN = strL.at(5).toInt();
+    Ntot = strL.at(6).toInt();
+    texc = strL.at(7).toDouble();
+    dirPath = strL.at(8);
+    desc = strL.at(9);
+
+    return 0;
 }
 
-IListOld::~IListOld()
+void tlRecord::toString(QString &tStr)
 {
-	delete(this->record);
-//	delete(this->ilBuf);
-	this->record = NULL;
-}
-
-int IListOld::init(char *fname)
-{
-	return(fBuffer::init(fname, ILISTOLD_LEN));
-}
-
-int IListOld::AddRec()
-{
-	char *stmp;
-	stmp = new char[SIMPLE_STR];
-
-	this->rec2s(stmp);
-	int res = this->AddStr(stmp, this->nstr);
-
-//	if(!res) this->nstr++;
-
-	delete [] stmp;
-
-	return(res);
-}
-
-int IListOld::AddRec(LRecord *nrec)
-{
-	if(this->GetRec(nrec)!=-1) return -1;
-	int rpos = this->GetRec(nrec);
-
-	nrec->copyTo(this->record);
-
-	if(rpos==-1) this->AddRec();
-	else this->UpdateRec(rpos);
-
-	return 0;
-}
-
-int IListOld::UpdateRec(int pos)
-{
-	char *nnstr;
-	nnstr = new char[SIMPLE_STR];
-
-	this->rec2s(nnstr);
-	this->Update(nnstr, pos);
-
-	return 0;	
+    tStr.clear();
+    //tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(exp, 12, 'e').arg(t0, 14, 'f', 6).arg(t0, 14, 'f', 6).arg(desc));
 }
 
 
-int IListOld::GetRec(int i)
+bool operator== ( const tlRecord& lhs, const tlRecord& rhs )
 {
-	if(this->ReadStr(i)) return 1;
-
-	this->s2rec(this->str);
-
-	return 0;
+    return(QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0);
 }
 
-int IListOld::GetRec(char *nnstr)
+tlRecord& tlRecord::operator=(const tlRecord &rhs) {
+    // Check for self-assignment!
+    if (this == &rhs)      // Same object?
+      return *this;        // Yes, so skip assignment, and just return *this.
+
+    this->desc = rhs.desc;
+    this->exp = rhs.exp;
+    this->name = rhs.name;
+    this->catName = rhs.catName;
+    this->dirPath = rhs.dirPath;
+    this->dRA = rhs.dRA;
+    this->flag_active = rhs.flag_active;
+    this->NinN = rhs.NinN;
+    this->Ntot = rhs.Ntot;
+    this->texc = rhs.texc;
+
+
+    return *this;
+}
+/*
+tlRecord& tlRecord::operator=(const TLRecord &rhs) {
+    // Check for self-assignment!
+    //if (this == &rhs)      // Same object?
+      //return *this;        // Yes, so skip assignment, and just return *this.
+
+    this->desc = QString(rhs.get_desc());
+    this->exp = rhs.exp;
+    this->name = QString(rhs.get_name());
+    this->catName = QString(rhs.get_cat_name());
+    this->dirPath = QString(rhs.get_dir_path());
+    this->dRA = rhs.dRA;
+    this->flag_active = rhs.flag_active;
+    this->NinN = rhs.NinN;
+    this->Ntot = rhs.Ntot;
+    this->texc = rhs.texc;
+
+
+    return *this;
+}
+*/
+
+void tlRecord::getIniName(QString &iniName)
 {
-	int i = 0;
-
-	while(!this->ReadStr(i))
-	{
-		this->s2rec(this->str);
-		if(streqv(this->record->name, nnstr)) return i;
-		i++;
-	}
-
-	return -1;
+    QDir tDir(dirPath);
+    iniName = QString("%1ini.lst").arg(tDir.absolutePath());
 }
 
-int IListOld::GetRec(LRecord *rec)
-{
-	int i = 0;
 
-	while(!this->ReadStr(i))
-	{
-		this->s2rec(this->str);
-		if(this->record->IsEqv(rec)) return i;
-		i++;
-	}
+//////////////////////////////////////////////////////////
 
-	return -1;
-}
-
-int IListOld::DelRec(LRecord *rec)
-{
-	int rpos = this->GetRec(rec);
-
-	if(rpos>=0) this->DelStr(rpos);
-
-	return -1;
-}
-
-void IListOld::rec2s(char *nnstr)
-{
-	sprintf(nnstr, "%5d%s%10e%9.1f%9.1f%3d%s%s", this->record->noftask, this->record->name, this->record->exp, this->record->t0, this->record->t1, this->record->flag0, this->record->desc, this->record->tail);
-}
-
-void IListOld::s2rec(char *nnstr)
-{
-	char *tempstr;
-	tempstr = new char[SIMPLE_STR];
-
-	slovoG(this->str, tempstr, 0, 5);
-	this->record->noftask = atoi(tempstr);
-
-	slovoG(this->str, tempstr, 5, 21);
-	strcpy(this->record->name, tempstr);
-	strcpy(&this->record->name[32], "\0");
-
-	slovoG(this->str, tempstr, 21, 34);
-	this->record->exp = atof(tempstr);
-
-	slovoG(this->str, tempstr, 34, 43);
-	this->record->t0 = atof(tempstr);
-
-	slovoG(this->str, tempstr, 43, 52);
-	this->record->t1 = atof(tempstr);
-
-	slovoG(this->str, tempstr, 52, 55);
-	this->record->flag0 = atoi(tempstr);
-
-	slovoG(this->str, tempstr, 55, 87);
-	strcpy(this->record->desc, tempstr);
-//	strcpy(&this->record->name[32], "\0");
-
-	delete [] tempstr;
-	tempstr = NULL;
-}
-
-int IListOld::sort_prior()
-{
-	int i, j, bnum;
-	double bds, ds;
-
-	for(i=0; i<this->nstr; i++)
-	{
-		bds = 0.0;
-		bnum = i;
-
-		for(j=i; j<this->nstr; j++)
-		{
-			this->GetRec(j);
-
-			ds = this->record->exp;
-			if(ds>bds)
-			{
-				bds = ds;
-				bnum = j;
-			}
-		}
-		this->Exchange(i, bnum);
-	}
-
-	return 0;
-}
 
 //	RLRecord	//////////////////////////////////
 

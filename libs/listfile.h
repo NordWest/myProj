@@ -6,6 +6,7 @@
 //template <class T>
 class tRecord
 {
+public:
     tRecord(){};
 //    ~tRecord(){};
 

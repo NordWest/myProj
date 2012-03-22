@@ -84,6 +84,11 @@ class CatRecord;
 class CatList;
 class IListBuf;
 class IListBuffer;
+class iniRecord;
+class IListR;
+
+int addIniListNames(TLRecord task, QString inpStr);
+
 
 class TLRecord	//Task List record
 {
@@ -150,7 +155,7 @@ public:
 
 	int IsTaskActive(int noft);
 
-	void rec2s(char *nnstr);
+        void rec2s(char *nnstr);
 	void s2rec(char *nnstr);
 
 	int pushTask(TLRecord *newtask);
@@ -165,6 +170,37 @@ public:
 //	int UpdateTask();
 
 //	int sort_prior();
+};
+
+class tlRecord : public tRecord	//Task List record
+{
+public:
+//	int noftask;	//number of task
+
+        double exp;			//experience of task
+        int Ntot;			//Total number of observation for one object
+        double texc;		//exclusion of a object after successful observations
+        double dRA;			//maximum distance from celestial meridian
+        int NinN;			//number obsrvations during one night
+        int flag_active;	//flag for activ task
+        QString name, desc, dirPath, catName;
+
+//	char *tail;
+
+        tlRecord();
+        int fromString(QString tStr);
+        void toString(QString &tStr);
+        tlRecord& operator=(const tlRecord &rhs);
+        tlRecord& operator=(const TLRecord &rhs);
+
+        void getIniName(QString &iniName);
+};
+
+bool operator==( const tlRecord& lhs, const tlRecord& rhs );
+
+class taskList : listFile <tlRecord>
+{
+
 };
 
 class LogRecord
@@ -311,8 +347,10 @@ public:
         double t0, t1;
         QString desc;
 
+        iniRecord();
+
         int fromString(QString tStr);
-        int toString(QString &tStr);
+        void toString(QString &tStr);
 
         iniRecord& operator=(const iniRecord &rhs);
 //        char *tail;
@@ -391,7 +429,7 @@ public:
 	int IsEqv(LRecord *rec);
 };
 */
-
+/*
 class IListOld : public fBuffer
 {
 public:
@@ -422,7 +460,7 @@ public:
 
 	int sort_prior();
 };
-
+*/
 class IListBuf
 {
 public:

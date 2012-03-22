@@ -1,13 +1,13 @@
 #include "listfile.h"
 
 template <class tRecord>
-listFile<tRecord>::listFile()
+listFile::listFile()
 {
 
 }
 
-template <class tRecord>
-int listFile<tRecord>::init(QString fname)
+//template <class tRecord>
+int listFile::init(QString fname)
 {
     fileName = fname;
     QFile iniFile(fileName);
