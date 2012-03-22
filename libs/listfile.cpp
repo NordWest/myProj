@@ -1,9 +1,9 @@
 #include "listfile.h"
-
+/*
 template <typename tRecord>
 listFile<tRecord>::listFile(){};
-
-template <class tRecord>
+*/
+template <typename tRecord>
 int listFile<tRecord>::init(QString fname)
 {
     fileName = fname;

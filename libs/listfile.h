@@ -14,6 +14,14 @@ public:
     int toString(QString &tStr){};
 };
 
+/*
+template <typename T>
+class tRecordList
+{
+    QList <T*> recList;
+};
+*/
+
 template <typename tRecord>
 class listFile
 {
@@ -33,7 +41,7 @@ class listFile
     int updateRec(tRecord *nrec);
     int size();
 
-    listFile();
+    //listFile();
 
     int rec2s(QString &tStr);
     int s2rec(QString tStr);

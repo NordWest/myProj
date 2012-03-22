@@ -1,7 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
-#include "./../libs/skyarea0.h"
+#include "./../libs/skyarea.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-/*    QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
 
@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
 
     TaskList taskL;
     taskL.init(taskListFile.toAscii().data());
-*/
 
-    taskList tl;
-//    tList.init(tListFile);
+
+    taskList tList;
+    tList.init(tListFile);
  /*   tlRecord *ntRec;
 
     int i, sz;
