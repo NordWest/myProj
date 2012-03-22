@@ -172,7 +172,7 @@ public:
 //	int sort_prior();
 };
 
-class tlRecord : public tRecord	//Task List record
+class tlRecord : tRecord	//Task List record
 {
 public:
 //	int noftask;	//number of task
@@ -200,7 +200,8 @@ bool operator==( const tlRecord& lhs, const tlRecord& rhs );
 
 class taskList : listFile <tlRecord>
 {
-
+public:
+ //   taskList();
 };
 
 class LogRecord

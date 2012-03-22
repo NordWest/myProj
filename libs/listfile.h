@@ -14,7 +14,7 @@ public:
     int toString(QString &tStr){};
 };
 
-template <class tRecord>
+template <typename tRecord>
 class listFile
 {
     QList <tRecord*> recList;

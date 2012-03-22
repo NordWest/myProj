@@ -1,16 +1,18 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
+#include "./../libs/skyarea0.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
+#include "./../libs/listfile.h"
 
+//using namespace std;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+/*    QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
 
@@ -25,8 +27,9 @@ int main(int argc, char *argv[])
 
     TaskList taskL;
     taskL.init(taskListFile.toAscii().data());
+*/
 
-    taskList tList;
+    taskList tl;
 //    tList.init(tListFile);
  /*   tlRecord *ntRec;
 
