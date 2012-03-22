@@ -3,7 +3,7 @@
 template <typename tRecord>
 listFile<tRecord>::listFile(){};
 */
-template <typename tRecord>
+/*template <typename tRecord>
 int listFile<tRecord>::init(QString fname)
 {
     fileName = fname;
@@ -28,6 +28,7 @@ int listFile<tRecord>::init(QString fname)
 
     return 0;
 }
+*/
 /*
 int listFile::rec2s(tRecord *tRec, QString &tStr)
 {
