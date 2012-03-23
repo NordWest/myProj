@@ -37,7 +37,7 @@ int listFile::rec2s(tRecord *tRec, QString &tStr)
     if(tRec->toString(tStr)) return 1;
     recList << tRec;
 }
-*/
+/
 template <class tRecord>
 int listFile<tRecord>::s2rec(QString tStr)
 {
@@ -141,4 +141,4 @@ int listFile<tRecord>::saveAs(QString fname)
     fileName = fname;
     return(save());
 }
-
+*/

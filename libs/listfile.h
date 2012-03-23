@@ -22,37 +22,15 @@ class tRecordList
 };
 */
 
-template <typename tRecord>
+template <class tRecord>
 class listFile
 {
     QList <tRecord*> recList;
     QString fileName;
  public:
-    int init(QString fname)
-    {
-        fileName = fname;
-        QFile iniFile(fileName);
-        iniFile.open(QIODevice::ReadOnly);
-        QTextStream iniStm(&iniFile);
-
-        QString tStr;
-
-        recList.clear();
-
-        while(!iniStm.atEnd())
-        {
-            tStr = iniStm.readLine();
-            s2rec(tStr);//) continue;
-            //recList << tRec;
-            //tRec = new tRecord;
-        }
-
-        iniFile.close();
-
-
-        return 0;
-    };
-
+    int init(QString fname);
+    int s2rec(QString tStr);
+/*
     int save();
     int saveAs(QString fname);
 
@@ -67,7 +45,42 @@ class listFile
     //listFile();
 
     int rec2s(QString &tStr);
-    int s2rec(QString tStr);
+    */
 };
+
+template <typename tRecord>
+int listFile<tRecord>::init(QString fname)
+{
+    fileName = fname;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    QString tStr;
+
+    recList.clear();
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+        s2rec(tStr);//) continue;
+        //recList << tRec;
+        //tRec = new tRecord;
+    }
+
+    iniFile.close();
+
+    return 0;
+};
+
+template <class tRecord>
+int listFile<tRecord>::s2rec(QString tStr)
+{
+    tRecord *tRec;
+    tRec = new tRecord;
+    if(tRec->toString(tStr)) return 1;
+    recList << tRec;
+    return 0;
+}
 
 #endif // LISTFILE_H

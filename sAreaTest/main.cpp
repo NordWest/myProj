@@ -1,12 +1,12 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
 #include "./../libs/listfile.h"
+#include "./../libs/skyarea.h"
 
 //using namespace std;
 
