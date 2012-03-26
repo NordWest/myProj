@@ -1048,6 +1048,10 @@ int main(int argc, char *argv[])    //r3StatPL
         if(saveAgg)
         {
             qDebug() << "saveAgg\n";
+            if(objAggSigma>0)
+            {
+                objAggTemp.do3sigma(0.0, objAggSigma, &objRejAgg.ocList);
+            }
             objAggTemp.saveAs(reportObjDir+"/objRes.txt");
             objRejAgg.saveAs(reportObjDir+"/objRes_rej.txt");
             if(saveEq)
