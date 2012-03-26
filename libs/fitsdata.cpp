@@ -7500,7 +7500,7 @@ void findCloserMarks(marksGrid *mgIP, marksGrid *mgEkv, marksGrid *mgRes, double
     mgRes->clearMarks();
     mgRes->ctype = mgEkv->ctype;
  //   if(FD_LOG_LEVEL) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
-    mgEkv->sortMagn();
+ //   mgEkv->sortMagn();
     szE = mgEkv->marks.size();
     szIP = mgIP->marks.size();
 
@@ -7546,10 +7546,67 @@ void findCloserMarks(marksGrid *mgIP, marksGrid *mgEkv, marksGrid *mgRes, double
 
 }
 
-void fitsdata::findCloserStars(double dMax)
+void findBrightAperMarks(marksGrid *mgIP, marksGrid *mgEkv, marksGrid *mgRes, double dMax)
+{
+    if(FD_LOG_LEVEL) qDebug() << "findCloserMarks\n";
+    int i, j, szE, szIP;
+    marksP *mkNew;
+
+
+    mgRes->clearMarks();
+    mgRes->ctype = mgEkv->ctype;
+ //   if(FD_LOG_LEVEL) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
+    mgEkv->sortMagn();
+    mgIP->sortAper();
+    szE = mgEkv->marks.size();
+
+
+    marksGrid mgIPt;
+
+
+    mgIPt.copy(mgIP);
+    szIP = mgIPt.marks.size();
+
+    double dist;//, distMax;
+
+    mkNew = new marksP;
+    if(FD_LOG_LEVEL) qDebug() << QString("mgEkv size = %1\n").arg(mgEkv->marks.size());
+    if(FD_LOG_LEVEL) qDebug() << QString("mgIP size = %1\n").arg(mgIP->marks.size());
+
+    for(j=0; j<szE; j++)
+    {
+
+        for(i=szIP-1; i>=0; i--)
+        {
+            dist = marksImgDist(mgIPt.marks.at(i), mgEkv->marks.at(j));
+
+            if(dist<dMax)
+            {
+                mkNew->copy(mgEkv->marks.at(j));
+                mkNew->copyImg(mgIPt.marks.at(i));
+                mgRes->addMark(mkNew);
+                mgIPt.marks.removeAt(i);
+            }
+        }
+
+    }
+
+    if(FD_LOG_LEVEL) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
+
+}
+
+void fitsdata::findCloserStars(double dMax, int clType)
 {
     if(FD_LOG_LEVEL) qDebug() << "findCloserStars:\n";
-    findCloserMarks(ipixMarks, catMarks, refMarks, dMax);
+    switch(clType)
+    {
+    case 0:
+        findCloserMarks(ipixMarks, catMarks, refMarks, dMax);
+        break;
+    case 1:
+        findBrightAperMarks(ipixMarks, catMarks, refMarks, dMax);
+        break;
+    }
     catMarks->clearMarks();
 }
 

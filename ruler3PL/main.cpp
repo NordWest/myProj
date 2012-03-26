@@ -168,6 +168,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             detHname = 1;
         }
         int saveHeaderFile = sett->value("general/saveHeaderFile", 0).toInt();
+        int clType = sett->value("general/clType", 0).toInt();
 
 //  logs
         int useLogLock = sett->value("logs/useLogLock", 0).toInt();
@@ -561,7 +562,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
     fitsd->cleanObjects(aper);
     fitsd->findCloserObjects(aper);
-    fitsd->findCloserStars(aper);
+    fitsd->findCloserStars(aper, clType);
 
     fitsd->ruler3(redparamIni, resFolder, refParam, sysCorr);
 

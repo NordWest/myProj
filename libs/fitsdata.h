@@ -395,6 +395,7 @@ void copyImgGrid(marksGrid *mgSource, marksGrid *mgRes);
 void remCrossedMarks(marksGrid *mg0, marksGrid *mgRem, double dMin);
 void remCrossedMarks(marksGrid *mg0, double dMin);
 void findCloserMarks(marksGrid *mg0, marksGrid *mg1, marksGrid *mgRes, double dMax);
+void findBrightAperMarks(marksGrid *mgIP, marksGrid *mgEkv, marksGrid *mgRes, double dMax);
 //marks
 int measureMark(img2d *imgArr, marksP *mP, measureParam params);                //0-bad; 1-good
 int markMassCenter(img2d *imgArr, marksP *mP, int aperture);                    //0-bad; 1-good
@@ -500,7 +501,7 @@ public:
         int loadIpixMarks(QString fName, QString mSep, QString mCol);
         int saveIpixMarks(QString fName, QString mSep, QString mCol);
 
-        void findCloserStars(double dMax);
+        void findCloserStars(double dMax, int clType = 0);
         void findCloserObjects(double dMax);
 
         void initRaDeHeadList();
