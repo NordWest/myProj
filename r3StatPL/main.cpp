@@ -1024,7 +1024,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         if(saveEq)
                         {
                             ssTemp.saveAs(tfName+"_sstar.txt");
-                            if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
+                            //if(saveAgg) aggSsTemp.ocList << ssTemp.ocList;
                         }
                         if(isSeries)
                         {
@@ -1058,6 +1058,7 @@ int main(int argc, char *argv[])    //r3StatPL
             {
                 qDebug() << "saveEq\n";
                 aggEqTemp.ocList.clear();
+                aggSsTemp.clear();
                 szj = objAggTemp.ocList.size();
                 for(j=0; j<szj; j++)
                 {
@@ -1066,6 +1067,12 @@ int main(int argc, char *argv[])    //r3StatPL
                         ocrec = new ocRec;
                         objAggTemp.ocList.at(j)->toOcRec(ocrec);
                         aggEqTemp.ocList << ocrec;
+                    }
+                    if(QString().compare(objAggTemp.ocList.at(j)->catName.simplified(), "LSPM")==0)
+                    {
+                        ssrec = new sstarRes;
+                        objAggTemp.ocList.at(j)->toSstarRes(ssrec);
+                        aggSsTemp.ocList << ssrec;
                     }
                 }
                 aggEqTemp.sortOClist();
