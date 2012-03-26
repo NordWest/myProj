@@ -7500,8 +7500,12 @@ void findCloserMarks(marksGrid *mgIP, marksGrid *mgEkv, marksGrid *mgRes, double
     mgRes->clearMarks();
     mgRes->ctype = mgEkv->ctype;
  //   if(FD_LOG_LEVEL) qDebug() << QString("mgRes size = %1\n").arg(mgRes->marks.size());
+    mgEkv->sortMagn();
     szE = mgEkv->marks.size();
     szIP = mgIP->marks.size();
+
+
+
     double dist, distMin;//, distMax;
     int posMin;
     mkNew = new marksP;
