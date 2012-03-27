@@ -564,6 +564,8 @@ qtccd2/wakeupdlg.ui -text
 r3Stat/main.cpp -text
 r3Stat/r3Stat.pro -text
 r3StatPL/main.cpp -text
+r3StatPL/orStat/main.cpp -text
+r3StatPL/orStat/orStat.pro -text
 r3StatPL/r3StatPL.pro -text
 reAver/main.cpp -text
 reAver/reAver.pro -text
