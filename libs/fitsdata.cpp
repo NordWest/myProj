@@ -10911,7 +10911,7 @@ void getLspmObject(marksGrid *objMarks, double MJD, QString lspmName, QString ls
         sprintf(strin, "%s\0", objDataStr.toAscii().data());
         if(mT->sstar->fromString(strin)) continue;
         if(FD_LOG_LEVEL) qDebug() << QString("pm: %1\t%2\n").arg(mT->sstar->pmRA).arg(mT->sstar->pmDE);
-        mT->mEkv[0] = mT->sstar->RAdeg + mas_to_grad(1000*mT->sstar->pmRA*(getYearFromMJD(MJD)-2000));//taking proper motion into account
+        mT->mEkv[0] = mT->sstar->RAdeg + mas_to_grad(1000*mT->sstar->pmRA/cos(grad2rad(mT->sstar->DEdeg))*(getYearFromMJD(MJD)-2000));//taking proper motion into account
         mT->mEkv[1] = mT->sstar->DEdeg + mas_to_grad(1000*mT->sstar->pmDE*(getYearFromMJD(MJD)-2000));//taking proper motion into account
         mT->mEkv[2] = mT->sstar->BJmag;
         mT->catName = QString("LSPM");

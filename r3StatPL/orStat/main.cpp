@@ -36,14 +36,17 @@ int main(int argc, char *argv[])
     tt1 = t0+dt*(k+1);
     for(i=0; i<sz; i++)
     {
+        //if((iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12))resStm << QString("%1|%2|%3|%4\n").arg(iniResFile.ocList.at(i)->mJD).arg(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC).arg(iniResFile.ocList.at(i)->ksiOC).arg(iniResFile.ocList.at(i)->etaOC);
         if(iniResFile.ocList.at(i)->mJD<tt1&&iniResFile.ocList.at(i)->mJD>=tt0)
         {
-            tempRF.ocList << iniResFile.ocList.at(i);
+            if(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12) tempRF.ocList << iniResFile.ocList.at(i);
+
         }
         else
         {
             tempRF.do3sigma(0.0, 3.0);
-            if(!tempRF.countCols(&cListT, "0,6,7")&&cListT.at(0)->num>20)
+            //resStm << QString("%1\n").arg(tempRF.ocList.size());
+            if(!tempRF.countCols(&cListT, "0,6,7"))//&&cListT.at(0)->num>20)
             {
                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(cListT.at(0)->mean).arg(cListT.at(0)->num).arg(cListT.at(1)->mean).arg(cListT.at(2)->mean).arg(cListT.at(1)->rmsMean).arg(cListT.at(2)->rmsMean).arg(cListT.at(1)->rmsOne).arg(cListT.at(2)->rmsOne);
                 lListX << pow(cListT.at(1)->rmsOne,2.0);
@@ -58,7 +61,7 @@ int main(int argc, char *argv[])
         }
 
     }
-    resFile.close();
+
 
 ////////////////////
 
@@ -89,6 +92,7 @@ int main(int argc, char *argv[])
     qDebug() << QString("y: %1 mas %2 mas/yr\n").arg(sqrt(fabs(Zy[0]))).arg(sqrt(fabs(Zy[1]))*365.2425);
 
 
+        resFile.close();
 
     return 0;//a.exec();
 }
