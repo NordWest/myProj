@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
         //if((iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12))resStm << QString("%1|%2|%3|%4\n").arg(iniResFile.ocList.at(i)->mJD).arg(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC).arg(iniResFile.ocList.at(i)->ksiOC).arg(iniResFile.ocList.at(i)->etaOC);
         if(iniResFile.ocList.at(i)->mJD<tt1&&iniResFile.ocList.at(i)->mJD>=tt0)
         {
-            //if(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12) tempRF.ocList << iniResFile.ocList.at(i);
-            tempRF.ocList << iniResFile.ocList.at(i);
+            if(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12) tempRF.ocList << iniResFile.ocList.at(i);
+            //tempRF.ocList << iniResFile.ocList.at(i);
 
         }
         else
