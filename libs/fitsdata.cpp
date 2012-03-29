@@ -3664,7 +3664,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             outerProcess.setWorkingDirectory(sCat->exePath);
                             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
                             outerProcess.setReadChannel(QProcess::StandardOutput);
-                            outerArguments << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("r=%1").arg(fov) << QString("%1").arg(sCat->catPath);
+                            outerArguments << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("r=%1").arg(fov/2.0) << QString("%1").arg(sCat->catPath);
                             if(FD_LOG_LEVEL) qDebug() << sCat->exeName << outerArguments.join(" ");
                             outerProcess.start(sCat->exeName, outerArguments);
                             break;
