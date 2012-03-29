@@ -3795,7 +3795,8 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 
                                             if((magn<minM)||(magn>maxM)) break;
 
-                                            mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000)/cos(grad_to_rad(de)));//taking proper motion into account
+                                            //mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000)/cos(grad_to_rad(de)));//taking proper motion into account
+                                            mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000));
                                             mkTemp->mEkv[1] = de + mas_to_grad(pmde*(getYearFromMJD(mjd)-2000));//taking proper motion into account
 
                                             mkTemp->mEkv[2] = magn;
@@ -3853,7 +3854,8 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                                     //if(FD_LOG_LEVEL) qDebug() << QString("deb2\n");
                                     //mkTemp = new marksP;
                                     //if(FD_LOG_LEVEL) qDebug() << QString("getYearFromMJD(MJD)-2000: %1\n").arg(getYearFromMJD(MJD)-2000);
-                                    mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000)/cos(grad_to_rad(de)));//taking proper motion into account
+                                    //mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000)/cos(grad_to_rad(de)));//taking proper motion into account
+                                    mkTemp->mEkv[0] = ra + mas_to_grad(pmra*(getYearFromMJD(mjd)-2000));//taking proper motion into account
                                     mkTemp->mEkv[1] = de + mas_to_grad(pmde*(getYearFromMJD(mjd)-2000));//taking proper motion into account
 
                                     mkTemp->mEkv[2] = magn;
