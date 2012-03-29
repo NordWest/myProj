@@ -39,14 +39,15 @@ int main(int argc, char *argv[])
         //if((iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12))resStm << QString("%1|%2|%3|%4\n").arg(iniResFile.ocList.at(i)->mJD).arg(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC).arg(iniResFile.ocList.at(i)->ksiOC).arg(iniResFile.ocList.at(i)->etaOC);
         if(iniResFile.ocList.at(i)->mJD<tt1&&iniResFile.ocList.at(i)->mJD>=tt0)
         {
-            if(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12) tempRF.ocList << iniResFile.ocList.at(i);
+            //if(iniResFile.ocList.at(i)->mag-iniResFile.ocList.at(i)->magOC>12) tempRF.ocList << iniResFile.ocList.at(i);
+            tempRF.ocList << iniResFile.ocList.at(i);
 
         }
         else
         {
             tempRF.do3sigma(0.0, 3.0);
             //resStm << QString("%1\n").arg(tempRF.ocList.size());
-            if(!tempRF.countCols(&cListT, "0,6,7"))//&&cListT.at(0)->num>20)
+            if(!tempRF.countCols(&cListT, "0,6,7")&&cListT.at(0)->num>20)
             {
                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(cListT.at(0)->mean).arg(cListT.at(0)->num).arg(cListT.at(1)->mean).arg(cListT.at(2)->mean).arg(cListT.at(1)->rmsMean).arg(cListT.at(2)->rmsMean).arg(cListT.at(1)->rmsOne).arg(cListT.at(2)->rmsOne);
                 lListX << pow(cListT.at(1)->rmsOne,2.0);
