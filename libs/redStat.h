@@ -771,7 +771,7 @@ public:
 	void saveAs(QString fName);
 
         void detStat();
-        void remSigma(double sg);
+        void remSigma(double sg, double proofP=0.0);
 
         void removeMes(QString mesureTimeCode);
 

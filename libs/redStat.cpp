@@ -3087,7 +3087,7 @@ void residualFile::detStat()
 
 }
 
-void residualFile::remSigma(double sg)
+void residualFile::remSigma(double sg, double proofP)
 {
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigma: %1\n").arg(sg);
     int i, recNum, recNum0;
@@ -3121,7 +3121,7 @@ void residualFile::remSigma(double sg)
 
         recNum0 = resList.size();
         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("num: %1\tnum0: %2\n").arg(recNum).arg(recNum0);
-    }while(recNum0>10&&(abs(recNum-recNum0)>(0.05*recNum)));
+    }while(recNum0>10&&(abs(recNum-recNum0)>(proofP*recNum)));
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars remain %1\n").arg(resList.size());
 }
 
