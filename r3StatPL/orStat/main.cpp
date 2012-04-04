@@ -1,12 +1,20 @@
 #include <QtCore/QCoreApplication>
 #include "./../../libs/redStat.h"
 #include "./../../mb/mb.h"
+#include "./../../astro/astro.h"
+
+double mjd2year(double mjd)
+{
+    DATEOBS date_obs;
+    getDATEOBSfromMJD(&date_obs, mjd);
+    return(date_obs.year+date_obs.month/12.0+(date_obs.day+date_obs.pday)/365.2425);
+}
 
 
 int main(int argc, char *argv[])
 {
 
-    double t0, t1, dt, tt0, tt1, tt;
+    double t0, t1, dt, tt0, tt1, tt, yrP;
     int i, sz, k;
     int tnum;
     double mjd2000 = 51544.5;
@@ -67,7 +75,8 @@ int main(int argc, char *argv[])
                 {
                     bResList.at(i)->detStat();
                     tt = t0+dt*(i+0.5);
-                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(tt).arg(bResList.at(i)->resList.size()).arg(bResList.at(i)->meanKsi).arg(bResList.at(i)->meanEta).arg(bResList.at(i)->rmsMeanKsi).arg(bResList.at(i)->rmsMeanEta).arg(bResList.at(i)->rmsOneKsi).arg(bResList.at(i)->rmsOneEta);
+
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(tt).arg(mjd2year(tt)).arg(bResList.at(i)->resList.size()).arg(bResList.at(i)->meanKsi).arg(bResList.at(i)->meanEta).arg(bResList.at(i)->rmsMeanKsi).arg(bResList.at(i)->rmsMeanEta).arg(bResList.at(i)->rmsOneKsi).arg(bResList.at(i)->rmsOneEta);
                     lListX << pow(bResList.at(i)->rmsOneKsi,2.0);
                     lListY << pow(bResList.at(i)->rmsOneEta,2.0);
                     lListT << pow(mjd2000-tt, 2.0);
@@ -158,7 +167,7 @@ int main(int argc, char *argv[])
                     //resStm << QString("%1\n").arg(tempRF.ocList.size());
                     if(!tempRF->countCols(&cListT, "0,6,7")&&cListT.at(0)->num>20)
                     {
-                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(cListT.at(0)->mean).arg(cListT.at(0)->num).arg(cListT.at(1)->mean).arg(cListT.at(2)->mean).arg(cListT.at(1)->rmsMean).arg(cListT.at(2)->rmsMean).arg(cListT.at(1)->rmsOne).arg(cListT.at(2)->rmsOne);
+                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(cListT.at(0)->mean).arg(mjd2year(cListT.at(0)->mean)).arg(cListT.at(0)->num).arg(cListT.at(1)->mean).arg(cListT.at(2)->mean).arg(cListT.at(1)->rmsMean).arg(cListT.at(2)->rmsMean).arg(cListT.at(1)->rmsOne).arg(cListT.at(2)->rmsOne);
                         lListX << pow(cListT.at(1)->rmsOne,2.0);
                         lListY << pow(cListT.at(2)->rmsOne,2.0);
                         lListT << pow(mjd2000-cListT.at(0)->mean, 2.0);
@@ -212,12 +221,12 @@ int main(int argc, char *argv[])
     qDebug() << QString("eqNum: %1\n").arg(sz);
 
     //slsm(2, sz, Zx, Cx, Lx);
-    iLSM(2, sz, 300, excX, Zx, Cx, Lx, uweX, Dx, 2.0, rnX);
+    iLSM(2, sz, 300, excX, Zx, Cx, Lx, uweX, Dx, 3.0, rnX);
     qDebug() << QString("\nx: %1 mas %2 mas/yr\n").arg(sqrt(fabs(Zx[0]))).arg((Zx[1]/fabs(Zx[1]))*sqrt(fabs(Zx[1]))*365.2425);
     qDebug() << QString("rn: %1\tuwe:%2\n").arg(rnX).arg(uweX);
 
     slsm(2, sz, Zy, Cy, Ly);
-    iLSM(2, sz, 300, excY, Zy, Cy, Ly, uweY, Dy, 2.0, rnY);
+    iLSM(2, sz, 300, excY, Zy, Cy, Ly, uweY, Dy, 3.0, rnY);
     qDebug() << QString("y: %1 mas %2 mas/yr\n").arg(sqrt(fabs(Zy[0]))).arg((Zy[1]/fabs(Zy[1]))*sqrt(fabs(Zy[1]))*365.2425);
     qDebug() << QString("rn: %1\tuwe:%2\n").arg(rnY).arg(uweY);
 
