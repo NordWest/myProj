@@ -26,6 +26,10 @@ int main(int argc, char *argv[])
         oFileName = QString("%1/%2_eq.txt").arg(fi.absolutePath()).arg(fi.completeBaseName());
     }
 
+    QFile resFile("resObj.txt");
+    resFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream resStm(&resFile);
+
     QString cfgFileName = "or2eq.ini";
 
     procData mpephProcData;
@@ -54,8 +58,16 @@ int main(int argc, char *argv[])
 
     int i, sz, getRes;
     QString tStr;
+    objResultsRec resRec;
     sz = orFile.ocList.size();
-
+    for(i=0; i<sz; i++)
+    {
+        orFile.ocList.at(i)->toResultsRec(&resRec);
+        resRec.rec2s(&tStr);
+        resStm << tStr << "\n";
+    }
+    resFile.close();
+/*
     for(i=0; i<sz; i++)
     {
         orTemp = orFile.ocList.at(i);
@@ -86,6 +98,6 @@ int main(int argc, char *argv[])
 
     qDebug() << QString("save %1\n").arg(oFileName);
     eqResFile.saveAs(oFileName);
-
+*/
     return 0;//a.exec();
 }

@@ -310,7 +310,7 @@ void ocRec::s2rec(QString str)
 	
 	QString tstr = sL[0];
 	
-	MJday = getMJDfromYMD(tstr);
+        MJday = getMJDfromYMD(tstr);
         ra = hms_to_deg(sL[1], " ");
         de = damas_to_deg(sL[2], " ");
 	mag0 = sL[3].toFloat(); 
@@ -929,6 +929,15 @@ void objResRec::toSstarRes(sstarRes *rec)
         rec->y = y;
 }
 
+void objResRec::toResultsRec(objResultsRec *resRec)
+{
+    resRec->name = name;
+    resRec->mJD = mJD;
+    resRec->ra = ra;
+    resRec->de = de;
+    resRec->mag = mag;
+}
+
 void objResRec::fromColList(QList <colRec*> colList)
 {
     int j, sz1;
@@ -1007,6 +1016,106 @@ void objResRec::fromColList(QList <colRec*> colList)
 
 
 /////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////
+
+objResultsRec::objResultsRec()
+{
+        mJD = ra = de  = mag = 0.0;
+        name = QString("");
+};
+
+objResultsRec::objResultsRec(QString str)
+{
+        objResRec();
+        s2rec(str);
+};
+
+objResultsRec::~objResultsRec()
+{
+
+}
+
+void objResultsRec::clear()
+{
+    mJD = ra = de  = mag = 0.0;
+    name = QString("");
+}
+
+void objResultsRec::copy(const objResultsRec &source)
+{
+    mJD = source.mJD;
+
+    ra = source.ra;
+    de = source.de;
+    mag = source.mag;
+/*
+    ksi = source.ksi;
+    eta = source.eta;
+
+    ksiOC = source.ksiOC;
+    etaOC = source.etaOC;
+    magOC = source.magOC;
+    x = source.x;
+    y = source.y;
+    pixmag = source.pixmag;
+    Dx = source.Dx;
+    Dy = source.Dy;
+
+    Dpixmag = source.Dpixmag;
+    //OCmag = source.OCmag;
+    name = source.name;
+    catName = source.catName;
+    catMagName = source.catMagName;
+    //exptime = source.exptime;
+    mesureTimeCode = source.mesureTimeCode;
+    mesParams = source.mesParams;*/
+}
+
+void objResultsRec::rec2s(QString *str)
+{
+    QString raStr, deStr;
+        str->clear();
+        DATEOBS dateObs = getDATEOBSfromMJD(mJD);
+        QString dateStr = getStrFromDATEOBS(dateObs," ", 0, 6);
+        deg_to_hms(&raStr, ra, " ", 2);
+        deg_to_damas(&deStr, de, " ", 3);
+        str->insert(0, QString("%1|%2|%3|%4|%5").arg(name.simplified(), -16).arg(dateStr).arg(raStr, 11, QLatin1Char(' ')).arg(deStr, 12, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')));//.arg(ksi, 12, 'f', 9, QLatin1Char(' ')).arg(eta, 12, 'f', 9, QLatin1Char(' ')).arg(ksiOC, 7, 'f', 1, QLatin1Char(' ')).arg(etaOC, 7, 'f', 1, QLatin1Char(' ')).arg(magOC, 5, 'f', 2, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 10, 'f', 6, QLatin1Char(' ')).arg(Dx, 7, 'f', 1, QLatin1Char(' ')).arg(Dy, 7, 'f', 1, QLatin1Char(' ')));
+        //str->append(QString("%1|%2|%3|%4").arg(Dpixmag, 9, 'f', 6, QLatin1Char(' ')).arg(catName, 8).arg(catMagName, 8));
+        //str->append(QString("|%1").arg(mesureTimeCode));
+        //str->append(QString("#%1").arg(mesParams));
+};
+
+int objResultsRec::s2rec(QString str)
+{
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
+    //QStringList parts = str.split("#");
+    QStringList sL = str.section("#", 0, 0).split("|");
+        //QStringList sL = str.split("|");
+        //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
+        if(sL.size()!=19) return 1;
+
+        name = sL[0];
+        mJD = getMJDfromYMD(sL[1]);//sL[1].toDouble();
+
+        ra = sL[2].toDouble();
+        de = sL[3].toDouble();
+        mag = sL[6].toDouble();
+ //       ksi = sL[4].toDouble();
+ //       eta = sL[5].toDouble();
+
+ //       x = sL[7].toDouble();
+ //       y = sL[8].toDouble();
+  //      pixmag = sL[9].toDouble();
+
+
+        return 0;
+};
+
+
+
+/////////////////////////////////////////////////////////////////////
+
 
 QString plateConstRec::toString()
 {

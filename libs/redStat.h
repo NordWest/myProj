@@ -45,6 +45,7 @@ struct measurementStatRec;
 struct eqSeriesRec;
 class objResRec;
 class objResidualFile;
+class objResultsRec;
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -581,7 +582,39 @@ public:
 
     void toOcRec(ocRec *rec);
     void toSstarRes(sstarRes *rec);
+    void toResultsRec(objResultsRec *resRec);
 };
+
+class objResultsRec
+{
+public:
+    double mJD;                     //[dateobs]
+    double ra, de;                  //[hms gms]
+    double ksi, eta;                //[deg]
+    double mag;                     //[mag]
+    double x, y;                    //[pix]
+    double pixmag;                  //[]
+    QString name;                   //obj name (1)
+
+    objResultsRec();
+    objResultsRec(QString str);
+    ~objResultsRec();
+
+    void clear();
+
+    void rec2s(QString *str);
+    int s2rec(QString str);
+
+//    void setMesParams(double *P, int pSize);
+
+    void copy(const objResultsRec &source);
+
+//    void fromColList(QList <colRec*> colList);
+
+//    void toOcRec(ocRec *rec);
+//    void toSstarRes(sstarRes *rec);
+};
+
 
 ////////////////////////////////////////////////////////////
 
