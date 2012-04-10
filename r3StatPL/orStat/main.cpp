@@ -184,6 +184,13 @@ int main(int argc, char *argv[])
             resFile.close();
         }
         break;
+    case 2:
+    {
+        errBudgetFile errB;
+        errB.init(QString(argv[1]));
+
+    }
+    break;
 }
 
 ////////////////////
