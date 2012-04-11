@@ -61,6 +61,7 @@ void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeri
 void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebSeriesList, double expMax);
 void sortORList(QList <objResRec*> *orList, int dir = 0);
 void sortErrBList(QList <errBudgetRec*> *ebList, int dir = 0);
+int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean);
 
 
 //////////////////////////////////////////////////////////////////////////////////////

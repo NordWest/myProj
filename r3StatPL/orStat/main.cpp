@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 {
 
     double t0, t1, dt, tt0, tt1, tt, yrP;
-    int i, sz, k;
+    int i, j, sz, k;
     int tnum;
     double mjd2000 = 51544.5;
     QList <double> lListX, lListY, lListT;
@@ -187,8 +187,65 @@ int main(int argc, char *argv[])
     case 2:
     {
         errBudgetFile errB;
-        errB.init(QString(argv[1]));
+        errB.init(argv[1]);
+        QList <errBudgetFile*> ebfList;
+        errBudgetFile* tempEbf;
+        errBudgetRec *tempEbr;
 
+        for(i=0;i<tnum;i++)
+        {
+            tempEbf = new errBudgetFile;
+            ebfList << tempEbf;
+        }
+
+        sz = errB.errList.size();
+
+        for(i=0; i<sz; i++)
+        {
+            tempEbr = errB.errList.at(i);
+            k = (tempEbr->MJD-t0)/dt;
+            if(k>=0&&k<tnum) ebfList.at(k)->errList << tempEbr;
+        }
+
+        QList <double> raList;
+        QList <double>  deList;
+        double meanRA, rmsMeanRA, rmsOneRA;
+        double meanDE, rmsMeanDE, rmsOneDE;
+        QFile resFileRA("./errbResRA.txt");
+        resFileRA.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmRA(&resFileRA);
+        QFile resFileDE("./errbResDE.txt");
+        resFileDE.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmDE(&resFileDE);
+
+        for(i=0;i<tnum;i++)
+        {
+            tempEbf = ebfList.at(i);
+            sz = tempEbf->errList.size();
+            if(sz<20) continue;
+            raList.clear();
+            deList.clear();
+            for(j=0;j<sz;j++)
+            {
+                raList << tempEbf->errList.at(j)->xParams.UWE;
+                deList << tempEbf->errList.at(j)->yParams.UWE;
+            }
+            tt = t0+dt*(i+0.5);
+            if(!doSigmaMul(raList, 3.0, 0.0, &meanRA, &rmsOneRA, &rmsMeanRA))
+            {
+                resStmRA << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(raList.size()).arg(meanRA).arg(rmsOneRA).arg(rmsMeanRA);
+            }
+            if(!doSigmaMul(deList, 3.0, 0.0, &meanDE, &rmsOneDE, &rmsMeanDE))
+            {
+                resStmDE << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(deList.size()).arg(meanDE).arg(rmsOneDE).arg(rmsMeanDE);
+            }
+
+        }
+
+        resFileRA.close();
+        resFileDE.close();
+
+        return 0;
     }
     break;
 }

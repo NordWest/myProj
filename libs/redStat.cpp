@@ -195,6 +195,46 @@ void detTimeCode(QString &timeCode)
     timeCode = cDT.toString("yyyyMMddhhmmsszzz");
 }
 
+int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean)
+{
+    double maxVal;
+    int num0, num1, i, sz;
+
+    num1 = valueList.size();
+
+    do
+    {
+            num0 = num1;
+
+            if(num0<3) return 1;
+
+            *rmsMean = *rmsOne = *mean = 0;
+
+            for(i=0; i<num0; i++) *mean += valueList[i];
+            *mean /= num0;
+
+            for(i=0; i<num0; i++) *rmsOne += pow(valueList[i]-*mean, 2.0);
+            *rmsOne = sqrt(*rmsOne/(num0-1));
+            *rmsMean = *rmsOne/sqrt(num0);
+
+            maxVal = sigmaMul*(*rmsOne);
+            qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
+
+            for(i=num0-1; i>=0;i--)
+            {
+                if(fabs(*mean-valueList[i])>maxVal) valueList.removeAt(i);
+            }
+
+            num1 = valueList.size();
+
+    }while(abs(num0-num1)>(proofP*num1));
+
+    qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
+
+    return 0;
+
+}
+
 
 
 
