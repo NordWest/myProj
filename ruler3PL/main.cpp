@@ -542,6 +542,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         }
         qDebug() << QString("objMarks num: %1\n").arg(fitsd->objMarks->marks.size());
         fitsd->detTanObj();
+
 ///////////
 
         if(saveObjEph) makeEphReports(fitsd->objMarks, fitsd->MJD, "./", QFileInfo(fileName).absoluteFilePath());
