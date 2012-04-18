@@ -237,6 +237,48 @@ int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double 
 
 }
 
+int doWeghts(QList <double> valList, QList <double> weList, double *mean, double *rmsOne, double *rmsMean)
+{
+    double maxVal;
+    int num0, num1, i, sz;
+
+    num0 = valList.size();
+    if(num0!=weList.size()) return 1;
+
+    double p=0;
+    for(i=0;i<num0;i++) p+=weList[i];
+   /*
+    double xav0=0;
+
+    for(i=0;i<num0;i++)
+    {
+        xav0 += weList[i]*valList[i];
+    }
+    xav0 /=num0;
+*/
+    double xav=0;
+
+    for(i=0;i<num0;i++)
+    {
+        xav += weList[i]*valList[i];
+    }
+    xav = xav/p;
+
+    double sig=0;
+    for(i=0;i<num0;i++)
+    {
+        sig += weList[i]*pow(valList[i]-xav, 2.0);
+    }
+    sig = sqrt(sig/(num0-1));
+
+    *mean = xav;
+    *rmsOne = sig;
+    *rmsMean = sig/sqrt(num0);
+
+    return 0;
+
+}
+
 
 
 

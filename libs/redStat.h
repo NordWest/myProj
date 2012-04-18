@@ -62,6 +62,7 @@ void detErrBSeriesList(QList <errBudgetRec*> ebList, QList <errBudgetFile*> *ebS
 void sortORList(QList <objResRec*> *orList, int dir = 0);
 void sortErrBList(QList <errBudgetRec*> *ebList, int dir = 0);
 int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean, int *numEnd);
+int doWeghts(QList <double> valList, QList <double> weList, double *mean, double *rmsOne, double *rmsMean);
 
 
 //////////////////////////////////////////////////////////////////////////////////////

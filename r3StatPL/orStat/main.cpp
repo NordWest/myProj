@@ -14,6 +14,7 @@ struct report0Record
 {
     double mjd;
     double year;
+    double uweRa, uweDe;
     double rmsRa;
     double rmsDe;
 };
@@ -272,6 +273,8 @@ int main(int argc, char *argv[])
         //QList <double> timeList;
         QList <double> raList;
         QList <double>  deList;
+        QList <double> uweRaList;
+        QList <double>  uweDeList;
         //QList <double> raListTot;
         //QList <double>  deListTot;
         double meanRA, rmsMeanRA, rmsOneRA;
@@ -293,6 +296,8 @@ int main(int argc, char *argv[])
             rep0R = new report0Record;
             rep0R->mjd = tStr.section("|", 2, 2).toDouble();
             rep0R->year = tStr.section("|", 1, 1).toDouble();
+            rep0R->uweRa = tStr.section("|", 5, 5).toDouble();
+            rep0R->uweDe = tStr.section("|", 7, 7).toDouble();
             rep0R->rmsRa = tStr.section("|", 9, 9).toDouble();
             rep0R->rmsDe = tStr.section("|", 10, 10).toDouble();
             k = (rep0R->mjd-t0)/dt;
@@ -307,6 +312,12 @@ int main(int argc, char *argv[])
         QFile resFileDE("./rep0ResDE.txt");
         resFileDE.open(QIODevice::WriteOnly | QIODevice::Truncate);
         QTextStream resStmDE(&resFileDE);
+        QFile resFileUweRA("./rep0UweResRA.txt");
+        resFileUweRA.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmUweRA(&resFileUweRA);
+        QFile resFileUweDE("./rep0UweResDE.txt");
+        resFileUweDE.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmUweDE(&resFileUweDE);
 
         for(i=0;i<tnum;i++)
         {
@@ -314,12 +325,22 @@ int main(int argc, char *argv[])
             if(sz<20) continue;
             raList.clear();
             deList.clear();
+            uweRaList.clear();
+            uweDeList.clear();
             for(j=0;j<sz;j++)
             {
                 raList << timeList.at(i)->recList.at(j)->rmsRa;
                 deList << timeList.at(i)->recList.at(j)->rmsDe;
+                uweRaList << 1.0/pow(timeList.at(i)->recList.at(j)->uweRa,2.0);
+                uweDeList << 1.0/pow(timeList.at(i)->recList.at(j)->uweDe,2.0);
+                qDebug() << QString("%1|%2\n").arg(1.0/timeList.at(i)->recList.at(j)->uweRa).arg(1.0/timeList.at(i)->recList.at(j)->uweDe);
             }
             tt = t0+dt*(i+0.5);
+
+            doWeghts(raList, uweRaList, &meanRA, &rmsOneRA, &rmsMeanRA);
+            doWeghts(deList, uweDeList, &meanDE, &rmsOneDE, &rmsMeanDE);
+            resStmUweRA << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(raList.size()).arg(meanRA).arg(rmsOneRA).arg(rmsMeanRA);
+            resStmUweDE << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(deList.size()).arg(meanDE).arg(rmsOneDE).arg(rmsMeanDE);
 
             qDebug() << QString("num before: %1").arg(raList.size());
 
@@ -331,10 +352,14 @@ int main(int argc, char *argv[])
             {
                 resStmDE << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(numDe).arg(meanDE).arg(rmsOneDE).arg(rmsMeanDE);
             }
+
+
         }
 
         resFileRA.close();
         resFileDE.close();
+        resFileUweRA.close();
+        resFileUweDE.close();
 
         return 0;
 
