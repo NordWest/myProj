@@ -10,6 +10,19 @@ double mjd2year(double mjd)
     return(date_obs.year+date_obs.month/12.0+(date_obs.day+date_obs.pday)/365.2425);
 }
 
+struct report0Record
+{
+    double mjd;
+    double year;
+    double rmsRa;
+    double rmsDe;
+};
+
+struct timeReport0
+{
+    QList <report0Record*> recList;
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -211,6 +224,7 @@ int main(int argc, char *argv[])
         QList <double>  deList;
         double meanRA, rmsMeanRA, rmsOneRA;
         double meanDE, rmsMeanDE, rmsOneDE;
+        int numRa, numDe;
         QFile resFileRA("./errbResRA.txt");
         resFileRA.open(QIODevice::WriteOnly | QIODevice::Truncate);
         QTextStream resStmRA(&resFileRA);
@@ -231,11 +245,11 @@ int main(int argc, char *argv[])
                 deList << tempEbf->errList.at(j)->yParams.UWE;
             }
             tt = t0+dt*(i+0.5);
-            if(!doSigmaMul(raList, 3.0, 0.0, &meanRA, &rmsOneRA, &rmsMeanRA))
+            if(!doSigmaMul(raList, 3.0, 0.0, &meanRA, &rmsOneRA, &rmsMeanRA, &numRa))
             {
                 resStmRA << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(raList.size()).arg(meanRA).arg(rmsOneRA).arg(rmsMeanRA);
             }
-            if(!doSigmaMul(deList, 3.0, 0.0, &meanDE, &rmsOneDE, &rmsMeanDE))
+            if(!doSigmaMul(deList, 3.0, 0.0, &meanDE, &rmsOneDE, &rmsMeanDE, &numDe))
             {
                 resStmDE << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(deList.size()).arg(meanDE).arg(rmsOneDE).arg(rmsMeanDE);
             }
@@ -248,6 +262,84 @@ int main(int argc, char *argv[])
         return 0;
     }
     break;
+    case 3:
+    {
+        QFile rep0File(argv[1]);
+        rep0File.open(QIODevice::ReadOnly);
+        QTextStream rep0Stm(&rep0File);
+
+        QString tStr;
+        //QList <double> timeList;
+        QList <double> raList;
+        QList <double>  deList;
+        //QList <double> raListTot;
+        //QList <double>  deListTot;
+        double meanRA, rmsMeanRA, rmsOneRA;
+        double meanDE, rmsMeanDE, rmsOneDE;
+        int numRa, numDe;
+        QList <timeReport0*> timeList;
+        timeReport0* timeRec;
+        report0Record* rep0R;
+
+        for(i=0;i<tnum;i++)
+        {
+            timeRec = new timeReport0;
+            timeList << timeRec;
+        }
+
+        while(!rep0Stm.atEnd())
+        {
+            tStr = rep0Stm.readLine();
+            rep0R = new report0Record;
+            rep0R->mjd = tStr.section("|", 2, 2).toDouble();
+            rep0R->year = tStr.section("|", 1, 1).toDouble();
+            rep0R->rmsRa = tStr.section("|", 9, 9).toDouble();
+            rep0R->rmsDe = tStr.section("|", 10, 10).toDouble();
+            k = (rep0R->mjd-t0)/dt;
+            if(k>=0&&k<tnum) timeList.at(k)->recList << rep0R;
+        }
+
+        rep0File.close();
+
+        QFile resFileRA("./rep0ResRA.txt");
+        resFileRA.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmRA(&resFileRA);
+        QFile resFileDE("./rep0ResDE.txt");
+        resFileDE.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        QTextStream resStmDE(&resFileDE);
+
+        for(i=0;i<tnum;i++)
+        {
+            sz = timeList.at(i)->recList.size();
+            if(sz<20) continue;
+            raList.clear();
+            deList.clear();
+            for(j=0;j<sz;j++)
+            {
+                raList << timeList.at(i)->recList.at(j)->rmsRa;
+                deList << timeList.at(i)->recList.at(j)->rmsDe;
+            }
+            tt = t0+dt*(i+0.5);
+
+            qDebug() << QString("num before: %1").arg(raList.size());
+
+            if(!doSigmaMul(raList, 3.0, 0.0, &meanRA, &rmsOneRA, &rmsMeanRA, &numRa))
+            {
+                resStmRA << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(numRa).arg(meanRA).arg(rmsOneRA).arg(rmsMeanRA);
+            }
+            if(!doSigmaMul(deList, 3.0, 0.0, &meanDE, &rmsOneDE, &rmsMeanDE, &numDe))
+            {
+                resStmDE << QString("%1|%2|%3|%4|%5\n").arg(tt).arg(numDe).arg(meanDE).arg(rmsOneDE).arg(rmsMeanDE);
+            }
+        }
+
+        resFileRA.close();
+        resFileDE.close();
+
+        return 0;
+
+    }
+        break;
 }
 
 ////////////////////

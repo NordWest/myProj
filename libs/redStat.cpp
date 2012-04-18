@@ -195,7 +195,7 @@ void detTimeCode(QString &timeCode)
     timeCode = cDT.toString("yyyyMMddhhmmsszzz");
 }
 
-int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean)
+int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean, int *numEnd)
 {
     double maxVal;
     int num0, num1, i, sz;
@@ -218,7 +218,7 @@ int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double 
             *rmsMean = *rmsOne/sqrt(num0);
 
             maxVal = sigmaMul*(*rmsOne);
-            qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
+            //qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
 
             for(i=num0-1; i>=0;i--)
             {
@@ -229,7 +229,9 @@ int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double 
 
     }while(abs(num0-num1)>(proofP*num1));
 
-    qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
+    *numEnd = num1;
+
+    //qDebug() << QString("%1|%2|%3|%4\n").arg(*mean).arg(*rmsOne).arg(*rmsMean).arg(maxVal);
 
     return 0;
 
