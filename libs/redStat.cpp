@@ -777,8 +777,8 @@ sstarRes::~sstarRes()
 void sstarRes::rec2s(QString *str)
 {
         str->clear();
-        str->insert(0, QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13|%14|").arg(mJD, 15, 'f', 7, QLatin1Char(' ')).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8).arg(ksi, 12, 'f', 9, QLatin1Char(' ')).arg(eta, 12, 'f', 9, QLatin1Char(' ')).arg(mag, 5, 'f', 2, QLatin1Char(' ')).arg(ksiOC, 7, 'f', 1, QLatin1Char(' ')).arg(etaOC, 7, 'f', 1, QLatin1Char(' ')).arg(magOC, 5, 'f', 2, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 10, 'f', 6, QLatin1Char(' ')).arg(Dx, 7, 'f', 1, QLatin1Char(' ')).arg(Dy, 7, 'f', 1, QLatin1Char(' ')));
-        str->append(QString("%1|%2|%3|%4").arg(Dpixmag, 9, 'f', 6, QLatin1Char(' ')).arg(lspmName, 8).arg(catName, 8).arg(catMagName, 8));
+        str->insert(0, QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13|%14|").arg(mJD, 15, 'f', 7, QLatin1Char(' ')).arg(ra, 13, 'f', 8, QLatin1Char(' ')).arg(de, 13, 'f', 8).arg(ksi, 13, 'f', 9, QLatin1Char(' ')).arg(eta, 13, 'f', 9, QLatin1Char(' ')).arg(mag, 6, 'f', 2, QLatin1Char(' ')).arg(ksiOC, 7, 'f', 1, QLatin1Char(' ')).arg(etaOC, 7, 'f', 1, QLatin1Char(' ')).arg(magOC, 6, 'f', 2, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 11, 'f', 6, QLatin1Char(' ')).arg(Dx, 7, 'f', 1, QLatin1Char(' ')).arg(Dy, 7, 'f', 1, QLatin1Char(' ')));
+        str->append(QString("%1|%2|%3|%4").arg(Dpixmag, 10, 'f', 6, QLatin1Char(' ')).arg(lspmName, 8).arg(catName, 8).arg(catMagName, 8));
         str->append(QString("|%1").arg(mesureTimeCode));
 };
 
