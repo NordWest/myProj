@@ -782,12 +782,12 @@ void sstarRes::rec2s(QString *str)
         str->append(QString("|%1").arg(mesureTimeCode));
 };
 
-void sstarRes::s2rec(QString str)
+int sstarRes::s2rec(QString str)
 {
 //	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
         QStringList sL = str.split("|");
         //if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
-        if(sL.size()!=19) return;
+        if(sL.size()!=19) return 1;
 
         mJD = sL[0].toDouble();
 
@@ -814,6 +814,7 @@ void sstarRes::s2rec(QString str)
 
         //exptime = sL[18].toDouble();
         mesureTimeCode = sL.at(18);
+        return 0;
 };
 
 void sstarRes::copy(const sstarRes &source)
@@ -4594,12 +4595,14 @@ int sstarFile::init(QString fileName)
     inFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream indata(&inFile);
     sstarRes* tRec;
-
+    QString tStr;
+    tRec = new sstarRes;
     while(!indata.atEnd())
     {
-        tRec = new sstarRes;
-        tRec->s2rec(indata.readLine());
+        tStr = indata.readLine();
+        if(tRec->s2rec(tStr)) continue;
         ocList << tRec;
+        tRec = new sstarRes;
     }
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nocList.size= %1\n").arg(ocList.size());
 }

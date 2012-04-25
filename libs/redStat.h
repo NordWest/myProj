@@ -543,7 +543,7 @@ public:
     ~sstarRes();
 
     void rec2s(QString *str);
-    void s2rec(QString str);
+    int s2rec(QString str);
 
     void copy(const sstarRes &source);
 };

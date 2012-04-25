@@ -629,6 +629,8 @@ sphereMod/main.cpp -text
 sphereMod/sphereMod.pro -text
 srPack/main.cpp -text
 srPack/srPack.pro -text
+sstarRes/main.cpp -text
+sstarRes/sstarRes.pro -text
 stimpro/OpenFileExDlg.cpp -text
 stimpro/OpenFileExDlg.h -text
 stimpro/ccdframe.cpp -text
