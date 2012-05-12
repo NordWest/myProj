@@ -1,12 +1,104 @@
-#include <QtCore/QCoreApplication>
+#include <QtCore>
+/*
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
-#include "./../libs/listfile.h"
 #include "./../libs/skyarea.h"
+*/
+
+//#include "./../libs/listfile.h"
+
+class tRecord
+{
+public:
+    tRecord(){};
+//    ~tRecord(){};
+
+    int fromString(QString tStr){};
+    int toString(QString &tStr){};
+};
+
+template <class tRecord>
+class listFile
+{
+    QList <tRecord*> recList;
+    QString fileName;
+ public:
+    int init(QString fname)
+    {
+        fileName = fname;
+        QFile iniFile(fileName);
+        iniFile.open(QIODevice::ReadOnly);
+        QTextStream iniStm(&iniFile);
+
+        QString tStr;
+
+        recList.clear();
+
+        while(!iniStm.atEnd())
+        {
+            tStr = iniStm.readLine();
+            s2rec(tStr);//) continue;
+            //recList << tRec;
+            //tRec = new tRecord;
+        }
+
+        iniFile.close();
+
+        return 0;
+    };
+
+    int s2rec(QString tStr){
+        tRecord *tRec;
+        tRec = new tRecord;
+        if(tRec->toString(tStr)) return 1;
+        recList << tRec;
+        return 0;
+    };
+
+};
+
+class tlRecord : tRecord	//Task List record
+{
+public:
+//	int noftask;	//number of task
+
+        double exp;			//experience of task
+        int Ntot;			//Total number of observation for one object
+        double texc;		//exclusion of a object after successful observations
+        double dRA;			//maximum distance from celestial meridian
+        int NinN;			//number obsrvations during one night
+        int flag_active;	//flag for activ task
+        QString name, desc, dirPath, catName;
+
+//	char *tail;
+
+        tlRecord();
+        int fromString(QString tStr);
+        void toString(QString &tStr);
+        tlRecord& operator=(const tlRecord &rhs);
+        //tlRecord& operator=(const TLRecord &rhs);
+
+        void getIniName(QString &iniName);
+};
+
+bool operator==( const tlRecord& lhs, const tlRecord& rhs );
+
+class taskList : listFile <tlRecord>
+{
+public:
+    taskList(){};
+    int init(QString fname);
+};
+
+int taskList::init(QString fname)
+{
+    return 0;
+}
+
 
 //using namespace std;
 
@@ -25,8 +117,8 @@ int main(int argc, char *argv[])
     QString tListFile = QString("%1/task.lst").arg(resDir);
 
 
-    TaskList taskL;
-    taskL.init(taskListFile.toAscii().data());
+//    TaskList taskL;
+//    taskL.init(taskListFile.toAscii().data());
 
 
     taskList tList;

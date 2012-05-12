@@ -53,7 +53,7 @@
 //#include "comfunc.h"
 #include "orbit.h"
 #include "orbcat.h"
-#include "listfile.h"
+//#include "listfile.h"
 
 //#include "atlstr.h"
 
@@ -172,7 +172,7 @@ public:
 //	int sort_prior();
 };
 
-class tlRecord : tRecord	//Task List record
+class tlRecord //: tRecord	//Task List record
 {
 public:
 //	int noftask;	//number of task
@@ -201,7 +201,7 @@ bool operator==( const tlRecord& lhs, const tlRecord& rhs );
 class taskList : listFile <tlRecord>
 {
 public:
- //   taskList();
+    taskList();
 };
 
 class LogRecord
