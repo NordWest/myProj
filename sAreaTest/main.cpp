@@ -14,7 +14,7 @@
 class tRecord
 {
 public:
-    tRecord(){};
+//    tRecord(){};
 //    ~tRecord(){};
 
     int fromString(QString tStr){};
@@ -61,7 +61,7 @@ class listFile
 
 };
 
-class tlRecord : tRecord	//Task List record
+class tlRecord : public tRecord	//Task List record
 {
 public:
 //	int noftask;	//number of task
@@ -91,7 +91,7 @@ class taskList : listFile <tlRecord>
 {
 public:
     taskList(){};
-    int init(QString fname);
+    //int init(QString fname);
 };
 
 int taskList::init(QString fname)
