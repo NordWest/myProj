@@ -198,10 +198,15 @@ public:
 
 bool operator==( const tlRecord& lhs, const tlRecord& rhs );
 
-class taskList : listFile <tlRecord>
+class taskList// : listFile <tlRecord>
 {
+    QList <tlRecord*> recList;
+    QString fileName;
 public:
     taskList();
+    int init(QString fname);
+    int s2rec(QString tStr);
+    int rec2s(QString &tStr);
 };
 
 class LogRecord
@@ -338,7 +343,7 @@ public:
 	int sort_prior();
 };
 
-class iniRecord : tRecord
+class iniRecord// : tRecord
 {
 public:
         //int noftask;
@@ -369,7 +374,7 @@ public:
 bool operator==( const iniRecord& lhs, const iniRecord& rhs );
 
 
-class IListR : listFile <iniRecord>
+class IListR// : listFile <iniRecord>
 {
 
 /*

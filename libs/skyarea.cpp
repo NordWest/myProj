@@ -412,6 +412,54 @@ int TaskList::remTask(int noft)
 
 //////////////////////////////////////////////////////////
 
+taskList::taskList()
+{
+
+}
+
+int taskList::init(QString fname)
+{
+    fileName = fname;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    QString tStr;
+
+    recList.clear();
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+        s2rec(tStr);//) continue;
+        //recList << tRec;
+        //tRec = new tRecord;
+    }
+
+    iniFile.close();
+
+    return 0;
+}
+
+int taskList::rec2s(QString &tStr)
+{
+    tlRecord *tRec;
+    tRec = new tlRecord;
+    tRec->toString(tStr);//) return 1;
+    //recList << tRec;
+}
+
+int taskList::s2rec(QString tStr)
+{
+    tlRecord *tRec;
+    tRec = new tlRecord;
+    tRec->toString(tStr);//) return 1;
+    recList << tRec;
+    return 0;
+}
+
+//////////////////////////////////////////////////////////
+
 LRecord::LRecord()
 {
 	this->name = new char[32];

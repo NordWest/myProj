@@ -1,5 +1,5 @@
 #include <QtCore>
-/*
+
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
 #include "./../libs/astro.h"
@@ -7,10 +7,10 @@
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
 #include "./../libs/skyarea.h"
-*/
+
 
 //#include "./../libs/listfile.h"
-
+/*
 class tRecord
 {
 public:
@@ -98,7 +98,7 @@ int taskList::init(QString fname)
 {
     return 0;
 }
-
+*/
 
 //using namespace std;
 
