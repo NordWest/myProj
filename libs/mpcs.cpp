@@ -307,12 +307,12 @@ mpcs::~mpcs()
 
 int mpcs::init(char *fname)
 {
-	return(FileDynStrBin::init(fname, MPC_SIZE));
+    return(FileDynStrBin::init(fname));
 }
 
 int mpcs::init(char *fname, int sizestr)
 {
-	return(FileDynStrBin::init(fname, sizestr));
+    return(FileDynStrBin::init(fname));
 }
 
 
@@ -341,7 +341,7 @@ int mpcs::addmpc(mpc *nrec)
 	if(this->record->set_mpc(nrec)) return 1;
 
 	this->rec2s(slo);
-	if(this->AddStr(slo, this->nstr)) return 1;
+    if(this->AddStr(slo, this->nstr())) return 1;
 
 	return 0;
 }
@@ -369,7 +369,7 @@ int mpcs::addmpc()
 	strcpy(slo, "");
 
 	this->rec2s(slo);
-	if(this->AddStr(slo, this->nstr)) return 1;
+    if(this->AddStr(slo, this->nstr())) return 1;
 
 	return 0;
 }
@@ -383,7 +383,7 @@ int mpcs::delmpc(int pos)
 
 int mpcs::getmpc(int pos)
 {
-	if(pos>this->nstr-1) return 1;
+    if(pos>this->nstr()-1) return 1;
 	if(this->ReadStr(pos)) return 1;
 	this->s2rec(this->str);
 //	this->record->head->cut_head(this->record->head-
@@ -415,10 +415,10 @@ void mpcs::s2rec(char *arec)
 
         //printf("%d %d\n", year, mth);
 
-	switch(this->sizestr)
+    /*switch(this->sizestr)
 	{
-	case 81:
-                slovoG(arec, slo, 23, 32);
+    case 81:*/
+        slovoG(arec, slo, 23, 32);
 		numb = atof(slo);
 
 		dat2JD(&this->record->eJD, year, mth, numb);
@@ -453,9 +453,9 @@ void mpcs::s2rec(char *arec)
 
 		slovoG(arec, slo, 80, 81);
 		strcpy(this->record->tnull, slo);
-
+/*
 		break;
-	case 64:
+    case 64:
 		slovoG(arec, slo, 23, 34);
 		numb = atof(slo);
 		dat2JD(&this->record->eJD, year, mth, numb);
@@ -490,9 +490,9 @@ void mpcs::s2rec(char *arec)
 
 		slovoG(arec, slo, 63, 64);
 		strcpy(this->record->tnull, slo);
-		break;
+        break;
 	}
-	
+    */
 
 
 
@@ -573,7 +573,7 @@ int mpcs::average(double *vra, double *vdec)
 {
 	int i, j, tlen, nt;
 	tlen = 2;
-	nt = this->nstr;
+    nt = this->nstr();
 
 	myvector *xt, *xr, *xd, *xmagn;
 	xt = new myvector(nt);
@@ -583,7 +583,7 @@ int mpcs::average(double *vra, double *vdec)
 
 	double d, t;
 	t = 0.0;
-	for(int i=0; i<this->nstr; i++)
+    for(int i=0; i<this->nstr(); i++)
 	{
 		this->getmpc(i);
 		xt->set(i, this->record->eJD);
@@ -679,7 +679,7 @@ int mpcs::GetCoordList(List4 *coord)
 
 	coord->Free();
 
-	for(int i=0; i<this->nstr; i++)
+    for(int i=0; i<this->nstr(); i++)
 	{
 		if(this->getmpc(i)) return 2;
 

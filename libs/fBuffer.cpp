@@ -16,7 +16,7 @@ bufStrRec::~bufStrRec()
 bufStr::bufStr(int strlen)
 {
 	this->record = NULL;
-	this->record = new bufStrRec(STRLEN);
+    //this->record = new bufStrRec(STRLEN);
 	this->strlen = strlen;
 	this->len = 0;
 }

@@ -161,7 +161,6 @@
 
   }
 */
-
 // BARYCENTR
 void Everhardt::force(double X[], double V[], double TS, double F[])
 {
@@ -178,7 +177,7 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
         double Ri, Rj, *D, res0, res1;
         //int k;
 
-        printf("TS: %12.2f\n", TS);
+        //printf("TS: %12.2f\n", TS);
 
         //printf("X: %f %f %f\n", X[0], X[1])
 
@@ -207,12 +206,12 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
                 printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloi], X[i], X[i+1], X[i+2]);
         }
 */
-        printf("eparam->col= %f\teparam->vout= %f\n", eparam->col, eparam->vout);
+        //printf("eparam->col= %f\teparam->vout= %f\n", eparam->col, eparam->vout);
 
         for(i=0, teloi=0; i<Ni; i+=3, teloi++)
         {
                 Ri = sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
-                printf("R[%d]= %f\n", teloi, Ri);
+                //printf("R[%d]= %f\n", teloi, Ri);
                 if(Ri<eparam->col)
                 {
 //		    cout << "WARN!!!! CRASH!!!!" << endl;
@@ -232,7 +231,7 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
                         {
                             D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
                             //D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
-                            printf("D[%d]= %f\n", teloj, D[teloj]);
+                            //printf("D[%d]= %f\n", teloj, D[teloj]);
 
 //			    cout << "D[j]= " << D[j] << endl;
                             if(D[teloj]<eparam->col)
@@ -263,7 +262,7 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
                                {
                                     //Rj = sqrt(Y[j]*Y[j] + Y[j+1]*Y[j+1] + Y[j+2]*Y[j+2]);
                                     Rj = sqrt(X[j]*X[j] + X[j+1]*X[j+1] + X[j+2]*X[j+2]);
-                                    printf("Rj= %f\n", Rj);
+                                    //printf("Rj= %f\n", Rj);
 //				    cout << "Rj= " << Rj << endl;
                                     if(Rj<eparam->col)
                                     {
@@ -289,12 +288,12 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
                         //res1 = -((pow(mass[0], -1.0)+pow(mass[teloi+1], -1.0))*X[i+komp])/(pow(Ri, 3));
                         res1 = 0.0;
 
-                        printf("res0= %e\nres1= %e\n", res0, res1);
+                        //printf("res0= %e\nres1= %e\n", res0, res1);
 
                         F[i+komp] = ka*ka*(res1 + res0);
 
                     }
-                printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+                //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
         }
 
 }
