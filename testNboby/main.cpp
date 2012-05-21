@@ -64,6 +64,9 @@ ever_params *eparam;
 int Sint(double X[], double V[]);
 int LFint(double X[], double V[]);
 
+#define CENTER CENTER_SUN
+#define SK SK_EKVATOR
+
 int main(int argc, char *argv[])
 {
     qInstallMsgHandler(customMessageHandler);
@@ -91,6 +94,10 @@ int main(int argc, char *argv[])
         double TS;
         double ra, de;
 
+        double *X, *V;
+        double *X0, *V0;
+        double TI, TF;
+
         //D = new double[Nj];
         //Y = new double[Nj];
         //VY = new double[Nj];
@@ -100,6 +107,8 @@ int main(int argc, char *argv[])
 
         eqFile eqRes;
         ocRec *eqRec;
+
+
 
 
         TS = 2444208.50;
@@ -149,7 +158,7 @@ int main(int argc, char *argv[])
 
         t0 = 2455201.0;
         t1 = t0+300;
-        dt = (t1-t0)/20.0;
+        dt = 20.0;
 
 
         qDebug() << QString("first epoch: %1\t%2\n").arg(t0, 10, 'f', 2).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3));
@@ -157,23 +166,24 @@ int main(int argc, char *argv[])
         qDebug() << QString("step: %1\t%2\n").arg(dt);
 
 
-        double *X, *V;
-        //double *X0, *V0;
 
-        int nb = 10;//iList->nstr;
-        int objNum = 5;
-        eparam->NV = (nb+objNum)*3;
-        N = eparam->NV;
+
+        int nb = eparam->NV;//iList->nstr;
+        int objNum = 0;
+        // = (nb+objNum)*3;
+        nofzbody = eparam->NV+objNum;
+        N = nofzbody*3;
+
         X = new double[N];
         V = new double[N];
-        //X0 = new double[N];
-        //V0 = new double[N];
+        X0 = new double[N];
+        V0 = new double[N];
         //r = new double[3];
         //nofzbody = 1;
 
-        double TI, TF;
 
-        nofzbody = nb+objNum;
+
+
 
         Everhardt *sun;
         sun = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
@@ -193,7 +203,7 @@ int main(int argc, char *argv[])
             qDebug() << QString("observ init error:%1").arg(oires);
             return 1;
         }
-        opos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, "084");
+        opos->set_obs_parpam(GEOCENTR_NUM, CENTER, SK, "084");
 
         IList *iList;
         OrbCat *iCat;
@@ -203,6 +213,7 @@ int main(int argc, char *argv[])
         QString file_ilist, file_icat, file_ires;
 
         double *r = new double[3];
+        double *v = new double[3];
 
         file_ilist = QString("./ini.lst");
         file_icat = QString("./ini.cat");
@@ -240,7 +251,7 @@ int main(int argc, char *argv[])
             rlRec = new RLRecord;
 
             Ri = sqrt(X[(nb+i)*3]*X[(nb+i)*3] + X[(nb+i)*3+1]*X[(nb+i)*3+1] + X[(nb+i)*3+2]*X[(nb+i)*3+2]);
-            resStm << QString("%1|%2|%3|%4|%5|%6|%7|2\n").arg(X[(nb+i)*3]).arg(X[(nb+i)*3+1]).arg(X[(nb+i)*3+2]).arg(Ri).arg(V[(nb+i)*3]).arg(V[(nb+i)*3+1]).arg(V[(nb+i)*3+2]);
+            resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|2\n").arg(t0, 12, 'f', 4).arg(X[(nb+i)*3]).arg(X[(nb+i)*3+1]).arg(X[(nb+i)*3+2]).arg(Ri).arg(V[(nb+i)*3]).arg(V[(nb+i)*3+1]).arg(V[(nb+i)*3+2]).arg(iCat->record->name);
             //RotX(r, -EKV);
             detRDnumGC(&rlRec->ra, &rlRec->dec, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
             qDebug() << QString("RA %1\tDEC %2\n").arg(rlRec->ra).arg(rlRec->dec);
@@ -276,13 +287,13 @@ int main(int argc, char *argv[])
 
         for(teloi=0, i=0; teloi<nb; teloi++, i+=3)
         {
-            nbody->detR(&X[i+0], &X[i+1], &X[i+2], t0, pla[teloi], 0, CENTER_BARY, SK_EKVATOR);
-            nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER_BARY, SK_EKVATOR);
+            nbody->detR(&X[i+0], &X[i+1], &X[i+2], t0, pla[teloi], 0, CENTER, SK);
+            nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER, SK);
 
 
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
                 Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(X[i]).arg(X[i+1]).arg(X[i+2]).arg(Ri).arg(V[i]).arg(V[i+1]).arg(V[i+2]);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
 
 
             qDebug() << QString("teloi: %1\tplaNum= %2\tmass= %3\n").arg(teloi).arg(pla[teloi]).arg(mass[teloi]);
@@ -322,13 +333,16 @@ int main(int argc, char *argv[])
         //resFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
         //resStm.setDevice(&resFile);
 
+        QFile dxFile("dxdy.txt");
+        dxFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+        QTextStream dxStm(&dxFile);
+
 
         for(ti=t0; ti<t1; ti+=dt)
         {
 
 
-            //nbody->detR(&X0[0], &X0[1], &X0[2], ti+dt, GEOCENTR_NUM, 0, CENTER_SUN, SK_EKVATOR);
-            //nbody->detR(&V0[0], &V0[1], &V0[2], ti+dt, GEOCENTR_NUM, 1, CENTER_SUN, SK_EKVATOR);
+
             qDebug() << QString("\njd: %1\ntime: %2\n").arg(ti, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(ti)), ":", 0, 3));
 
             TI = ti;
@@ -346,7 +360,22 @@ int main(int argc, char *argv[])
             {
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
                 Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(X[i]).arg(X[i+1]).arg(X[i+2]).arg(Ri).arg(V[i]).arg(V[i+1]).arg(V[i+2]);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
+
+                nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, GEOCENTR_NUM, 0, CENTER, SK);
+                nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, GEOCENTR_NUM, 1, CENTER, SK);
+
+                r[0] = X[i]-X0[i];
+                r[1] = X[i+1]-X0[i+1];
+                r[2] = X[i+2]-X0[i+2];
+
+                Ri = sqrt(r[i+0]*r[i+0] + r[i+1]*r[i+1] + r[i+2]*r[i+2]);
+
+                v[0] = V[i]-V0[i];
+                v[1] = V[i+1]-V0[i+1];
+                v[2] = V[i+2]-V0[i+2];
+
+                dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pla[teloi]);
             }
 
             k=0;
@@ -355,10 +384,13 @@ int main(int argc, char *argv[])
             {
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
                 Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|2\n").arg(X[i]).arg(X[i+1]).arg(X[i+2]).arg(Ri).arg(V[i]).arg(V[i+1]).arg(V[i+2]);
+                iCat->GetRec(teloi-nb);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|2\n").arg(TF).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(iCat->record->name);
                 qDebug() << QString("teloi: %1\tplaNum= %2\tmass= %3\n").arg(teloi).arg(pla[teloi]).arg(mass[teloi]);
                 qDebug() << QString("X: %1\t%2\t%3\t%4\n").arg(X[i+0]).arg(X[i+1]).arg(X[i+2]).arg(Ri);//, t0, pla[teloi], 0, CENTER_SUN, SK_ECLIPTIC);
                 qDebug() << QString("V: %1\t%2\t%3\t%4\n").arg(V[i+0]).arg(V[i+1]).arg(V[i+2]).arg(Vi);
+
+
 
                 r[0] = X[i];
                 r[1] = X[i+1];
@@ -417,6 +449,7 @@ int main(int argc, char *argv[])
         eqRes.saveAs("eq.txt");
 
 
+        dxFile.close();
 
         rList->saveAs("res.lst");
     qInstallMsgHandler(0);
