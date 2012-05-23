@@ -80,7 +80,7 @@ double a, CC, omega, Ltilde, A;
 double col, vout;
 
 
-
+QString jplFile;
 
 
 int main(int argc, char *argv[])
@@ -93,11 +93,13 @@ int main(int argc, char *argv[])
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog0 = new QDataStream(logFile);
 
+    jplFile = "./../../data/cats/binp1940_2020.405";
+
     nbody = new dele();
     //int iniHeadRes = nbody->init_header("./../../data/cats/header.405");
     //int iniHeadRes = nbody->init_header("./../../data/cats/header1980_2000.405");
     //int iniJplRes = nbody->init_jpl("./../../data/cats/ascp2000.405");
-    int iniJplRes = nbody->init("./../../data/cats/bin1940_2020.lin.405");
+    int iniJplRes = nbody->init(jplFile.toAscii().data());
     //int iniJplRes = nbody->init("./../../../data/cats/bin1940_2020.win.405");
 
     qDebug() << QString("iniJplRes: %1").arg(iniJplRes);
@@ -137,6 +139,7 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
     IList *iList;
     OrbCat *iCat;
     RList *rList;
+    RLRecord *rlRec;
     orbit *iOrb;
     int N;
     int nb;
@@ -158,7 +161,7 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
     iOrb = new orbit();
 
     observ *opos = new observ();
-    int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/bin1940_2020.lin.405");
+    int oires = opos->init("./../../data/cats/Obs.txt", jplFile.toAscii().data());
     //int oires = opos->init("./../../../data/cats/Obs.txt", "./../../../data/cats/bin1940_2020.win.405");
     //int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/header.405", "./../../data/cats/ascp2000.405");
     if(oires)
@@ -202,11 +205,16 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
         r[1] = X[i*3+1];
         r[2] = X[i*3+2];
 
+        rlRec = new RLRecord;
+
         resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(X[i*3]).arg(X[i*3+1]).arg(X[i*3+2]).arg(V[i*3]).arg(V[i*3+1]).arg(V[i*3+2]);
         //RotX(r, -EKV);
-        detRDnumGC(&rList->record->RA, &rList->record->DEC, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
-        qDebug() << QString("RA %1\tDEC %2\n").arg(rList->record->RA).arg(rList->record->DEC);
-        qDebug() << QString("%1: %2\t%3\t%4\n").arg(iList->record->name).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3)).arg(mas_to_hms(rad_to_mas(rList->record->RA), " ", 3)).arg(mas_to_damas(rad_to_mas(rList->record->DEC), " ", 3));
+        //detRDnumGC(&rList->record->RA, &rList->record->DEC, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+        detRDnumGC(&rlRec->ra, &rlRec->dec, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+        qDebug() << QString("RA %1\tDEC %2\n").arg(rlRec->ra).arg(rlRec->dec);
+        qDebug() << QString("%1: %2\t%3\t%4\n").arg(iList->record->name).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3)).arg(mas_to_hms(rad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(rad_to_mas(rlRec->dec), " ", 3));
+
+        rList->AddRec(rlRec);
 
         qDebug() << QString("%1: %2 \t %3 \t %4\n").arg(i).arg(X[i*3]).arg(X[i*3+1]).arg(X[i*3+2]);
         qDebug() << QString("  : %1 \t %2 \t %3\t %4\n").arg(V[i*3]).arg(V[i*3+1]).arg(V[i*3+2]).arg(sqrt(V[i*3]*V[i*3] + V[i*3+1]*V[i*3+1] + V[i*3+2]*V[i*3+2])*AUKM/86400.0);
@@ -293,6 +301,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
 
     qDebug() << "\never\n";
 
+    RLRecord *rlRec;
     iList = new IList();
     iList->init(file_ilist.toAscii().data());
     rList = new RList();
@@ -337,7 +346,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
             qDebug() << QString("%1 is absent\n").arg(i);
             continue;
         }
-
+        rlRec = new RLRecord;
         iOrb->get(iCat);
         //iOrb->detRecEkv(&x, &y, &z, iCat->record->eJD);
         iOrb->detRecEcl(&X[i*3], &X[i*3+1], &X[i*3+2], t0);
@@ -347,9 +356,13 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
         r[1] = X[i*3+1];
         r[2] = X[i*3+2];
         //RotX(r, -EKV);
-        detRDnumGC(&rList->record->RA, &rList->record->DEC, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
-        qDebug() << QString("RA %1\tDEC %2\n").arg(rList->record->RA).arg(rList->record->DEC);
-        qDebug() << QString("%1: %2\t%3\t%4\n").arg(iList->record->name).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3)).arg(mas_to_hms(rad_to_mas(rList->record->RA), " ", 3)).arg(mas_to_damas(rad_to_mas(rList->record->DEC), " ", 3));
+        detRDnumGC(&rlRec->ra, &rlRec->dec, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+        qDebug() << QString("RA %1\tDEC %2\n").arg(rlRec->ra).arg(rlRec->dec);
+        qDebug() << QString("%1: %2\t%3\t%4\n").arg(iList->record->name).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3)).arg(mas_to_hms(rad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(rad_to_mas(rlRec->dec), " ", 3));
+        qDebug() << QString("%1: %2 \t %3 \t %4\n").arg(i).arg(X[(nb+i)*3]).arg(X[(nb+i)*3+1]).arg(X[(nb+i)*3+2]);
+        qDebug() << QString("  : %1 \t %2 \t %3\t %4\n").arg(V[(nb+i)*3]).arg(V[(nb+i)*3+1]).arg(V[(nb+i)*3+2]).arg(sqrt(V[(nb+i)*3]*V[(nb+i)*3] + V[(nb+i)*3+1]*V[(nb+i)*3+1] + V[(nb+i)*3+2]*V[(nb+i)*3+2])*AUKM/86400.0);
+
+        rList->AddRec(rlRec);
 
         qDebug() << QString("%1: %2 \t %3 \t %4\n").arg(i).arg(X[i*3]).arg(X[i*3+1]).arg(X[i*3+2]);
         qDebug() << QString("  : %1 \t %2 \t %3\n").arg(V[i*3]).arg(V[i*3+1]).arg(V[i*3+2]);
@@ -373,6 +386,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
 
     for(i=0; i<nb;i++)
     {
+        rlRec = new RLRecord;
         iList->GetRec(i);
         if(iCat->GetRecName(iList->record->name)==-1)
         {
@@ -380,24 +394,25 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
             qDebug() << QString("%1 is absent\n").arg(i);
             continue;
         }
-        rList->record->set_name(iCat->record->name);
+        rlRec->name = iCat->record->name;
         x = X[i*3];
         y = X[i*3+1];
         z = X[i*3+2];
-        detRDnumGC(&rList->record->RA, &rList->record->DEC, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+        detRDnumGC(&rlRec->ra, &rlRec->dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
 
         Sdist = sqrt(x*x + y*y + z*z);
         Edist = sqrt((opos->ox - x)*(opos->ox - x) + (opos->oy - y)*(opos->oy - y) + (opos->oz - z)*(opos->oz - z));
 
-        rList->record->magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
+        rlRec->magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
 
-        rList->record->noftask = 0;
-        rList->record->exp = 1.0;
-        sprintf(rList->record->num, "%s", QString("%1").arg(iCat->record->number).toAscii().data());
-        rList->AddRec(rList->record);
-        qDebug() << QString("%1: %2\t%3\n").arg(rList->record->get_name()).arg(mas_to_hms(grad_to_mas(rList->record->RA), " ", 3)).arg(mas_to_damas(grad_to_mas(rList->record->DEC), " ", 3));
+        rlRec->taskName = "";
+        rlRec->exp = 1.0;
+        rlRec->num = iCat->record->number;
+        //sprintf(rlRec->num, "%s", QString("%1").arg(iCat->record->number).toAscii().data());
+        rList->AddRec(rlRec);
+        qDebug() << QString("%1: %2\t%3\n").arg(rlRec->name).arg(mas_to_hms(grad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(grad_to_mas(rlRec->dec), " ", 3));
     }
-    rList->Save();
+    rList->save();
 
     return 0;
 }

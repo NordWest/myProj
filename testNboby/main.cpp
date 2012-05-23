@@ -64,7 +64,7 @@ ever_params *eparam;
 int Sint(double X[], double V[]);
 int LFint(double X[], double V[]);
 
-#define CENTER CENTER_SUN
+#define CENTER CENTER_BARY
 #define SK SK_EKVATOR
 
 int main(int argc, char *argv[])
@@ -122,6 +122,8 @@ int main(int argc, char *argv[])
         qDebug() << QString("iniJplRes: %1\n").arg(iniJplRes);
         if(iniJplRes) return 1;
 
+        QString obsCode = "500";
+
         eparam = new ever_params;
 
         QSettings *esett = new QSettings("./paramsEv.ini", QSettings::IniFormat);
@@ -145,7 +147,7 @@ int main(int argc, char *argv[])
         double mass[11] = {1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0};
 
         int pla[11] = {
-                SUN_NUM, MERCURY_NUM, VENUS_NUM, GEOCENTR_NUM, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM, MOON_NUM
+                SUN_NUM, MERCURY_NUM, VENUS_NUM, EARTH, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM, MOON_NUM
         };
 
         QFile resFile("res.txt");
@@ -166,12 +168,13 @@ int main(int argc, char *argv[])
         qDebug() << QString("step: %1\t%2\n").arg(dt);
 
 
+        int nb, objNum;
 
-
-        int nb = eparam->NV;//iList->nstr;
-        int objNum = 0;
+        //nb = eparam->NV;//iList->nstr;
+        nb = eparam->NV;
+        objNum = 0;
         // = (nb+objNum)*3;
-        nofzbody = eparam->NV+objNum;
+        nofzbody = nb+objNum;
         N = nofzbody*3;
 
         X = new double[N];
@@ -203,7 +206,7 @@ int main(int argc, char *argv[])
             qDebug() << QString("observ init error:%1").arg(oires);
             return 1;
         }
-        opos->set_obs_parpam(GEOCENTR_NUM, CENTER, SK, "084");
+        opos->set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
         IList *iList;
         OrbCat *iCat;
@@ -229,9 +232,47 @@ int main(int argc, char *argv[])
         int icNum = iCat->nstr;
         iOrb = new orbit();
 
+        QFile dxFile("dxdy.txt");
+        dxFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+        QTextStream dxStm(&dxFile);
+
+        QFile deFile("de.txt");
+        deFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+        QTextStream deStm(&deFile);
 
 
         opos->det_observ(t0);
+
+
+
+
+        for(teloi=0, i=0; teloi<nb; teloi++, i+=3)
+        {
+            nbody->detR(&X[i+0], &X[i+1], &X[i+2], t0, pla[teloi], 0, CENTER, SK);
+            nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER, SK);
+
+
+        Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
+        Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
+        resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
+        deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
+
+
+    qDebug() << QString("teloi: %1\tplaNum= %2\tmass= %3\n").arg(teloi).arg(pla[teloi]).arg(mass[teloi]);
+    qDebug() << QString("X: %1\t%2\t%3\t%4\n").arg(X[i+0]).arg(X[i+1]).arg(X[i+2]).arg(sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]));//, t0, pla[teloi], 0, CENTER_SUN, SK_ECLIPTIC);
+    qDebug() << QString("V: %1\t%2\t%3\t%4\n").arg(V[i+0]).arg(V[i+1]).arg(V[i+2]).arg(sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0);
+
+    //dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pla[teloi]);
+
+    //nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER_SUN, SK_ECLIPTIC);
+/*
+    X[i+0] *= AUSM;
+    X[i+1] *= AUSM;
+    X[i+2] *= AUSM;
+    V[i+0] *= AUSM/86400.0;
+    V[i+1] *= AUSM/86400.0;
+    V[i+2] *= AUSM/86400.0;*/
+}
 
 
         k=0;
@@ -274,74 +315,17 @@ int main(int argc, char *argv[])
         }
 
 
-        //t0 = iCat->record->eJD;
+
+        /////////
 
 
 
 
 
-
-
-
-/////////
-
-        for(teloi=0, i=0; teloi<nb; teloi++, i+=3)
-        {
-            nbody->detR(&X[i+0], &X[i+1], &X[i+2], t0, pla[teloi], 0, CENTER, SK);
-            nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER, SK);
-
-
-                Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
-                Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
-
-
-            qDebug() << QString("teloi: %1\tplaNum= %2\tmass= %3\n").arg(teloi).arg(pla[teloi]).arg(mass[teloi]);
-            qDebug() << QString("X: %1\t%2\t%3\t%4\n").arg(X[i+0]).arg(X[i+1]).arg(X[i+2]).arg(sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]));//, t0, pla[teloi], 0, CENTER_SUN, SK_ECLIPTIC);
-            qDebug() << QString("V: %1\t%2\t%3\t%4\n").arg(V[i+0]).arg(V[i+1]).arg(V[i+2]).arg(sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0);
-            //nbody->detR(&V[i+0], &V[i+1], &V[i+2], t0, pla[teloi], 1, CENTER_SUN, SK_ECLIPTIC);
-/*
-            X[i+0] *= AUSM;
-            X[i+1] *= AUSM;
-            X[i+2] *= AUSM;
-            V[i+0] *= AUSM/86400.0;
-            V[i+1] *= AUSM/86400.0;
-            V[i+2] *= AUSM/86400.0;*/
-        }
-
-   /*     nbody->detR(&X0[0], &X0[1], &X0[2], t0, SUN_NUM, 0, CENTER_SUN, SK_EKVATOR);
-        nbody->detR(&V0[0], &V0[1], &V0[2], t0, SUN_NUM, 1, CENTER_SUN, SK_EKVATOR);
-        X[0] = X0[0];
-        X[1] = X0[1];
-        X[2] = X0[2];
-        V[0] = V0[0];
-        V[1] = V0[1];
-        V[2] = V0[2];*/
-/*
-        t1 = (t1-t0)*86400.0;
-        t0 = 0.0;
-        dt *= 86400.0;
-
-
-*/
-
-
-        //t1 = t0+300;
-        //dt = (t1-t0)/10.0;
-
-
-        //resFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-        //resStm.setDevice(&resFile);
-
-        QFile dxFile("dxdy.txt");
-        dxFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-        QTextStream dxStm(&dxFile);
 
 
         for(ti=t0; ti<t1; ti+=dt)
         {
-
-
 
             qDebug() << QString("\njd: %1\ntime: %2\n").arg(ti, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(ti)), ":", 0, 3));
 
@@ -356,26 +340,30 @@ int main(int argc, char *argv[])
 
             //for(teloi=0, i=0; teloi<nb; teloi++, i+=3) resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(X[i]/AUSM).arg(X[i+1]/AUSM).arg(X[i+2]/AUSM).arg(V[i]/AUSM*86400.0).arg(V[i+1]/AUSM*86400.0).arg(V[i+2]/AUSM*86400.0);
 
-            for(teloi=0, i=0; teloi<=nb; teloi++, i+=3)
+            for(teloi=0, i=0; teloi<nb; teloi++, i+=3)
             {
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
                 Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pla[teloi]);
 
-                nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, GEOCENTR_NUM, 0, CENTER, SK);
-                nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, GEOCENTR_NUM, 1, CENTER, SK);
+                nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, pla[teloi], 0, CENTER, SK);
+                nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, pla[teloi], 1, CENTER, SK);
 
                 r[0] = X[i]-X0[i];
                 r[1] = X[i+1]-X0[i+1];
                 r[2] = X[i+2]-X0[i+2];
 
-                Ri = sqrt(r[i+0]*r[i+0] + r[i+1]*r[i+1] + r[i+2]*r[i+2]);
+                Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
 
                 v[0] = V[i]-V0[i];
                 v[1] = V[i+1]-V0[i+1];
                 v[2] = V[i+2]-V0[i+2];
 
-                dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pla[teloi]);
+                dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pla[teloi]);
+
+                Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
+
+                deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pla[teloi]);
             }
 
             k=0;
@@ -385,7 +373,7 @@ int main(int argc, char *argv[])
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
                 Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
                 iCat->GetRec(teloi-nb);
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|2\n").arg(TF).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(iCat->record->name);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|2\n").arg(TF, 12, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(iCat->record->name);
                 qDebug() << QString("teloi: %1\tplaNum= %2\tmass= %3\n").arg(teloi).arg(pla[teloi]).arg(mass[teloi]);
                 qDebug() << QString("X: %1\t%2\t%3\t%4\n").arg(X[i+0]).arg(X[i+1]).arg(X[i+2]).arg(Ri);//, t0, pla[teloi], 0, CENTER_SUN, SK_ECLIPTIC);
                 qDebug() << QString("V: %1\t%2\t%3\t%4\n").arg(V[i+0]).arg(V[i+1]).arg(V[i+2]).arg(Vi);
@@ -440,7 +428,7 @@ int main(int argc, char *argv[])
         for(i=0; i<eqRes.ocList.size();i++)
         {
             iCat->GetRecName(eqRes.ocList.at(i)->name.simplified().toAscii().data());
-            eqRes.ocList.at(i)->rec2MPC(&tStr, "084", QString("%1").arg(iCat->record->number, 5, 10, QLatin1Char( '0' )));
+            eqRes.ocList.at(i)->rec2MPC(&tStr, obsCode, QString("%1").arg(iCat->record->number, 5, 10, QLatin1Char( '0' )));
             mpcStm << tStr << "\n";
         }
 
@@ -450,6 +438,7 @@ int main(int argc, char *argv[])
 
 
         dxFile.close();
+        deFile.close();
 
         rList->saveAs("res.lst");
     qInstallMsgHandler(0);

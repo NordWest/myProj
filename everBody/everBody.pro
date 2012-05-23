@@ -25,7 +25,7 @@ SOURCES += main.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscat.cpp \
     ../libs/sscatFB.cpp \
-    ../libs/astro.cpp \
+#    ../libs/astro.cpp \
     ../libs/rada.cpp \
     ../libs/force_ev.cpp
 HEADERS += \
@@ -51,3 +51,6 @@ HEADERS += \
     ../libs/ephem_types.h
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win/libmb.a
+
+unix:LIBS+=./../libs/unix/libastro.a
+win32:LIBS+=./../libs/win/libastro.a
