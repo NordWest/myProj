@@ -269,6 +269,8 @@ libs/rec.cpp -text
 libs/rec.h -text
 libs/redStat.cpp -text
 libs/redStat.h -text
+libs/ringpix.cpp -text
+libs/ringpix.h -text
 libs/sPorabola.cpp -text
 libs/sPorabola.h -text
 libs/skyarea.cpp -text
