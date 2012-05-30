@@ -15,6 +15,7 @@
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/mb.h"
+#include "./../libs/ringpix.h"
 
 #define PI 3.141592653589
 
@@ -57,7 +58,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
-int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMaxm, int csys = 0);
+int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int rtype = 0, int csys = 0);
 
 int main(int argc, char *argv[])
 {
@@ -81,6 +82,7 @@ int main(int argc, char *argv[])
     deMin = sett->value("general/deMin", -90).toDouble();        //
     deMax = sett->value("general/deMax", 90).toDouble();        //
     int pointNum = sett->value("general/pointNum", 0).toInt();
+    int rtype = sett->value("general/rtype", 0).toInt();
 
     double *Eps = new double[3];
     Eps[0] = sett->value("rotation/ex", 0).toDouble();
@@ -96,24 +98,7 @@ int main(int argc, char *argv[])
     QList <double*> objList;
     QList <double*> objListRot;
     double *obj, *objR;
-    double *A = new double[3*pointNum];
-    double *r = new double[pointNum];
-    double *W = new double[pointNum];
-    double *Z = new double[3];
 
-    double Dx[3][3];
-    int exclind[pointNum];
-    double uwe;
-    int rn;
-
-    Z[0] = Z[1] = Z[2] = 0.0;
-
-    double *Ad = new double[2*pointNum];
-    double *rd = new double[pointNum];
-    double *Wd = new double[pointNum];
-    double *Zd = new double[2];
-
-    Zd[0] = Zd[1] = 0.0;
 /*
     double *Ac = new double[3*pointNum];
     double *rc = new double[pointNum];
@@ -227,10 +212,29 @@ do//for(i=0; i<pointNum; i++)
     }while(i<pointNum);*/
 
 //////////////////////////////////////////////////////////////////
-    randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+    randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), rtype, csys);
 
     double orT0, orT1;
 
+    double *A = new double[3*pointNum*2];
+    double *r = new double[pointNum*2];
+    double *W = new double[pointNum*2];
+    double *Z = new double[3];
+
+    double Dx[3][3];
+    int exclind[pointNum];
+    double uwe;
+    int rn;
+
+    Z[0] = Z[1] = Z[2] = 0.0;
+/*
+    double *Ad = new double[2*pointNum];
+    double *rd = new double[pointNum];
+    double *Wd = new double[pointNum];
+    double *Zd = new double[2];
+
+    Zd[0] = Zd[1] = 0.0;
+*/
     for(i=0; i<pointNum; i++)
     {
 
@@ -245,18 +249,19 @@ do//for(i=0; i<pointNum; i++)
         A[i*3+1] = (sin(dec[i])*sin(ra[i]));
         A[i*3+2] = -cos(dec[i]);
 
-        Ad[i*3] = -sin(ra[i]);
-        Ad[i*3+1] =     cos(ra[i]);
+        A[pointNum+i*3] = -sin(ra[i]);
+        A[pointNum+i*3+1] = cos(ra[i]);
+        A[pointNum+i*3+2] = 0;
     //         Ad[i*3+2] = 0.0;
     /*         Ac[i*3] = A[i*3] + Ad[i*2];
         Ac[i*3+1] = A[i*3+1] + Ad[i*2+1];
         Ac[i*3+2] = A[i*3+2];
     */
         W[i] = 1.0;
-        Wd[i] = 1.0;
+        W[pointNum+i] = 1.0;
     //          Wc[i] = 1.0;
 
-/////////////   distersion  ////////////////
+/////////////   dispersion  ////////////////
         do
         {
     //           srand(time(NULL));
@@ -273,13 +278,14 @@ do//for(i=0; i<pointNum; i++)
 
     //            z1 = z0 = 0;
 
-        orT1 = dec[i]+Ad[i*3]*Eps[0]+Ad[i*3+1]*Eps[1] + disp*z1;
-        rd[i] = orT1 - dec[i];
-        r[i] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
-        orT0 = r[i]/cos(dec[i]) + ra[i];
+        //orT1 = dec[i]+Ad[i*3]*Eps[0]+Ad[i*3+1]*Eps[1] + disp*z1;
+        //rd[i] = orT1 - dec[i];
+        r[i] = (A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0)*cos(dec[i]);
+        r[pointNum+i] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+        //orT0 = r[i]/cos(dec[i]) + ra[i];
 
-        objR[0] = rad2mas(orT0);
-        objR[1] = rad2mas(orT1);
+        objR[0] = rad2mas(r[i]);
+        objR[1] = rad2mas(r[pointNum+i]);
     //        objR[0] = obj[0]+A[i]*Eps[0]+A[i+1]*Eps[1]+A[i+2]*Eps[2];
     //       objR[0] = obj[0]+rad_to_mas(-sin(mas_to_rad(obj[1]))*cos(mas_to_rad(obj[0]))*mas_to_rad(Eps[0]) - sin(mas_to_rad(obj[1]))*sin(mas_to_rad(obj[0]))*mas_to_rad(Eps[1]) + cos(mas_to_rad(obj[1]))*mas_to_rad(Eps[2]))/cos(mas_to_rad(obj[1]));
     //        r[i] = objR[0] - obj[0];
@@ -292,14 +298,14 @@ do//for(i=0; i<pointNum; i++)
 
 ////////////////////////////////////////////////////////////////////
 
+    slsm(3, pointNum*2, Z, A, r, W);
 
-
-    slsm(3, pointNum, Z, A, r, W);
+//    slsm(3, pointNum, Z, A, r, W);
 //    iLSM(3, pointNum, 0.6, &exclind[0], Z, A, r, uwe, &Dx[0][0], -1, rn, W);
     qDebug() << QString("Z: %1\t%2\t%3\n").arg(Z[0],12, 'f', 8).arg(Z[1],12, 'f', 8).arg(Z[2],12, 'f', 8);
-    slsm(2, pointNum, Zd, Ad, rd, Wd);
+//    slsm(2, pointNum, Zd, Ad, rd, Wd);
   //  qDebug() << "Zd: " << Zd[0] << "\t" << Zd[1] << "\n";
-    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
+//    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
 
 
 //    slsm(3, pointNum, Zc, Ac, rc, Wc);
@@ -318,7 +324,7 @@ do//for(i=0; i<pointNum; i++)
     QBrush pointBrush(Qt::darkGreen, Qt::SolidPattern);
 
    pointPen.setColor(Qt::darkGreen);
-   pointPen.setWidth(1);
+   pointPen.setWidth(2);
    pointRotPen.setColor(Qt::darkBlue);
    pointRotPen.setWidth(1);
    linePen.setColor(Qt::red);
@@ -380,23 +386,44 @@ do//for(i=0; i<pointNum; i++)
  //   return a.exec();
 }
 
-int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int csys) //[rad]
+int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int rtype, int csys) //[rad]
 {
     int k = 0;
     double h, phi, x, y, z, rat, dect, lam, beta;
+    long ipix, nsMax, ipixMax;
+
+    nsMax = 8192;
+    ipixMax = nsMax*nsMax*12;
+
 
     srand(time(NULL));
 
     do
     {
+        switch(rtype)
+        {
 
-        h = 2.0*(rand())/(1.0*RAND_MAX)-1.0;
-        phi = 2.0*PI*(rand()/(1.0*RAND_MAX));
-        x= cos(phi) * sqrt(1-h*h); //вращаем вокруг по оси z на угол phi
-        y= -sin(phi) * sqrt(1-h*h); //вращаем вокруг по оси z на угол phi
-        z= h;
-        rat = phi;//atan2(y, x);
-        dect = atan2(z, sqrt(y*y+x*x));
+        case 0:
+
+            h = 2.0*(rand())/(1.0*RAND_MAX)-1.0;
+            phi = 2.0*PI*(rand()/(1.0*RAND_MAX));
+            x= cos(phi) * sqrt(1-h*h); //вращаем вокруг по оси z на угол phi
+            y= -sin(phi) * sqrt(1-h*h); //вращаем вокруг по оси z на угол phi
+            z= h;
+            rat = phi;//atan2(y, x);
+            dect = atan2(z, sqrt(y*y+x*x));
+
+        break;
+        case 1:
+            ipix = ipixMax*(rand()/(1.0*RAND_MAX));
+            pix2ang_ring( nsMax, ipix, &dect, &rat);
+            dect = PI/2.0 - dect;
+            //qDebug() << QString("ipix: %1\tra: %2\tde: %3\n").arg(ipix).arg(rat).arg(dect);
+            //qDebug() << QString("raMin: %1\traMax: %2\tdeMin: %3\tdeMax: %4\n").arg(raMin).arg(raMax).arg(deMin).arg(deMax);
+
+            break;
+
+        }
 
 
         if((rat<=raMax)&&(rat>=raMin)&&(dect>=deMin)&&(dect<=deMax))

@@ -1,7 +1,7 @@
 # -------------------------------------------------
 # Project created by QtCreator 2009-08-07T16:44:51
 # -------------------------------------------------
-TARGET = sphereMod
+TARGET = ./../../lab/sphereMod/sphereMod
 CONFIG += console \
     warn_off \
     qt
