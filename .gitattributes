@@ -766,6 +766,10 @@ ucac3find/main.cpp -text
 ucac3find/ucac3find.pro -text
 utCorrTest/main.cpp -text
 utCorrTest/utCorrTest.pro -text
+vsf/ang2pix_ring.c -text
+vsf/main.cpp -text
+vsf/pix2ang_ring.c -text
+vsf/vsf.pro -text
 wcs2mks/main.cpp -text
 wcs2mks/wcs2mks.pro -text
 wcsFinder/main.cpp -text
