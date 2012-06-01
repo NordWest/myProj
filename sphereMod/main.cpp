@@ -85,9 +85,9 @@ int main(int argc, char *argv[])
     int rtype = sett->value("general/rtype", 0).toInt();
 
     double *Eps = new double[3];
-    Eps[0] = sett->value("rotation/ex", 0).toDouble();
-    Eps[1] = sett->value("rotation/ey", 0).toDouble();
-    Eps[2] = sett->value("rotation/ez", 0).toDouble();
+    Eps[0] = mas_to_rad(sett->value("rotation/ex", 0).toDouble());
+    Eps[1] = mas_to_rad(sett->value("rotation/ey", 0).toDouble());
+    Eps[2] = mas_to_rad(sett->value("rotation/ez", 0).toDouble());
 
 //    double epsi = grad2rad(sett->value("general/eps").toDouble());
     int csys = sett->value("general/coord_sys", 0).toInt();
@@ -239,12 +239,13 @@ do//for(i=0; i<pointNum; i++)
     {
 
         obj = new double[2];
+        objR = new double[2];
+
         obj[0] = rad_to_mas(ra[i]);
         obj[1] = rad_to_mas(dec[i]);
 
         objList << obj;
 
-        objR = new double[2];
         A[i*3] = (sin(dec[i])*cos(ra[i]));
         A[i*3+1] = (sin(dec[i])*sin(ra[i]));
         A[i*3+2] = -cos(dec[i]);
@@ -280,17 +281,19 @@ do//for(i=0; i<pointNum; i++)
 
         //orT1 = dec[i]+Ad[i*3]*Eps[0]+Ad[i*3+1]*Eps[1] + disp*z1;
         //rd[i] = orT1 - dec[i];
-        r[i] = (A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0)*cos(dec[i]);
-        r[pointNum+i] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+        r[i] = ra[i] - (A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0)/cos(dec[i]);
+        r[pointNum+i] = dec[i] -A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
         //orT0 = r[i]/cos(dec[i]) + ra[i];
 
         objR[0] = rad2mas(r[i]);
         objR[1] = rad2mas(r[pointNum+i]);
+
     //        objR[0] = obj[0]+A[i]*Eps[0]+A[i+1]*Eps[1]+A[i+2]*Eps[2];
     //       objR[0] = obj[0]+rad_to_mas(-sin(mas_to_rad(obj[1]))*cos(mas_to_rad(obj[0]))*mas_to_rad(Eps[0]) - sin(mas_to_rad(obj[1]))*sin(mas_to_rad(obj[0]))*mas_to_rad(Eps[1]) + cos(mas_to_rad(obj[1]))*mas_to_rad(Eps[2]))/cos(mas_to_rad(obj[1]));
     //        r[i] = objR[0] - obj[0];
     //        rc[i] = r[i] + rd[i];
     //        qDebug() << "r[i]= " << r[i] << "\n";
+
         objListRot << objR;
         oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'f', 9).arg(obj[1], 12, 'f', 9).arg(objR[0], 12, 'f', 9).arg(objR[1], 12, 'f', 9).arg(obj[0]-objR[0], 12, 'f', 9).arg(obj[1]-objR[1], 12, 'f', 9);
     }
@@ -302,7 +305,7 @@ do//for(i=0; i<pointNum; i++)
 
 //    slsm(3, pointNum, Z, A, r, W);
 //    iLSM(3, pointNum, 0.6, &exclind[0], Z, A, r, uwe, &Dx[0][0], -1, rn, W);
-    qDebug() << QString("Z: %1\t%2\t%3\n").arg(Z[0],12, 'f', 8).arg(Z[1],12, 'f', 8).arg(Z[2],12, 'f', 8);
+    qDebug() << QString("Z: %1\t%2\t%3\n").arg(rad_to_mas(Z[0]),12, 'f', 8).arg(rad_to_mas(Z[1]),12, 'f', 8).arg(rad_to_mas(Z[2]),12, 'f', 8);
 //    slsm(2, pointNum, Zd, Ad, rd, Wd);
   //  qDebug() << "Zd: " << Zd[0] << "\t" << Zd[1] << "\n";
 //    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
