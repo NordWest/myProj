@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 //    double epsi = grad2rad(sett->value("general/eps").toDouble());
     int csys = sett->value("general/coord_sys", 0).toInt();
 
-    double disp = sett->value("noice/disp", 0).toDouble();
+    double disp = mas_to_rad(sett->value("noice/disp", 0).toDouble());
 
 
     QList <double*> objList;
@@ -246,12 +246,12 @@ do//for(i=0; i<pointNum; i++)
 
         objList << obj;
 
-        A[i*3] = (sin(dec[i])*cos(ra[i]));
-        A[i*3+1] = (sin(dec[i])*sin(ra[i]));
-        A[i*3+2] = -cos(dec[i]);
+        A[i*3] = -(sin(dec[i])*cos(ra[i]));
+        A[i*3+1] = -(sin(dec[i])*sin(ra[i]));
+        A[i*3+2] = cos(dec[i]);
 
-        A[pointNum+i*3] = -sin(ra[i]);
-        A[pointNum+i*3+1] = cos(ra[i]);
+        A[pointNum+i*3] = sin(ra[i]);
+        A[pointNum+i*3+1] = -cos(ra[i]);
         A[pointNum+i*3+2] = 0;
     //         Ad[i*3+2] = 0.0;
     /*         Ac[i*3] = A[i*3] + Ad[i*2];
@@ -281,12 +281,15 @@ do//for(i=0; i<pointNum; i++)
 
         //orT1 = dec[i]+Ad[i*3]*Eps[0]+Ad[i*3+1]*Eps[1] + disp*z1;
         //rd[i] = orT1 - dec[i];
-        r[i] = ra[i] - (A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0)/cos(dec[i]);
-        r[pointNum+i] = dec[i] -A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+        objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
+        objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
         //orT0 = r[i]/cos(dec[i]) + ra[i];
 
-        objR[0] = rad2mas(r[i]);
-        objR[1] = rad2mas(r[pointNum+i]);
+        r[i] = objR[0];
+        r[pointNum+i] = objR[1];
+
+        objR[0] = rad2mas(r[i]/cos(dec[i])+ra[i]);
+        objR[1] = rad2mas(r[pointNum+i]+dec[i]);
 
     //        objR[0] = obj[0]+A[i]*Eps[0]+A[i+1]*Eps[1]+A[i+2]*Eps[2];
     //       objR[0] = obj[0]+rad_to_mas(-sin(mas_to_rad(obj[1]))*cos(mas_to_rad(obj[0]))*mas_to_rad(Eps[0]) - sin(mas_to_rad(obj[1]))*sin(mas_to_rad(obj[0]))*mas_to_rad(Eps[1]) + cos(mas_to_rad(obj[1]))*mas_to_rad(Eps[2]))/cos(mas_to_rad(obj[1]));
@@ -305,7 +308,7 @@ do//for(i=0; i<pointNum; i++)
 
 //    slsm(3, pointNum, Z, A, r, W);
 //    iLSM(3, pointNum, 0.6, &exclind[0], Z, A, r, uwe, &Dx[0][0], -1, rn, W);
-    qDebug() << QString("Z: %1\t%2\t%3\n").arg(rad_to_mas(Z[0]),12, 'f', 8).arg(rad_to_mas(Z[1]),12, 'f', 8).arg(rad_to_mas(Z[2]),12, 'f', 8);
+    qDebug() << QString("Z: %1\t%2\t%3\n").arg(rad2mas(Z[0]),12, 'f', 8).arg(rad2mas(Z[1]),12, 'f', 8).arg(rad2mas(Z[2]),12, 'f', 8);
 //    slsm(2, pointNum, Zd, Ad, rd, Wd);
   //  qDebug() << "Zd: " << Zd[0] << "\t" << Zd[1] << "\n";
 //    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
