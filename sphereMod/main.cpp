@@ -154,6 +154,10 @@ int main(int argc, char *argv[])
 
     Zd[0] = Zd[1] = 0.0;
 */
+    QFile zFile("z.dat");
+    zFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QTextStream zStm(&zFile);
+
     for(i=0; i<pointNum; i++)
     {
 
@@ -193,6 +197,8 @@ int main(int argc, char *argv[])
         z0 = x*lns;
         z1 = y*lns;
 
+        zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
+
 ////////////////////////////////////////////
     //            qDebug() << QString("z0= %1\tz1= %2\n").arg(z0).arg(z1);
 
@@ -217,7 +223,7 @@ int main(int argc, char *argv[])
     //        qDebug() << "r[i]= " << r[i] << "\n";
 
         objListRot << objR;
-        oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg(objR[0]-obj[0], 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9);
+        oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9);
     }
 
 
@@ -248,7 +254,7 @@ int main(int argc, char *argv[])
 //    qDebug() << "Zc: " << Zc[0] << "\t" << Zc[1] << "\t" << Zc[2] << "\n";
 //    qDebug() << QString("Zc: %1\t%2\t%3\n").arg(Zc[0],12, 'f', 8).arg(Zc[1],12, 'f', 8).arg(Zc[2],12, 'f', 8);
 
-//Plot
+/*Plot
     QImage *baseImg;
     QVector<QRgb> colormap;
     QPen pointPen;
@@ -289,7 +295,7 @@ int main(int argc, char *argv[])
         pPos.setY(((objList[i][1]-deMin)/fabs(deMax-deMin))*maxIH);
         pPosRot.setX(((objListRot[i][0]-raMin)/fabs(raMax-raMin))*maxIW);
         pPosRot.setY(((objListRot[i][1]-deMin)/fabs(deMax-deMin))*maxIH);
-        */
+        /
         pPos.setX(((objList[i][0])/fabs(rad_to_mas(2.0*PI)))*maxIW);
         pPos.setY(((objList[i][1]-rad_to_mas(-PI/2.0))/fabs(rad_to_mas(PI)))*maxIH);
         pPosRot.setX(((objListRot[i][0])/fabs(rad_to_mas(2.0*PI)))*maxIW);
@@ -306,7 +312,8 @@ int main(int argc, char *argv[])
 
     painter.end();
     baseImg->save(resFileName, "BMP");
-//
+
+*/
 
     qDebug() << "\nend\n";
     delete clog;
@@ -314,6 +321,7 @@ int main(int argc, char *argv[])
     delete logFile;
     logFile = 0;
     oFile.close();
+    zFile.close();
 
     qInstallMsgHandler(0);
     return 0;
