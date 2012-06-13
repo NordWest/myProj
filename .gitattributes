@@ -627,6 +627,8 @@ skybotclient/skybotclient.cpp -text
 skybotclient/skybotclient.h -text
 skybotclient/skybotclient.ini -text
 skybotclient/skybotclient.pro -text
+sphereCounter/main.cpp -text
+sphereCounter/sphereCounter.pro -text
 sphereMod/main.cpp -text
 sphereMod/sphereMod.pro -text
 srPack/main.cpp -text
