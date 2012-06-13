@@ -97,17 +97,14 @@ int main(int argc, char *argv[])
         double *X, *V;
         double *X0, *V0;
         double TI, TF;
-
-        //D = new double[Nj];
-        //Y = new double[Nj];
-        //VY = new double[Nj];
-        //QSettings sett("testNb.ini", QSettings::IniFormat);
-        QString jplFile = "./../../data/cats/binp1940_2020.405";
-
-
         eqFile eqRes;
         ocRec *eqRec;
 
+        QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
+
+        QString jplFile = sett->value("%general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+        QString obsFile = sett->value("%general/obsFile", "./../../data/cats/Obs.txt").toString();
+        QString obsCode = sett->value("%general/obsCode", "500").toString();
 
 
 
@@ -122,7 +119,7 @@ int main(int argc, char *argv[])
         qDebug() << QString("iniJplRes: %1\n").arg(iniJplRes);
         if(iniJplRes) return 1;
 
-        QString obsCode = "500";
+
 
         eparam = new ever_params;
 
@@ -185,9 +182,7 @@ int main(int argc, char *argv[])
         //nofzbody = 1;
 
 
-
-
-
+/////////////////////////////////////////////////
         Everhardt *sun;
         sun = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 /*
@@ -199,7 +194,7 @@ int main(int argc, char *argv[])
 /////////
 
         observ *opos = new observ();
-        int oires = opos->init("./../../data/cats/Obs.txt", jplFile.toAscii().data());
+        int oires = opos->init(obsFile.toAscii().data(), jplFile.toAscii().data());
 
         if(oires)
         {
