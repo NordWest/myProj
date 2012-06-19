@@ -11,6 +11,8 @@
 #include "./../libs/mb.h"
 #include "./../libs/ringpix.h"
 
+#include "./vsfFunc.h"
+
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
 {
@@ -51,6 +53,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps);
+int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps, int epsNum);
 
 
 int main(int argc, char *argv[])
@@ -118,9 +121,11 @@ int main(int argc, char *argv[])
         res = lsmCount(ra, de, dRa, dDe, dSize, &Eps[0]);
         break;
     case 1:
+        res = vsfCount(ra, de, dRa, dDe, dSize, &Eps[0], 3);
         break;
     }
 
+    qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0])).arg(rad2mas(Eps[1])).arg(rad2mas(Eps[2]));
 
     
     return 0;//a.exec();
@@ -198,4 +203,24 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     Eps[2] = Zra[2];
 
     return 0;
+}
+
+int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, int epsNum)
+{
+    int i;
+
+    Eps[0] = 0;
+    Eps[1] = 0;
+    Eps[2] = 0;
+
+    for(i=0; i<pointNum; i++)
+    {
+        Eps[0] += (dRa[i]*TL(1, 1, 1, ra[i], dec[i])+TB(1, 1, 1,ra[i], dec[i]))*cos(dec[i]);
+        Eps[1] += (dRa[i]*TL(1, 1, 0, ra[i], dec[i])+TB(1, 1, 0,ra[i], dec[i]))*cos(dec[i]);
+        Eps[2] += (dRa[i]*TL(1, 0, 1, ra[i], dec[i])+TB(1, 0, 1,ra[i], dec[i]))*cos(dec[i]);
+    }
+    Eps[0] *= 4*PI/pointNum;
+    Eps[1] *= 4*PI/pointNum;
+    Eps[2] *= 4*PI/pointNum;
+
 }
