@@ -53,7 +53,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps);
-int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps, int epsNum);
+int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum);
 
 
 int main(int argc, char *argv[])
@@ -104,6 +104,10 @@ int main(int argc, char *argv[])
     de = new double[dSize];
     dRa = new double[dSize];
     dDe = new double[dSize];
+    int coefNum = 9;
+    int N, K, P;
+    double *sCoef = new double[coefNum];
+    double *tCoef = new double[coefNum];
 
     qDebug() << QString("point num: %1\n").arg(dSize);
 
@@ -121,7 +125,18 @@ int main(int argc, char *argv[])
         res = lsmCount(ra, de, dRa, dDe, dSize, &Eps[0]);
         break;
     case 1:
-        res = vsfCount(ra, de, dRa, dDe, dSize, &Eps[0], 3);
+        res = vsfCount(ra, de, dRa, dDe, dSize, &sCoef[0], &tCoef[0], coefNum);
+
+        for(i=0; i<coefNum; i++)
+        {
+            indexes(i, N, K, P);
+            qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
+        }
+
+        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/2.89;
+        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/2.89;
+        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/2.89;
+
         break;
     }
 
@@ -205,22 +220,72 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     return 0;
 }
 
-int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, int epsNum)
+int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum)
 {
-    int i;
+    int i, j;
 
-    Eps[0] = 0;
-    Eps[1] = 0;
-    Eps[2] = 0;
+    for(j=0; j<coefNum; j++)
+    {
+    tCoef[j] = 0;
+    sCoef[j] = 0;
+    }
 
     for(i=0; i<pointNum; i++)
     {
-        Eps[0] += (dRa[i]*TL(1, 1, 1, ra[i], dec[i])+TB(1, 1, 1,ra[i], dec[i]))*cos(dec[i]);
-        Eps[1] += (dRa[i]*TL(1, 1, 0, ra[i], dec[i])+TB(1, 1, 0,ra[i], dec[i]))*cos(dec[i]);
-        Eps[2] += (dRa[i]*TL(1, 0, 1, ra[i], dec[i])+TB(1, 0, 1,ra[i], dec[i]))*cos(dec[i]);
+        for(j=0; j<coefNum; j++)
+        {
+            //indexes(j, n, k, p);
+            /*
+            Eps[0] += (dRa[i]*TL(1, 1, 1, ra[i], dec[i])+dDe[i]*TB(1, 1, 1,ra[i], dec[i]));//*cos(dec[i]);
+            Eps[1] += (dRa[i]*TL(1, 1, 0, ra[i], dec[i])+dDe[i]*TB(1, 1, 0,ra[i], dec[i]));//*cos(dec[i]);
+            Eps[2] += (dRa[i]*TL(1, 0, 1, ra[i], dec[i])+dDe[i]*TB(1, 0, 1,ra[i], dec[i]));//*cos(dec[i]);*/
+            tCoef[j] += (dRa[i]*TLJ(j+1, ra[i], dec[i])+dDe[i]*TBJ(j+1,ra[i], dec[i]))*4*PI/pointNum;
+            sCoef[j] += (dRa[i]*SLJ(j+1, ra[i], dec[i])+dDe[i]*SBJ(j+1,ra[i], dec[i]))*4*PI/pointNum;
+        }
     }
-    Eps[0] *= 4*PI/pointNum;
-    Eps[1] *= 4*PI/pointNum;
-    Eps[2] *= 4*PI/pointNum;
 
+    double *vsfRA, *vsfDE;
+    vsfRA = new double[pointNum];
+    vsfDE = new double[pointNum];
+    double dra1, dde1;
+
+    for(i=0; i<pointNum; i++)
+    {
+        dra1 = 0;
+        dde1 = 0;
+        for(j=0; j<coefNum; j++)
+        {
+            dra1 += sCoef[j]*SLJ(j+1, ra[i], dec[i]) + tCoef[j]*TLJ(j+1, ra[i], dec[i]);
+            dde1 += sCoef[j]*SBJ(j+1, ra[i], dec[i]) + tCoef[j]*TBJ(j+1, ra[i], dec[i]);
+        }
+        vsfRA[i] = dRa[i] - dra1;
+        vsfDE[i] = dDe[i] - dde1;
+    }
+
+    double meanRa, meanDe, rmsOneRa, rmsOneDe, rmsMeanRa, rmsMeanDe;
+
+    meanRa = meanDe = rmsOneRa = rmsOneDe = rmsMeanRa = rmsMeanDe = 0.0;
+
+    for(i=0; i<pointNum; i++)
+    {
+        meanRa += vsfRA[i];
+        meanDe += vsfDE[i];
+    }
+
+    meanRa /= pointNum;
+    meanDe /= pointNum;
+
+    for(i=0; i<pointNum; i++)
+    {
+        rmsOneRa += pow(vsfRA[i]-meanRa, 2.0);
+        rmsOneDe += pow(vsfDE[i]-meanDe, 2.0);
+    }
+    rmsOneRa = sqrt(rmsOneRa/(pointNum-1));
+    rmsOneDe = sqrt(rmsOneDe/(pointNum-1));
+
+    rmsMeanRa = rmsOneRa/sqrt(pointNum);
+    rmsMeanDe = rmsOneDe/sqrt(pointNum);
+
+    qDebug() << QString("ra: %1\t%2\t%3\n").arg(rad2mas(meanRa)).arg(rad2mas(rmsOneRa), 10, 'e').arg(rad2mas(rmsMeanRa), 10, 'e');
+    qDebug() << QString("de: %1\t%2\t%3\n").arg(rad2mas(meanDe)).arg(rad2mas(rmsOneDe), 10, 'e').arg(rad2mas(rmsMeanDe), 10, 'e');
 }
