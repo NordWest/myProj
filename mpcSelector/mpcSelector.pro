@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = mpcSelector
+TARGET = ./../../lab/mpcTools/mpcSelector
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
