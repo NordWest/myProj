@@ -68,6 +68,7 @@ QString getStrFromDE(double de, QString spl_symb);
 QString getRaDecMag(QString str);
 
 void mjdDateCode(QString *dateCode, double mJD);
+void mjdDateCode_file(QString *dateCode, double mJD);
 /*mas
 double* getTangToRaDe(double ksi, double eta, double ra_c, double de_c);
 void getTangToRaDe1(double *rd0, double *rd1, double ksi, double eta, double ra_c, double de_c);

@@ -161,7 +161,7 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
              continue;
          }
 
-         mjdDateCode(&dateCode, fitsd.MJD);
+         mjdDateCode_file(&dateCode, fitsd.MJD);
 /*
          dObs = getDATEOBSfromMJD(fitsd.MJD);
          dateCode = QString("%1").arg((int)dObs.year, 4, 10, QLatin1Char( '0' ));

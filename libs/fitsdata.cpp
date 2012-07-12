@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 1
+#define FD_LOG_LEVEL 0
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -1771,7 +1771,7 @@ fitsdata::fitsdata()
 
         tmu = NULL;
 
-        if(FD_LOG_LEVEL) qDebug() << "\ndetNaxes\n";
+        //if(FD_LOG_LEVEL) qDebug() << "\ndetNaxes\n";
 
 
         //detNaxes();
