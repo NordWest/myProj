@@ -37,7 +37,8 @@ TARGET = ruler3
 
 CONFIG += console \
     exceptions \
-    warn_off
+    warn_off \
+    release
 HEADERS += ../astro/astro.h \
     ../libs/comfunc.h \
     ../libs/sscat.h \
