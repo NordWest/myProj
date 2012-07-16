@@ -1,4 +1,4 @@
-prefix=/mnt/work/Dev/ccd/cfitsio
+prefix=/home/berezhnoy/work/svnProj/cfitsio
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

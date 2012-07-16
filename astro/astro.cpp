@@ -350,11 +350,14 @@ int roundDATEOBS(DATEOBS *date_obs, int nsec)
 {
     int dayM;
 
+qDebug() << QString("sec: %1\nnsec: %2\nres: %3\n").arg(date_obs->sec*pow(10, nsec)).arg(floor(59.9999999999999999*pow(10, nsec))).arg(((int)(date_obs->sec*pow(10, nsec)))>=((int)(59.9999999999999999*pow(10, nsec))));
+
     if(date_obs->sec*pow(10, nsec)>=floor(59.9999999999999999*pow(10, nsec)))
     {
         date_obs->sec = 0.0;
         date_obs->min +=1;
     }
+qDebug() << QString("secn: %1\n").arg(date_obs->sec);
     if(date_obs->min>=60)
     {
         date_obs->min -= 60;

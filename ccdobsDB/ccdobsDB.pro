@@ -8,7 +8,7 @@ QT       += core sql
 
 QT       -= gui
 
-TARGET = ./../../lab/ccdobsDB/ccdobsDB
+TARGET = ccdobsDB
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
