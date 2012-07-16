@@ -335,70 +335,51 @@ double getMJDFromYear(double year)
    return (year-1858.87885010267)*365.25;
 };
 
-DATEOBS getDATEOBSfromMJD(double mjd)
+DATEOBS getDATEOBSfromMJD(double mjd, int rnsec)
 {
    DATEOBS date_obs;
-   double parth_of_day = mjd - floor(mjd);
-   double JD = 2400000.5+mjd;
-   double x = JD+0.5;
-   int Z = (int)floor(x);
-   double F = x - Z;
-   int q = (int)floor((Z - 1867216.25)/36524.25);
-   int A = Z + 1 + q - (int)(q/4);
-   int B = A + 1524;
-   int C = (int)floor((B - 122.1)/365.25);
-   int D = (int)floor(365.25*C);
-   int E = (int)floor((B - D)/30.6001);
-   int Day = B - D - (int)floor(30.6001*E) + F;
-   int Month;
-   if (E<13.5) Month = E - 1;
-   else Month = E - 13;
-   int Year;
-   if (Month<2.5) Year = C - 4715;
-   else Year = C - 4716;
 
-   date_obs.year = Year;
-   date_obs.month = Month;
-   date_obs.day = Day;
-   date_obs.pday = Day+parth_of_day;
-   date_obs.hour = (int)floor(parth_of_day*24);
-   date_obs.min = (int)floor(parth_of_day*1440) - date_obs.hour*60;
-   date_obs.sec = parth_of_day*86400 - date_obs.hour*3600 - date_obs.min*60;
+    getDATEOBSfromMJD(&date_obs, mjd);
 
-   int dayM;
-
-   if(date_obs.sec>=59.99999)
-   {
-       date_obs.sec = 0.0;
-       date_obs.min +=1;
-   }
-   if(date_obs.min>=60)
-   {
-       date_obs.min -= 60;
-       date_obs.hour++;
-   }
-   if(date_obs.hour>=24)
-   {
-       date_obs.hour -= 24;
-       date_obs.day++;
-   }
-   dayM = dinm(date_obs.month, isVes(date_obs.year));
-   if(date_obs.day>dayM)
-   {
-       date_obs.day -= dayM;
-       date_obs.month++;
-   }
-   if(date_obs.month>12)
-   {
-       date_obs.year++;
-       date_obs.month -= 12;
-   }
-
+    roundDATEOBS(&date_obs, rnsec);
 
    return date_obs;
 };
 
-void getDATEOBSfromMJD(DATEOBS *date_obs, double mjd)
+int roundDATEOBS(DATEOBS *date_obs, int nsec)
+{
+    int dayM;
+
+    if(date_obs->sec*pow(10, nsec)>=floor(59.9999999999999999*pow(10, nsec)))
+    {
+        date_obs->sec = 0.0;
+        date_obs->min +=1;
+    }
+    if(date_obs->min>=60)
+    {
+        date_obs->min -= 60;
+        date_obs->hour++;
+    }
+    if(date_obs->hour>=24)
+    {
+        date_obs->hour -= 24;
+        date_obs->day++;
+    }
+    dayM = dinm(date_obs->month, isVes(date_obs->year));
+    if(date_obs->day>dayM)
+    {
+        date_obs->day -= dayM;
+        date_obs->month++;
+    }
+    if(date_obs->month>12)
+    {
+        date_obs->year++;
+        date_obs->month -= 12;
+    }
+
+}
+
+void getDATEOBSfromMJD(DATEOBS *date_obs, double mjd, int rnsec)
 {
     //DATEOBS date_obs;
     double parth_of_day = mjd - floor(mjd);
@@ -428,34 +409,7 @@ void getDATEOBSfromMJD(DATEOBS *date_obs, double mjd)
     date_obs->min = (int)floor(parth_of_day*1440) - date_obs->hour*60;
     date_obs->sec = parth_of_day*86400 - date_obs->hour*3600 - date_obs->min*60;
 
-    int dayM;
-
-    if(date_obs->sec>=59.99999)
-    {
-        date_obs->sec = 0.0;
-        date_obs->min +=1;
-    }
-    if(date_obs->min>=60)
-    {
-        date_obs->min -= 60;
-        date_obs->hour++;
-    }
-    if(date_obs->hour>=24)
-    {
-        date_obs->hour -= 24;
-        date_obs->day++;
-    }
-    dayM = dinm(date_obs->month, isVes(date_obs->year));
-    if(date_obs->day>dayM)
-    {
-        date_obs->day -= dayM;
-        date_obs->month++;
-    }
-    if(date_obs->month>12)
-    {
-        date_obs->year++;
-        date_obs->month -= 12;
-    }
+    roundDATEOBS(date_obs, rnsec);
 
 
     //return date_obs;
@@ -710,15 +664,17 @@ void getPixPosFromWCS(double ra, double de, double *WCSD, double *const pixp)
 void mjdDateCode(QString *dateCode, double mJD)
 {
     DATEOBS dObs;
-    dObs = getDATEOBSfromMJD(mJD);
+    dObs = getDATEOBSfromMJD(mJD, 1);
+
     dateCode->clear();
+
     dateCode->append(QString("%1").arg((int)dObs.year, 4, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.month, 2, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.day, 2, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.hour, 2, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.min, 2, 10, QLatin1Char( '0' )));
     //dateCode->append(QString("%1").arg((int)dObs.sec, 2, 10, QLatin1Char( '0' )));
-    dateCode->append(QString("%1").arg((int)floor(dObs.sec*10), 3, 10, QLatin1Char( '0' )));
+    dateCode->append(QString("%1").arg((int)floor(dObs.sec*10+0.5), 3, 10, QLatin1Char( '0' )));
 }
 
 void mjdDateCode_file(QString *dateCode, double mJD)

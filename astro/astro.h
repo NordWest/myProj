@@ -52,8 +52,9 @@ double getMJDFromYear(double year);
 double getMJDfromYMD(QString strT);
 double jd2mjd(double jd);
 double mjd2jd(double mjd);
-DATEOBS getDATEOBSfromMJD(double mjd);
-void getDATEOBSfromMJD(DATEOBS *date_obs, double mjd);
+DATEOBS getDATEOBSfromMJD(double mjd, int rnsec = 5);
+void getDATEOBSfromMJD(DATEOBS *date_obs, double mjd, int rnsec = 5);
+int roundDATEOBS(DATEOBS *date_obs, int nsec);
 QString getStrFromDATEOBS(DATEOBS date_obs, QString spl_symb, int format, int ndig);
 void getStrFromDATEOBS(QString *rstr, DATEOBS date_obs, QString spl_symb, int format, int ndig);
 
