@@ -680,7 +680,7 @@ void mjdDateCode(QString *dateCode, double mJD)
 void mjdDateCode_file(QString *dateCode, double mJD)
 {
     DATEOBS dObs;
-    dObs = getDATEOBSfromMJD(mJD);
+    dObs = getDATEOBSfromMJD(mJD, 1);
     dateCode->clear();
     dateCode->append(QString("%1").arg((int)dObs.year, 4, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.month, 2, 10, QLatin1Char( '0' )));
