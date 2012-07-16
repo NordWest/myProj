@@ -349,10 +349,13 @@ DATEOBS getDATEOBSfromMJD(double mjd, int rnsec)
 int roundDATEOBS(DATEOBS *date_obs, int nsec)
 {
     int dayM;
+    double val;
 
-qDebug() << QString("sec: %1\nnsec: %2\nres: %3\n").arg(date_obs->sec*pow(10, nsec)).arg(floor(59.9999999999999999*pow(10, nsec))).arg(((int)(date_obs->sec*pow(10, nsec)))>=((int)(59.9999999999999999*pow(10, nsec))));
+    val = 60.0 - pow(10, -nsec);
 
-    if(date_obs->sec*pow(10, nsec)>=floor(59.9999999999999999*pow(10, nsec)))
+//qDebug() << QString("sec: %1\nnsec: %2\nres: %3\n").arg(date_obs->sec*pow(10, nsec)).arg(floor(59.999999*pow(10, nsec))).arg(((int)(date_obs->sec*pow(10, nsec)))>=((int)(59.999999*pow(10, nsec))));
+
+    if(date_obs->sec*pow(10, nsec)>=floor(val*pow(10, nsec)))
     {
         date_obs->sec = 0.0;
         date_obs->min +=1;
