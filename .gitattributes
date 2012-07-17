@@ -34,7 +34,6 @@ cfitsio/cfitsio.pdf -text
 cfitsio/fitsio.pdf -text
 cfitsio/fpackguide.pdf -text
 cfitsio/iter_b.fit -text
-cfitsio/libcfitsio.a -text
 cfitsio/quick.pdf -text
 cfitsio/testf77.std -text
 convert405/convert405.pro -text
