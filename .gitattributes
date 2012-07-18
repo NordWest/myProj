@@ -229,12 +229,6 @@ libs/longnam.h -text
 libs/mathbase.cpp -text
 libs/mathbase.h -text
 libs/mb.h -text
-libs/moody/capsule/capsuleBase/mopfile/MopState.o -text
-libs/moody/capsule/capsuleBase/particle/Particle.o -text
-libs/moody/capsule/capsuleBase/tinyxml/ticpp.o -text
-libs/moody/capsule/capsuleBase/tinyxml/tinyxml.o -text
-libs/moody/capsule/capsuleBase/tinyxml/tinyxmlerror.o -text
-libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.o -text
 libs/mpcOC.cpp -text
 libs/mpcOC.h -text
 libs/mpccat.cpp -text
