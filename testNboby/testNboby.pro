@@ -8,6 +8,7 @@ CONFIG += qt \
     warn_off \
     debug
 CONFIG -= app_bundle
+QT           += xml
 TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/orbit.cpp \
@@ -30,7 +31,13 @@ SOURCES += main.cpp \
     ../libs/dele.cpp \
     ../libs/rada.cpp \
     ../libs/redStat.cpp \
-    ../libs/mpcs.cpp
+    ../libs/mpcs.cpp \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.cpp \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxml.cpp \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlerror.cpp \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.cpp \
+    ./../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
+    ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp
 
 HEADERS += ../libs/orbit.h \
     ../libs/orbcat.h \
@@ -54,7 +61,19 @@ HEADERS += ../libs/orbit.h \
     ../libs/ephem_types.h \
     ../libs/rada.h \
     ../libs/redStat.h \
-    ../libs/mpcs.h
+    ../libs/mpcs.h \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/ticpprc.h \
+    ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxml.h \
+    ./../libs/moody/capsule/capsuleBase/mopfile/MopFile.h \
+    ./../libs/moody/capsule/capsuleBase/mopfile/MopItem.h \
+    ./../libs/moody/capsule/capsuleBase/mopfile/MopState.h \
+    ./../libs/moody/capsule/capsuleBase/etc/Advisor.h \
+    ./../libs/moody/capsule/capsuleBase/particle/Particle.h \
+    ./../libs/moody/capsule/capsuleBase/CapsuleBase.h \
+    ../libs/moody/moody.h \
+    ../libs/moody/capsule/Capsule.h
+
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a
 unix:LIBS+=./../libs/unix/libastro.a

@@ -761,6 +761,34 @@ int dele::detRtt(double *x, double *y, double *z, double Time, int nplanet, int 
 	return 0;
 }
 
+int dele::headParam(QString name, double &res)
+{
+    int i, sz;
+    QString param;
+    char *oneParam = new char[6];
+
+    //return Find_Value(name, R1.constName, H2.data.constValue);
+    for(i=0; i<400; i++)
+    {
+        strncpy(oneParam, &R1.constName[i][0], 6);
+        strcpy(&oneParam[5], "\0");
+        param = QString(oneParam).simplified();
+        if(QString().compare(name, param)==0)
+        {
+            res = H2.data.constValue[i];
+            return 0;
+        }
+    }
+    return 1;
+}
+
+double dele::headParam(QString name)
+{
+    double res;
+    headParam(name, res);
+    return res;
+}
+
 
 int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk)
 {

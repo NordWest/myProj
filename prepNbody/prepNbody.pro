@@ -32,9 +32,9 @@ SOURCES += main.cpp \
 #    ../libs/astro.cpp \
     ../libs/rec.cpp \
     ../libs/commetorbcat.cpp \
-    ../libs/force_ev.cpp \
+    #../libs/force_ev.cpp \
     ../libs/dele.cpp \
-    ../libs/rada.cpp \
+    #../libs/rada.cpp \
     ../libs/redStat.cpp \
     ../libs/mpcs.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.cpp \
@@ -66,7 +66,7 @@ HEADERS += ../libs/orbit.h \
     ../libs/ephem_types.h \
     ../libs/dele.h \
     ../libs/ephem_types.h \
-    ../libs/rada.h \
+    #../libs/rada.h \
     ../libs/redStat.h \
     ../libs/mpcs.h \
     ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \

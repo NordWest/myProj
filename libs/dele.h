@@ -15,6 +15,10 @@
 #include "ephem_types.h"
 #endif
 
+#ifndef EPHEM_UTIL
+#include "ephem_util.h"
+#endif
+
 //#include "ephem_types.h"
 //#include "ephem_read.h"
 
@@ -189,6 +193,9 @@ public:
 	int detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk);
 	int detR(double *x, double *y, double *z, double Time, char *planet, int proizv, int centr, int sk);
 	int detRtt(double *x, double *y, double *z, double Time, int nplanet, int centr, int sk);
+
+    int headParam(QString name, double &res);
+    double headParam(QString name);
 
 	/*
 		proiz: 0 - положения, 1 - скорости

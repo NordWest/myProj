@@ -16,7 +16,17 @@
 #include <QDebug>
 #include <QSettings>
 #include <QDataStream>
+#include <QDomDocument>
 
+#define OMPLIB
+
+#include "./../libs/moody/moody.h"
+#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../libs/moody/capsule/Capsule.h"
+#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
+
+int readCFG(QString fileName, QList<ParticleStruct *> &pList);
+int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
 
 static QDataStream* clog0 = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -60,12 +70,15 @@ void customMessageHandler(QtMsgType type, const char* msg)
 int nofzbody;
 dele *nbody;
 ever_params *eparam;
+double *mass;
 
 int Sint(double X[], double V[]);
 int LFint(double X[], double V[]);
 
 #define CENTER CENTER_BARY
 #define SK SK_EKVATOR
+
+
 
 int main(int argc, char *argv[])
 {
@@ -80,8 +93,400 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 
     int i, j, k, N, komp, teloi, teloj;
+    double *X, *V, TI, TF, *X0, *V0, *r, *v;
+
+    QList <ParticleStruct*> pList;
+    dele *nbody;
+    nbody = new dele();
+
+    QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
+
+    QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
+    QString obsCode = sett->value("general/obsCode", "500").toString();
+    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+
+    eparam = new ever_params;
+
+    QSettings *esett = new QSettings("./paramsEv.ini", QSettings::IniFormat);
+    eparam->NOR = esett->value("NOR", 17).toInt();
+    eparam->NCLASS = esett->value("NCLASS", -2).toInt();
+    eparam->NI = esett->value("NI", 2).toInt();
+    eparam->NV = esett->value("NV", 6).toInt();
+    eparam->LL = esett->value("LL", 6).toInt();
+    eparam->XL = esett->value("XL", 0.0).toDouble();
+    //eparam->t0 = esett->value("t0", 0.0).toDouble();
+    //eparam->te = esett->value("te", 3.0e+3).toDouble();
+    //eparam->stp = esett->value("stp", 100.0).toDouble();
+    //eparam->shag = esett->value("shag", 10.0).toDouble();
+    eparam->col = esett->value("col", 0.0015).toDouble();
+    eparam->vout = esett->value("vout", 1000.0).toDouble();
+    strncpy(&eparam->jkeys[0], esett->value("jkeys", "1111111111").toString().toAscii().data(), 10);
+
+
+
+
+    if(readCFG("test.xml", pList))
+    {
+        qDebug() << QString("readCFG error\n");
+        return 1;
+    }
+
+    int iniJplRes = nbody->init(jplFile.toAscii().data());
+    if(iniJplRes) return 1;
+
+    nofzbody = pList.size();
+    mass = new double[nofzbody];
+
+    N = nofzbody*3;
+
+    X = new double[N];
+    V = new double[N];
+    X0 = new double[N];
+    V0 = new double[N];
+    r = new double[3];
+    v = new double[3];
+
+
+    for(i=0; i<nofzbody; i++)
+    {
+        mass[i] = pList[i]->mass;
+        X[i*3] = pList[i]->x;
+        X[i*3+1] = pList[i]->y;
+        X[i*3+2] = pList[i]->z;
+        V[i*3] = pList[i]->xd;
+        V[i*3+1] = pList[i]->yd;
+        V[i*3+2] = pList[i]->zd;
+    }
+
+    Everhardt *solSys;
+    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
+
+    double t0, t1, ti, dt, Ri, Vi;
+
+    t0 = 2455201.0;
+    t1 = t0+300;
+    dt = 20.0;
+
+    QFile resFile("res.txt");
+    resFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream resStm(&resFile);
+
+    QFile dxFile("dxdy.txt");
+    dxFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream dxStm(&dxFile);
+
+    QFile deFile("de.txt");
+    deFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream deStm(&deFile);
+
+    QString name;
+    int plaNum;
+
+    for(ti=t0; ti<t1; ti+=dt)
+    {
+
+        qDebug() << QString("\njd: %1\ntime: %2\n").arg(ti, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(ti)), ":", 0, 3));
+
+        TI = ti;
+        TF = ti+dt;
+
+        solSys->rada27(X, V, TI, TF);
+        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
+        {
+            name = QString(pList[teloi]->name.data());
+            if(QString().compare(name, "Sol")==0) plaNum = 10;
+            else plaNum = planet_num(name.toAscii().data());
+
+            Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
+            Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
+            resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 13, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+
+            nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+            nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+
+            r[0] = X[i]-X0[i];
+            r[1] = X[i+1]-X0[i+1];
+            r[2] = X[i+2]-X0[i+2];
+
+            Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+            v[0] = V[i]-V0[i];
+            v[1] = V[i+1]-V0[i+1];
+            v[2] = V[i+2]-V0[i+2];
+
+            dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+
+            Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
+
+            deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+        }
+    }
+
+    resFile.close();
+
+    dxFile.close();
+    deFile.close();
 
 }
+
+int readCFG(QString fileName, QList <ParticleStruct*> &pList)
+{
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    QString objName;
+    QDomDocument domDocument;
+    ParticleStruct *p;
+
+    QFile cfgFile(fileName);
+    if(!cfgFile.open(QIODevice::ReadOnly | QFile::Text))
+    {
+        qDebug() << QString("can't open cfg file\n");
+        return 1;
+    }
+
+    if(!domDocument.setContent(&cfgFile, true, &errorStr, &errorLine,
+                                     &errorColumn)) {
+        qDebug() << QString("error setContent\n");
+        return 1;
+    }
+
+    QDomElement root = domDocument.documentElement();
+         if (root.hasAttribute("version")
+                    && root.attribute("version") != "1.0") {
+             qDebug() << "wrong version\n";
+             return false;
+         }
+
+     std::string srep;
+     std::string irep;
+
+     QDomElement child = root.firstChildElement("particle");
+     QDomElement vector;
+          while (!child.isNull()) {
+              p = new ParticleStruct;
+              p->name = child.firstChildElement("name").text().toAscii().data();
+              p->mass = child.firstChildElement("mass").text().toDouble();
+              p->radius = child.firstChildElement("radius").text().toDouble();
+              p->visualRepresentation = child.firstChildElement("visualSize").text().toInt();
+              //p->interactionPermission = child.firstChildElement("interactionPermission").text().toAscii().data();
+              irep = child.firstChildElement("interactionPermission").text().toAscii().data();
+              if (irep == "interactALL") {
+                  p->interactionPermission = Advisor::interactALL;
+              }
+              if (irep == "interactNONE") {
+                  p->interactionPermission = Advisor::interactNONE;
+              }
+              if (irep == "interactEnvironmentOnly") {
+                  p->interactionPermission = Advisor::interactEnvironmentOnly;
+              }
+              if (irep == "interactDifferentOnly") {
+                  p->interactionPermission = Advisor::interactDifferentOnly;
+              }
+              //setting that determines what class of particle this is, which effects its interactions.
+              srep = child.firstChildElement("identity").text().toAscii().data();
+              if (srep == "collapsor") {
+                  p->identity = Advisor::collapsor;
+              }
+              if (srep == "collapsorFixed") {
+                  p->identity = Advisor::collapsorFixed;
+              }
+              if (srep == "nonInteractive") {
+                  p->identity = Advisor::nonInteractive;
+              }
+              if (srep == "ordinary") {
+                  p->identity = Advisor::ordinary;
+              }
+              if (srep == "chromosome") {
+                  p->identity = Advisor::chromosome;
+              }
+              if (srep == "planetesimal") {
+                  p->identity = Advisor::planetesimal;
+              }
+
+              vector = child.firstChildElement("vector");
+              p->x = vector.firstChildElement("X").text().toDouble();
+              p->y = vector.firstChildElement("Y").text().toDouble();
+              p->z = vector.firstChildElement("Z").text().toDouble();
+              p->xd = vector.firstChildElement("XD").text().toDouble();
+              p->yd = vector.firstChildElement("YD").text().toDouble();
+              p->zd = vector.firstChildElement("ZD").text().toDouble();
+
+
+              qDebug() << QString("%1\n").arg(p->name.data());
+              pList << p;
+              child = child.nextSiblingElement("particle");
+          }
+
+    cfgFile.close();
+    return 0;
+}
+
+int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
+{
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    QString objName;
+    QDomDocument domDocument;
+    ParticleStruct *p;
+
+    QFile cfgFile(fileName);
+    cfgFile.open(QIODevice::ReadWrite | QFile::Truncate);
+    QTextStream cfgStm(&cfgFile);
+
+/*
+    if(!domDocument.setContent(&cfgFile)) {
+        qDebug() << "error setContent\n";
+        return 1;
+    }
+
+*/
+    domDocument.createElement("root");
+
+    cfgStm << "<?xml version=\"1.0\"?><root xsi:noNamespaceSchemaLocation = \"EnvironmentSet.xsd\" xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\">" << "\n";
+
+
+     std::string srep;
+     std::string irep;
+
+     QDomElement child, vector, partDom;// = root.firstChildElement("particle");
+    QDomText childText;
+     int i, sz;
+     sz = pList.size();
+     for(i=0; i<sz; i++)
+     {
+  //       cfgStm << "<particles>\n";
+
+
+   //      cfgStm << "<\particles>\n";
+
+         //partDom.setTagName("particle");
+         partDom = domDocument.createElement("particle");
+         //partDom
+
+         p = pList[i];
+
+         child = domDocument.createElement("interactionPermission");
+         switch(p->interactionPermission)
+         {
+             case Advisor::interactALL:
+                 irep = "interactALL";
+                 break;
+             case Advisor::interactNONE:
+                 irep = "interactNONE";
+                 break;
+             case Advisor::interactEnvironmentOnly:
+                 irep = "interactEnvironmentOnly";
+                 break;
+             case Advisor::interactDifferentOnly:
+                 irep = "interactDifferentOnly";
+                 break;
+
+         }
+         childText = domDocument.createTextNode(QString(irep.data()));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+
+         switch(p->identity)
+         {
+             case Advisor::collapsor:
+                 srep = "collapsor";
+                 break;
+             case Advisor::collapsorFixed:
+                 srep = "collapsorFixed";
+                 break;
+             case Advisor::nonInteractive:
+                 srep = "nonInteractive";
+                 break;
+             case Advisor::ordinary:
+                 srep = "ordinary";
+                 break;
+             case Advisor::chromosome:
+                 srep = "chromosome";
+                 break;
+             case Advisor::planetesimal:
+                 srep = "planetesimal";
+                 break;
+         }
+         child = domDocument.createElement("identity");
+         childText = domDocument.createTextNode(QString(srep.data()));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+         child = domDocument.createElement("name");
+         childText = domDocument.createTextNode(QString(p->name.data()));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+         child = domDocument.createElement("mass");
+         childText = domDocument.createTextNode(QString("%1").arg(p->mass));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+         child = domDocument.createElement("radius");
+         childText = domDocument.createTextNode(QString("%1").arg(p->radius));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+
+         child = domDocument.createElement("visualSize");
+         childText = domDocument.createTextNode(QString("%1").arg(p->visualRepresentation));
+         child.appendChild(childText);
+         partDom.appendChild(child);
+
+         vector = domDocument.createElement("vector");
+
+         child = domDocument.createElement("X");
+         childText = domDocument.createTextNode(QString("%1").arg(p->x));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         child = domDocument.createElement("Y");
+         childText = domDocument.createTextNode(QString("%1").arg(p->y));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         child = domDocument.createElement("Z");
+         childText = domDocument.createTextNode(QString("%1").arg(p->z));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         child = domDocument.createElement("XD");
+         childText = domDocument.createTextNode(QString("%1").arg(p->xd));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         child = domDocument.createElement("YD");
+         childText = domDocument.createTextNode(QString("%1").arg(p->yd));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         child = domDocument.createElement("ZD");
+         childText = domDocument.createTextNode(QString("%1").arg(p->zd));
+         child.appendChild(childText);
+         vector.appendChild(child);
+
+         partDom.appendChild(vector);
+
+
+         domDocument.appendChild(partDom);
+
+         }
+
+//
+
+     QString xml = domDocument.toString();
+     //qDebug() << "xml:" << xml << "\n";
+
+     cfgStm << xml << "\n";
+     cfgStm << "</root>" << "\n";
+
+    cfgFile.close();
+}
+
 /*
 int main(int argc, char *argv[])
 {

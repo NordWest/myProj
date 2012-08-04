@@ -8,7 +8,7 @@
 #include "./../libs/skyarea.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
-#include "./../libs/rada.h"
+//#include "./../libs/rada.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcs.h"
 #include "./../libs/ephem_util.h"
@@ -70,7 +70,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 
 int nofzbody;
 dele *nbody;
-ever_params *eparam;
+//ever_params *eparam;
 
 #define CENTER CENTER_BARY
 #define SK SK_EKVATOR
@@ -89,11 +89,12 @@ int main(int argc, char *argv[])
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+    double time0 = sett->value("general/time0", 2455201.0).toDouble();
+    int si = sett->value("general/si", 0).toInt();
 
     dele *nbody;
     nbody = new dele();
 
-    double TS = 2444208.50;
     int iniJplRes = nbody->init(jplFile.toAscii().data());
     if(iniJplRes) return 1;
 
@@ -124,7 +125,36 @@ int main(int argc, char *argv[])
     QTextStream xyStm(&xyFile);
 
     double dist, vel;
+    double mass[10];/* = {
+                1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
+    };*/
+    double gmass[10];
 
+    double gms = nbody->headParam("GMS");
+    gmass[9] = gms;
+    mass[9] = 1.0;
+    gmass[2] = nbody->headParam(QString("GMB").arg(i+1).toAscii().data());
+    mass[2] = gms/gmass[2];
+    for(i=0; i<9; i++)
+    {
+        if(i==2) continue;
+        gmass[i] = nbody->headParam(QString("GM%1").arg(i+1).toAscii().data());
+        mass[i] = gms/gmass[i];
+    }
+
+    for(i=0; i<10; i++)
+    {
+        if(si) mass[i] = SUN_MASS_KG/mass[i];
+        qDebug() << QString("mass %1: %2 - %3\n").arg(i).arg(mass[i]).arg(gmass[i]);
+    }
+
+    double coefX, coefXD;
+    coefX = coefXD = 1.0;
+    if(si)
+    {
+        coefX = AUKM*1000;
+        coefXD = 1000*AUKM/SECINDAY;
+    }
 
 
     for(i=0; i<sz; i++)
@@ -138,20 +168,32 @@ int main(int argc, char *argv[])
         {
             X = new double[3];
             V = new double[3];
-            nbody->detR(&X[0], &X[1], &X[2], TS, plaNum, 0, CENTER, SK);
-            nbody->detR(&V[0], &V[1], &V[2], TS, plaNum, 1, CENTER, SK);
+            nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
+            nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
             xVect << X;
             vVect << V;
             dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
             vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
-            pList[i]->x = X[0];
-            pList[i]->y = X[1];
-            pList[i]->z = X[2];
-            pList[i]->xd = V[0];
-            pList[i]->yd = V[1];
-            pList[i]->zd = V[2];
+            pList[i]->x = coefX*X[0];
+            pList[i]->y = coefX*X[1];
+            pList[i]->z = coefX*X[2];
+            pList[i]->xd = coefXD*V[0];
+            pList[i]->yd = coefXD*V[1];
+            pList[i]->zd = coefXD*V[2];
 
+            if(plaNum==10) pList[i]->mass = 1.0;
+            else pList[i]->mass = mass[plaNum];
 
+        /*
+
+            switch(plaNum)
+            {
+            case 0:
+                pList[i]->mass = gms/nbody->headParam("GM0");
+                break;
+            }
+
+*/
             xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 18, 'e', 9).arg(X[1], 18, 'e', 9).arg(X[2], 18, 'e', 9).arg(dist, 18, 'e', 9).arg(V[0], 18, 'e', 9).arg(V[1], 18, 'e', 9).arg(V[2], 18, 'e', 9).arg(vel, 18, 'e', 9);
         }
 
@@ -407,7 +449,7 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
 //
 
      QString xml = domDocument.toString();
-     qDebug() << "xml:" << xml << "\n";
+     //qDebug() << "xml:" << xml << "\n";
 
      cfgStm << xml << "\n";
      cfgStm << "</root>" << "\n";
