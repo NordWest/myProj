@@ -169,7 +169,7 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
         qDebug() << QString("observ init error:%1").arg(oires);
         return 1;
     }
-    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_ECLIPTIC, "084");
+    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_BARY, SK_EKVATOR, "084");
 
     nb = 1;//iList->nstr;
     N = nb*3;

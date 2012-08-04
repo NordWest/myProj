@@ -72,6 +72,22 @@ int main(int argc, char *argv[])
     qInstallMsgHandler(customMessageHandler);
     QCoreApplication a(argc, argv);
 
+    QFile* logFile = new QFile("messages.log");
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+        clog0 = new QDataStream(logFile);
+    QTextStream logstr(logFile);
+
+    setlocale(LC_NUMERIC, "C");
+
+    int i, j, k, N, komp, teloi, teloj;
+
+}
+/*
+int main(int argc, char *argv[])
+{
+    qInstallMsgHandler(customMessageHandler);
+    QCoreApplication a(argc, argv);
+
 
     QFile* logFile = new QFile("messages.log");
         if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
@@ -188,7 +204,7 @@ int main(int argc, char *argv[])
 /*
         nbody->detR(&X[0], &X[1], &X[2], t0, GEOCENTR_NUM, 0, CENTER_BARY, SK_ECLIPTIC);
         nbody->detR(&V[0], &V[1], &V[2], t0, GEOCENTR_NUM, 1, CENTER_BARY, SK_ECLIPTIC);
-*/
+/
 
 
 /////////
@@ -266,7 +282,7 @@ int main(int argc, char *argv[])
     X[i+2] *= AUSM;
     V[i+0] *= AUSM/86400.0;
     V[i+1] *= AUSM/86400.0;
-    V[i+2] *= AUSM/86400.0;*/
+    V[i+2] *= AUSM/86400.0;/
 }
 
 
@@ -403,7 +419,7 @@ int main(int argc, char *argv[])
                     qDebug() << QString("plaNum= %1\tY:\t%2\t%3\t%4\t%5\n").arg(pla[teloj]).arg(Y[j]).arg(Y[j+1]).arg(Y[j+2]).arg(sqrt(Y[j]*Y[j] + Y[j+1]*Y[j+1] + Y[j+2]*Y[j+2]));
                     resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(pla[teloj]).arg(Y[j]).arg(Y[j+1]).arg(Y[j+2]).arg(VY[j]).arg(VY[j+1]).arg(VY[j+2]);
             }
-            */
+            /
 
 
         }
