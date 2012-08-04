@@ -71,31 +71,71 @@ int nofzbody;
 dele *nbody;
 ever_params *eparam;
 
+#define CENTER CENTER_BARY
+#define SK SK_EKVATOR
+
 int readCFG(QString fileName, QList<ParticleStruct *> &pList);
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    setlocale(LC_NUMERIC, "C");
+
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
+
+    QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
+    QString obsCode = sett->value("general/obsCode", "500").toString();
+
+    dele *nbody;
+    nbody = new dele();
+
+    double TS = 2444208.50;
+    int iniJplRes = nbody->init(jplFile.toAscii().data());
+    if(iniJplRes) return 1;
 
     QList <ParticleStruct*> pList;
 
-   readCFG("./particles.xml", pList);
+    readCFG("./particles.xml", pList);
+
+
+    int i, sz;
+    sz = pList.size();
+    qDebug() << QString("pList: %1\n").arg(sz);
+
+    Capsule *experiment = new Capsule;
+    Particle *p = new Particle;
+
+    QString name;
+    int plaNum;
+
+    double *X, *V;
+    QVector <double*> xVect, vVect;
+
+
+    for(i=0; i<sz; i++)
+    {
+        p->fillFromExistingParticleStruct(*pList[i]);
+
+        name = QString(pList[i]->name.data());
+        int plaNum = planet_num(name.toAscii().data());
+        if(plaNum!=-1)
+        {
+            X = new double[3];
+            V = new double[3];
+            nbody->detR(&X[0], &X[1], &X[2], TS, plaNum, 0, CENTER, SK);
+            nbody->detR(&V[0], &V[1], &V[2], TS, plaNum, 1, CENTER, SK);
+            xVect << X;
+            vVect << V;
+            qDebug() << QString("%1:\t%2\t%3\t%4\n").arg(name).arg(X[0]).arg(X[1]).arg(X[2]);
+        }
 
 
 
-int i, sz;
-sz = pList.size();
-qDebug() << QString("pList: %1\n").arg(sz);
 
-Capsule *experiment = new Capsule;
-Particle p;
+        experiment->addToEnvironmentSet(*p);
+    }
 
-for(i=0; i<sz; i++)
-{
-    p.fillFromExistingParticleStruct(*pList[i]);
-
-    experiment->addToEnvironmentSet(p);
-}
     experiment->exportParticlesToXMLFile("test.xml");
     return 0;//a.exec();
 }
@@ -124,10 +164,50 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
              return false;
          }
 
+     std::string srep;
+     std::string irep;
+
      QDomElement child = root.firstChildElement("particle");
           while (!child.isNull()) {
               p = new ParticleStruct;
               p->name = child.firstChildElement("name").text().toAscii().data();
+              p->mass = child.firstChildElement("mass").text().toDouble();
+              p->radius = child.firstChildElement("radius").text().toDouble();
+              p->visualRepresentation = child.firstChildElement("visualSize").text().toInt();
+              //p->interactionPermission = child.firstChildElement("interactionPermission").text().toAscii().data();
+              irep = child.firstChildElement("interactionPermission").text().toAscii().data();
+              if (irep == "interactALL") {
+                  p->interactionPermission = Advisor::interactALL;
+              }
+              if (irep == "interactNONE") {
+                  p->interactionPermission = Advisor::interactNONE;
+              }
+              if (irep == "interactEnvironmentOnly") {
+                  p->interactionPermission = Advisor::interactEnvironmentOnly;
+              }
+              if (irep == "interactDifferentOnly") {
+                  p->interactionPermission = Advisor::interactDifferentOnly;
+              }
+              //setting that determines what class of particle this is, which effects its interactions.
+              srep = child.firstChildElement("identity").text().toAscii().data();
+              if (srep == "collapsor") {
+                  p->identity = Advisor::collapsor;
+              }
+              if (srep == "collapsorFixed") {
+                  p->identity = Advisor::collapsorFixed;
+              }
+              if (srep == "nonInteractive") {
+                  p->identity = Advisor::nonInteractive;
+              }
+              if (srep == "ordinary") {
+                  p->identity = Advisor::ordinary;
+              }
+              if (srep == "chromosome") {
+                  p->identity = Advisor::chromosome;
+              }
+              if (srep == "planetesimal") {
+                  p->identity = Advisor::planetesimal;
+              }
               qDebug() << QString("%1\n").arg(p->name.data());
               pList << p;
               child = child.nextSiblingElement("particle");
