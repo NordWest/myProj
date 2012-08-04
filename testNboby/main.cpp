@@ -135,6 +135,20 @@ void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int p
     dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
 }
 
+int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData);
+int getMopName(MopState *mState, MopItem &mItem, QString name)
+{
+    int i, sz;
+    sz = mState->getItemCount();
+    for(i=0;i<sz;i++)
+    {
+        mItem = mState->getMopItem(i);
+        if(QString().compare(QString(mItem.name), name)==0) return i;
+    }
+
+    return -1;
+
+}
 
 
 int main(int argc, char *argv[])
@@ -151,6 +165,19 @@ int main(int argc, char *argv[])
 
     int i, N, teloi, nt;
     double *X, *V, TI, TF, *X0, *V0, *r, *v;
+    Particle *tPar;
+    MopFile* mFile;
+    MopState *mState;
+    MopItem mItem;
+    double *Xm, *Vm;
+
+    QString name;
+    int plaNum, resMiri;
+    mpephRec mpcObj;
+    QString objType;
+    procData miriProcData;
+
+    Everhardt *solSys;
 
     QList <ParticleStruct*> pList;
     dele *nbody;
@@ -169,10 +196,16 @@ int main(int argc, char *argv[])
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
+    //int useConfMasses = sett->value("general/useConfMasses", 0).toInt();
     int useMoody = sett->value("general/useMoody", 0).toInt();
     t0 = sett->value("general/t0", 0).toDouble();
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
+    int useMiriade = sett->value("general/useMiriade", 0).toInt();
+    miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
+    miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
+    miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
+    if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
 
     eparam = new ever_params;
 
@@ -236,16 +269,7 @@ int main(int argc, char *argv[])
 
 
 
-    Particle *tPar;
-    MopFile* mFile;
-    MopState *mState;
-    MopItem mItem;
-    double *Xm, *Vm;
 
-    QString name;
-    int plaNum;
-
-    Everhardt *solSys;
     solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
     if(useMoody)
@@ -256,9 +280,13 @@ int main(int argc, char *argv[])
         mFile->setFilename(mopFileName.toAscii().data());
         //mFile->openMopfileReader();
         mState = mFile->readCyclingState();
-        if(mState->getItemCount()!=nofzbody) useMoody = 0;
-        else
+        /*if(mState->getItemCount()!=nofzbody)
         {
+            useMoody = 0;
+            qDebug() << QString("Cant open MOP File\n");
+        }
+        else
+        {*/
             Xm = new double[N];
             Vm = new double[N];
 
@@ -269,7 +297,7 @@ int main(int argc, char *argv[])
             resmFile.setFileName("res_moody.txt");
             resmFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             resmStm.setDevice(&resmFile);
-        }
+        //}
     }
 
 
@@ -287,23 +315,42 @@ int main(int argc, char *argv[])
         if(QString().compare(name, "Sol")==0) plaNum = 10;
         else plaNum = planet_num(name.toAscii().data());
 
-        nbody->detR(&X0[i*3+0], &X0[i*3+1], &X0[i*3+2], t0, plaNum, 0, CENTER, SK);
-        nbody->detR(&V0[i*3+0], &V0[i*3+1], &V0[i*3+2], t0, plaNum, 1, CENTER, SK);
+        if(plaNum!=-1)
+        {
+            nbody->detR(&X0[i*3+0], &X0[i*3+1], &X0[i*3+2], t0, plaNum, 0, CENTER, SK);
+            nbody->detR(&V0[i*3+0], &V0[i*3+1], &V0[i*3+2], t0, plaNum, 1, CENTER, SK);
 
-        saveResults(t0, X, V, X0, V0, i*3, name, resStm, dxStm, deStm);
+            saveResults(t0, X, V, X0, V0, i*3, name, resStm, dxStm, deStm);
+        }
+/*        else
+        {
+            if(useMiriade)
+            {
+                resMiri = getMiriadeObject(&mpcObj, jd2mjd(t0), name, miriadeProcData, objType);
+                if(!resMiri)
+                {
+                    X0[i*3] =
+                }
+            }
+        }
+
+        */
 
 
         if(useMoody)
         {
-            mItem = mState->getMopItem(i);
-            Xm[i*3] = mItem.x/AUKM/1000;
-            Xm[i*3+1] = mItem.y/AUKM/1000;
-            Xm[i*3+2] = mItem.z/AUKM/1000;
-            Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
-            Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
-            Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
+            if(getMopName(mState, mItem, name)!=-1)
+            {
+                //mItem = mState->getMopItem(i);
+                Xm[i*3] = mItem.x/AUKM/1000;
+                Xm[i*3+1] = mItem.y/AUKM/1000;
+                Xm[i*3+2] = mItem.z/AUKM/1000;
+                Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
+                Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
+                Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-            saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+                saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+            }
         }
 
 /*
@@ -354,22 +401,28 @@ int main(int argc, char *argv[])
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
 
-            nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-            nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+            if(plaNum!=-1)
+            {
+                nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+                nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
 
-            saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+            }
 
             if(useMoody)
             {
-                mItem = mState->getMopItem(teloi);
-                Xm[i] = mItem.x/AUKM/1000;
-                Xm[i+1] = mItem.y/AUKM/1000;
-                Xm[i+2] = mItem.z/AUKM/1000;
-                Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
-                Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
-                Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+                if(getMopName(mState, mItem, name)!=-1)
+                {
+                    //mItem = mState->getMopItem(teloi);
+                    Xm[i] = mItem.x/AUKM/1000;
+                    Xm[i+1] = mItem.y/AUKM/1000;
+                    Xm[i+2] = mItem.z/AUKM/1000;
+                    Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                    Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                    Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                    saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                }
             }
 /*
             Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
@@ -409,6 +462,55 @@ int main(int argc, char *argv[])
     }
 
 }
+
+int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData)
+{
+    qDebug() << "\ngetMiriadeObject\n";
+    QStringList outerArguments;
+
+    outerArguments << QString("-name=\"%1\"").arg(objStr.simplified());
+
+
+    QString sJD = QString("%1").arg(mjd2jd(mJD), 11, 'f',7);
+    outerArguments << QString("-ep=%1").arg(sJD);
+
+    QProcess outerProcess;
+
+    outerProcess.setWorkingDirectory(miriadeProcData.folder);
+    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+    outerProcess.setReadChannel(QProcess::StandardOutput);
+
+//    if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
+
+    outerProcess.start(miriadeProcData.name, outerArguments);
+
+    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+    {
+//        if(FD_LOG_LEVEL) qDebug() << "\nmpephProc finish error\n";
+    }
+    QTextStream objStream(outerProcess.readAllStandardOutput());
+    QString objDataStr;
+
+    while (!objStream.atEnd())
+    //for(i=0; i<orList.size(); i++)
+    {
+        objDataStr = objStream.readLine();
+        //objDataStr = orList.at(i);
+        if(objDataStr.at(0)=='#') continue;
+//        if(FD_LOG_LEVEL) qDebug() << QString("objDataStr: %1").arg(objDataStr);
+
+//        if(FD_LOG_LEVEL) qDebug() << "mpcObj: " << mpcObj << "\n";
+        if(mpcObj->fromMiriStr(objDataStr))
+        {
+//            if(FD_LOG_LEVEL) qDebug() << "\nfromString error\n";
+            continue;
+        }
+        else return 0;
+    }
+
+    return 1;
+}
+
 /*
 int readCFG(QString fileName, QList <ParticleStruct*> &pList)
 {
