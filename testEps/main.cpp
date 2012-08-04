@@ -56,9 +56,11 @@ class vfPlot
     QRect boxRect, xAxeRect, yAxeRect;
     QPoint pPos, pPos0, pPos1;
     int picWidth, picHeight;
+    int legendW;
     QRect xTextRect, yTextRect;
     QRect scaleRect;
     QRect headerRect;
+    QRect legendRect;
 
     int boxW, boxH;
     double scX, scY;
@@ -68,7 +70,7 @@ class vfPlot
     double scLine;
     int xdir, ydir;
 
-    int axeLabelsFontSize, headerFontSize;
+    int axeLabelsFontSize, headerFontSize, legendFontSize;
 
     int mainStepNumX, mainStepNumY;
     int subStepNumX,  subStepNumY;
@@ -101,7 +103,7 @@ class vfPlot
 
     //QVector<QRgb> colormap;
 
-    QTextOption xAxeLabelOpt, yAxeLabelOpt;
+    QTextOption xAxeLabelOpt, yAxeLabelOpt, legendOpt;
 
 public:
 
@@ -114,6 +116,9 @@ public:
     void drawVectField(double *x, double *y, double*dx, double *dy, int num, int isAutoLimits = 0, int isColorList = 0, int *cols = NULL);
     void drawVectFieldNums(double *x, double *y, double*dx, double *dy, int *nums, int num, int isAutoLimits = 0, int numsMin = 0, int isColorList = 0, int *cols = NULL);
     void drawDotPlot(double *x, double *y, int num, int isLines = 0, int isAutoLimits = 0, double*dx = NULL, double *dy = NULL, int *nums = NULL, int isColorList = 0);
+    void drawDotPlot1(double *x, double *y, double *dx, double *dy, int num, int isLines, int isAutoLimits, int isLegend, QStringList rowNames, int isColorList);
+
+
 
     void savePlot(QString fileName, const char* picType);
     void detLimits(double *x, double *y, int num);
@@ -131,6 +136,7 @@ public:
     void drawHeadLabel(QString hLab);
     void drawAxes(int mSNX, int mSNY, int sSNX = 0, int sSNY = 0);
     void drawScale(int aScale, double sc = 0);
+    void drawLegend(QStringList namesList, int isColorList);
 
     void setScAuto(int isAuto);
     void setScPatt(double scP);
@@ -192,10 +198,13 @@ int main(int argc, char *argv[])
     int isLines = sett->value("general/isLines", 0).toInt();
     int isPlotScale = sett->value("general/isPlotScale", 1).toInt();
     int isColorList = sett->value("general/isColorList", 0).toInt();
+    int isLegend = sett->value("general/isLegend", 0).toInt();
     QString xLabel =  codec1->toUnicode(sett->value("plot/xLabel", "X").toByteArray());
     QString yLabel =  codec1->toUnicode(sett->value("plot/yLabel", "Y").toByteArray());
     QString hLabel =  codec1->toUnicode(sett->value("plot/hLabel", "Header").toByteArray());
     QString scLabel =  codec1->toUnicode(sett->value("plot/scLabel", ", pix").toByteArray());
+
+    QStringList namesList;
 
 
       /*  int cx = QString(argv[2]).toInt();// номер колонки по горизонтали
@@ -252,6 +261,20 @@ int main(int argc, char *argv[])
                     if(isNumsPlot) N<<tline.section(colSep,cn,cn, QString::SectionSkipEmpty).toDouble();
                 }
                 break;
+            case 2:
+                {
+                    X<<tline.section(colSep,cx,cx, QString::SectionSkipEmpty).toDouble();
+                    Y<<tline.section(colSep,cy,cy, QString::SectionSkipEmpty).toDouble();
+                    if(isErrBars)
+                    {
+                        dX<<tline.section(colSep,cdx,cdx, QString::SectionSkipEmpty).toDouble();
+                        dY<<tline.section(colSep,cdy,cdy, QString::SectionSkipEmpty).toDouble();
+                    }
+                    namesList<<tline.section(colSep,ccol,ccol, QString::SectionSkipEmpty);
+                }
+                break;
+
+
             }
 
         }
@@ -319,6 +342,12 @@ int main(int argc, char *argv[])
             {
                 if(isErrBars) plot.drawDotPlot(x, y, dotNum, isLines, isAutoLimits, dx, dy, nums, isColorList);
                 else plot.drawDotPlot(x, y, dotNum, isLines, isAutoLimits, NULL, NULL, nums, isColorList);
+            }
+            break;
+        case 2:
+            {
+                if(isErrBars) plot.drawDotPlot1(x, y, dx, dy, dotNum, isLines, isAutoLimits, isLegend, namesList, isColorList);
+                else plot.drawDotPlot1(x, y, NULL, NULL, dotNum, isLines, isAutoLimits, isLegend, namesList, isColorList);
             }
             break;
         }
@@ -477,6 +506,8 @@ vfPlot::vfPlot()
     xAxeLabelOpt.setAlignment(Qt::AlignCenter);
     yAxeLabelOpt.setAlignment(Qt::AlignLeft);
 
+    legendOpt.setAlignment(Qt::AlignCenter);
+
     isAutoScPatt = 1;
     scPatt = 1;
 
@@ -496,12 +527,13 @@ void vfPlot::init(QString iniFileName)
 
     boxW = sett->value("general/boxW", 700).toInt();
     boxH = sett->value("general/boxH", 700).toInt();
+    legendW = sett->value("general/legendW", 200).toInt();
 
     headerFontSize = sett->value("general/headerFontSize", 45).toInt();
 
     dataNumsFontSize = sett->value("general/dataNumsFontSize", 15).toInt();
     //axeLabelsFontSize = sett->value("general/axeLabelsFontSize", 15).toInt();
-
+    legendFontSize = sett->value("general/legendFontSize", 15).toInt();
     colorList = sett->value("general/colorList", "0x000000").toString().split("|");
 
     baseSize = sett->value("pens/baseSize", 5).toInt();
@@ -1012,6 +1044,213 @@ void vfPlot::drawDotPlot(double *x, double *y, int num, int isLines, int isAutoL
     painter.end();
 }
 
+void vfPlot::drawDotPlot1(double *x, double *y, double *dx, double *dy, int num, int isLines, int isAutoLimits, int isLegend, QStringList rowNames, int isColorList)
+{
+    qDebug() << "vfPlot::drawDotPlot\n";
+    int i;
+    if(isAutoLimits) detLimits(x, y, num);
+    //detDLimits(dx, dy, num);
+
+    QStringList uniqNames;
+
+    baseImg = new QImage(picWidth, picHeight, QImage::Format_RGB444);
+    //baseImg->setColorTable(colormap);
+    painter.begin(baseImg);
+    if(!painter.isActive())
+    {
+            qDebug() << "\npainter is\'t active\n";
+            return;
+    }
+
+    painter.fillRect(0, 0, picWidth, picHeight, baseBrush);
+//boxRect
+    if(!isLegend) legendW = 0;
+    pPos0.setX(picWidth - picWidth*0.05 - boxW - legendW);
+    pPos0.setY(picHeight/2 - boxH/2);
+    pPos1.setX(picWidth - picWidth*0.05 - legendW);
+    pPos1.setY(picHeight/2 + boxH/2);
+    boxRect.setBottomRight(pPos1);
+    boxRect.setTopLeft(pPos0);
+    /*
+    pPos0.setX(picWidth/2 - boxW/2);
+    pPos0.setY(picHeight/2 - boxH/2);
+    pPos1.setX(picWidth/2 + boxW/2);
+    pPos1.setY(picHeight/2 + boxH/2);
+    boxRect.setBottomRight(pPos1);
+    boxRect.setTopLeft(pPos0);
+    */
+//xAxeRect
+    pPos0.setX(boxRect.left());
+    pPos0.setY((boxRect.bottom()+picHeight)/2.0);
+    pPos1.setX(boxRect.right());
+    pPos1.setY(picHeight);
+    xAxeRect.setBottomRight(pPos1);
+    xAxeRect.setTopLeft(pPos0);
+/*xLabelRect
+    pPos0.setX(picWidth/2 - boxW/2);
+    pPos0.setY(picHeight/2 + boxH/2);
+    pPos1.setX(picWidth);
+    pPos1.setY(picHeight);
+    xAxeRect.setBottomRight(pPos1);
+    xAxeRect.setTopLeft(pPos0);*/
+//yAxeRect
+    pPos0.setX(0);
+    pPos0.setY(boxRect.top());
+    pPos1.setX(boxRect.left()/2.0);
+    pPos1.setY(boxRect.bottom());
+    yAxeRect.setTopLeft(pPos0);
+    yAxeRect.setBottomRight(pPos1);
+
+    //painter.drawEllipse(yAxeRect.center(), 5, 5);
+
+//headRect
+    pPos0.setX(0);
+    pPos0.setY(0);
+    pPos1.setX(picWidth);
+    pPos1.setY(boxRect.top());
+    headerRect.setTopLeft(pPos0);
+    headerRect.setBottomRight(pPos1);
+
+
+    painter.setPen(axesPen);
+    painter.drawRect(boxRect);
+
+
+    painter.setBrush(pointBrush);
+
+    int pixX, pixY;
+    int pixX0, pixY0;
+    painter.setFont(QFont("Times", dataNumsFontSize, -1, true));
+    QString dataText;
+    QRect tempRect;
+    QPoint tempPos;
+    int uniqNum;
+    int j, szj;
+    for(i=0; i<num; i++)
+    {
+        if(i>0)
+        {
+            tempPos = pPos;
+        }
+        painter.setPen(pointPen);
+        data2pix(x[i], y[i], &pixX, &pixY);
+        pPos.setX(pixX);
+        pPos.setY(pixY);
+
+
+        if(i==0)
+        {
+            tempPos = pPos;
+        }
+        szj = uniqNames.size();
+        uniqNum = -1;
+        for(j=0; j<szj; j++)
+        {
+            if(QString().compare(rowNames.at(i), uniqNames[j])==0)
+            {
+                uniqNum = j;
+                break;
+            }
+        }
+        if(uniqNum==-1)
+        {
+            uniqNames << QString(rowNames.at(i));
+            uniqNum = uniqNames.size()-1;
+        }
+
+
+
+        //pPos.setX(scX*(x[i]-xs0)+boxRect.topLeft().x());
+        //pPos.setY(scY*(ys1-y[i])+boxRect.topLeft().y());
+
+
+        //pPos1.setX(scX*(x[i]+dx[i]*scLine-xs0)+boxRect.topLeft().x());
+        //pPos1.setY(scY*(ys1-y[i]+dy[i]*scLine)+boxRect.topLeft().y());
+        //painter.drawEllipse(pPos, pointSize, pointSize);
+        //dataText = QString("%1").arg(nums[i]);
+
+        if(isColorList)
+        {
+
+            if(uniqNum<colorList.size())
+            {
+                //qDebug() << QString("nums= %1\tcolor= %2\n").arg(uniqNum).arg(colorList.at(uniqNum));
+                pointPen.setColor(colorList.at(uniqNum));
+                pointBrush.setColor(colorList.at(uniqNum));
+            }
+            else
+            {
+                pointPen.setColor(Qt::black);
+                pointBrush.setColor(Qt::black);
+            }
+            painter.setPen(pointPen);
+            painter.setBrush(pointBrush);
+            painter.drawEllipse(pPos, pointSize, pointSize);
+        }
+        else
+        {
+            tempRect.setRect(pixX-40, pixY-20, 80, 40);
+            painter.drawText(tempRect, QString("%1").arg(uniqNames[uniqNum]), xAxeLabelOpt);
+        }
+
+
+        if(isLines)
+        {
+          //  qDebug() << "\ndrawLine\n";
+            painter.setPen(pointPen);
+            painter.drawLine(pPos.x(), pPos.y(), tempPos.x(), tempPos.y());
+        }
+
+        if(dx!=NULL)
+        {
+         //   qDebug() << "\ndrawDx\n";
+            painter.setPen(trendPen);
+            data2pix(x[i]+dx[i]*scLine, y[i], &pixX, &pixY);
+            pPos1.setX(pixX);
+            pPos1.setY(pixY);
+            painter.drawLine(pPos.x(), pPos.y(), pPos1.x(), pPos1.y());
+            data2pix(x[i]-dx[i]*scLine, y[i], &pixX, &pixY);
+            pPos1.setX(pixX);
+            pPos1.setY(pixY);
+            painter.drawLine(pPos.x(), pPos.y(), pPos1.x(), pPos1.y());
+        }
+        if(dy!=NULL)
+        {
+         //   qDebug() << "\ndrawDy\n";
+            painter.setPen(trendPen);
+            data2pix(x[i], y[i]+dy[i]*scLine, &pixX, &pixY);
+            pPos1.setX(pixX);
+            pPos1.setY(pixY);
+            painter.drawLine(pPos.x(), pPos.y(), pPos1.x(), pPos1.y());
+            data2pix(x[i], y[i]-dy[i]*scLine, &pixX, &pixY);
+            pPos1.setX(pixX);
+            pPos1.setY(pixY);
+            painter.drawLine(pPos.x(), pPos.y(), pPos1.x(), pPos1.y());
+        }
+
+    }
+
+//Header
+
+    drawHeadLabel(hLabel);
+
+
+//Labels
+    drawLabels(xLabel, yLabel);
+
+
+//Axes
+    drawAxes(mainStepNumX, mainStepNumY, subStepNumX, subStepNumY);
+
+//Scale
+    //drawScale(isAutoScPatt, scPatt);
+    if(isLegend) drawLegend(uniqNames, isColorList);
+
+
+    painter.end();
+}
+
+
 void vfPlot::drawScale(int aScale, double sc)
 {
     double sc0;
@@ -1092,7 +1331,7 @@ void vfPlot::drawAxes(int mSNX, int mSNY, int sSNX, int sSNY)
     painter.setFont(QFont("Times", axeLabelsFontSize, -1, true));
 
     xTextRect.setRect(-boxRect.width()/(mSNX+1.0)/2.0, 20, boxRect.width()/(mSNX+1.0), 40);
-    yTextRect.setRect(-yAxeRect.width(), -20, yAxeRect.width()-20, 40);
+    yTextRect.setRect(-yAxeRect.width()-50, -20, yAxeRect.width()-20, 40);
     painter.setPen(basePen);
     //x0
     data2pix(xs0, ys0, &pixX, &pixY);
@@ -1638,3 +1877,46 @@ int detCurv(QVector<double> X, QVector<double> Y, report3data r3data, QVector<do
 
 }
 */
+
+void vfPlot::drawLegend(QStringList namesList, int isColorList)
+{
+//legendRect
+    pPos1.setX(picWidth - picWidth*0.05);
+    pPos1.setY(boxRect.bottom());
+    legendRect.setBottomRight(pPos1);
+    legendRect.setTopLeft(boxRect.topRight());
+    int i, szi;
+    szi = namesList.size();
+    QRect nameRect, labelRect;
+    painter.setFont(QFont("Times", legendFontSize, -1, true));
+
+
+    for(i=0; i<szi; i++)
+    {
+        labelRect.setCoords(legendRect.left(), legendRect.top() + (legendFontSize*2)*i, legendRect.left() + pointPen.width()*2+15, legendRect.top() - legendFontSize*2 - pointPen.width()*2+15);
+        nameRect.setCoords(labelRect.right(), labelRect.top(), legendRect. right(), labelRect.bottom());
+
+        if(isColorList)
+        {
+
+            if(i<colorList.size())
+            {
+                //qDebug() << QString("nums= %1\tcolor= %2\n").arg(uniqNum).arg(colorList.at(uniqNum));
+                pointPen.setColor(colorList.at(i));
+                pointBrush.setColor(colorList.at(i));
+            }
+            else
+            {
+                pointPen.setColor(Qt::black);
+                pointBrush.setColor(Qt::black);
+            }
+            painter.setPen(pointPen);
+            painter.setBrush(pointBrush);
+            painter.drawEllipse(labelRect.center(), pointSize, pointSize);
+        }
+
+
+        painter.drawText(nameRect, QString("%1").arg(namesList[i]), legendOpt);
+
+    }
+}

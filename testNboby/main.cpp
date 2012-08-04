@@ -20,13 +20,16 @@
 
 #define OMPLIB
 
+#include "./../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
 #include "./../libs/moody/moody.h"
 #include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
 #include "./../libs/moody/capsule/Capsule.h"
 #include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
 
-int readCFG(QString fileName, QList<ParticleStruct *> &pList);
-int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
+#include "./../libs/myDomMoody.h"
+
+//int readCFG(QString fileName, QList<ParticleStruct *> &pList);
+//int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
 
 static QDataStream* clog0 = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -78,6 +81,60 @@ int LFint(double X[], double V[]);
 #define CENTER CENTER_BARY
 #define SK SK_EKVATOR
 
+void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
+{
+    double* r = new double[3];
+    double* v = new double[3];
+    double Ri, Vi;
+
+    Ri = sqrt(X[pos+0]*X[pos+0] + X[pos+1]*X[pos+1] + X[pos+2]*X[pos+2]);
+    Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
+    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
+
+
+
+    r[0] = X[pos]-X0[pos];
+    r[1] = X[pos+1]-X0[pos+1];
+    r[2] = X[pos+2]-X0[pos+2];
+
+    Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+    v[0] = V[pos]-V0[pos];
+    v[1] = V[pos+1]-V0[pos+1];
+    v[2] = V[pos+2]-V0[pos+2];
+
+    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
+
+    Ri = sqrt(X0[pos+0]*X0[pos+0] + X0[pos+1]*X0[pos+1] + X0[pos+2]*r[pos+2]);
+
+    deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[pos], 18, 'g', 9).arg(X0[pos+1], 18, 'g', 9).arg(X0[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V0[pos], 18, 'g', 9).arg(V0[pos+1], 18, 'g', 9).arg(V0[pos+2], 18, 'g', 9).arg(name);
+}
+
+void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm)
+{
+    double* r = new double[3];
+    double* v = new double[3];
+    double Ri, Vi;
+
+    Ri = sqrt(X[pos+0]*X[pos+0] + X[pos+1]*X[pos+1] + X[pos+2]*X[pos+2]);
+    Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
+    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
+
+
+
+    r[0] = X[pos]-X0[pos];
+    r[1] = X[pos+1]-X0[pos+1];
+    r[2] = X[pos+2]-X0[pos+2];
+
+    Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+    v[0] = V[pos]-V0[pos];
+    v[1] = V[pos+1]-V0[pos+1];
+    v[2] = V[pos+2]-V0[pos+2];
+
+    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
+}
+
 
 
 int main(int argc, char *argv[])
@@ -92,19 +149,30 @@ int main(int argc, char *argv[])
 
     setlocale(LC_NUMERIC, "C");
 
-    int i, j, k, N, komp, teloi, teloj;
+    int i, N, teloi, nt;
     double *X, *V, TI, TF, *X0, *V0, *r, *v;
 
     QList <ParticleStruct*> pList;
     dele *nbody;
     nbody = new dele();
 
-    QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
+    double t0, nstep, ti, dt;
+/*
+    t0 = 2455201.0;
+    t1 = t0+300;
+    dt = 20.0;
+*/
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+    QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
+    int useMoody = sett->value("general/useMoody", 0).toInt();
+    t0 = sett->value("general/t0", 0).toDouble();
+    dt = sett->value("general/dt", 1).toDouble();
+    nstep = sett->value("general/nstep", 1).toDouble();
 
     eparam = new ever_params;
 
@@ -126,7 +194,7 @@ int main(int argc, char *argv[])
 
 
 
-    if(readCFG("test.xml", pList))
+    if(readCFG(confFile, pList))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -147,26 +215,11 @@ int main(int argc, char *argv[])
     r = new double[3];
     v = new double[3];
 
+    QFile dxmFile;
+    QTextStream dxmStm;
+    QFile resmFile;
+    QTextStream resmStm;
 
-    for(i=0; i<nofzbody; i++)
-    {
-        mass[i] = pList[i]->mass;
-        X[i*3] = pList[i]->x;
-        X[i*3+1] = pList[i]->y;
-        X[i*3+2] = pList[i]->z;
-        V[i*3] = pList[i]->xd;
-        V[i*3+1] = pList[i]->yd;
-        V[i*3+2] = pList[i]->zd;
-    }
-
-    Everhardt *solSys;
-    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
-
-    double t0, t1, ti, dt, Ri, Vi;
-
-    t0 = 2455201.0;
-    t1 = t0+300;
-    dt = 20.0;
 
     QFile resFile("res.txt");
     resFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -180,16 +233,119 @@ int main(int argc, char *argv[])
     deFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
     QTextStream deStm(&deFile);
 
+
+
+
+    Particle *tPar;
+    MopFile* mFile;
+    MopState *mState;
+    MopItem mItem;
+    double *Xm, *Vm;
+
     QString name;
     int plaNum;
 
-    for(ti=t0; ti<t1; ti+=dt)
+    Everhardt *solSys;
+    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
+
+    if(useMoody)
     {
 
-        qDebug() << QString("\njd: %1\ntime: %2\n").arg(ti, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(ti)), ":", 0, 3));
 
-        TI = ti;
-        TF = ti+dt;
+        mFile = new MopFile;
+        mFile->setFilename(mopFileName.toAscii().data());
+        //mFile->openMopfileReader();
+        mState = mFile->readCyclingState();
+        if(mState->getItemCount()!=nofzbody) useMoody = 0;
+        else
+        {
+            Xm = new double[N];
+            Vm = new double[N];
+
+            dxmFile.setFileName("dxdy_moody.txt");
+            dxmFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            dxmStm.setDevice(&dxmFile);
+
+            resmFile.setFileName("res_moody.txt");
+            resmFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            resmStm.setDevice(&resmFile);
+        }
+    }
+
+
+    for(i=0; i<nofzbody; i++)
+    {
+        mass[i] = pList[i]->mass;
+        X[i*3] = pList[i]->x;
+        X[i*3+1] = pList[i]->y;
+        X[i*3+2] = pList[i]->z;
+        V[i*3] = pList[i]->xd;
+        V[i*3+1] = pList[i]->yd;
+        V[i*3+2] = pList[i]->zd;
+
+        name = QString(pList[i]->name.data());
+        if(QString().compare(name, "Sol")==0) plaNum = 10;
+        else plaNum = planet_num(name.toAscii().data());
+
+        nbody->detR(&X0[i*3+0], &X0[i*3+1], &X0[i*3+2], t0, plaNum, 0, CENTER, SK);
+        nbody->detR(&V0[i*3+0], &V0[i*3+1], &V0[i*3+2], t0, plaNum, 1, CENTER, SK);
+
+        saveResults(t0, X, V, X0, V0, i*3, name, resStm, dxStm, deStm);
+
+
+        if(useMoody)
+        {
+            mItem = mState->getMopItem(i);
+            Xm[i*3] = mItem.x/AUKM/1000;
+            Xm[i*3+1] = mItem.y/AUKM/1000;
+            Xm[i*3+2] = mItem.z/AUKM/1000;
+            Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
+            Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
+            Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
+
+            saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+        }
+
+/*
+        Ri = sqrt(X[i*3+0]*X[i*3+0] + X[i*3+1]*X[i*3+1] + X[i*3+2]*X[i*3+2]);
+        Vi = sqrt(V[i*3+0]*V[i*3+0] + V[i*3+1]*V[i*3+1] + V[i*3+2]*V[i*3+2])*AUKM/86400.0;
+        resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[i*3], 13, 'f', 9).arg(X[i*3+1], 13, 'f', 9).arg(X[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i*3], 13, 'f', 9).arg(V[i*3+1], 13, 'f', 9).arg(V[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
+
+
+
+        r[0] = X[i*3]-X0[i*3];
+        r[1] = X[i*3+1]-X0[i*3+1];
+        r[2] = X[i*3+2]-X0[i*3+2];
+
+        Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+        v[0] = V[i*3]-V0[i*3];
+        v[1] = V[i*3+1]-V0[i*3+1];
+        v[2] = V[i*3+2]-V0[i*3+2];
+
+        dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[i]->name.data());
+
+        Ri = sqrt(X0[i*3+0]*X0[i*3+0] + X0[i*3+1]*X0[i*3+1] + X0[i*3+2]*r[i*3+2]);
+
+        deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[i*3], 13, 'f', 9).arg(X0[i*3+1], 13, 'f', 9).arg(X0[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i*3], 13, 'f', 9).arg(V0[i*3+1], 13, 'f', 9).arg(V0[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
+        */
+    }
+
+
+
+
+//    for(ti=t0; ti<t1; ti+=dt)
+    TF = t0;
+    for(nt=0; nt<nstep; nt++)
+    {
+
+
+        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+
+        TI = TF;
+        TF += dt;
+
+        if(useMoody) mState = mFile->readCyclingState();
 
         solSys->rada27(X, V, TI, TF);
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
@@ -198,12 +354,29 @@ int main(int argc, char *argv[])
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
 
+            nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+            nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+
+            saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+
+            if(useMoody)
+            {
+                mItem = mState->getMopItem(teloi);
+                Xm[i] = mItem.x/AUKM/1000;
+                Xm[i+1] = mItem.y/AUKM/1000;
+                Xm[i+2] = mItem.z/AUKM/1000;
+                Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+
+                saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+            }
+/*
             Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
             Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
             resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 13, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
 
-            nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-            nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+
 
             r[0] = X[i]-X0[i];
             r[1] = X[i+1]-X0[i+1];
@@ -215,11 +388,12 @@ int main(int argc, char *argv[])
             v[1] = V[i+1]-V0[i+1];
             v[2] = V[i+2]-V0[i+2];
 
-            dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[i], 13, 'f', 9).arg(v[i+1], 13, 'f', 9).arg(v[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+            dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[teloi]->name.data());
 
             Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
 
             deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+            */
         }
     }
 
@@ -228,8 +402,14 @@ int main(int argc, char *argv[])
     dxFile.close();
     deFile.close();
 
-}
+    if(useMoody)
+    {
+        resmFile.close();
+        dxmFile.close();
+    }
 
+}
+/*
 int readCFG(QString fileName, QList <ParticleStruct*> &pList)
 {
     QString errorStr;
@@ -261,6 +441,7 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
 
      std::string srep;
      std::string irep;
+     QString tstr;
 
      QDomElement child = root.firstChildElement("particle");
      QDomElement vector;
@@ -306,6 +487,8 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
               }
 
               vector = child.firstChildElement("vector");
+
+              tstr = QString(vector.firstChildElement("X").text().data());
               p->x = vector.firstChildElement("X").text().toDouble();
               p->y = vector.firstChildElement("Y").text().toDouble();
               p->z = vector.firstChildElement("Z").text().toDouble();
@@ -314,7 +497,7 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
               p->zd = vector.firstChildElement("ZD").text().toDouble();
 
 
-              qDebug() << QString("%1\n").arg(p->name.data());
+              qDebug() << QString("%1\n%2\t%3\t%4\n\n").arg(p->name.data()).arg(p->x).arg(p->y).arg(p->z);
               pList << p;
               child = child.nextSiblingElement("particle");
           }
@@ -342,7 +525,7 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
         return 1;
     }
 
-*/
+/
     domDocument.createElement("root");
 
     cfgStm << "<?xml version=\"1.0\"?><root xsi:noNamespaceSchemaLocation = \"EnvironmentSet.xsd\" xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\">" << "\n";

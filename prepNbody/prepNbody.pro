@@ -80,7 +80,8 @@ HEADERS += ../libs/orbit.h \
     ./../libs/moody/capsule/capsuleBase/CapsuleBase.h \
     ../libs/moody/moody.h \
     ../libs/moody/capsule/Capsule.h \
-    ../libs/ephem_util.h
+    ../libs/ephem_util.h \
+    ../libs/myDomMoody.h
 
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a

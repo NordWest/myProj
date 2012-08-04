@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
     Capsule * experiment = new Capsule;
     experiment->loadProject(argv[2]);
 
+
     std::cout  << "> Succesfully Loaded: " << argv[2]<< std::endl;
     std::cout  << "> Project contains " <<experiment->getEnvironmentSetSize()<< " particles. "<<std::endl;
     std::cout  << "> Number of states specified : " <<experiment->getNumStates()<<std::endl;
@@ -57,6 +58,8 @@ int main(int argc, char *argv[]) {
             pct = (float) ((float)i/experiment->getNumStates())*100;
             std::cout <<"> State "<<i<<" of "<<experiment->getNumStates()<< " Completed - " << std::setprecision(3) <<pct<<"%"<<std::endl;
             experiment->writeCurrentStateToMopFile();
+
+
         }
         experiment->timer.stop();
     } else if (integrator =="mp") {

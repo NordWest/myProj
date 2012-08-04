@@ -1,219 +1,8 @@
-#include <QtCore/QCoreApplication>
+#ifndef MYDOMMOODY_H
+#define MYDOMMOODY_H
 
-#include "./../libs/dele.h"
-//#include "./../libs/orbcat.h"
-//#include "./../libs/observ.h"
-//#include "./../libs/dele.h"
-//#include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
-#include "./../libs/astro.h"
-#include "./../libs/comfunc.h"
-//#include "./../libs/rada.h"
-#include "./../libs/redStat.h"
-#include "./../libs/mpcs.h"
-#include "./../libs/ephem_util.h"
+#include "moody/capsule/capsuleBase/particle/Particle.h"
 
-#include <QDebug>
-#include <QSettings>
-#include <QDataStream>
-#include <QDomDocument>
-
-#define OMPLIB
-
-#include <iostream>
-#include <iomanip>
-
-#include "./../libs/moody/moody.h"
-#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
-#include "./../libs/moody/capsule/Capsule.h"
-#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
-#include "./../libs/myDomMoody.h"
-
-
-static QDataStream* clog0 = 0;
-void customMessageHandler(QtMsgType type, const char* msg)
-{
-    static const char* msgType[] =
-    {
-        "Debug    : ",
-        "Warning  : ",
-        "Critical : ",
-        "Fatal    : "
-    };
-
-    static QTextStream cout(stdout);
-    static QTextStream cerr(stderr);
-
-    cerr << msgType[type] << msg << endl;
-    if(clog0 && clog0->device())
-        *clog0 << type << msg;
-    if(type == QtFatalMsg)
-    {
-        cerr << "aborting..." << endl;
-
-#if defined(Q_CC_MSVC) && defined(QT_DEBUG) && defined(_CRT_ERROR) && defined(_DEBUG)
-        int reportMode = _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
-        _CrtSetReportMode(_CRT_ERROR, reportMode);
-        int ret = _CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, QT_VERSION_STR, msg);
-        if(ret == 0 && reportMode & _CRTDBG_MODE_WNDW)
-            return;
-        else if(ret == 1)
-            _CrtDbgBreak();
-#endif
-
-#if defined(Q_OS_UNIX) && defined(QT_DEBUG)
-        abort();
-#else
-        exit(1);
-#endif
-    }
-}
-
-int nofzbody;
-dele *nbody;
-//ever_params *eparam;
-
-#define CENTER CENTER_BARY
-#define SK SK_EKVATOR
-
-//int readCFG(QString fileName, QList<ParticleStruct *> &pList);
-//int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
-
-int main(int argc, char *argv[])
-{
-    QCoreApplication a(argc, argv);
-    setlocale(LC_NUMERIC, "C");
-
-    QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
-
-    QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
-    QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
-    QString obsCode = sett->value("general/obsCode", "500").toString();
-    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
-    double time0 = sett->value("general/time0", 2455201.0).toDouble();
-    int si = sett->value("general/si", 0).toInt();
-
-    dele *nbody;
-    nbody = new dele();
-
-    int iniJplRes = nbody->init(jplFile.toAscii().data());
-    if(iniJplRes) return 1;
-
-    QList <ParticleStruct*> pList;
-
-    if(readCFG(confFile, pList))
-    {
-        qDebug() << QString("readCFG error\n");
-        return 1;
-    }
-
-
-    int i, sz;
-    sz = pList.size();
-    qDebug() << QString("pList: %1\n").arg(sz);
-
-    //Capsule *experiment = new Capsule;
-
-
-    QString name;
-    int plaNum;
-
-    double *X, *V;
-    QVector <double*> xVect, vVect;
-
-    QFile xyFile("xyData.txt");
-    xyFile.open(QFile::Truncate | QFile::WriteOnly);
-    QTextStream xyStm(&xyFile);
-
-    double dist, vel;
-    double mass[10];/* = {
-                1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
-    };*/
-    double gmass[10];
-
-    double gms = nbody->headParam("GMS");
-    gmass[9] = gms;
-    mass[9] = 1.0;
-    gmass[2] = nbody->headParam(QString("GMB").arg(i+1).toAscii().data());
-    mass[2] = gms/gmass[2];
-    for(i=0; i<9; i++)
-    {
-        if(i==2) continue;
-        gmass[i] = nbody->headParam(QString("GM%1").arg(i+1).toAscii().data());
-        mass[i] = gms/gmass[i];
-    }
-
-    for(i=0; i<10; i++)
-    {
-        if(si) mass[i] = SUN_MASS_KG/mass[i];
-        qDebug() << QString("mass %1: %2 - %3\n").arg(i).arg(mass[i]).arg(gmass[i]);
-    }
-
-    double coefX, coefXD;
-    coefX = coefXD = 1.0;
-    if(si)
-    {
-        coefX = AUKM*1000;
-        coefXD = 1000*AUKM/SECINDAY;
-    }
-
-
-    for(i=0; i<sz; i++)
-    {
-
-
-        name = QString(pList[i]->name.data());
-        if(QString().compare(name, "Sol")==0) plaNum = 10;
-        else plaNum = planet_num(name.toAscii().data());
-        if(plaNum!=-1)
-        {
-            X = new double[3];
-            V = new double[3];
-            nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
-            nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
-            xVect << X;
-            vVect << V;
-            dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
-            vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
-            pList[i]->x = coefX*X[0];
-            pList[i]->y = coefX*X[1];
-            pList[i]->z = coefX*X[2];
-            pList[i]->xd = coefXD*V[0];
-            pList[i]->yd = coefXD*V[1];
-            pList[i]->zd = coefXD*V[2];
-
-            if(plaNum==10) pList[i]->mass = mass[9];
-            else pList[i]->mass = mass[plaNum];
-
-//            pList[i]->mass = mass[plaNum];
-
-        /*
-
-            switch(plaNum)
-            {
-            case 0:
-                pList[i]->mass = gms/nbody->headParam("GM0");
-                break;
-            }
-
-*/
-            xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 18, 'e', 9).arg(X[1], 18, 'e', 9).arg(X[2], 18, 'e', 9).arg(dist, 18, 'e', 9).arg(V[0], 18, 'e', 9).arg(V[1], 18, 'e', 9).arg(V[2], 18, 'e', 9).arg(vel, 18, 'e', 9);
-        }
-
-        //Particle *p = new Particle;
-
-        //p->fillFromExistingParticleStruct(*pList[i]);
-
-        //experiment->addToPopulationSet(*p);
-    }
-
-    xyFile.close();
-
-    saveCFG("test.xml", pList);
-    //experiment->exportParticlesToXMLFile("test.xml");
-    return 0;//a.exec();
-}
-/*
 int readCFG(QString fileName, QList <ParticleStruct*> &pList)
 {
     QString errorStr;
@@ -247,6 +36,8 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
      std::string irep;
 
      QDomElement child = root.firstChildElement("particle");
+     QDomElement vector;
+     QDomElement rgb;
           while (!child.isNull()) {
               p = new ParticleStruct;
               p->name = child.firstChildElement("name").text().toAscii().data();
@@ -287,6 +78,21 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
               if (srep == "planetesimal") {
                   p->identity = Advisor::planetesimal;
               }
+
+              vector = child.firstChildElement("vector");
+
+              p->x = vector.firstChildElement("X").text().toDouble();
+              p->y = vector.firstChildElement("Y").text().toDouble();
+              p->z = vector.firstChildElement("Z").text().toDouble();
+              p->xd = vector.firstChildElement("XD").text().toDouble();
+              p->yd = vector.firstChildElement("YD").text().toDouble();
+              p->zd = vector.firstChildElement("ZD").text().toDouble();
+
+              rgb = child.firstChildElement("rgb");
+              p->red = rgb.firstChildElement("red").text().toInt();
+              p->green = rgb.firstChildElement("green").text().toInt();
+              p->blue = rgb.firstChildElement("blue").text().toInt();
+
               qDebug() << QString("%1\n").arg(p->name.data());
               pList << p;
               child = child.nextSiblingElement("particle");
@@ -315,16 +121,16 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
         return 1;
     }
 
-/
+*/
     domDocument.createElement("root");
 
-    cfgStm << "<?xml version=\"1.0\"?><root xsi:noNamespaceSchemaLocation = \"EnvironmentSet.xsd\" xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\">" << "\n";
+    cfgStm << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root xsi:noNamespaceSchemaLocation = \"EnvironmentSet.xsd\" xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\">" << "\n";
 
 
      std::string srep;
      std::string irep;
 
-     QDomElement child, vector, partDom;// = root.firstChildElement("particle");
+     QDomElement child, vector, rgb, partDom;// = root.firstChildElement("particle");
     QDomText childText;
      int i, sz;
      sz = pList.size();
@@ -445,6 +251,26 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
          partDom.appendChild(vector);
 
 
+         rgb = domDocument.createElement("rgb");
+
+         child = domDocument.createElement("red");
+         childText = domDocument.createTextNode(QString("%1").arg(p->red));
+         child.appendChild(childText);
+         rgb.appendChild(child);
+
+         child = domDocument.createElement("green");
+         childText = domDocument.createTextNode(QString("%1").arg(p->green));
+         child.appendChild(childText);
+         rgb.appendChild(child);
+
+         child = domDocument.createElement("blue");
+         childText = domDocument.createTextNode(QString("%1").arg(p->blue));
+         child.appendChild(childText);
+         rgb.appendChild(child);
+
+         partDom.appendChild(rgb);
+
+
          domDocument.appendChild(partDom);
 
          }
@@ -459,4 +285,6 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
 
     cfgFile.close();
 }
-*/
+
+
+#endif // MYDOMMOODY_H

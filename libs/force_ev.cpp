@@ -61,6 +61,7 @@
                   {
   //		    cout << "WARN!!!! V OUT!!!!" << endl;
                       printf("WARN!!!! V OUT!!!!\n");
+                      printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
                       exit(1);
                   }
                   //k=0;
@@ -116,6 +117,7 @@
                                       {
           //				cout << "WARN!!!! V OUT!!!!" << endl;
                                           printf("WARN!!!! V OUT!!!!\n");
+                                          printf("Rj[%d]: %f > %f\n", teloj, Rj, eparam->vout);
                                           exit(1);
                                       }
 
