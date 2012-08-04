@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlerror.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.cpp \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
-    ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp
+    ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
+    ../libs/ephem_util.cpp
 
 
 HEADERS += ../libs/orbit.h \
@@ -78,7 +79,8 @@ HEADERS += ../libs/orbit.h \
     ./../libs/moody/capsule/capsuleBase/particle/Particle.h \
     ./../libs/moody/capsule/capsuleBase/CapsuleBase.h \
     ../libs/moody/moody.h \
-    ../libs/moody/capsule/Capsule.h
+    ../libs/moody/capsule/Capsule.h \
+    ../libs/ephem_util.h
 
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a
