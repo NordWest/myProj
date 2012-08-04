@@ -2,7 +2,7 @@
 # Project created by QtCreator 2009-11-07T17:37:18
 # -------------------------------------------------
 #QT -= gui
-TARGET = everBody
+TARGET = ./../../lab/testNbody/everBody
 CONFIG += console \
     warn_off \
     debug
