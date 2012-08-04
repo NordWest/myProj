@@ -194,19 +194,27 @@ public:
         tlRecord& operator=(const TLRecord &rhs);
 
         void getIniName(QString &iniName);
+        char* get_cat_name();
+        char* get_task_name();
 };
 
 bool operator==( const tlRecord& lhs, const tlRecord& rhs );
 
 class taskList// : listFile <tlRecord>
 {
+public:
     QList <tlRecord*> recList;
     QString fileName;
-public:
+
     taskList();
     int init(QString fname);
     int s2rec(QString tStr);
     int rec2s(QString &tStr);
+    int size();
+    tlRecord* at(int i);
+    int save();
+    int saveAs(QString tfName);
+    int getRec(tlRecord* tlRec, int pos);
 };
 
 class LogRecord
@@ -562,21 +570,21 @@ class ERecord
 	char *desc;
 	
 public:
-	char *name;
-	int noftask;
+    QString name;
+    QString taskName;
 	double Tun;
-	char *tail;
+//	char *tail;
 	
 	ERecord();
 	~ERecord();
 
 	void copyTo(ERecord *recp);
-
+/*
 	int set_desc(char *desc);
-	int set_name(char *name);
+    int set_name(char *name);
 	char* get_desc();
 	char* get_name();
-
+*/
 };
 
 class EList :public fBuffer
@@ -596,7 +604,7 @@ public:
 	int RemExc(int noftask, char *ename);
 	int RemExc(char *ename);
 
-	int IsExc(int noftask, char *ename);
+    int IsExc(char *taskName, char *ename);
 	int IsExc(char *ename);
 
 	int UpdateExc(double cTime);
@@ -618,27 +626,27 @@ class CatRecord
 {
 public:
 	int cat_type;			//0-dele; 1-orbcat; 2-sscat; 3-mpccat
-	char *name;
-	char *path;
+    QString name;
+    QString path;
 
 	CatRecord();
 	~CatRecord();
 
-	void Set(int num, char *name, char *path);
-	void get_dir_path(char *dp);
+//	void Set(int num, char *name, char *path);
+//	void get_dir_path(char *dp);
 };
 
 class CatList :public FileDynStrBin
 {
 public:
-	CatRecord *record;
+    QList <CatRecord *> recList;
 	
 	int Add(CatRecord *er);
-	int Rem(char *cname);
+    int Rem(QString cname);
 	int Get(int num);
 
-	int GetByName(char *ename);
-	int GetCatType(char *cat_name);
+    int GetByName(QString ename);
+    int GetCatType(QString cat_name);
 //	int GetByNum(int num);
 
 
@@ -757,7 +765,7 @@ public:
 	LogList *log_list;
 	LogList *log_list_oneday;
 	ObsList *obs_list;
-	TaskList *task_list;
+    taskList *task_list;
 	CatList *cat_list;
 
 //	char *fn_cat;

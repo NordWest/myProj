@@ -458,6 +458,52 @@ int taskList::s2rec(QString tStr)
     return 0;
 }
 
+int taskList::size()
+{
+    return(recList.size());
+}
+
+tlRecord* taskList::at(int i)
+{
+    return(recList.at(i));
+}
+
+int taskList::save()
+{
+    int i, sz;
+    QString tstr;
+    sz = recList.size();
+
+    QFile resFile(fileName);
+    if(!resFile.open(QFile::WriteOnly | QFile::Truncate)) return 1;
+    QTextStream resStm(&resFile);
+
+    for(i=0; i<sz; i++)
+    {
+        recList.at(i)->toString(tstr);
+        resStm << tstr << "\n";
+    }
+
+    resFile.close();
+
+    return 0;
+}
+
+int taskList::saveAs(QString tfName)
+{
+    fileName = tfName;
+    return(save());
+}
+
+int taskList::getRec(tlRecord* tlRec, int pos)
+{
+    if(pos<0||pos>=recList.size()) return 1;
+
+    tlRec = recList.at(pos);
+
+    return 0;
+}
+
 //////////////////////////////////////////////////////////
 
 LRecord::LRecord()
@@ -851,7 +897,7 @@ int tlRecord::fromString(QString tStr)
 void tlRecord::toString(QString &tStr)
 {
     tStr.clear();
-    //tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(exp, 12, 'e').arg(t0, 14, 'f', 6).arg(t0, 14, 'f', 6).arg(desc));
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10").arg(name, 16).arg(catName).arg(flag_active).arg(exp, 12, 'e').arg(dRA).arg(NinN).arg(Ntot).arg(texc).arg(dirPath).arg(desc));
 }
 
 
@@ -905,6 +951,16 @@ void tlRecord::getIniName(QString &iniName)
 {
     QDir tDir(dirPath);
     iniName = QString("%1ini.lst").arg(tDir.absolutePath());
+}
+
+char* tlRecord::get_cat_name()
+{
+    return(catName.toAscii().data());
+}
+
+char* tlRecord::get_task_name()
+{
+    return(name.toAscii().data());
 }
 
 
@@ -1602,7 +1658,7 @@ int EList::IsExc(char *ename)
 	return 0;
 }
 
-int EList::IsExc(int noft, char *ename)
+int EList::IsExc(char* taskName, char *ename)
 {
 	int i = 0;
 
@@ -1610,7 +1666,7 @@ int EList::IsExc(int noft, char *ename)
 	{
 		this->GetExc(i);
 
-		if((streqv(ename, this->record->name))&&(noft==this->record->noftask)) return 1;
+        if((streqv(ename, this->record->name))&&(streqv(taskName, this->record->)) return 1;
 
 		i++;
 	}
@@ -2108,7 +2164,9 @@ CatList::~CatList()
 
 int CatList::init(char *fname)
 {
-        return(FileDynStrBin::init(fname));
+        //return(FileDynStrBin::init(fname));
+
+        return 0;
 }
 
 int CatList::Add(CatRecord *er)
@@ -2133,7 +2191,7 @@ int CatList::Get(int i)
 	return 0;
 }
 
-int CatList::Rem(char *cname)
+int CatList::Rem(QString cname)
 {
 	int rempos = this->GetByName(cname);
 
@@ -2142,27 +2200,25 @@ int CatList::Rem(char *cname)
 	return 0;
 }
 
-int CatList::GetByName(char *ename)
+int CatList::GetByName(QString ename)
 {
 	int i = 0;
-	int nobs = 0;
+    int sz;
+    sz = recList.size();
 
-        while(i<nstr())
+    for(i=0; i<sz; i++)
 	{
-		this->Get(i);
-
-		if(streqv(ename, this->record->name)) return i;
-
-		i++;
+        if(QString().compare(ename, recList.at(i)->name)==0) return i;
 	}
 
 	return -1;
 }
 
-int CatList::GetCatType(char *cat_name)
+int CatList::GetCatType(QString cat_name)
 {
+                int cpos = GetByName(cat_name);
 	if(this->GetByName(cat_name)==-1) return -1;
-	return(this->record->cat_type);
+    return(this->recList.at(cpos)->cat_type);
 
 //	return -1;
 }
@@ -2425,7 +2481,7 @@ SkyArea::SkyArea(char *dele_header)
 	this->log_list = new LogList();
 	this->log_list_oneday = new LogList();
 	this->obs_list = new ObsList();
-	this->task_list = new TaskList;
+    this->task_list = new taskList;
 	this->cat_list = new CatList;
 	this->params = new saParams;
 	err_log = new char[255];
@@ -2457,7 +2513,7 @@ SkyArea::SkyArea()
 	this->log_list = new LogList();
 	this->log_list_oneday = new LogList();
 	this->obs_list = new ObsList();
-	this->task_list = new TaskList;
+    this->task_list = new taskList;
 	this->cat_list = new CatList;
 	this->params = new saParams;
 	err_log = new char[256];
@@ -2642,7 +2698,7 @@ int SkyArea::Grade()
 
 	double Sdist, Edist;
 
-        int ctask = this->task_list->nstr();
+        int ctask = this->task_list->size();
 
 	IList temp_ini;
         RLRecord *resRec;
@@ -2658,16 +2714,17 @@ int SkyArea::Grade()
 	sscatFB *tsscat;
         QString nameStr;
 //	sscat *tsscat = new sscat;
+        tlRecord* tlRec;
 
 	for(i=0; i<ctask; i++)
 	{
-		if(this->task_list->GetRec(i)) break;
-		if(this->task_list->record->flag_active==0) continue;
+        if(this->task_list->getRec(tlRec, i)) break;
+        if(tlRec->flag_active==0) continue;
 
-		this->GetTaskIniFNames(str_ini, str_cat);
+        this->GetTaskIniFNames(str_ini, str_cat);
 		this->ini_list->init(str_ini);
 
-		this->cat_list->GetByName(this->task_list->record->get_cat_name());
+        this->cat_list->GetByName(tlRec->get_cat_name());
 
 		switch(this->cat_list->record->cat_type)
 		{
@@ -2701,7 +2758,7 @@ int SkyArea::Grade()
                         resRec = new RLRecord;
 
 			if(!ini_list->record->flag0) continue;
-			if(exc_list->IsExc(task_list->record->noftask, ini_list->record->name)) continue;
+            if(exc_list->IsExc(tlRec->get_task_name(), ini_list->record->name)) continue;
 
 
                         resRec->nofobs = this->obs_list->GetNObs(this->ini_list->record->name);

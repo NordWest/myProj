@@ -114,31 +114,31 @@ int main(int argc, char *argv[])
     QString catListFile = QString("%1/cat.lst").arg(eassDir);
 
     QString resDir = QString("./");
-    QString tListFile = QString("%1/task.lst").arg(resDir);
+    QString tListFile = QString("%1/taskN.lst").arg(resDir);
 
 
-//    TaskList taskL;
-//    taskL.init(taskListFile.toAscii().data());
+    taskList taskL;
+    taskL.init(taskListFile.toAscii().data());
 
 
     taskList tList;
     tList.init(tListFile);
- /*   tlRecord *ntRec;
+    tlRecord *ntRec;
 
     int i, sz;
 
-    sz = taskL.nstr();
+    sz = taskL.size();
 
     for(i=0;i<sz;i++)
     {
-        taskL.GetRec(i);
+        //taskL.GetRec(i);
         ntRec = new tlRecord;
-        &ntRec = &taskL.record;
-        tList.addRec(ntRec);
+        ntRec = taskL.at(i);
+        tList.recList.append(ntRec);
     }
 
     tList.save();
-*/
+
 
 
 
