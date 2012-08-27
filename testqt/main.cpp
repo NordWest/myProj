@@ -1,8 +1,9 @@
 #include <QApplication>
 #include <QtCore>
 //#include "multidim.h"
-#include "./../libs/astro.h"
+//#include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
+#include "./../libs/listfile.h"
 //#include "./../libs/observatory.h"
 //#include "./../libs/fitsdata.h"
 //#include <conio.h>
@@ -49,6 +50,46 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
+class tRecord1 : public tRecord
+{
+public:
+    int fromString(QString tStr){return 1;};
+    int toString(QString &tStr){return 1;};
+};
+
+class listFile1 : public listFile <tRecord1>
+{
+
+};
+
+
+int main(int argc, char *argv[])
+{
+    qInstallMsgHandler(customMessageHandler);
+    QApplication app(argc, argv);
+
+    QFile* logFile = new QFile("messages.log");
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+    clog = new QDataStream(logFile);
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    listFile1 lf;
+    tRecord1 lr1;
+
+    lf.init("./test.lf");
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////
+    delete clog;
+    clog = 0;
+    delete logFile;
+    logFile = 0;
+
+    qInstallMsgHandler(0);
+
+    return 0;
+}
+/*
 int findIndex(int *tInd, int dLev, int expNum, QVector <int*> *eIndex);
 int proofInd(int *tInd, int expNum, QVector <int*> *eIndex);
 

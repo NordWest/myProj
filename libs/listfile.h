@@ -10,8 +10,8 @@ public:
     tRecord(){};
 //    ~tRecord(){};
 
-    int fromString(QString tStr){};
-    int toString(QString &tStr){};
+    int fromString(QString tStr){return 0;};
+    int toString(QString &tStr){return 0;};
 };
 
 /*
