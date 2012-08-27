@@ -23,7 +23,9 @@ public:
     double dec();
     double magn();
     void getBand(QString &bandStr);
+    void getCatFlag(QString &catFlag);
     void getObsCode(QString &obsCode);
+    int  getObsNum();
 
     void setPos(double mjdt, double radeg, double deDeg);
     void setMagn(double magn);

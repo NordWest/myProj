@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = mpcOC
+TARGET = ./../../lab/mpcTools/mpcOC
 
 CONFIG += console \
     exceptions \

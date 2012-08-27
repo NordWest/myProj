@@ -16,7 +16,13 @@ QString mpcRec::getMpNumber()
 int mpcRec::mpNumber()
 {
     bool isOk;
-    int num = dataStr.mid(0, 5).toInt(&isOk);
+    QString upStr;
+
+
+    unpackString(&upStr, dataStr.mid(0, 5));
+
+    int num = upStr.toInt(&isOk);
+
     if(isOk) return num;
     return -1;
 }
@@ -91,10 +97,33 @@ void mpcRec::getObsCode(QString &obsCode)
     obsCode.insert(0, dataStr.mid(77, 3));
 }
 
+int  mpcRec::getObsNum()
+{
+    QString obsCode;
+    getObsCode(obsCode);
+
+    bool isOk;
+    QString upStr;
+
+
+    unpackString(&upStr, obsCode);
+
+    int num = upStr.toInt(&isOk);
+
+    if(isOk) return num;
+    return -1;
+}
+
 void mpcRec::getBand(QString &bandStr)
 {
     bandStr.clear();
     bandStr.insert(0, dataStr.mid(70, 1));
+}
+
+void mpcRec::getCatFlag(QString &catFlag)
+{
+    catFlag.clear();
+    catFlag.insert(0, dataStr.mid(71, 1));
 }
 
 int mpcRec::fromStr(QString dStr)

@@ -20,22 +20,22 @@
 #include <boost/numeric/ublas/matrix.hpp>
 */
 
-struct obsCodeCouter
+struct obsCodeCounter
 {
     QString obsCode;
     int count;
-    obsCodeCouter()
+    obsCodeCounter()
     {
         obsCode="";
         count = 0;
     };
 };
 
-struct objCouter
+struct objCounter
 {
     QString objNum;
     int count;
-    objCouter()
+    objCounter()
     {
         objNum="";
         count = 0;
@@ -53,10 +53,21 @@ struct yearCounter
     };
 };
 
-void addObsCode(QList <obsCodeCouter*> &obsList, QString obsCode)
+struct catFlagCounter
+{
+    QString catFlag;
+    int count;
+    catFlagCounter()
+    {
+        catFlag="";
+        count = 0;
+    };
+};
+
+void addObsCode(QList <obsCodeCounter*> &obsList, QString obsCode)
 {
     int i, sz;
-    obsCodeCouter* obsRec;
+    obsCodeCounter* obsRec;
     sz = obsList.count();
     for(i=0; i<sz; i++)
     {
@@ -67,10 +78,31 @@ void addObsCode(QList <obsCodeCouter*> &obsList, QString obsCode)
         }
 
     }
-    obsRec = new obsCodeCouter;
+    obsRec = new obsCodeCounter;
     obsRec->obsCode = obsCode;
     obsRec->count=1;
     obsList << obsRec;
+
+}
+
+void addCatFlag(QList <catFlagCounter*> &cfList, QString catFlag)
+{
+    int i, sz;
+    catFlagCounter* cfRec;
+    sz = cfList.count();
+    for(i=0; i<sz; i++)
+    {
+        if(QString().compare(cfList.at(i)->catFlag, catFlag)==0)
+        {
+            cfList.at(i)->count++;
+            return;
+        }
+
+    }
+    cfRec = new catFlagCounter;
+    cfRec->catFlag = catFlag;
+    cfRec->count=1;
+    cfList << cfRec;
 
 }
 
@@ -95,7 +127,28 @@ void addYear(QList <yearCounter*> &yrList, int year)
 
 }
 
-void sortObsNum(QList <obsCodeCouter*> &obsList)
+void addObjNum(QList <objCounter*> &objList, QString objNum)
+{
+    int i, sz;
+    objCounter* objRec;
+    sz = objList.count();
+    for(i=0; i<sz; i++)
+    {
+        if(QString().compare(objList.at(i)->objNum, objNum)==0)
+        {
+            objList.at(i)->count++;
+            return;
+        }
+
+    }
+    objRec = new objCounter;
+    objRec->objNum = objNum;
+    objRec->count=1;
+    objList << objRec;
+
+}
+
+void sortObsNum(QList <obsCodeCounter*> &obsList)
 {
     int i, j, sz;
     sz = obsList.size();
@@ -104,6 +157,32 @@ void sortObsNum(QList <obsCodeCouter*> &obsList)
         for(j=i+1;j<sz;j++)
         {
             if(obsList.at(i)->count<obsList.at(j)->count) obsList.swap(i, j);
+        }
+    }
+}
+
+void sortYear(QList <yearCounter*> &yrList, int dir = 1)
+{
+    int i, j, sz;
+    sz = yrList.size();
+    for(i=0;i<sz-1;i++)
+    {
+        for(j=i+1;j<sz;j++)
+        {
+            if(dir*yrList.at(i)->year<yrList.at(j)->year*dir) yrList.swap(i, j);
+        }
+    }
+}
+
+void sortObjNum(QList <objCounter*> &objList)
+{
+    int i, j, sz;
+    sz = objList.size();
+    for(i=0;i<sz-1;i++)
+    {
+        for(j=i+1;j<sz;j++)
+        {
+            if(objList.at(i)->count<objList.at(j)->count) objList.swap(i, j);
         }
     }
 }
@@ -147,13 +226,16 @@ int main(int argc, char *argv[])
 */
 
         mpcRec mpR;
-        QString mpNum, obsCode;
+        QString mpNum, obsCode, catFlag;
         double mjd;
         DATEOBS date_obs;
         QString mpcFile(argv[1]);
 
-        QList <obsCodeCouter*> obsList;
+        QList <obsCodeCounter*> obsList;
         QList <yearCounter*> yrList;
+        QList <catFlagCounter*> cfList;
+        QList <objCounter*> objList;
+
 
         QFile inFile(mpcFile);
         if(!inFile.open(QIODevice::ReadOnly))
@@ -171,36 +253,41 @@ int main(int argc, char *argv[])
             mpR.getObsCode(obsCode);
             mjd = mpR.mjd();
             getDATEOBSfromMJD(&date_obs, mjd);
+            mpR.getCatFlag(catFlag);
+
 
             addObsCode(obsList, obsCode);
             addYear(yrList, date_obs.year);
+            addCatFlag(cfList, catFlag);
+            addObjNum(objList, mpNum);
         }
 
-        qDebug() << QString("obs: %1\nyears: %2\n").arg(obsList.count()).arg(yrList.count());
+        qDebug() << QString("obs: %1\nyears: %2\ncatFlags: %3\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count());
+
+
+
+        //save obsList
 
         sortObsNum(obsList);
 
-    //save obsList
-
-        QFile resFile;
-        resFile.setFileName("./obsCounter.txt");
-        QTextStream resStm;
-        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
-        {
-            resStm.setDevice(&resFile);
-            sz = obsList.count();
-            for(i=0; i<sz; i++)
+            QFile resFile;
+            resFile.setFileName("./obsCounter.txt");
+            QTextStream resStm;
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
+                resStm.setDevice(&resFile);
+                sz = obsList.count();
+                for(i=0; i<sz; i++)
+                {
 
-                resStm << QString("%1|%2\n").arg(obsList.at(i)->obsCode).arg(obsList.at(i)->count);
+                    resStm << QString("%1|%2\n").arg(obsList.at(i)->obsCode).arg(obsList.at(i)->count);
+                }
+
+                resFile.close();
             }
 
-            resFile.close();
-        }
-
     //save yrList
-
-
+        sortYear(yrList, -1);
 
         resFile.setFileName("./yearCounter.txt");
 
@@ -211,7 +298,44 @@ int main(int argc, char *argv[])
             for(i=0; i<sz; i++)
             {
 
-                resStm << QString("%1|%2\n").arg(yrList.at(i)->year).arg(obsList.at(i)->count);
+                resStm << QString("%1|%2\n").arg(yrList.at(i)->year).arg(yrList.at(i)->count);
+            }
+
+            resFile.close();
+        }
+
+
+    //save cfList
+        //sortYear(yrList);
+
+        resFile.setFileName("./cfCounter.txt");
+
+        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        {
+            resStm.setDevice(&resFile);
+            sz = cfList.count();
+            for(i=0; i<sz; i++)
+            {
+
+                resStm << QString("%1|%2\n").arg(cfList.at(i)->catFlag).arg(cfList.at(i)->count);
+            }
+
+            resFile.close();
+        }
+
+    //save objList
+        sortObjNum(objList);
+
+        resFile.setFileName("./objCounter.txt");
+
+        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        {
+            resStm.setDevice(&resFile);
+            sz = objList.count();
+            for(i=0; i<sz; i++)
+            {
+
+                resStm << QString("%1|%2\n").arg(objList.at(i)->objNum).arg(objList.at(i)->count);
             }
 
             resFile.close();

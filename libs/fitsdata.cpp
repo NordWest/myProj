@@ -10791,7 +10791,8 @@ int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miri
     outerProcess.setProcessChannelMode(QProcess::MergedChannels);
     outerProcess.setReadChannel(QProcess::StandardOutput);
 
-    if(FD_LOG_LEVEL) qDebug() << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
+    //if(FD_LOG_LEVEL)
+        qDebug() << "outerArguments: " << miriadeProcData.name << " " << outerArguments.join("|") << "\n";
 
     outerProcess.start(miriadeProcData.name, outerArguments);
 

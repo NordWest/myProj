@@ -1,7 +1,7 @@
 #include <QtCore/QCoreApplication>
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
+#include "./../libs/skyarealf.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
@@ -16,15 +16,16 @@ int main(int argc, char *argv[])
     QString mpcCatName = sett.value("general/mpcCatName", "mpcorb.dat").toString();
     QString deleCatName = sett.value("general/deleCatName", "dele.cat").toString();
     QString obsCatName = sett.value("general/obsCatName", "Obs.txt").toString();
+    QString installDir = sett.value("general/installDir", "./").toString();
 
 
 
-    SkyArea sa;
+    skyAreaLF sa;
     int yr, mth, day, hr, min;
     double sec, jDay, s;
     //sa = new SkyArea;
 
-    sa.init(obsCatName.toAscii().data(), deleCatName.toAscii().data());
+    sa.init(obsCatName, deleCatName, installDir);
 
 
     QDateTime dtCurr;
@@ -53,15 +54,18 @@ int main(int argc, char *argv[])
 
     //deg_to_damas(&strT0, le de, QString spl_symb, int ndig);
 
-    qDebug() << QString("s: %1\ntr: %2\nts: %3\n").arg(s).arg(rad2grad(sa.params->timeSunRise)).arg(rad2grad(sa.params->timeSunSet));
+    qDebug() << QString("s: %1\ntr: %2\nts: %3\n").arg(s).arg(rad2grad(sa.params.timeSunRise)).arg(rad2grad(sa.params.timeSunSet));
 
-    sa.params->ignore_task_rules = 1;
+    sa.params.ignore_task_rules = 1;
 
     //sa.UpdateTaskCatalog(3);
 
-    sa.Grade();
+    resList rList;
 
-    sa.res_list->save();
+
+    sa.grade(rList);
+
+    rList.saveAs("res.lst");
 
     //delete sa;
 

@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = findSimMpcs
+TARGET = ./../../lab/mpcTools/findSimMpcs
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 

@@ -8,11 +8,12 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 
     mpcRec mpR;
-    int obsNum;
-    int objNum;
-    int isObs, isObj, isTime, k, r, i;
-    QString mpNum, obsCode;
+    int obsNum, objNum, cfNum;
+    int isObs, isObj, isTime, isCF;
+    int k, r, i;
+    QString mpNum, obsCode, catFlag;
     double mjd0, mjd1, mjd;
+    QStringList objNumList;
 
     QTime workTime;
     workTime.start();
@@ -21,12 +22,25 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
     QStringList obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
-    QStringList objNumList = sett->value("general/objNumList", "").toString().split("|");
+    QString objFileName = sett->value("general/objFileName", "").toString();
+    QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
 
     if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0, 0);
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
+
+
+    QFile objFile(objFileName);
+    QTextStream objStm;
+    if(objFile.open(QFile::ReadOnly))
+    {
+        objStm.setDevice(&objFile);
+        while(!objStm.atEnd())
+        {
+            objNumList << QString("%1").arg(objStm.readLine().section(" ", 0, 0), 5, QLatin1Char( '0' ) );
+        }
+    }
 
     QString fileName = QString(argv[1]);
     QString fileNameRes = QString(argv[2]);
@@ -51,7 +65,8 @@ int main(int argc, char *argv[])
 
     obsNum = obsCodeList.size();
     objNum = objNumList.size();
-    qDebug() << QString("obsNum= %1\tobjNum= %2\n").arg(obsNum).arg(objNum);
+    cfNum = catFlagList.size();
+    qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\n").arg(obsNum).arg(objNum).arg(cfNum);
 
     k=0; r=0;
     while(!inFile.atEnd())
@@ -61,6 +76,7 @@ int main(int argc, char *argv[])
         isObj = 1;
         isObs = 1;
         isTime = 1;
+        isCF = 1;
 
         mpR.getMpNumber(mpNum);
         for(i=0; i<objNum && objNumList.at(i).size()>0;i++)
@@ -77,10 +93,16 @@ int main(int argc, char *argv[])
         }
 
         mjd = mpR.mjd();
-
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
 
-        if(isObj&&isObs&&isTime)
+        mpR.getCatFlag(catFlag);
+        for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
+        {
+            isCF = (QString().compare(catFlag, catFlagList.at(i))==0);
+            if(isCF) break;
+        }
+
+        if(isObj&&isObs&&isTime&&isCF)
         {
             resStm << mpR.toStr() << "\n";
             r++;

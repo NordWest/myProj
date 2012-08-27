@@ -329,6 +329,93 @@ int iniList::removeObj(QString name)
     return 1;
 }
 
+/////////////////////////////////////////////////
+
+resRecord::resRecord()
+{
+    name = "";
+    taskName = "";
+    desc = "";
+    ra = dec = mu_ra = mu_dec = magn = exp = 0.0;
+}
+
+int resRecord::fromString(QString tStr)
+{
+    QStringList strL;
+    strL = tStr.split("|");
+    if(strL.size()!=9) return 1;
+    name = strL.at(0);
+    taskName = strL.at(1);
+    ra = strL.at(2).toDouble();
+    dec = strL.at(3).toDouble();
+    mu_ra = strL.at(4).toDouble();
+    mu_dec = strL.at(5).toDouble();
+    magn = strL.at(6).toDouble();
+    exp = strL.at(7).toDouble();
+    taskName = strL.at(8);
+
+    return 0;
+}
+
+void resRecord::toString(QString &tStr)
+{
+    tStr.clear();
+    tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(taskName).arg(ra, 14, 'f', 6).arg(dec, 14, 'f', 6).arg(mu_ra, 14, 'f', 6).arg(mu_dec, 14, 'f', 6).arg(magn, 5, 'f', 2).arg(exp, 10).arg(desc));
+}
+
+
+bool operator== ( const resRecord& lhs, const resRecord& rhs )
+{
+    return((QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0)&&(QString().compare(lhs.taskName, rhs.taskName, Qt::CaseSensitive)==0));
+}
+
+bool operator== ( const resRecord& lhs, const resRecord* rhs )
+{
+    return((QString().compare(lhs.name, rhs->name, Qt::CaseSensitive)==0)&&(QString().compare(lhs.taskName, rhs->taskName, Qt::CaseSensitive)==0));
+}
+
+resRecord& resRecord::operator=(const resRecord &rhs) {
+    // Check for self-assignment!
+    if (this == &rhs)      // Same object?
+      return *this;        // Yes, so skip assignment, and just return *this.
+
+    //... // Deallocate, allocate new space, copy values...
+    name = rhs.name;
+    this->taskName = rhs.taskName;
+    this->desc = rhs.desc;
+    this->exp = rhs.exp;
+    this->ra = rhs.ra;
+    this->dec = rhs.dec;
+    this->mu_ra = rhs.mu_ra;
+    this->mu_dec = rhs.mu_dec;
+    this->magn = rhs.magn;
+
+    return *this;
+}
+
+int resList::addRec(resRecord& nRec)
+{
+    int i, sz;
+    sz = recList.size();
+    for(i=0; i<sz; i++)
+    {
+        if(&nRec==recList.at(i)) return 1;
+    }
+    append(nRec);
+    return 0;
+}
+
+int resList::addRec(resRecord* nRec)
+{
+    int i, sz;
+    sz = recList.size();
+    for(i=0; i<sz; i++)
+    {
+        if(*nRec==recList.at(i)) return 1;
+    }
+    append(*nRec);
+    return 0;
+}
 
 ////////////////////////////////////////////////
 
@@ -540,3 +627,98 @@ int skyAreaLF::removeObj(QString taskName, QString objName)
     return(task_list.removeObj(taskName, objName));
 }
 
+int skyAreaLF::initVisualProp(double jDay)
+{
+    double tr, ts;
+    this->init_time(jDay);
+
+//	if(this->obs_pos->place->detR(&this->params.sunX, &this->params.sunY, &this->params.sunZ, this->obs_pos->otime, SUN_NUM, 0, this->obs_pos->center, obs_pos->sk)) return 1;
+    detRDnumGC(&this->params.sunRA, &this->params.sunDE, 0.0, 0.0, 0.0, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
+
+    detRiseSet(&tr, &ts, params.sunDE, this->obs_pos->obs->record->getFi());
+
+        params.timeSunRise = tr;
+        params.timeSunSet = ts;
+
+/*
+        params.timeSunRise = tr + this->params.sunRA;
+        params.timeSunSet = ts + this->params.sunRA;
+
+        if(params.timeSunRise>2.0*PI) params.timeSunRise -= 2.0*PI;
+        if(params.timeSunSet>2.0*PI) params.timeSunSet -= 2.0*PI;
+*/
+
+    return 0;
+}
+
+int skyAreaLF::init_time(double jDay)
+{
+    this->timeCur = jDay;
+    if(this->obs_pos->det_observ(jDay)) return 1;
+
+    return 0;
+}
+
+int skyAreaLF::set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max)
+{
+    this->params.RAmin = RAmin;
+    this->params.RAmax = RAmax;
+    this->params.DECmin = DECmin;
+    this->params.DECmax = DECmax;
+    this->params.magn_min = magn_min;
+    this->params.magn_max = magn_max;
+
+    return 0;
+}
+
+int skyAreaLF::grade(resList &rList)
+{
+    int i, tn, sz;
+    tlRecord *tl;
+    catRecord *catR;
+    iniList *iL;
+    iniRecord *iR;
+    resRecord *resRec;
+
+    double x, y, z, vx, vy, vz, Sdist, Edist;
+    //mpcCat
+
+    int taskNum = task_list.size();
+
+    for(tn=0; tn<taskNum; tn++)
+    {
+        tl = task_list.at(tn);
+        catR = cat_list.getCatByName(tl->catName);
+        tl->getIniList(iL);
+        sz = iL->size();
+
+        for(i=0; i<sz; i++)
+        {
+            iR = iL->at(i);
+            resRec = new resRecord;
+
+            switch(catR->catType)
+            {
+                case 0:
+                if(this->obs_pos->place->detR(&x, &y, &z, this->obs_pos->otime, iR->name.toAscii().data(), 0, CENTER_SUN, SK_EKVATOR))
+                {
+    //				AfxMessageBox("c0");
+                    continue;
+                }
+
+                                if(this->obs_pos->place->detR(&vx, &vy, &vz, this->obs_pos->otime, iR->name.toAscii().data(), 1, CENTER_SUN, SK_EKVATOR))
+                                {
+        //				AfxMessageBox("c0");
+                                        continue;
+                                }
+
+                                resRec->name = iR->name;
+                                //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
+                                //resRec->num = planet_num(iR->name);
+
+                                //det_res_list(resRec, x, y, z, vx, vy, vz, &Sdist, &Edist, this->cat_list->record->cat_type);
+                break;
+            }
+        }
+    }
+}

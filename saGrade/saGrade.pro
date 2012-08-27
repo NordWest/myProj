@@ -17,7 +17,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ../libs/sscat.cpp \
-    ../libs/skyarea.cpp \
+    ../libs/skyarealf.cpp \
     ../libs/orbit.cpp \
     ../libs/orbcat.cpp \
     ../libs/observatory.cpp \
@@ -35,7 +35,7 @@ SOURCES += main.cpp \
 
 HEADERS += \
     ../libs/sscat.h \
-    ../libs/skyarea.h \
+    ../libs/skyarealf.h \
     ../libs/orbit.h \
     ../libs/orbcat.h \
     ../libs/observatory.h \

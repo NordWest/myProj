@@ -58,6 +58,8 @@ class iniRecord;
 class iniList;
 class catRecord;
 class catList;
+class resRecord;
+class resList;
 
 class iniRecord : tRecord
 {
@@ -93,6 +95,37 @@ public:
 
 };
 
+class resRecord : tRecord
+{
+public:
+        //int noftask;
+        QString name, taskName, desc;
+
+        double ra, dec, mu_ra, mu_dec, magn, exp;
+
+        resRecord();
+
+        int fromString(QString tStr);
+        void toString(QString &tStr);
+
+        resRecord& operator=(const resRecord &rhs);
+
+};
+
+bool operator==( const resRecord& lhs, const resRecord& rhs );
+bool operator==( const resRecord& lhs, const resRecord* rhs );
+
+class resList : public listFile <resRecord>
+{
+public:
+    int addRec(resRecord &nRec);
+    int addRec(resRecord* nRec);
+/*    void addIniList(resList newIniList);
+    void updateIniList(iniList newIniList);
+    int getRecName(resRecord* nRec, QString name);
+    int removeObj(QString name);
+*/
+};
 
 class tlRecord : tRecord	//Task List record
 {
@@ -236,9 +269,11 @@ public:
     catList cat_list;
 
     observ *obs_pos;
+    saParams params;
 
     QDir installDir;
 
+    double timeCur;
 
     skyAreaLF();
 
@@ -254,6 +289,12 @@ public:
     QString getTaskCatName(QString taskName);
 
     int removeObj(QString taskName, QString objName);
+
+    int initVisualProp(double jDay);
+    int init_time(double jDay);
+    int set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max);
+
+    int grade(resList &rList);
 /*
     int addIniList(iniList *iniadd, QString taskName);
     int remIniList(iniRecord *remrec, QString taskName);
