@@ -17,7 +17,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     ../libs/sscat.cpp \
-    ../libs/skyarea.cpp \
     ../libs/orbit.cpp \
     ../libs/orbcat.cpp \
     ../libs/observatory.cpp \
@@ -31,11 +30,10 @@ SOURCES += main.cpp \
     ../libs/fbStream.cpp \
     ../libs/redStat.cpp \
     ../libs/mpcfile.cpp \
-    ../libs/listfile.cpp
+    ../libs/listfile.cpp \
+    ../libs/skyarealf.cpp
 
-HEADERS += \
-    ../libs/sscat.h \
-    ../libs/skyarea.h \
+HEADERS += ../libs/sscat.h \
     ../libs/orbit.h \
     ../libs/orbcat.h \
     ../libs/observatory.h \
@@ -51,7 +49,8 @@ HEADERS += \
     ../libs/astro.h \
     ../libs/redStat.h \
     ../libs/mpcfile.h \
-    ../libs/listfile.h
+    ../libs/listfile.h \
+    ../libs/skyarealf.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a

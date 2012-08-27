@@ -5,7 +5,7 @@
 //#include "./../libs/observ.h"
 //#include "./../libs/dele.h"
 //#include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
+//#include "./../libs/skyarea.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 //#include "./../libs/rada.h"
@@ -73,8 +73,8 @@ int nofzbody;
 dele *nbody;
 //ever_params *eparam;
 
-#define CENTER CENTER_BARY
-#define SK SK_EKVATOR
+//#define CENTER CENTER_BARY
+//#define SK SK_EKVATOR
 
 //int readCFG(QString fileName, QList<ParticleStruct *> &pList);
 //int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+    int SK, CENTER;
+
     QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
@@ -92,6 +94,9 @@ int main(int argc, char *argv[])
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     double time0 = sett->value("general/time0", 2455201.0).toDouble();
     int si = sett->value("general/si", 0).toInt();
+
+    SK = sett->value("general/sk", 0).toInt();
+    CENTER = sett->value("general/center", 0).toInt();
 
     dele *nbody;
     nbody = new dele();
@@ -126,9 +131,12 @@ int main(int argc, char *argv[])
     QTextStream xyStm(&xyFile);
 
     double dist, vel;
-    double mass[10];/* = {
+    /*double mass[10];/* = {
                 1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
-    };*/
+    };/
+
+
+
     double gmass[10];
 
     double gms = nbody->headParam("GMS");
@@ -148,7 +156,7 @@ int main(int argc, char *argv[])
         if(si) mass[i] = SUN_MASS_KG/mass[i];
         qDebug() << QString("mass %1: %2 - %3\n").arg(i).arg(mass[i]).arg(gmass[i]);
     }
-
+*/
     double coefX, coefXD;
     coefX = coefXD = 1.0;
     if(si)
@@ -163,8 +171,9 @@ int main(int argc, char *argv[])
 
 
         name = QString(pList[i]->name.data());
-        if(QString().compare(name, "Sol")==0) plaNum = 10;
-        else plaNum = planet_num(name.toAscii().data());
+//        if(QString().compare(name, "Sol")==0) plaNum = 10;
+        //else
+        plaNum = planet_num(name.toAscii().data());
         if(plaNum!=-1)
         {
             X = new double[3];
@@ -182,8 +191,8 @@ int main(int argc, char *argv[])
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
 
-            if(plaNum==10) pList[i]->mass = mass[9];
-            else pList[i]->mass = mass[plaNum];
+//            if(plaNum==10) pList[i]->mass = mass[9];
+//            else pList[i]->mass = mass[plaNum];
 
 //            pList[i]->mass = mass[plaNum];
 
@@ -197,9 +206,11 @@ int main(int argc, char *argv[])
             }
 
 */
-            xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 18, 'e', 9).arg(X[1], 18, 'e', 9).arg(X[2], 18, 'e', 9).arg(dist, 18, 'e', 9).arg(V[0], 18, 'e', 9).arg(V[1], 18, 'e', 9).arg(V[2], 18, 'e', 9).arg(vel, 18, 'e', 9);
+
         }
 
+
+        xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 18, 'e', 9).arg(X[1], 18, 'e', 9).arg(X[2], 18, 'e', 9).arg(dist, 18, 'e', 9).arg(V[0], 18, 'e', 9).arg(V[1], 18, 'e', 9).arg(V[2], 18, 'e', 9).arg(vel, 18, 'e', 9);
         //Particle *p = new Particle;
 
         //p->fillFromExistingParticleStruct(*pList[i]);

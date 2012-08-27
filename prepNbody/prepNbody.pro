@@ -22,7 +22,6 @@ SOURCES += main.cpp \
     ../libs/observ.cpp \
     ../libs/mpccat.cpp \
     ../libs/comfunc.cpp \
-    ../libs/skyarea.cpp \
     ../libs/fBuffer.cpp \
     ../libs/fbStream.cpp \
     ../libs/DynArr.cpp \
@@ -52,7 +51,6 @@ HEADERS += ../libs/orbit.h \
     ../libs/observ.h \
     ../libs/mpccat.h \
     ../libs/comfunc.h \
-    ../libs/skyarea.h \
     ../libs/fBuffer.h \
     ../libs/fbStream.h \
     ../libs/DynArr.h \

@@ -1,4 +1,5 @@
 //#pragma once
+#include <QtCore>
 
 #ifndef COMF_H
 #include "comfunc.h"
@@ -151,6 +152,7 @@ public:
 
 //	int GetRec(int pos);
 	int GetRecName(char *name);
+    int getRegExpName(QString name, QList <mpcrec *> recL);
 //	int GetRecNum(int num);
 //	int AddRec(int pos);
 //	int AddRec();
@@ -162,6 +164,29 @@ public:
 	int init(char *fname);
 	int init(char *fname, int catKpos);
 };
+/*
+class mpccatL : public fbStreamLine
+{
+public:
+    mpcrec *record;
+
+    void s2rec(char *str_in);
+//	void rec2s(char *str_out);
+
+    int GetRec(int pos);
+    int GetRecName(char *name);
+//	int GetRecNum(int num);
+//	int AddRec(int pos);
+//	int AddRec();
+
+    mpccat();
+    mpccat(char *fn);
+    ~mpccat();
+
+    int init(char *fname);
+    int init(char *fname, int catKpos);
+};
+*/
 
 #define MPCCAT_H
 #endif

@@ -6,7 +6,7 @@
 //#include "./../libs/observ.h"
 //#include "./../libs/dele.h"
 //#include "./../libs/orbit.h"
-#include "./../libs/skyarea.h"
+//#include "./../libs/skyarea.h"
 #include "./../libs/astro.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/rada.h"
@@ -78,8 +78,8 @@ double *mass;
 int Sint(double X[], double V[]);
 int LFint(double X[], double V[]);
 
-#define CENTER CENTER_BARY
-#define SK SK_EKVATOR
+//#define CENTER CENTER_BARY
+//#define SK SK_EKVATOR
 
 void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
 {
@@ -163,13 +163,14 @@ int main(int argc, char *argv[])
 
     setlocale(LC_NUMERIC, "C");
 
-    int i, N, teloi, nt;
+    int i, N, teloi, nt, j, teloj;
     double *X, *V, TI, TF, *X0, *V0, *r, *v;
     Particle *tPar;
     MopFile* mFile;
     MopState *mState;
     MopItem mItem;
     double *Xm, *Vm;
+    int SK, CENTER;
 
     QString name;
     int plaNum, resMiri;
@@ -202,6 +203,10 @@ int main(int argc, char *argv[])
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
+
+    CENTER = sett->value("general/center", 0).toInt();
+    SK = sett->value("general/sk", 0).toInt();
+
     miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
     miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
     miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
@@ -210,19 +215,19 @@ int main(int argc, char *argv[])
     eparam = new ever_params;
 
     QSettings *esett = new QSettings("./paramsEv.ini", QSettings::IniFormat);
-    eparam->NOR = esett->value("NOR", 17).toInt();
-    eparam->NCLASS = esett->value("NCLASS", -2).toInt();
-    eparam->NI = esett->value("NI", 2).toInt();
-    eparam->NV = esett->value("NV", 6).toInt();
-    eparam->LL = esett->value("LL", 6).toInt();
-    eparam->XL = esett->value("XL", 0.0).toDouble();
+    eparam->NOR = esett->value("general/NOR", 17).toInt();
+    eparam->NCLASS = esett->value("general/NCLASS", -2).toInt();
+    eparam->NI = esett->value("general/NI", 2).toInt();
+    eparam->NV = esett->value("general/NV", 6).toInt();
+    eparam->LL = esett->value("general/LL", 9).toInt();
+    eparam->XL = esett->value("general/XL", 1.0e-9).toDouble();
     //eparam->t0 = esett->value("t0", 0.0).toDouble();
     //eparam->te = esett->value("te", 3.0e+3).toDouble();
     //eparam->stp = esett->value("stp", 100.0).toDouble();
     //eparam->shag = esett->value("shag", 10.0).toDouble();
-    eparam->col = esett->value("col", 0.0015).toDouble();
-    eparam->vout = esett->value("vout", 1000.0).toDouble();
-    strncpy(&eparam->jkeys[0], esett->value("jkeys", "1111111111").toString().toAscii().data(), 10);
+    eparam->col = esett->value("general/col", 0.0015).toDouble();
+    eparam->vout = esett->value("general/vout", 1000.0).toDouble();
+    strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
 
 
 
@@ -322,19 +327,19 @@ int main(int argc, char *argv[])
 
             saveResults(t0, X, V, X0, V0, i*3, name, resStm, dxStm, deStm);
         }
-/*        else
+   /*     else
         {
             if(useMiriade)
             {
                 resMiri = getMiriadeObject(&mpcObj, jd2mjd(t0), name, miriadeProcData, objType);
                 if(!resMiri)
                 {
-                    X0[i*3] =
+
                 }
             }
         }
+*/
 
-        */
 
 
         if(useMoody)
@@ -382,6 +387,8 @@ int main(int argc, char *argv[])
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
+    double *ssb, mui, mui1;
+    ssb= new double[3];
     TF = t0;
     for(nt=0; nt<nstep; nt++)
     {
@@ -395,6 +402,11 @@ int main(int argc, char *argv[])
         if(useMoody) mState = mFile->readCyclingState();
 
         solSys->rada27(X, V, TI, TF);
+
+        ssb[0] = 0;
+        ssb[1] = 0;
+        ssb[2] = 0;
+
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             name = QString(pList[teloi]->name.data());
@@ -424,6 +436,22 @@ int main(int argc, char *argv[])
                     saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
                 }
             }
+
+            mui1=0.0;
+
+            for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
+            {
+                if(teloi!=teloj) mui1+=pow(mass[teloj], -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+            }
+            mui1 *= 1.0/(2.0*CAU*CAU);
+            mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
+
+            mui = pow(mass[teloi], -1.0)*mui1;
+
+            ssb[0] += mui*X[i];
+            ssb[1] += mui*X[i+1];
+            ssb[2] += mui*X[i+2];
+
 /*
             Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
             Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
@@ -448,7 +476,11 @@ int main(int argc, char *argv[])
             deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
             */
         }
+
+        qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     }
+
+
 
     resFile.close();
 

@@ -24,8 +24,169 @@
  // extern dele *nbody;
  // extern int nofzbody;
 
+  double dist(int i, int j, double X[])
+  {
+      return(sqrt(pow(X[j*3+0] - X[i*3+0], 2) + pow(X[j*3+1] - X[i*3+1], 2) + pow(X[j*3+2] - X[i*3+2], 2)));
+  }
+
+  void force_N(double X[], double V[], double F[])
+  {
+      int i, j, N, komp, teloi, teloj;
+      double Rij, Ri, Rj, res1, res0;
+
+      int iNum = nofzbody;
+      int Ni = nofzbody*3;
+      int jNum = iNum;//eparam->NV;
+      int Nj = Ni;//eparam->NV*3;
+
+      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+      {
+              Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+
+              if(Ri>(eparam->vout))
+              {
+                  printf("WARN!!!! V OUT!!!!\n");
+                  printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+                  exit(1);
+              }
+
+              for(komp=0; komp<3; komp++)
+              {
+                      res0 = 0.0;
+                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                      {
+                             if(teloi!=teloj)
+                             {
+                                Rij = dist(teloi, teloj, X);
+                                Rj = dist(teloj, 0, X);
+
+                                if(Rij<eparam->col)
+                                {
+
+                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                    printf("Rij= %f\n", Rij);
+                                    printf("WARN!!!! CRASH!!!!\n");
+                                    exit(1);
+                                }
+
+                                res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
+                                //res0 += mass[teloj]*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                             }
+                      }
+                      //res1 = -((mass[0] + mass[teloi])*X[i+komp])/(pow(Ri, 3));
+
+
+                      F[i+komp] = ka*ka*(res0);
+
+                  }
+              //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+      }
+  }
+
+
 
   // BARYCENTR Particles
+  void Everhardt::force(double X[], double V[], double TS, double F[])
+  {
+          int i, j, N, komp, teloi, teloj;
+          double Rij, Rik, Rjk;
+          int iNum = nofzbody;
+          int Ni = nofzbody*3;
+          int jNum = iNum;//eparam->NV;
+          int Nj = Ni;//eparam->NV*3;
+          double Ri, Rj, *D, res0, res1;
+
+          double beta = 1.0;
+          double gamma = 1.0;
+
+        force_N(X, V, F);
+
+
+/*
+
+          for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+          {
+                  Ri = sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+                  if(Ri>(eparam->vout))
+                  {
+  //		    cout << "WARN!!!! V OUT!!!!" << endl;
+                      printf("WARN!!!! V OUT!!!!\n");
+                      printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+                      exit(1);
+                  }
+
+                  for(j=0, teloj=0; teloj<jNum; j+=3, teloj++)
+                  {
+                      if(teloi!=teloj)
+                      {
+
+//                              D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                              //D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                              //printf("D[%d]= %f\n", teloj, D[teloj]);
+
+  //			    cout << "D[j]= " << D[j] << endl;
+
+
+
+                          }
+                              //k++;
+                  }
+
+
+
+                  for(komp=0; komp<3; komp++)
+                  {
+                          res0 = res1 = 0.0;
+                          for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                          {
+                                 if(teloi!=teloj)
+                                 {
+                                    Rij = dist(teloi, teloj, X);
+
+                                    if(Rij<eparam->col)
+                                    {
+        //				cout << "WARN!!!! CRASH!!!!" << endl;
+                                        printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                        printf("Rij= %f\n", Rij);
+                                        printf("WARN!!!! CRASH!!!!\n");
+                                        exit(1);
+                                    }
+
+                                    for(k=0, telok=0; k<Nj; k+=3, telokj++)
+                                    {
+                                        if(teloi!=telok)
+                                        {
+
+                                            Rik = dist(teloi, teloj, X);
+
+
+                                        }
+                                    }
+
+                                      //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)) - X[j+komp]/(pow(Rj, 3)));
+                                      //res0 += pow(mass[teloj], -1.0)*((Y[j+komp] - X[i+komp])/(pow(D[teloj],3)));
+                                      //if(mass[teloj]<1.0) continue;
+                                      res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)));
+
+                                 }
+                          }
+
+                          //res1 = -((pow(mass[0], -1.0)+pow(mass[teloi+1], -1.0))*X[i+komp])/(pow(Ri, 3));
+                          res1 = 0.0;
+
+                          //printf("res0= %e\nres1= %e\n", res0, res1);
+
+                          F[i+komp] = ka*ka*(res1 + res0);
+
+                      }
+                  //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+          }
+*/
+  }
+
+/*
+  // BARYCENTR Particles [SAVE 16 avg]
   void Everhardt::force(double X[], double V[], double TS, double F[])
   {
           int i, j, N, komp, teloi, teloj;
@@ -56,7 +217,7 @@
   //		    cout << "WARN!!!! CRASH!!!!" << endl;
                       printf("WARN!!!! CRASH!!!!\n");
                       exit(1);
-                  }*/
+                  }/
                   if(Ri>(eparam->vout))
                   {
   //		    cout << "WARN!!!! V OUT!!!!" << endl;
@@ -87,7 +248,7 @@
   //				cout << "WARN!!!! V OUT!!!!" << endl;
                                   printf("WARN!!!! V OUT!!!!\n");
                                   exit(1);
-                              }*/
+                              }/
 
                           }
                               //k++;
@@ -112,7 +273,7 @@
                                           printf("WARN!!!! CRASH!!!!\n");
                                           exit(1);
   //					error = 1;
-                                      }*/
+                                      }/
                                       if(Rj>eparam->vout)
                                       {
           //				cout << "WARN!!!! V OUT!!!!" << endl;

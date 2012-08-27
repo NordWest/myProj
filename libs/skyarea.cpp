@@ -32,7 +32,7 @@ int addIniListNames(tlRecord task, QString inpStr, iniRecord iListMask)
 
     iniFile.close;
 }
-*/
+/
 
 TLRecord::TLRecord()
 {
@@ -233,7 +233,7 @@ int TaskList::AddTask()
 
 	return 0;
 }
-*/
+/
 int TaskList::AddTask(TLRecord *ntask)
 {
 	int i, pos0, pos1, pose;
@@ -409,9 +409,9 @@ int TaskList::remTask(int noft)
 	return 1;
 	
 }
-
+*/
 //////////////////////////////////////////////////////////
-
+/*
 taskList::taskList()
 {
 
@@ -503,13 +503,13 @@ int taskList::getRec(tlRecord* tlRec, int pos)
 
     return 0;
 }
-
+*/
 //////////////////////////////////////////////////////////
 
 LRecord::LRecord()
 {
-	this->name = new char[32];
-	this->exp = 0.0;
+    name = "";
+    exp = 0.0;
 	this->noftask = 0;
 	this->desc = new char[255];
 	this->tail = new char[32];
@@ -551,7 +551,7 @@ int LRecord::IsEqv(LRecord *rec)
 	return 0;
 }
 
-int LRecord::set_desc(char *desc)
+int LRecord::set_desc(QString desc)
 {
 	return(indexB(this->desc, desc, " ", 32));
 }
@@ -950,7 +950,7 @@ tlRecord& tlRecord::operator=(const TLRecord &rhs) {
 void tlRecord::getIniName(QString &iniName)
 {
     QDir tDir(dirPath);
-    iniName = QString("%1ini.lst").arg(tDir.absolutePath());
+    iniName = QString("%1/ini.lst").arg(tDir.absolutePath());
 }
 
 char* tlRecord::get_cat_name()
@@ -1727,25 +1727,12 @@ int EList::rec2s(char *tstr)
 
 ////////////////////////////////////////////
 
-LogRecord::LogRecord()
+
+
+bool operator== ( const LogRecord& lhs, const LogRecord& rhs )
 {
-	this->name = new char[16];
-	this->RA = new char[12];
-	this->DEC = new char[12];
+    return(QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0);
 }
-
-LogRecord::~LogRecord()
-{
-	delete [] this->name;
-	this->name = NULL;
-
-	delete [] this->RA;
-	this->RA = NULL;
-
-	delete [] this->DEC;
-	this->DEC = NULL;
-}
-
 
 ////////////// LogList /////////////////////
 LogList::LogList() : FileDynStrBin(LLIST_LEN)

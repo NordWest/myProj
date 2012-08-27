@@ -143,7 +143,7 @@ int fbStream::SaveAs(char *fname)
 	strncpy(fn, fname, FNLEN);
 	return(this->Save());
 }
-
+/*
 int fbStream::Get(char *str, char *name, int kpos, int szstr)
 {
 	basic_string <char>::size_type spos;
@@ -159,6 +159,26 @@ int fbStream::Get(char *str, char *name, int kpos, int szstr)
 		strcpy(&str[szstr], "\0");
                 res = 0;
 	}
+
+        delete [] tname;
+        return res;
+}
+*/
+int fbStream::Get(char *str, char *name, int kpos, int szstr, int startpos)
+{
+    basic_string <char>::size_type spos;
+    static const basic_string <char>::size_type npos = -1;
+        char *tname = new char[256];
+        int res;
+        sprintf(tname, " %s ", name);
+        spos = buf->find(tname, startpos);
+        res = 1;
+    if(spos!=npos)
+    {
+                buf->copy(str, szstr, spos-kpos+1);
+        strcpy(&str[szstr], "\0");
+                res = 0;
+    }
 
         delete [] tname;
         return res;

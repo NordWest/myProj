@@ -53,7 +53,7 @@
 //#include "comfunc.h"
 #include "orbit.h"
 #include "orbcat.h"
-//#include "listfile.h"
+#include "listfile.h"
 
 //#include "atlstr.h"
 
@@ -89,7 +89,7 @@ class IListR;
 
 int addIniListNames(TLRecord task, QString inpStr);
 
-
+/*
 class TLRecord	//Task List record
 {
 public:
@@ -171,8 +171,8 @@ public:
 
 //	int sort_prior();
 };
-
-class tlRecord //: tRecord	//Task List record
+*/
+class tlRecord : tRecord	//Task List record
 {
 public:
 //	int noftask;	//number of task
@@ -191,15 +191,17 @@ public:
         int fromString(QString tStr);
         void toString(QString &tStr);
         tlRecord& operator=(const tlRecord &rhs);
-        tlRecord& operator=(const TLRecord &rhs);
+//        tlRecord& operator=(const TLRecord &rhs);
 
         void getIniName(QString &iniName);
         char* get_cat_name();
         char* get_task_name();
 };
 
-bool operator==( const tlRecord& lhs, const tlRecord& rhs );
 
+
+bool operator==( const tlRecord& lhs, const tlRecord& rhs );
+/*
 class taskList// : listFile <tlRecord>
 {
 public:
@@ -216,49 +218,36 @@ public:
     int saveAs(QString tfName);
     int getRec(tlRecord* tlRec, int pos);
 };
-
-class LogRecord
+*/
+class taskList : public listFile <tlRecord>
 {
-public:
-	int year0, year1;
-	int month0, month1;
-	int day0, day1;
-	int hour0, hour1;
-	int min0, min1;
-	int sec0, sec1;
-
-	char *name;
-	int success;
-	int noftask;
-
-	char *RA, *DEC;
-	double magn;
-
-	LogRecord();
-	~LogRecord();
 };
 
-class LogList :public FileDynStrBin
+class LogRecord : public tRecord
 {
 public:
-	LogRecord *record;
-	
-	int AddObs(LogRecord *er);
-//	int RemExc(char *ename);
-	int GetObs(char *ename);		//get number of successful observations
-	int GetRec(int i);
+    QDateTime timeObs;
 
+    QString name;
+	int success;
+    QString taskName;
 
-	int Clear();
+    double RA, DEC;
+	double magn;
 
-	LogList();
-	~LogList();
+    //LogRecord();
 
-	int init(char *fname);
+    int fromString(QString tStr);
+    void toString(QString &tStr);
+    LogRecord& operator=(const LogRecord &rhs);
 
-private:
-	int s2rec(char *str);
-	int rec2s(LogRecord *er);
+};
+
+bool operator==( const LogRecord& lhs, const LogRecord& rhs );
+
+class LogList :public listFile <LogRecord>
+{
+
 };
 
 
@@ -294,26 +283,31 @@ private:
 	int rec2s(ObsRecord *er);
 };
 
-class LRecord
+class LRecord : tRecord
 {
 public:
 	int noftask;
-	char *name;
+    QString name;
 	double exp;
 	int flag0;					//0 - DE/LE; 1 - numbered; 2 - rapid stars
 	double t0, t1;
-	char *desc;
-	char *tail;
+    QString desc;
 
 	LRecord();
 	~LRecord();
 
-	int set_desc(char *desc);
-	int set_name(char *nm);
-	char* get_desc();
-	void copyTo(LRecord *rec);
-	int IsEqv(LRecord *rec);
+//	int set_desc(QString desc);
+//	int set_name(char *nm);
+//	char* get_desc();
+//	void copyTo(LRecord *rec);
+//	int IsEqv(LRecord *rec);
+
+    int fromString(QString tStr);
+    void toString(QString &tStr);
+    LRecord& operator=(const LRecord &rhs);
 };
+
+bool operator==( const LogRecord& lhs, const LogRecord& rhs );
 
 
 class IList : public fBuffer
@@ -748,7 +742,7 @@ public:
 //	OrbCat *orb_ini_catalog;
 	
 //Каталоги
-        OrbCat *orb_catalog;
+    OrbCat *orb_catalog;
 	mpccat *mpc_catalog;
 //	sscatFB *lspm_catalog;
 

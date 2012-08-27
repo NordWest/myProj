@@ -1331,7 +1331,7 @@ void vfPlot::drawAxes(int mSNX, int mSNY, int sSNX, int sSNY)
     painter.setFont(QFont("Times", axeLabelsFontSize, -1, true));
 
     xTextRect.setRect(-boxRect.width()/(mSNX+1.0)/2.0, 20, boxRect.width()/(mSNX+1.0), 40);
-    yTextRect.setRect(-yAxeRect.width()-50, -20, yAxeRect.width()-20, 40);
+    yTextRect.setRect(-yAxeRect.width()-50, -20, yAxeRect.width()+120, 40);
     painter.setPen(basePen);
     //x0
     data2pix(xs0, ys0, &pixX, &pixY);

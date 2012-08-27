@@ -397,7 +397,12 @@ int mpccat::GetRecName(char *name)
 	if(this->GetStr(name)) return 1;
 	this->s2rec(this->str);
 	
-	return 0;
+    return 0;
+}
+
+int mpccat::getRegExpName(QString name, QList<mpcrec *> recL)
+{
+
 }
 /*
 int mpccat::GetRecName(char *name)

@@ -62,6 +62,50 @@ class listFile1 : public listFile <tRecord1>
 
 };
 
+class tlRecord : tRecord	//Task List record
+{
+public:
+//	int noftask;	//number of task
+
+        double exp;			//experience of task
+        int Ntot;			//Total number of observation for one object
+        double texc;		//exclusion of a object after successful observations
+        double dRA;			//maximum distance from celestial meridian
+        int NinN;			//number obsrvations during one night
+        int flag_active;	//flag for activ task
+        QString name, desc, dirPath, catName;
+
+//	char *tail;
+
+        tlRecord();
+        int fromString(QString tStr);
+        void toString(QString &tStr);
+        tlRecord& operator=(const tlRecord &rhs);
+//        tlRecord& operator=(const TLRecord &rhs);
+
+        void getIniName(QString &iniName);
+        char* get_cat_name();
+        char* get_task_name();
+};
+
+class taskList : public listFile <tlRecord>
+{
+public:
+/*    QList <tlRecord*> recList;
+    QString fileName;
+
+    taskList();
+
+    int s2rec(QString tStr);
+    int rec2s(QString &tStr);
+    int size();
+    tlRecord* at(int i);
+    int save();
+    int saveAs(QString tfName);
+    int getRec(tlRecord* tlRec, int pos);
+    int append(tlRecord tlRec);*/
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -73,10 +117,24 @@ int main(int argc, char *argv[])
     clog = new QDataStream(logFile);
     ///////////////////////////////////////////////////////////////////////////////////////
 
-    listFile1 lf;
-    tRecord1 lr1;
+    taskList tlf;
+    tlRecord lr1;
 
-    lf.init("./test.lf");
+    tlf.init("./test.lf");
+
+    lr1.catName = "astorb";
+    lr1.desc = "non";
+    lr1.dirPath = "./";
+    lr1.dRA = 160;
+    lr1.exp = 1.0;
+    lr1.flag_active = 1;
+    lr1.name = "testtask";
+    lr1.NinN = 1;
+    lr1.Ntot = 10;
+
+    tlf.append(lr1);
+    tlf.save();
+
 
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +147,216 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+//////////////////////////////////////////////////////////
+
+tlRecord::tlRecord()
+{
+    this->desc = "";
+    this->exp = 1.0;
+    this->name = "";
+    this->catName = "";
+    this->dirPath = "";
+    this->dRA = 180.0;
+    this->flag_active = 1;
+    this->NinN = 0;
+    this->Ntot = 0;
+    this->texc = 0;
+}
+
+int tlRecord::fromString(QString tStr)
+{
+    QStringList strL;
+    strL = tStr.split("|");
+    if(strL.size()!=10) return 1;
+    name = strL.at(0);
+    catName = strL.at(1);
+    flag_active = strL.at(2).toInt();
+    exp = strL.at(3).toDouble();
+    dRA = strL.at(4).toDouble();
+    NinN = strL.at(5).toInt();
+    Ntot = strL.at(6).toInt();
+    texc = strL.at(7).toDouble();
+    dirPath = strL.at(8);
+    desc = strL.at(9);
+
+    return 0;
+}
+
+void tlRecord::toString(QString &tStr)
+{
+    tStr.clear();
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10").arg(name, 16).arg(catName).arg(flag_active).arg(exp, 12, 'e').arg(dRA).arg(NinN).arg(Ntot).arg(texc).arg(dirPath).arg(desc));
+}
+
+
+bool operator== ( const tlRecord& lhs, const tlRecord& rhs )
+{
+    return(QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0);
+}
+
+tlRecord& tlRecord::operator=(const tlRecord &rhs) {
+    // Check for self-assignment!
+    if (this == &rhs)      // Same object?
+      return *this;        // Yes, so skip assignment, and just return *this.
+
+    this->desc = rhs.desc;
+    this->exp = rhs.exp;
+    this->name = rhs.name;
+    this->catName = rhs.catName;
+    this->dirPath = rhs.dirPath;
+    this->dRA = rhs.dRA;
+    this->flag_active = rhs.flag_active;
+    this->NinN = rhs.NinN;
+    this->Ntot = rhs.Ntot;
+    this->texc = rhs.texc;
+
+
+    return *this;
+}
+/*
+tlRecord& tlRecord::operator=(const TLRecord &rhs) {
+    // Check for self-assignment!
+    //if (this == &rhs)      // Same object?
+      //return *this;        // Yes, so skip assignment, and just return *this.
+
+    this->desc = QString(rhs.get_desc());
+    this->exp = rhs.exp;
+    this->name = QString(rhs.get_name());
+    this->catName = QString(rhs.get_cat_name());
+    this->dirPath = QString(rhs.get_dir_path());
+    this->dRA = rhs.dRA;
+    this->flag_active = rhs.flag_active;
+    this->NinN = rhs.NinN;
+    this->Ntot = rhs.Ntot;
+    this->texc = rhs.texc;
+
+
+    return *this;
+}
+*/
+
+void tlRecord::getIniName(QString &iniName)
+{
+    QDir tDir(dirPath);
+    iniName = QString("%1ini.lst").arg(tDir.absolutePath());
+}
+
+char* tlRecord::get_cat_name()
+{
+    return(catName.toAscii().data());
+}
+
+char* tlRecord::get_task_name()
+{
+    return(name.toAscii().data());
+}
+
+
+
+/*
+taskList::taskList()
+{
+
+}
+
+int taskList::init(QString fname)
+{
+    fileName = fname;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    QString tStr;
+
+    recList.clear();
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+        s2rec(tStr);//) continue;
+        //recList << tRec;
+        //tRec = new tRecord;
+    }
+
+    iniFile.close();
+
+    return 0;
+}
+
+int taskList::rec2s(QString &tStr)
+{
+    tlRecord *tRec;
+    tRec = new tlRecord;
+    tRec->toString(tStr);//) return 1;
+    //recList << tRec;
+}
+
+int taskList::s2rec(QString tStr)
+{
+    tlRecord *tRec;
+    tRec = new tlRecord;
+    tRec->toString(tStr);//) return 1;
+    recList << tRec;
+    return 0;
+}
+
+int taskList::size()
+{
+    return(recList.size());
+}
+
+tlRecord* taskList::at(int i)
+{
+    return(recList.at(i));
+}
+
+int taskList::save()
+{
+    int i, sz;
+    QString tstr;
+    sz = recList.size();
+
+    QFile resFile(fileName);
+    if(!resFile.open(QFile::WriteOnly | QFile::Truncate)) return 1;
+    QTextStream resStm(&resFile);
+
+    for(i=0; i<sz; i++)
+    {
+        recList.at(i)->toString(tstr);
+        resStm << tstr << "\n";
+    }
+
+    resFile.close();
+
+    return 0;
+}
+
+int taskList::saveAs(QString tfName)
+{
+    fileName = tfName;
+    return(save());
+}
+
+int taskList::getRec(tlRecord* tlRec, int pos)
+{
+    if(pos<0||pos>=recList.size()) return 1;
+
+    tlRec = recList.at(pos);
+
+    return 0;
+}
+
+int taskList::append(tlRecord tlRec)
+{
+    tlRecord *tlnRec = new tlRecord;
+    *tlnRec = tlRec;
+    recList << tlnRec;
+}
+*/
+//////////////////////////////////////////////////////////
+
+
 /*
 int findIndex(int *tInd, int dLev, int expNum, QVector <int*> *eIndex);
 int proofInd(int *tInd, int expNum, QVector <int*> *eIndex);

@@ -16,7 +16,8 @@ HEADERS += ../libs/comfunc.h \
  #   ../libs/ap.h \
  #   ../libs/vectGrid3D.h \
  #   ../libs/ialglib.h \
-    ../libs/astro.h
+    ../libs/astro.h \
+    ../libs/listfile.h
 
 HEADERS += ../libs/ccdmeasurements.h
 SOURCES += ../libs/observatory.cpp \
@@ -33,6 +34,7 @@ SOURCES += ../libs/observatory.cpp \
  #   ../libs/ap.cpp \
  #   ../libs/vectGrid3D.cpp \
  #   ../libs/ialglib.cpp
+    ../libs/listfile.cpp
 
 HEADERS += ./../libs/astro.h
 SOURCES += main.cpp

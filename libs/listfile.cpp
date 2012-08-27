@@ -1,4 +1,38 @@
 #include "listfile.h"
+
+/*
+int listFile::init(QString fname)
+{
+    fileName = fname;
+    QFile iniFile(fileName);
+    iniFile.open(QIODevice::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    QString tStr;
+
+    recList.clear();
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+        s2rec(tStr);//) continue;
+        //recList << tRec;
+        //tRec = new tRecord;
+    }
+
+    iniFile.close();
+
+    return 0;
+};
+
+int listFile::s2rec(QString tStr){
+    tRecord *tRec;
+    tRec = new tRecord;
+    if(tRec->toString(tStr)) return 1;
+    recList << tRec;
+    return 0;
+};
+
 /*
 template <typename tRecord>
 listFile<tRecord>::listFile(){};

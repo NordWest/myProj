@@ -41,7 +41,7 @@ public:
 	~fbStream();
 	int init(char* fname);					//инициализация
 
-	int Get(char *str, char *name, int kpos, int szstr);	//получить строку str длинной szstr, содержащую ключевую подстроку name в позиции kpos
+    int Get(char *str, char *name, int kpos, int szstr, int startpos = 0);	//получить строку str длинной szstr, содержащую ключевую подстроку name в позиции kpos
 	int Del(char *name, int kpos, int szstr);				//удалить строку длинной szstr, содержащую ключевую подстроку name в позиции kpos
 	int Insert(char *str, int pos);							//вставить строку str в позицию pos
 	int Push(char *str);									//добавить строку str в конец файла

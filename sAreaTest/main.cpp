@@ -6,7 +6,7 @@
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
-#include "./../libs/skyarea.h"
+#include "./../libs/skyarealf.h"
 
 
 //#include "./../libs/listfile.h"
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         //taskL.GetRec(i);
         ntRec = new tlRecord;
         ntRec = taskL.at(i);
-        tList.recList.append(ntRec);
+        tList.append(*ntRec);
     }
 
     tList.save();

@@ -201,7 +201,7 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
          partDom.appendChild(child);
 
          child = domDocument.createElement("mass");
-         childText = domDocument.createTextNode(QString("%1").arg(p->mass));
+         childText = domDocument.createTextNode(QString("%1").arg(p->mass, 20, 'e', 12));
          child.appendChild(childText);
          partDom.appendChild(child);
 
@@ -219,32 +219,32 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
          vector = domDocument.createElement("vector");
 
          child = domDocument.createElement("X");
-         childText = domDocument.createTextNode(QString("%1").arg(p->x));
+         childText = domDocument.createTextNode(QString("%1").arg(p->x, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("Y");
-         childText = domDocument.createTextNode(QString("%1").arg(p->y));
+         childText = domDocument.createTextNode(QString("%1").arg(p->y, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("Z");
-         childText = domDocument.createTextNode(QString("%1").arg(p->z));
+         childText = domDocument.createTextNode(QString("%1").arg(p->z, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("XD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->xd));
+         childText = domDocument.createTextNode(QString("%1").arg(p->xd, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("YD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->yd));
+         childText = domDocument.createTextNode(QString("%1").arg(p->yd, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("ZD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->zd));
+         childText = domDocument.createTextNode(QString("%1").arg(p->zd, 20, 'e', 12));
          child.appendChild(childText);
          vector.appendChild(child);
 
