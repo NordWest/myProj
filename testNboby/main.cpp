@@ -18,6 +18,16 @@
 #include <QDataStream>
 #include <QDomDocument>
 
+/*
+#include <cuda.h>
+#include <cutil.h>
+#include <cutil_inline_drvapi.h>
+
+// utilities and system includes
+#include <shrUtils.h>
+#include <shrQATest.h>
+*/
+
 #define OMPLIB
 
 #include "./../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
@@ -75,8 +85,24 @@ dele *nbody;
 ever_params *eparam;
 double *mass;
 
-int Sint(double X[], double V[]);
-int LFint(double X[], double V[]);
+void CM_int(double *CM, double X[], double V[])
+{
+    int i;
+    CM[0] = CM[1] = CM[2] = 0.0;
+    for(i=0; i<nofzbody; i++)
+    {
+        CM[0] += pow(mass[i], -1.0)*V[i*3];
+        CM[1] += pow(mass[i], -1.0)*V[i*3+1];
+        CM[2] += pow(mass[i], -1.0)*V[i*3+2];
+    }
+}
+
+int S_int(double X[], double V[])
+{
+
+}
+
+int LF_int(double X[], double V[]);
 
 //#define CENTER CENTER_BARY
 //#define SK SK_EKVATOR
@@ -171,6 +197,7 @@ int main(int argc, char *argv[])
     MopItem mItem;
     double *Xm, *Vm;
     int SK, CENTER;
+    double *CM = new double[3];
 
     QString name;
     int plaNum, resMiri;
@@ -217,8 +244,8 @@ int main(int argc, char *argv[])
     QSettings *esett = new QSettings("./paramsEv.ini", QSettings::IniFormat);
     eparam->NOR = esett->value("general/NOR", 17).toInt();
     eparam->NCLASS = esett->value("general/NCLASS", -2).toInt();
-    eparam->NI = esett->value("general/NI", 2).toInt();
-    eparam->NV = esett->value("general/NV", 6).toInt();
+    eparam->NI = esett->value("general/NI", 2).toInt();     //Number of Iteration
+    eparam->NV = esett->value("general/NV", 6).toInt();     //Number of dependent Variable
     eparam->LL = esett->value("general/LL", 9).toInt();
     eparam->XL = esett->value("general/XL", 1.0e-9).toDouble();
     //eparam->t0 = esett->value("t0", 0.0).toDouble();
@@ -244,7 +271,7 @@ int main(int argc, char *argv[])
     nofzbody = pList.size();
     mass = new double[nofzbody];
 
-    N = nofzbody*3;
+    N = (nofzbody-1)*3;
 
     X = new double[N];
     V = new double[N];
@@ -306,26 +333,34 @@ int main(int argc, char *argv[])
     }
 
 
+    int p = 0;
     for(i=0; i<nofzbody; i++)
     {
         mass[i] = pList[i]->mass;
-        X[i*3] = pList[i]->x;
-        X[i*3+1] = pList[i]->y;
-        X[i*3+2] = pList[i]->z;
-        V[i*3] = pList[i]->xd;
-        V[i*3+1] = pList[i]->yd;
-        V[i*3+2] = pList[i]->zd;
 
         name = QString(pList[i]->name.data());
         if(QString().compare(name, "Sol")==0) plaNum = 10;
         else plaNum = planet_num(name.toAscii().data());
+        if(plaNum==10) continue;
+
+        X[p] = pList[i]->x;
+        X[p+1] = pList[i]->y;
+        X[p+2] = pList[i]->z;
+        V[p] = pList[i]->xd;
+        V[p+1] = pList[i]->yd;
+        V[p+2] = pList[i]->zd;
+
+
+
 
         if(plaNum!=-1)
         {
-            nbody->detR(&X0[i*3+0], &X0[i*3+1], &X0[i*3+2], t0, plaNum, 0, CENTER, SK);
-            nbody->detR(&V0[i*3+0], &V0[i*3+1], &V0[i*3+2], t0, plaNum, 1, CENTER, SK);
+            nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
+            nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
 
-            saveResults(t0, X, V, X0, V0, i*3, name, resStm, dxStm, deStm);
+            saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+
+
         }
    /*     else
         {
@@ -358,6 +393,8 @@ int main(int argc, char *argv[])
             }
         }
 
+
+
 /*
         Ri = sqrt(X[i*3+0]*X[i*3+0] + X[i*3+1]*X[i*3+1] + X[i*3+2]*X[i*3+2]);
         Vi = sqrt(V[i*3+0]*V[i*3+0] + V[i*3+1]*V[i*3+1] + V[i*3+2]*V[i*3+2])*AUKM/86400.0;
@@ -381,9 +418,11 @@ int main(int argc, char *argv[])
 
         deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[i*3], 13, 'f', 9).arg(X0[i*3+1], 13, 'f', 9).arg(X0[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i*3], 13, 'f', 9).arg(V0[i*3+1], 13, 'f', 9).arg(V0[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
         */
+        p+=3;
     }
 
-
+    CM_int(CM, X, V);
+    qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
@@ -407,9 +446,12 @@ int main(int argc, char *argv[])
         ssb[1] = 0;
         ssb[2] = 0;
 
-        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
+        CM_int(CM, X, V);
+        qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+
+        for(teloi=0, i=0; teloi<nofzbody-1; teloi++, i+=3)
         {
-            name = QString(pList[teloi]->name.data());
+            name = QString(pList[teloi+1]->name.data());
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
 
@@ -419,6 +461,8 @@ int main(int argc, char *argv[])
                 nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
 
                 saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+
+
             }
 
             if(useMoody)
@@ -436,7 +480,7 @@ int main(int argc, char *argv[])
                     saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
                 }
             }
-
+/*
             mui1=0.0;
 
             for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
@@ -477,7 +521,7 @@ int main(int argc, char *argv[])
             */
         }
 
-        qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+ //       qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     }
 
 

@@ -360,7 +360,7 @@ int roundDATEOBS(DATEOBS *date_obs, int nsec)
         date_obs->sec = 0.0;
         date_obs->min +=1;
     }
-qDebug() << QString("secn: %1\n").arg(date_obs->sec);
+//qDebug() << QString("secn: %1\n").arg(date_obs->sec);
     if(date_obs->min>=60)
     {
         date_obs->min -= 60;

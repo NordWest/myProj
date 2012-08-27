@@ -1,35 +1,19 @@
 TEMPLATE = app
 SOURCES += main.cpp \
-    ./../libs/astro.cpp \
-    ./../libs/redStat.cpp \
-    ../libs/comfunc.cpp \
-    ../libs/spline3.cpp \
-    ../libs/spline2d.cpp \
-    ../libs/multidim.cpp \
-    ../libs/ap.cpp \
-    ../libs/vectGrid3D.cpp \
-    ../libs/ialglib.cpp \
-    ../libs/ccdmeasurements.cpp
-HEADERS += ./../libs/fitsio.h \
-    ./../libs/astro.h \
-    ./../libs/redStat.h \
-    ../libs/comfunc.h \
-    ../libs/mb.h \
-    ../libs/spline3.h \
-    ../libs/spline2d.h \
-    ../libs/multidim.h \
-    ../libs/ap.h \
-    ../libs/vectGrid3D.h \
-    ../libs/ialglib.h \
-    ../libs/ccdmeasurements.h
-win32:LIBS += cfitsio.lib \
-    ../libs/ablas.dll
-win32:LIBS += ./../libs/libmb.a
-unix:LIBS += ./libmb.a
+    ../libs/mpcfile.cpp \
+    ../libs/comfunc.cpp
+HEADERS += ../libs/mpcfile.h \
+            ../libs/astro.h \
+            ../libs/mb.h \
+    ../libs/comfunc.h
 
-unix:LIBS += libcfitsio.a
-TARGET = mpcStat
+win32:LIBS += ./../libs/win32/libmb.a \
+            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libmb.a \
+            ./../libs/unix/libastro.a
+
+
+TARGET = ./../../lab/mpcTools/mpcStat
 CONFIG += console \
     qt \
-    warn_off \
-    debug
+    warn_off

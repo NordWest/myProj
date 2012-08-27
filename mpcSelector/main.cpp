@@ -14,6 +14,9 @@ int main(int argc, char *argv[])
     QString mpNum, obsCode;
     double mjd0, mjd1, mjd;
 
+    QTime workTime;
+    workTime.start();
+
     QString cfgFileName = "mpcSelector.ini";
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
@@ -89,6 +92,9 @@ int main(int argc, char *argv[])
 
     inFile.close();
     resFile.close();
+
+
+    qDebug() << QString("Time: %1 sec").arg(workTime.elapsed()/1000.0);
 
     //return a.exec();
 }

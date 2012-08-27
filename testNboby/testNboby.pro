@@ -77,3 +77,5 @@ unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a
 unix:LIBS+=./../libs/unix/libastro.a
 win32:LIBS+=./../libs/win32/libastro.a
+
+#INCLUDEPATH += /usr/local/cuda/include
