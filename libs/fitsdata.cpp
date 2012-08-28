@@ -10774,12 +10774,20 @@ void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int useO
 
 //  miriade
 
-int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData, QString objType)
+int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData, QString obsCode, QString objType)
 {
     qDebug() << "\ngetMiriadeObject\n";
     QStringList outerArguments;
 
-    outerArguments << QString("-name=\"%1\"").arg(objStr.simplified());
+    QString obsArg;
+
+    if(QString().compare(objType, "")==0) obsArg = QString("-name=\"%1\"").arg(objStr.simplified());
+    else obsArg = QString("-name=\"%1:%2\"").arg(objType).arg(objStr.simplified());
+
+
+    outerArguments << obsArg;//QString("-name=\"%1\"").arg(objStr.simplified());
+
+    if(QString().compare(obsCode, "")!=0) outerArguments << "-observer="+obsCode;
 
 
     QString sJD = QString("%1").arg(mjd2jd(mJD), 11, 'f',7);

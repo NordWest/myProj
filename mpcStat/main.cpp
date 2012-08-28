@@ -11,6 +11,7 @@
 #include "./../libs/astro.h"
 #include "./../libs/mpcfile.h"
 #include "./../libs/comfunc.h"
+#include "./../libs/ringpix.h"
 //#include "./../libs/redStat.h"
 //#include "./../libs/multidim.h"
 //#include "./../libs/vectGrid3D.h"
@@ -209,12 +210,23 @@ int main(int argc, char *argv[])
 	fout.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 	
 	out_stream.setDevice(&fout);
+
+    QSettings *settings = new QSettings("./mpcStat.ini",QSettings::IniFormat);
+
+    int isObs = settings->value("general/isObs", 1).toInt();
+    int isYear = settings->value("general/isYear", 1).toInt();
+    int isCatFlag = settings->value("general/isCatFlag", 1).toInt();
+    int isObj = settings->value("general/isObj", 1).toInt();
+    int isSphere = settings->value("general/isSphere", 1).toInt();
+
+    //objSphere
+     long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
+     int isEcl = settings->value("objSphere/isEcl", 0).toLongLong();
+
+//	QString workingFolder = settings->value("general/workingFolder").toString();
+//	QString outputFolder = settings->value("general/outputFolder").toString();
+//	int taskNum = settings->value("general/taskNum").toInt();
 /*
-	QSettings *settings = new QSettings("./mpcstat.ini",QSettings::IniFormat);
-	QString workingFolder = settings->value("general/workingFolder").toString();
-	QString outputFolder = settings->value("general/outputFolder").toString();
-	int taskNum = settings->value("general/taskNum").toInt();
-	
 //	double velMin = settings->value("task14/velMin").toDouble();
 	double velMax = settings->value("general/velMax").toDouble();
 	
@@ -231,6 +243,8 @@ int main(int argc, char *argv[])
         DATEOBS date_obs;
         QString mpcFile(argv[1]);
 
+
+
         QList <obsCodeCounter*> obsList;
         QList <yearCounter*> yrList;
         QList <catFlagCounter*> cfList;
@@ -245,6 +259,23 @@ int main(int argc, char *argv[])
         }
         QTextStream inStm(&inFile);
 
+        QFileInfo mpcI(mpcFile);
+        QString wDirName = QString(mpcI.absolutePath());
+
+        double dect, rat, lam, beta;
+        long ipix, ipixMax;
+
+        //nsMax = 32;//8192;
+        QVector <int> iNum;
+        if(isSphere)
+        {
+            ipixMax = nsMax*nsMax*12;
+            iNum.fill(0, ipixMax);
+        }
+        //int *iNum = new int[ipixMax];
+        //for(i=0; i<ipixMax; i++) iNum[i] = 0;
+
+
         while(!inFile.atEnd())
         {
             mpR.fromStr(inStm.readLine());
@@ -256,23 +287,49 @@ int main(int argc, char *argv[])
             mpR.getCatFlag(catFlag);
 
 
-            addObsCode(obsList, obsCode);
-            addYear(yrList, date_obs.year);
-            addCatFlag(cfList, catFlag);
-            addObjNum(objList, mpNum);
+            if(isObs) addObsCode(obsList, obsCode);
+            if(isYear) addYear(yrList, date_obs.year);
+            if(isCatFlag) addCatFlag(cfList, catFlag);
+            if(isObj) addObjNum(objList, mpNum);
+
+            if(isSphere)
+            {
+                dect = grad2rad(mpR.dec());
+                rat = grad2rad(mpR.ra());
+                if(isEcl==1)
+                {
+                    lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
+
+                    beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
+
+                    if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                    if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                    if((lam>2.0*PI)) lam -=2.0*PI;
+                    if((lam<0.0)) lam +=2.0*PI;
+                    rat = lam;
+                    dect = beta;
+
+                }
+
+                ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
+                if(ipix>ipixMax||ipix<0) qDebug() << QString("WARN ipix: %1\n").arg(ipix);
+            else iNum[ipix]++;
+            }
         }
 
-        qDebug() << QString("obs: %1\nyears: %2\ncatFlags: %3\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count());
+        qDebug() << QString("obs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count());
 
-
+QFile resFile;
+QTextStream resStm;
 
         //save obsList
+        if(isObs)
+        {
+            sortObsNum(obsList);
 
-        sortObsNum(obsList);
+            resFile.setFileName(QString("%1/obsCounter.txt").arg(wDirName));
 
-            QFile resFile;
-            resFile.setFileName("./obsCounter.txt");
-            QTextStream resStm;
             if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
                 resStm.setDevice(&resFile);
@@ -285,60 +342,94 @@ int main(int argc, char *argv[])
 
                 resFile.close();
             }
+        }
 
     //save yrList
-        sortYear(yrList, -1);
-
-        resFile.setFileName("./yearCounter.txt");
-
-        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        if(isYear)
         {
-            resStm.setDevice(&resFile);
-            sz = yrList.count();
-            for(i=0; i<sz; i++)
+            sortYear(yrList, -1);
+
+            //resFile.setFileName("./yearCounter.txt");
+            resFile.setFileName(QString("%1/yearCounter.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
+                resStm.setDevice(&resFile);
+                sz = yrList.count();
+                for(i=0; i<sz; i++)
+                {
 
-                resStm << QString("%1|%2\n").arg(yrList.at(i)->year).arg(yrList.at(i)->count);
+                    resStm << QString("%1|%2\n").arg(yrList.at(i)->year).arg(yrList.at(i)->count);
+                }
+
+                resFile.close();
             }
-
-            resFile.close();
         }
 
 
     //save cfList
-        //sortYear(yrList);
-
-        resFile.setFileName("./cfCounter.txt");
-
-        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        if(isCatFlag)
         {
-            resStm.setDevice(&resFile);
-            sz = cfList.count();
-            for(i=0; i<sz; i++)
+
+            //resFile.setFileName("./cfCounter.txt");
+            resFile.setFileName(QString("%1/cfCounter.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
+                resStm.setDevice(&resFile);
+                sz = cfList.count();
+                for(i=0; i<sz; i++)
+                {
 
-                resStm << QString("%1|%2\n").arg(cfList.at(i)->catFlag).arg(cfList.at(i)->count);
+                    resStm << QString("%1|%2\n").arg(cfList.at(i)->catFlag).arg(cfList.at(i)->count);
+                }
+
+                resFile.close();
             }
-
-            resFile.close();
         }
 
     //save objList
-        sortObjNum(objList);
-
-        resFile.setFileName("./objCounter.txt");
-
-        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        if(isObj)
         {
-            resStm.setDevice(&resFile);
-            sz = objList.count();
-            for(i=0; i<sz; i++)
+            sortObjNum(objList);
+
+            //resFile.setFileName("./objCounter.txt");
+            resFile.setFileName(QString("%1/objCounter.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
+                resStm.setDevice(&resFile);
+                sz = objList.count();
+                for(i=0; i<sz; i++)
+                {
 
-                resStm << QString("%1|%2\n").arg(objList.at(i)->objNum).arg(objList.at(i)->count);
+                    resStm << QString("%1|%2\n").arg(objList.at(i)->objNum).arg(objList.at(i)->count);
+                }
+
+                resFile.close();
             }
+        }
 
-            resFile.close();
+    //save sphere
+
+        if(isSphere)
+        {
+
+            //resFile.setFileName("./objSphere.txt");
+            resFile.setFileName(QString("%1/objSphere.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+            {
+                resStm.setDevice(&resFile);
+                for(i=0; i<ipixMax; i++)
+                {
+                    pix2ang_ring( nsMax, i, &dect, &rat);
+
+                    resStm << QString("%1|%2|%3\n").arg(rad2grad(rat)).arg(rad2grad(dect-M_PI/2.0)).arg(iNum[i]);
+                }
+
+                resFile.close();
+            }
         }
 
 

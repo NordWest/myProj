@@ -13,9 +13,9 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
     int sMod = 0;
     mpcFile mpc0, mpc1, mpc0res, mpc1res;
-    QString mpcFileName0, mpcFileName1, mpcFileName0_res, mpcFileName1_res;
-    QFile mpcFile0, mpcFile1, mpcFile0_res, mpcFile1_res;
-    QTextStream mpcStm0, mpcStm1, mpcStm0_res, mpcStm1_res;
+    QString mpcFileName0, mpcFileName1, mpcFileName0_res, mpcFileName1_res, mpcFileName0_uniq, mpcFileName1_uniq;
+    QFile mpcFile0, mpcFile1, mpcFile0_res, mpcFile1_res, mpcFile0_uniq, mpcFile1_uniq;
+    QTextStream mpcStm0, mpcStm1, mpcStm0_res, mpcStm1_res, mpcStm0_uniq, mpcStm1_uniq;
 
     if(argc<3) sMod = 1;
 
@@ -23,10 +23,12 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
     mpcFileName0_res = QString("%1_res.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data();
     //mpc0res.init(QString("%1_res.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data());
+    mpcFileName0_uniq = QString("%1_uniq.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data();
     if(argc==3)
     {
         mpcFileName1 = QString(argv[2]);
         mpcFileName1_res = QString("%1_res.txt").arg(QFileInfo(argv[2]).completeBaseName()).toAscii().data();
+        mpcFileName1_uniq = QString("%1_uniq.txt").arg(QFileInfo(argv[2]).completeBaseName()).toAscii().data();
     }
 
 
@@ -74,6 +76,10 @@ qDebug() << QString("Begin\n");
     if(!mpcFile0_res.open(QFile::WriteOnly | QFile::Truncate)) return 1;
     mpcStm0_res.setDevice(&mpcFile0_res);
 
+    mpcFile0_uniq.setFileName(mpcFileName0_uniq);
+    if(!mpcFile0_uniq.open(QFile::WriteOnly | QFile::Truncate)) return 1;
+    mpcStm0_uniq.setDevice(&mpcFile0_uniq);
+
     if(argc==3)
     {
         mpcFile1.setFileName(mpcFileName1);
@@ -87,6 +93,11 @@ qDebug() << QString("Begin\n");
             mpcFile1_res.setFileName(mpcFileName1_res);
             if(!mpcFile1_res.open(QFile::WriteOnly | QFile::Truncate)) return 1;
             mpcStm1_res.setDevice(&mpcFile1_res);
+/*
+            mpcFile1_uniq.setFileName(mpcFileName1_uniq);
+            if(!mpcFile1_uniq.open(QFile::WriteOnly | QFile::Truncate)) return 1;
+            mpcStm1_uniq.setDevice(&mpcFile1_uniq);
+            */
         }
         else sz1=0;
     }
@@ -97,7 +108,7 @@ qDebug() << QString("Begin\n");
 
     //DATEOBS dobs;
 
-    mpcRec rec0, rec1;
+    mpcRec rec0, rec1, rec1min;
 
 /*
     for(j=0;j<sz1;j++)
@@ -116,6 +127,7 @@ qDebug() << QString("Begin\n");
     }
 
 */
+    int uk;
     while(!mpcStm0.atEnd())
     {
         //tStr0 = mpcStm0.readLine();
@@ -124,6 +136,8 @@ qDebug() << QString("Begin\n");
         rec0.getObsCode(obsCode0);
         rec0.getMpNumber(objNum0);
         mjd0 = rec0.mjd();
+
+        uk=1;
 
         if(((QString().compare(obsCode0, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
         {
@@ -142,6 +156,7 @@ qDebug() << QString("Begin\n");
                 rec1.getObsCode(obsCode1);
                 rec1.getMpNumber(objNum1);
                 mjd1 = rec1.mjd();
+                dT = fabs(mjd0-mjd1);
 
                 if(((QString().compare(obsCode1, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
                 {
@@ -149,6 +164,7 @@ qDebug() << QString("Begin\n");
                     {
                         posMin=j;
                         dTmin = dT;
+                        rec1min.fromRec(rec1);
                     }
                 }
             }
@@ -157,8 +173,14 @@ qDebug() << QString("Begin\n");
                 logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0.mjd(), 13, 'f', 5).arg(dTmin*1440);
                 //rec1 = mpc1.at(posMin);
                 mpcStm0_res << rec0.toStr() << "\n";
-                if(sz1!=0) mpcStm1_res << rec1.toStr() << "\n";
+                if(sz1!=0) mpcStm1_res << rec1min.toStr() << "\n";
+
+                uk=0;
             }
+        }
+        if(uk)
+        {
+            mpcStm0_uniq << rec0.toStr() << "\n";
         }
     }
    /*

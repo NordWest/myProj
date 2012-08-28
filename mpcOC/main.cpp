@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     }
     qDebug() << QString("mpCat size: %1\n").arg(mpCat.nstr);
 
-    QString objName;
+    QString objName, obsCode;
     bool isNum;
     int objNum;
     double mjd, ra, de, magn;
@@ -107,9 +107,12 @@ int main(int argc, char *argv[])
         ra = mpFile.at(i)->ra();
         de = mpFile.at(i)->dec();
         magn = mpFile.at(i)->magn();
+        mpFile.at(i)->getObsCode(obsCode);
 
-        if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData);
-        else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
+        //if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData);
+        //else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
+
+        getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData, obsCode);
 
         if(!getRes)
         {
