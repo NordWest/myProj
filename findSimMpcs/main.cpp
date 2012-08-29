@@ -132,6 +132,8 @@ qDebug() << QString("Begin\n");
 */
     QString tStr0;
     int iNum=0;
+	int rNum, uqNum;
+	rNum = uqNum = 0;
 
     while(!mpcStm0.atEnd())
     {
@@ -140,12 +142,11 @@ qDebug() << QString("Begin\n");
         rec0.fromStr(tStr0);
 
         rec0.getObsCode(obsCode0);
-        rec0.getMpNumber(objNum0);
         mjd0 = rec0.mjd();
         obsNum0 = rec0.getObsNum();
 
-        iNum++;
-        qDebug() << QString("%1/%2\n").arg(iNum).arg(sz0);
+//        iNum++;
+//        qDebug() << QString("%1/%2\t%3\t%4\t%5\n").arg(iNum).arg(sz0).arg(uqNum).arg(rNum0).arg(rNum1);
 
         uk=1;
 
@@ -189,13 +190,19 @@ qDebug() << QString("Begin\n");
                 mpcStm0_res << rec0.toStr() << "\n";
                 if(sz1!=0) mpcStm1_res << rec1min.toStr() << "\n";
 
+		rNum++;
                 uk=0;
             }
         }
         if(uk)
         {
             mpcStm0_uniq << rec0.toStr() << "\n";
+		uqNum++;
         }
+
+	iNum++;
+        qDebug() << QString("%1/%2\t%3/%4                              \r").arg(iNum).arg(sz0).arg(uqNum).arg(rNum) << flush;
+
     }
    /*
     for(i=0; i<sz0; i++)
