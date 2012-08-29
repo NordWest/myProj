@@ -144,6 +144,7 @@ qDebug() << QString("Begin\n");
         rec0.getObsCode(obsCode0);
         mjd0 = rec0.mjd();
         obsNum0 = rec0.getObsNum();
+        rec0.getMpNumber(objNum0);
 
 //        iNum++;
 //        qDebug() << QString("%1/%2\t%3\t%4\t%5\n").arg(iNum).arg(sz0).arg(uqNum).arg(rNum0).arg(rNum1);
@@ -171,20 +172,24 @@ qDebug() << QString("Begin\n");
                 mjd1 = rec1.mjd();
                 dT = fabs(mjd0-mjd1);
 
+                //qDebug() << QString("%1:%2\n").arg(obsNum0).arg(obsNum1);
+
                 //if(((QString().compare(obsCode1, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
                 if((obsNum1==obsNum0)&&(QString().compare(objNum1, objNum0)==0))
                 {
                     //qDebug() << QString("dT: %1\n").arg(dT);
                     if(dT<dTmin)
                     {
-                        posMin=j;
+                        //qDebug() << QString("dT: %1\n").arg(dT);
+                        //posMin=1;
                         dTmin = dT;
                         rec1min.fromRec(rec1);
                     }
                 }
             }
-            if(((posMin!=-1)&&(dTmin<dtime))||(sz1==0))
+            if((dTmin<dtime)||(sz1==0))
             {
+                //qDebug() << QString("dTmin: %1\n").arg(dTmin);
                 logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0.mjd(), 13, 'f', 5).arg(dTmin*1440);
                 //rec1 = mpc1.at(posMin);
                 mpcStm0_res << rec0.toStr() << "\n";
@@ -201,7 +206,8 @@ qDebug() << QString("Begin\n");
         }
 
 	iNum++;
-        qDebug() << QString("%1/%2\t%3/%4                              \r").arg(iNum).arg(sz0).arg(uqNum).arg(rNum) << flush;
+        qDebug() << QString("%1/%2\t%3/%4                              \n").arg(iNum).arg(sz0).arg(uqNum).arg(rNum);
+
 
     }
    /*
