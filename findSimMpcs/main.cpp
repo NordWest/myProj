@@ -33,7 +33,9 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
 
     int i, j, sz0, sz1;
-    int obsNum, posMin;
+    int posMin;
+    int uk;
+    int obsNum0, obsNum1, obsNum;
     double mjd0, mjd1, dT, dTmin;
     QString objNum0, objNum1, tStr;
 
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
     QString obsCode = sett->value("general/obsCode", "-1").toString();
     QString objNum = sett->value("general/objNum", "-1").toString();
     QString obsCode0, obsCode1;
+
 
     bool isOk;
     QString upStr;
@@ -127,19 +130,24 @@ qDebug() << QString("Begin\n");
     }
 
 */
-    int uk;
+    QString tStr0;
+
     while(!mpcStm0.atEnd())
     {
-        //tStr0 = mpcStm0.readLine();
-        rec0.fromStr(mpcStm0.readLine());
+        tStr0 = mpcStm0.readLine();
+        //qDebug() << QString("tStr0: %1\n").arg(tStr0);
+        rec0.fromStr(tStr0);
 
         rec0.getObsCode(obsCode0);
         rec0.getMpNumber(objNum0);
         mjd0 = rec0.mjd();
+        obsNum0 = rec0.getObsNum();
+
 
         uk=1;
 
-        if(((QString().compare(obsCode0, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
+        //if(((QString().compare(obsCode0, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
+        if(((obsNum0==obsNum)||(obsNum==-1))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
         {
 
 
@@ -154,12 +162,15 @@ qDebug() << QString("Begin\n");
                 rec1.fromStr(mpcStm1.readLine());
 
                 rec1.getObsCode(obsCode1);
+                obsNum1 = rec1.getObsNum();
                 rec1.getMpNumber(objNum1);
                 mjd1 = rec1.mjd();
                 dT = fabs(mjd0-mjd1);
 
-                if(((QString().compare(obsCode1, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
+                //if(((QString().compare(obsCode1, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
+                if((obsNum1==obsNum0)&&(QString().compare(objNum1, objNum0)==0))
                 {
+                    //qDebug() << QString("dT: %1\n").arg(dT);
                     if(dT<dTmin)
                     {
                         posMin=j;

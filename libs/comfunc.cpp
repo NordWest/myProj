@@ -722,6 +722,8 @@ double dinm(int mounth, int isves)
 
 int upackDigStr(char *pstr, char *upstr)
 {
+    if(streqv(pstr, "-")) strcpy(upstr, "-\0");
+    if(streqv(pstr, "+")) strcpy(upstr, "+\0");
         if(streqv(pstr, " ")) strcpy(upstr, " \0");
         if(streqv(pstr, "0")) strcpy(upstr, "0\0");
         if(streqv(pstr, "1")) strcpy(upstr, "1\0");

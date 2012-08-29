@@ -274,11 +274,13 @@ int main(int argc, char *argv[])
         }
         //int *iNum = new int[ipixMax];
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
+        int oNum=0;
 
 
-        while(!inFile.atEnd())
+        while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
+            oNum++;
 
             mpR.getMpNumber(mpNum);
             mpR.getObsCode(obsCode);
@@ -318,7 +320,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        qDebug() << QString("obs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count());
+        qDebug() << QString("mpcNum: %5\nobs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count()).arg(oNum);
 
 QFile resFile;
 QTextStream resStm;
