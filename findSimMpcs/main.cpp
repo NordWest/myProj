@@ -131,6 +131,7 @@ qDebug() << QString("Begin\n");
 
 */
     QString tStr0;
+    int iNum=0;
 
     while(!mpcStm0.atEnd())
     {
@@ -143,6 +144,8 @@ qDebug() << QString("Begin\n");
         mjd0 = rec0.mjd();
         obsNum0 = rec0.getObsNum();
 
+        iNum++;
+        qDebug() << QString("%1/%2\n").arg(iNum).arg(sz0);
 
         uk=1;
 
