@@ -70,10 +70,16 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings("sphC.ini", QSettings::IniFormat);
 
     int solMode = sett->value("general/solutionMode", 0).toInt();
+    int isZonal = sett->value("general/isZonal", 0).toInt();
+    double dMin = grad2rad(sett->value("general/dMin", -90).toDouble());
+    double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
+
+    double s1 = sin(dMin);
+    double s2 = sin(dMax);
 
     QString fileName = QString(argv[1]);
 
-    double *ra, *de, *dRa, *dDe;
+    double *ra, *de, *dRa, *dDe, de1;
     int i, dSize;
 
     QVector <double*> dataVect;
@@ -96,6 +102,8 @@ int main(int argc, char *argv[])
         data[1] = tStr.section(" ", 3, 3).toDouble();
         data[2] = tStr.section(" ", 4, 4).toDouble();
         data[3] = tStr.section(" ", 5, 5).toDouble();
+        if(isZonal&&(data[1]<dMin||data[1]>dMax)) continue;
+
         dataVect << data;
     }
 
@@ -114,9 +122,17 @@ int main(int argc, char *argv[])
     for(i=0; i<dSize; i++)
     {
         ra[i] = dataVect[i][0];
+
         de[i] = dataVect[i][1];
         dRa[i] = dataVect[i][2];
         dDe[i] = dataVect[i][3];
+        if(isZonal)
+        {
+            de1 = de[i]+dDe[i];
+            de[i] = asin((2.0*sin(de[i])/(s2-s1))-(s2+s1)/(s2-s1));
+            de1 = asin((2.0*sin(de1)/(s2-s1))-(s2+s1)/(s2-s1));
+            dDe[i] = de1-de[i];
+        }
     }
 
     switch(solMode)
