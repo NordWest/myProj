@@ -205,6 +205,7 @@ int mpcFile::init(QString fName)
         }
         recList << mpR;
     }
+    return 0;
 }
 
 int mpcFile::saveAs(QString fName)
@@ -241,6 +242,13 @@ mpcRec* mpcFile::at(int i)
 int mpcFile::size()
 {
     return(recList.size());
+}
+
+int mpcFile::removeAt(int pos)
+{
+    if(pos<0||pos>=size()) return 1;
+    recList.removeAt(pos);
+    return 0;
 }
 
 void mpcFile::addRec(mpcRec& nRec)

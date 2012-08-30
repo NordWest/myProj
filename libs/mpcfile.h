@@ -49,6 +49,7 @@ public:
     void addObs(QString mpNumber, QString provDest, double mjd, double ra, double de, double magn, QString discAster = " ", QString note1 = " ", QString note2 = " ", QString magnBand = " ");
     mpcRec* at(int i);
     int size();
+    int removeAt(int pos);
     void addRec(mpcRec& nRec);
     int saveAs(QString fName);
     int save();
