@@ -66,7 +66,7 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 logStm << QString("Begin\n");
 qDebug() << QString("Begin\n");
 
-    if(!mpc0.init(mpcFileName0))return 1;
+    if(mpc0.init(mpcFileName0))return 1;
 /*mpcFile0.setFileName(mpcFileName0);
     if(!mpcFile0.open(QFile::ReadOnly)) return 1;
     mpcStm0.setDevice(&mpcFile0);*/
