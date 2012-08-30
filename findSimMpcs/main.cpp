@@ -85,7 +85,7 @@ qDebug() << QString("Begin\n");
     if(argc==3)
     {
         //mpcFile1.setFileName(mpcFileName1);
-        if(mpc1.init(mpcFileName1))//mpcFile1.open(QFile::ReadOnly))
+        if(!mpc1.init(mpcFileName1))//mpcFile1.open(QFile::ReadOnly))
         {
             //mpcStm1.setDevice(&mpcFile1);
             //tStr = mpcStm1.readLine();
