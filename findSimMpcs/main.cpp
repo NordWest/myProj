@@ -71,9 +71,9 @@ qDebug() << QString("Begin\n");
     mpcFile0.setFileName(mpcFileName0);
     if(!mpcFile0.open(QFile::ReadOnly)) return 1;
     mpcStm0.setDevice(&mpcFile0);
-    tStr = mpcStm0.readLine();
-    sz0 = mpcFile0.size()/tStr.size();
-    mpcStm0.seek(0);
+    //tStr = mpcStm0.readLine();
+    //sz0 = mpcFile0.size()/tStr.size();
+    //mpcStm0.seek(0);
 
     mpcFile0_res.setFileName(mpcFileName0_res);
     if(!mpcFile0_res.open(QFile::WriteOnly | QFile::Truncate)) return 1;
@@ -89,9 +89,9 @@ qDebug() << QString("Begin\n");
         if(mpcFile1.open(QFile::ReadOnly))
         {
             mpcStm1.setDevice(&mpcFile1);
-            tStr = mpcStm1.readLine();
-            sz1 = mpcFile1.size()/tStr.size();
-            mpcStm1.seek(0);
+            //tStr = mpcStm1.readLine();
+            //sz1 = mpcFile1.size()/tStr.size();
+            //mpcStm1.seek(0);
 
             mpcFile1_res.setFileName(mpcFileName1_res);
             if(!mpcFile1_res.open(QFile::WriteOnly | QFile::Truncate)) return 1;
@@ -105,8 +105,8 @@ qDebug() << QString("Begin\n");
         else sz1=0;
     }
 
-    logStm << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
-    qDebug() << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
+    //logStm << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
+    //qDebug() << QString("sz0: %1\tsz1: %2\n").arg(sz0).arg(sz1);
 
 
     //DATEOBS dobs;
@@ -206,7 +206,7 @@ qDebug() << QString("Begin\n");
         }
 
 	iNum++;
-        qDebug() << QString("%1/%2\t%3/%4                              \n").arg(iNum).arg(sz0).arg(uqNum).arg(rNum);
+        qDebug() << QString("%1:\t%2/%3                              \n").arg(iNum).arg(uqNum).arg(rNum);
 
 
     }
