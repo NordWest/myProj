@@ -281,13 +281,18 @@ qDebug() << QString("Begin\n");
             {
                 //qDebug() << QString("dTmin: %1\n").arg(dTmin);
                 logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0->mjd(), 13, 'f', 5).arg(dTmin*1440);
-                rec1 = mpc1.at(posMin);
+
                 mpcStm0_res << rec0->toStr() << "\n";
-                if(sz1!=0) mpcStm1_res << rec1->toStr() << "\n";
-                mpc1.removeAt(posMin);
+                if(sz1!=0)
+                {
+                    rec1 = mpc1.at(posMin);
+                    mpcStm1_res << rec1->toStr() << "\n";
+                    mpc1.removeAt(posMin);
+                    uk=0;
+                }
 
                 rNum++;
-                uk=0;
+
             }
             if(uk)
             {
