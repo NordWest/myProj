@@ -45,6 +45,9 @@ int main(int argc, char *argv[])
         X<<-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
         Y<< -sin(B)/sqrt(1+cos(B)*cos(L/2));
     }
+
+    qDebug() << QString("pNum: %1\n").arg(X.size());
+
     //////////////////////////////
     mglData xs(2),ys(2);
     xs.a[0]=-2;
