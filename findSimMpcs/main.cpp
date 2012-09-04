@@ -303,7 +303,7 @@ qDebug() << QString("Begin\n");
 
         }
         //iNum++;
-        qDebug() << QString("%1/%2:\t%3/%4                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum);
+        qDebug() << QString("%1/%2:\t%3/%4\t %5                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum).arg(sz1);
     }
 /*
     mpc0res.save();
