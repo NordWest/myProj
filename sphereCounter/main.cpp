@@ -53,7 +53,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps);
-int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum);
+int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum, double &sigmaVal);
 
 
 int main(int argc, char *argv[])
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     int isZonal = sett->value("general/isZonal", 0).toInt();
     double dMin = grad2rad(sett->value("general/dMin", -90).toDouble());
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
+    int coefNum = sett->value("general/coefNum", 9).toInt();
 
     double s1 = sin(dMin);
     double s2 = sin(dMax);
@@ -92,6 +93,7 @@ int main(int argc, char *argv[])
     QString tStr;
     double *data;
     double Eps[3];
+    double sgEps[3];
     int res;
 
     while(!inpStm.atEnd())
@@ -112,10 +114,11 @@ int main(int argc, char *argv[])
     de = new double[dSize];
     dRa = new double[dSize];
     dDe = new double[dSize];
-    int coefNum = 9;
+
     int N, K, P;
     double *sCoef = new double[coefNum];
     double *tCoef = new double[coefNum];
+    double sigmaVal;
 
     qDebug() << QString("point num: %1\n").arg(dSize);
 
@@ -141,7 +144,7 @@ int main(int argc, char *argv[])
         res = lsmCount(ra, de, dRa, dDe, dSize, &Eps[0]);
         break;
     case 1:
-        res = vsfCount(ra, de, dRa, dDe, dSize, &sCoef[0], &tCoef[0], coefNum);
+        res = vsfCount(ra, de, dRa, dDe, dSize, &sCoef[0], &tCoef[0], coefNum, sigmaVal);
 
         for(i=0; i<coefNum; i++)
         {
@@ -153,10 +156,16 @@ int main(int argc, char *argv[])
         Eps[1] = tCoef[indexJ(1, 1, 0)-1]/2.89;
         Eps[2] = tCoef[indexJ(1, 0, 1)-1]/2.89;
 
+        sgEps[0] = sigmaVal/2.89;
+        sgEps[1] = sigmaVal/2.89;
+        sgEps[2] = sigmaVal/2.89;
+
         break;
     }
 
     qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0])).arg(rad2mas(Eps[1])).arg(rad2mas(Eps[2]));
+    qDebug() << QString("sgEps: %1\t%2\t%3\n").arg(rad2mas(sgEps[0])).arg(rad2mas(sgEps[1])).arg(rad2mas(sgEps[2]));
+
 
     
     return 0;//a.exec();
@@ -236,7 +245,7 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     return 0;
 }
 
-int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum)
+int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum, double &sigmaVal)
 {
     int i, j;
 
@@ -275,7 +284,7 @@ int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
             dde1 += sCoef[j]*SBJ(j+1, ra[i], dec[i]) + tCoef[j]*TBJ(j+1, ra[i], dec[i]);
         }
         vsfRA[i] = dRa[i] - dra1;
-        vsfDE[i] = dDe[i] - dde1;
+        vsfDE[i] = (dDe[i] - dde1);
     }
 
     double meanRa, meanDe, rmsOneRa, rmsOneDe, rmsMeanRa, rmsMeanDe;
@@ -301,6 +310,8 @@ int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
 
     rmsMeanRa = rmsOneRa/sqrt(pointNum);
     rmsMeanDe = rmsOneDe/sqrt(pointNum);
+
+    sigmaVal = (rmsMeanRa + rmsMeanDe)/(2.0*coefNum);
 
     qDebug() << QString("ra: %1\t%2\t%3\n").arg(rad2mas(meanRa)).arg(rad2mas(rmsOneRa), 10, 'e').arg(rad2mas(rmsMeanRa), 10, 'e');
     qDebug() << QString("de: %1\t%2\t%3\n").arg(rad2mas(meanDe)).arg(rad2mas(rmsOneDe), 10, 'e').arg(rad2mas(rmsMeanDe), 10, 'e');
