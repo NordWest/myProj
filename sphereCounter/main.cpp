@@ -52,7 +52,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
-int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps);
+int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps);
 int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum, double &sigmaVal);
 
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
         de[i] = dataVect[i][1];
         dRa[i] = dataVect[i][2];
         dDe[i] = dataVect[i][3];
-        if(isZonal)
+        if(isZonal&&solMode)
         {
             de1 = de[i]+dDe[i];
             de[i] = asin((2.0*sin(de[i])/(s2-s1))-(s2+s1)/(s2-s1));
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     switch(solMode)
     {
     case 0:
-        res = lsmCount(ra, de, dRa, dDe, dSize, &Eps[0]);
+        res = lsmCount(ra, de, dRa, dDe, dSize, &Eps[0], &sgEps[0]);
         break;
     case 1:
         res = vsfCount(ra, de, dRa, dDe, dSize, &sCoef[0], &tCoef[0], coefNum, sigmaVal);
@@ -152,13 +152,24 @@ int main(int argc, char *argv[])
             qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
         }
 
-        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/2.89;
+/*        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/2.89;
         Eps[1] = tCoef[indexJ(1, 1, 0)-1]/2.89;
         Eps[2] = tCoef[indexJ(1, 0, 1)-1]/2.89;
-
         sgEps[0] = sigmaVal/2.89;
         sgEps[1] = sigmaVal/2.89;
-        sgEps[2] = sigmaVal/2.89;
+        sgEps[2] = sigmaVal/2.89;*/
+
+        qDebug() << QString("Eps coef: %1\t%2\t%3\n").arg(indexJ(1, 1, 1)-1).arg(indexJ(1, 1, 0)-1).arg(indexJ(1, 0, 1)-1);
+
+
+        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/8.29;
+        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/8.29;
+        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/3.13;
+
+        sgEps[0] = sigmaVal/8.29;
+        sgEps[1] = sigmaVal/8.29;
+        sgEps[2] = sigmaVal/3.13;
+
 
         break;
     }
@@ -172,7 +183,7 @@ int main(int argc, char *argv[])
 }
 
 
-int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps)
+int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps)
 {
     int i;
 

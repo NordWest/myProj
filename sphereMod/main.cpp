@@ -58,7 +58,8 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
-int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int rtype = 0, int csys = 0);
+int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int csys = 0);
+int randomSphereHpix(QVector <double> &ra, QVector <double> &de, int nsMax, double raMin, double raMax, double deMin, double deMax, int csys);
 
 int main(int argc, char *argv[])
 {
@@ -82,12 +83,24 @@ int main(int argc, char *argv[])
     deMin = sett->value("general/deMin", -90).toDouble();        //
     deMax = sett->value("general/deMax", 90).toDouble();        //
     int pointNum = sett->value("general/pointNum", 0).toInt();
+    int nsMax = sett->value("general/nsMax", 32).toInt();
     int rtype = sett->value("general/rtype", 0).toInt();
 
     double *Eps = new double[3];
-    Eps[0] = mas_to_rad(sett->value("rotation/ex", 0).toDouble());
-    Eps[1] = mas_to_rad(sett->value("rotation/ey", 0).toDouble());
-    Eps[2] = mas_to_rad(sett->value("rotation/ez", 0).toDouble());
+    Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
+    Eps[1] = mas_to_rad(sett->value("rotation/w2", 0).toDouble());
+    Eps[2] = mas_to_rad(sett->value("rotation/w3", 0).toDouble());
+    double *mMatr = new double[9];
+    mMatr[0] = mas_to_rad(sett->value("rotation/M11", 0).toDouble());
+    mMatr[1] = mas_to_rad(sett->value("rotation/M12", 0).toDouble());
+    mMatr[2] = mas_to_rad(sett->value("rotation/M13", 0).toDouble());
+    mMatr[3] = mas_to_rad(sett->value("rotation/M21", 0).toDouble());
+    mMatr[4] = mas_to_rad(sett->value("rotation/M22", 0).toDouble());
+    mMatr[5] = mas_to_rad(sett->value("rotation/M23", 0).toDouble());
+    mMatr[6] = mas_to_rad(sett->value("rotation/M31", 0).toDouble());
+    mMatr[7] = mas_to_rad(sett->value("rotation/M32", 0).toDouble());
+    mMatr[8] = mas_to_rad(sett->value("rotation/M33", 0).toDouble());
+
 
 //    double epsi = grad2rad(sett->value("general/eps").toDouble());
     int csys = sett->value("general/coord_sys", 0).toInt();
@@ -113,13 +126,34 @@ int main(int argc, char *argv[])
     double h, phi;
     int pN = 0;
 
-    ra = new double[pointNum];
-    dec = new double[pointNum];
+    QVector <double> raVect;
+    QVector <double> deVect;
 
 
 
 //////////////////////////////////////////////////////////////////
-    randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), rtype, csys);
+    if(rtype)
+    {
+
+        randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+        pointNum = raVect.size();
+        ra = new double[pointNum];
+        dec = new double[pointNum];
+
+        for(i=0; i<pointNum; i++)
+        {
+            ra[i] = raVect[i];
+            dec[i] = deVect[i];
+        }
+    }
+    else
+    {
+        ra = new double[pointNum];
+        dec = new double[pointNum];
+        randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+    }
+
+
 
     double orT0, orT1;
 
@@ -204,10 +238,14 @@ int main(int argc, char *argv[])
 
     //            z1 = z0 = 0;
 
-        //orT1 = dec[i]+Ad[i*3]*Eps[0]+Ad[i*3+1]*Eps[1] + disp*z1;
-        //rd[i] = orT1 - dec[i];
+
+        //objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
+        //objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+
         objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
         objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+
+
         //orT0 = r[i]/cos(dec[i]) + ra[i];
 
         rRa[i] = r[i] = objR[0];
@@ -330,24 +368,57 @@ int main(int argc, char *argv[])
  //   return a.exec();
 }
 
-int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int rtype, int csys) //[rad]
+int randomSphereHpix(QVector <double> &ra, QVector <double> &de, int nsMax, double raMin, double raMax, double deMin, double deMax, int csys)
+{
+    double h, phi, x, y, z, rat, dect, lam, beta;
+    long ipix, ipixMax;
+    ipixMax = nsMax*nsMax*12;
+
+    for(ipix=0; ipix<ipixMax; ipix++)
+    {
+        pix2ang_ring( nsMax, ipix, &dect, &rat);
+        dect = PI/2.0 - dect;
+
+        if((rat<=raMax)&&(rat>=raMin)&&(dect>=deMin)&&(dect<=deMax))
+        {
+            if(csys==1)
+            {
+                lam = atan2(cos(dect)*sin(rat)*cos(EKV)-sin(dect)*sin(EKV), cos(dect)*cos(rat));
+//                beta = atan2((cos(mas_to_rad(dec))*sin(mas_to_rad(ra))*sin(epsi)+sin(mas_to_rad(dec))*cos(epsi))*cos(lam), cos(mas_to_rad(dec))*cos(mas_to_rad(ra)));
+//                beta = atan2((cos(mas_to_rad(dec))*sin(mas_to_rad(ra))*sin(epsi)+sin(mas_to_rad(dec))*cos(epsi))*sin(lam), (cos(mas_to_rad(dec))*sin(mas_to_rad(ra))*cos(epsi)-sin(mas_to_rad(dec))*sin(epsi)));
+                beta = asin(cos(dect)*sin(rat)*sin(EKV)+sin(dect)*cos(EKV));
+
+                if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                if((lam>2.0*PI)) lam -=2.0*PI;
+                if((lam<0.0)) lam +=2.0*PI;
+                rat = lam;
+                dect = beta;
+
+            }
+
+            ra << rat;
+            de << dect;
+        }
+    }
+}
+
+int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int csys) //[rad]
 {
     int k = 0;
     double h, phi, x, y, z, rat, dect, lam, beta;
-    long ipix, nsMax, ipixMax;
+    long ipix, nsMax, ipixMax, i;
 
-    nsMax = 8192;
-    ipixMax = nsMax*nsMax*12;
+
+
 
 
     srand(time(NULL));
 
     do
     {
-        switch(rtype)
-        {
 
-        case 0:
 
             h = 2.0*(rand())/(1.0*RAND_MAX)-1.0;
             phi = 2.0*PI*(rand()/(1.0*RAND_MAX));
@@ -357,17 +428,9 @@ int randomSphere(double *ra, double *de, int num, double raMin, double raMax, do
             rat = phi;//atan2(y, x);
             dect = atan2(z, sqrt(y*y+x*x));
 
-        break;
-        case 1:
-            ipix = ipixMax*(rand()/(1.0*RAND_MAX));
-            pix2ang_ring( nsMax, ipix, &dect, &rat);
-            dect = PI/2.0 - dect;
-            //qDebug() << QString("ipix: %1\tra: %2\tde: %3\n").arg(ipix).arg(rat).arg(dect);
-            //qDebug() << QString("raMin: %1\traMax: %2\tdeMin: %3\tdeMax: %4\n").arg(raMin).arg(raMax).arg(deMin).arg(deMax);
 
-            break;
 
-        }
+
 
 
         if((rat<=raMax)&&(rat>=raMin)&&(dect>=deMin)&&(dect<=deMax))
