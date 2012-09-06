@@ -238,8 +238,10 @@ qDebug() << QString("Begin\n");
             posMin = -1;
             dTmin = dtime +100;
             sz1 = mpc1.size();
+            logStm << QString("%1/%2:\t%3/%4\t %5                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum).arg(sz1);
             for(j=0;j<sz1;j++)
             {
+
                 //mpc1.getmpc(j);
                 rec1 = mpc1.at(j);//.record;
 
@@ -287,6 +289,7 @@ qDebug() << QString("Begin\n");
                 {
                     rec1 = mpc1.at(posMin);
                     mpcStm1_res << rec1->toStr() << "\n";
+                    qDebug() << QString("removeAt(%1)\n").arg(posMin);
                     mpc1.removeAt(posMin);
                     uk=0;
                 }
