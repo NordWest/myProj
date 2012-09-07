@@ -75,6 +75,10 @@ int main(int argc, char *argv[])
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
     int coefNum = sett->value("general/coefNum", 9).toInt();
 
+    double coef1 = sett->value("vsf/coef1", 2.89).toDouble();
+    double coef2 = sett->value("vsf/coef2", 2.89).toDouble();
+    double coef3 = sett->value("vsf/coef3", 2.89).toDouble();
+
     double s1 = sin(dMin);
     double s2 = sin(dMax);
 
@@ -95,6 +99,10 @@ int main(int argc, char *argv[])
     double Eps[3];
     double sgEps[3];
     int res;
+
+    QFile resFile("resCoef.txt");
+    resFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream resStm(&resFile);
 
     while(!inpStm.atEnd())
     {
@@ -162,20 +170,26 @@ int main(int argc, char *argv[])
         qDebug() << QString("Eps coef: %1\t%2\t%3\n").arg(indexJ(1, 1, 1)-1).arg(indexJ(1, 1, 0)-1).arg(indexJ(1, 0, 1)-1);
 
 
-        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/8.29;
-        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/8.29;
-        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/3.13;
+        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/coef1;
+        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/coef2;
+        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/coef3;
 
-        sgEps[0] = sigmaVal/8.29;
-        sgEps[1] = sigmaVal/8.29;
-        sgEps[2] = sigmaVal/3.13;
+        sgEps[0] = sigmaVal/coef1;
+        sgEps[1] = sigmaVal/coef2;
+        sgEps[2] = sigmaVal/coef3;
 
 
         break;
     }
 
-    qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0])).arg(rad2mas(Eps[1])).arg(rad2mas(Eps[2]));
-    qDebug() << QString("sgEps: %1\t%2\t%3\n").arg(rad2mas(sgEps[0])).arg(rad2mas(sgEps[1])).arg(rad2mas(sgEps[2]));
+    for(i=0; i<3; i++)
+    {
+        qDebug() << QString("Eps[%1]: %2\t+-\t%3\n").arg(i).arg(rad2mas(Eps[i])).arg(rad2mas(sgEps[i]));
+        resStm << QString("%1\t%2\n").arg(rad2mas(Eps[i])).arg(rad2mas(sgEps[i]));
+    }
+
+    resFile.close();
+    //qDebug() << QString("sgEps: %1\t%2\t%3\n").arg(rad2mas(sgEps[0])).arg(rad2mas(sgEps[1])).arg(rad2mas(sgEps[2]));
 
 
     
@@ -252,6 +266,10 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     Eps[0] = Zra[0];
     Eps[1] = Zra[1];
     Eps[2] = Zra[2];
+
+    sgEps[0] = sqrt(Dra[0][0]);
+    sgEps[1] = sqrt(Dra[1][1]);
+    sgEps[2] = sqrt(Dra[2][2]);
 
     return 0;
 }
