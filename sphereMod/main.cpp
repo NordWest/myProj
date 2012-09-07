@@ -242,8 +242,8 @@ int main(int argc, char *argv[])
         //objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
         //objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
 
-        objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
-        objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
+        objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] - mMatr[2]*sin(dec[i])*sin(ra[i]) + mMatr[5]*sin(dec[i])*cos(ra[i]) + mMatr[1]*cos(dec[i])*cos(2.0*ra[i]) - 0.5*mMatr[0]*cos(dec[i])*sin(2.0*ra[i]) + 0.5*mMatr[4]*cos(dec[i])*sin(3.0*ra[i]) + disp*z0;
+        objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] - 0.5*mMatr[1]*sin(2.0*dec[i])*sin(2.0*ra[i]) + mMatr[2]*cos(2.0*dec[i])*cos(ra[i]) + mMatr[5]*cos(2.0*dec[i])*sin(ra[i]) - 0.5*mMatr[0]*sin(2.0*dec[i])*pow(cos(ra[i]), 2.0) - 0.5*mMatr[4]*sin(2.0*dec[i])*pow(sin(ra[i]), 2.0) + 0.5*mMatr[8]*sin(2.0*dec[i]) + disp*z1;
 
 
         //orT0 = r[i]/cos(dec[i]) + ra[i];

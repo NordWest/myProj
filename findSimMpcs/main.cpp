@@ -289,8 +289,8 @@ qDebug() << QString("Begin\n");
                 {
                     rec1 = mpc1.at(posMin);
                     mpcStm1_res << rec1->toStr() << "\n";
-                    qDebug() << QString("removeAt(%1)\n").arg(posMin);
-                    mpc1.removeAt(posMin);
+                    //qDebug() << QString("removeAt(%1)\n").arg(posMin);
+                    //mpc1.removeAt(posMin);
                     uk=0;
                 }
 
