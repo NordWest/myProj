@@ -21,14 +21,14 @@ int main(int argc, char *argv[])//mpcs.ini.txt mpcs.cat.txt mpcs.res.txt
 
     mpcFileName0 = QString(argv[1]);
 
-    mpcFileName0_res = QString("%1_res.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data();
+    mpcFileName0_res = QString("%1/%2_res.txt").arg(QFileInfo(argv[1]).absolutePath()).arg(QFileInfo(argv[1]).baseName()).toAscii().data();
     //mpc0res.init(QString("%1_res.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data());
-    mpcFileName0_uniq = QString("%1_uniq.txt").arg(QFileInfo(argv[1]).completeBaseName()).toAscii().data();
+    mpcFileName0_uniq = QString("%1/%2_uniq.txt").arg(QFileInfo(argv[1]).absolutePath()).arg(QFileInfo(argv[1]).baseName()).toAscii().data();
     if(argc==3)
     {
         mpcFileName1 = QString(argv[2]);
-        mpcFileName1_res = QString("%1_res.txt").arg(QFileInfo(argv[2]).completeBaseName()).toAscii().data();
-        mpcFileName1_uniq = QString("%1_uniq.txt").arg(QFileInfo(argv[2]).completeBaseName()).toAscii().data();
+        mpcFileName1_res = QString("%1/%2_res.txt").arg(QFileInfo(argv[2]).absolutePath()).arg(QFileInfo(argv[2]).baseName()).toAscii().data();
+        mpcFileName1_uniq = QString("%1/%2_uniq.txt").arg(QFileInfo(argv[2]).absolutePath()).arg(QFileInfo(argv[2]).baseName()).toAscii().data();
     }
 
 
@@ -113,7 +113,7 @@ qDebug() << QString("Begin\n");
 
     //DATEOBS dobs;
 
-    mpcRec *rec0, *rec1, rec1min;
+    mpcRec *rec0, *rec1;
 
 /*
     for(j=0;j<sz1;j++)
@@ -219,7 +219,9 @@ qDebug() << QString("Begin\n");
     {
         uk=1;
         //if(mpc0.(i)) qDebug() << "\nERROR reading mpc0\n";
+
         rec0 = mpc0.at(i);
+        //rec0.fromRec(*mpc0.recList.at(i));
 
         //qDebug() << QString("i: %1").arg(i);
         //qDebug() << QString("eJD|%1\n").arg(rec0->eJD);
@@ -228,6 +230,7 @@ qDebug() << QString("Begin\n");
         mjd0 = rec0->mjd();
         obsNum0 = rec0->getObsNum();
         rec0->getMpNumber(objNum0);
+
         //qDebug() << QString("%1 | %2 | %3\n").arg(obsCode0).arg(objNum0).arg(mjd0, 13, 'f', 5);
         //if(((QString().compare(obsCode0, obsCode)==0)||(QString().compare("-1", obsCode)==0))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
         if(((obsNum0==obsNum)||(obsNum==-1))&&((QString().compare(objNum0, objNum)==0)||(QString().compare("-1", objNum)==0)))
@@ -238,12 +241,13 @@ qDebug() << QString("Begin\n");
             posMin = -1;
             dTmin = dtime +100;
             sz1 = mpc1.size();
-            logStm << QString("%1/%2:\t%3/%4\t %5                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum).arg(sz1);
+            //logStm << QString("%1/%2:\t%3/%4\t %5                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum).arg(sz1);
             for(j=0;j<sz1;j++)
             {
 
                 //mpc1.getmpc(j);
                 rec1 = mpc1.at(j);//.record;
+                //rec1.fromRec(*mpc1.recList.at(j));
 
                 //qDebug() << QString("eJD|%1:\t%2\t%3\n").arg(rec0->eJD).arg(rec1->eJD).arg(fabs(rec0->eJD-rec1->eJD));
                 //qDebug() << QString("num|%1:\t%2\n").arg(rec0->num).arg(rec1->num);
@@ -271,6 +275,8 @@ qDebug() << QString("Begin\n");
                     //break;
                     //getDATEOBSfromMJD(&dobs, jd2mjd(recr->eJD));*/
                 }
+
+
             }
             /*if((posMin!=-1)&&(dTmin<dtime))
             {
@@ -279,18 +285,26 @@ qDebug() << QString("Begin\n");
                 mpc0res.addRec(*rec0);
                 mpc1res.addRec(*rec1);
             }*/
+
+
             if(((posMin!=-1)&&(dTmin<dtime))||(sz1==0))
             {
                 //qDebug() << QString("dTmin: %1\n").arg(dTmin);
-                logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0->mjd(), 13, 'f', 5).arg(dTmin*1440);
+                //logStm << QString("%1 | %2 | %3\n").arg(objNum0).arg(rec0->mjd(), 13, 'f', 5).arg(dTmin*1440);
 
                 mpcStm0_res << rec0->toStr() << "\n";
+
                 if(sz1!=0)
                 {
                     rec1 = mpc1.at(posMin);
+                    //rec1.fromRec(*mpc1.recList.at(posMin));
+
+
                     mpcStm1_res << rec1->toStr() << "\n";
+
+
                     //qDebug() << QString("removeAt(%1)\n").arg(posMin);
-                    //mpc1.removeAt(posMin);
+                    mpc1.removeAt(posMin);
                     uk=0;
                 }
 
@@ -299,14 +313,20 @@ qDebug() << QString("Begin\n");
             }
             if(uk)
             {
+
                 mpcStm0_uniq << rec0->toStr() << "\n";
+
+
             uqNum++;
             }
 
 
         }
+
         //iNum++;
         qDebug() << QString("%1/%2:\t%3/%4\t %5                              \n").arg(i).arg(sz0).arg(uqNum).arg(rNum).arg(sz1);
+
+
     }
 /*
     mpc0res.save();

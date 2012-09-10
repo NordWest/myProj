@@ -844,6 +844,9 @@ int unpackString(QString *upStr, QString pStr)
         upStr->append(fstr);
     }
 
+    delete [] fstr;
+    delete [] ustr;
+
     return 0;
 }
 

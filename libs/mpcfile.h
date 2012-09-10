@@ -41,8 +41,9 @@ public:
 
 class mpcFile
 {
-    QList <mpcRec*> recList;
+
 public:
+    QList <mpcRec*> recList;
     mpcFile();
     QString fileName;
     int init(QString fName);
