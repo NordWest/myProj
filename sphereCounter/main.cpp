@@ -108,10 +108,14 @@ int main(int argc, char *argv[])
     {
         tStr = inpStm.readLine();
         data = new double[4];
-        data[0] = grad2rad(tStr.section(" ", 2, 2).toDouble());
+        /*data[0] = grad2rad(tStr.section(" ", 2, 2).toDouble());
         data[1] = grad2rad(tStr.section(" ", 3, 3).toDouble());
         data[2] = grad2rad(tStr.section(" ", 4, 4).toDouble());
-        data[3] = grad2rad(tStr.section(" ", 5, 5).toDouble());
+        data[3] = grad2rad(tStr.section(" ", 5, 5).toDouble());*/
+        data[0] = tStr.section(" ", 2, 2).toDouble();
+        data[1] = tStr.section(" ", 3, 3).toDouble();
+        data[2] = tStr.section(" ", 4, 4).toDouble();
+        data[3] = tStr.section(" ", 5, 5).toDouble();
         if(isZonal&&(data[1]<dMin||data[1]>dMax)) continue;
 
         dataVect << data;
@@ -156,7 +160,7 @@ int main(int argc, char *argv[])
 
         for(i=0; i<coefNum; i++)
         {
-            indexes(i, N, K, P);
+            indexes(i+1, N, K, P);
             qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
         }
 

@@ -151,6 +151,44 @@ int main(int argc, char *argv[])
     //gr->Colorbar("_wk");
     gr->Plot(ksi,eta,"k.");
     ///////////////
+    double lon=-M_PI;
+    double lat =0;
+    QVector<double> p,q;
+    for(int i=0;i<=500;i++)
+    {
+        p<<-2*cos(lat)*sin(lon/2)/sqrt(1+cos(lat)*cos(lon/2));
+        q<<-sin(lat)/sqrt(1+cos(lat)*cos(lon/2));
+        //
+        p<<-2*cos(lat+M_PI/4)*sin(lon/2)/sqrt(1+cos(lat+M_PI/4)*cos(lon/2));
+        q<<-sin(lat+M_PI/4)/sqrt(1+cos(lat+M_PI/4)*cos(lon/2));
+        //
+        p<<-2*cos(lat-M_PI/4)*sin(lon/2)/sqrt(1+cos(lat-M_PI/4)*cos(lon/2));
+        q<<-sin(lat-M_PI/4)/sqrt(1+cos(lat-M_PI/4)*cos(lon/2));
+        //
+        lon+=2*M_PI/500;
+    }
+    lon = 0;
+    lat =-M_PI/2;
+    for(int i=0;i<=500;i++)
+    {
+        p<<-2*cos(lat)*sin(lon/2)/sqrt(1+cos(lat)*cos(lon/2));
+        q<<-sin(lat)/sqrt(1+cos(lat)*cos(lon/2));
+        //
+        p<<-2*cos(lat)*sin((lon+M_PI/2)/2)/sqrt(1+cos(lat)*cos((lon+M_PI/2)/2));
+        q<<-sin(lat)/sqrt(1+cos(lat)*cos((lon+M_PI/2)/2));
+        //
+        p<<-2*cos(lat)*sin((lon-M_PI/2)/2)/sqrt(1+cos(lat)*cos((lon-M_PI/2)/2));
+        q<<-sin(lat)/sqrt(1+cos(lat)*cos((lon-M_PI/2)/2));
+        //
+        lat+=M_PI/500;
+    }
+    mglData P,Q;
+    P.Set(p.data(),p.count());
+    Q.Set(q.data(),q.count());
+    gr->Plot(P,Q," h.");
+    //////////////
+
+    ///////////////
     /*mglData Mu,Nu;
     Mu.Set(X.data(),X.count());
     Nu.Set(Y.data(),Y.count());
