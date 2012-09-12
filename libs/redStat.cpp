@@ -7506,3 +7506,17 @@ int countColStat(colRec *cRec, double *vect, int sz)
 
     return 0;
 }
+
+ocRecO::ocRecO() : ocRec()
+{
+    obsCode = "";
+}
+
+void ocRecO::rec2s(QString &str)
+{
+        str.clear();
+//	DATEOBS dobs = getDATEOBSfromMJD(MJday);
+
+        str.insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(obsCode, 3).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
+
+};

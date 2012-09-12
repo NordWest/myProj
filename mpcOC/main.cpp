@@ -10,10 +10,13 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
+
+    //if(argc<3) return 1;
+
     mpcFile mpFile;
-    eqFile eqResFile;
+    //eqFile eqResFile;
     objResRec *orTemp;
-    ocRec *ocTemp;
+    ocRecO ocTemp;
     mpephRec mpeRec;
     QString fileName = QString(argv[1]);
     int i, sz, getRes;
@@ -79,6 +82,10 @@ int main(int argc, char *argv[])
     }
     qDebug() << QString("mpCat size: %1\n").arg(mpCat.nstr);
 
+    QFile eqResFile(oFileName);
+    eqResFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream eqStm(&eqResFile);
+
     QString objName, obsCode;
     bool isNum;
     int objNum;
@@ -111,38 +118,43 @@ int main(int argc, char *argv[])
 
         //if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData);
         //else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
+        obsCode.replace(" ", "0");
 
         getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData, obsCode);
 
         if(!getRes)
         {
-            ocTemp = new ocRec;
-            ocTemp->name = objName;
-            ocTemp->MJday = mjd;
-            ocTemp->ra = ra;
-            ocTemp->de = de;
-            ocTemp->mag0 = magn;
-            ocTemp->ocRaCosDe = grad_to_mas(ra*cos(grad2rad(de)) - mpeRec.ra*cos(grad2rad(mpeRec.de)));
-            ocTemp->ocDe = grad_to_mas(de - mpeRec.de);
-            ocTemp->elong = mpeRec.elong;
-            ocTemp->ocMag = magn - mpeRec.Vmag;
-            ocTemp->phase = mpeRec.phase;
-            ocTemp->Vr = mpeRec.Vr;
-            ocTemp->muRaCosDe = mpeRec.muRaCosDe;
-            ocTemp->muDe = mpeRec.muDe;
-            ocTemp->topDist = mpeRec.topDist;
-            if(useMiriade) ocTemp->catName = QString("miriade");
-            else ocTemp->catName = QString("mpeph");
-            ocTemp->catMagName = QString("Vmag");
-            ocTemp->rec2s(&tStr);
+            //ocTemp = new ocRecO;
+            ocTemp.name = objName;
+            ocTemp.MJday = mjd;
+            ocTemp.ra = ra;
+            ocTemp.de = de;
+            ocTemp.mag0 = magn;
+            ocTemp.ocRaCosDe = grad_to_mas(ra*cos(grad2rad(de)) - mpeRec.ra*cos(grad2rad(mpeRec.de)));
+            ocTemp.ocDe = grad_to_mas(de - mpeRec.de);
+            ocTemp.obsCode = obsCode;
+            ocTemp.elong = mpeRec.elong;
+            ocTemp.ocMag = magn - mpeRec.Vmag;
+            ocTemp.phase = mpeRec.phase;
+            ocTemp.Vr = mpeRec.Vr;
+            ocTemp.muRaCosDe = mpeRec.muRaCosDe;
+            ocTemp.muDe = mpeRec.muDe;
+            ocTemp.topDist = mpeRec.topDist;
+            if(useMiriade) ocTemp.catName = QString("miriade");
+            else ocTemp.catName = QString("mpeph");
+            ocTemp.catMagName = QString("Vmag");
+            ocTemp.rec2s(tStr);
             qDebug() << tStr << "\n";
-            eqResFile.ocList.append(ocTemp);
+            //eqResFile.ocList.append(ocTemp);
+            eqStm << tStr << "\n";
         }
         else qDebug() << "\ngetMpephObject\n";
 
 
-        qDebug() << QString("%1: %2\n").arg(i).arg(tStr);
+        //qDebug() << QString("%1: %2\n").arg(i).arg(tStr);
     }
+
+    eqResFile.close();
 
     /*
     sz = orFile.ocList.size();
@@ -157,26 +169,26 @@ int main(int argc, char *argv[])
         {
             ocTemp = new ocRec;
             orTemp->toOcRec(ocTemp);
-            ocTemp->ocRaCosDe = grad_to_mas(orTemp->ra*cos(grad2rad(orTemp->de)) - mpeRec.ra*cos(grad2rad(mpeRec.de)));
-            ocTemp->ocDe = grad_to_mas(orTemp->de - mpeRec.de);
-            ocTemp->elong = mpeRec.elong;
-            ocTemp->ocMag = orTemp->mag - mpeRec.Vmag;
-            ocTemp->phase = mpeRec.phase;
-            ocTemp->Vr = mpeRec.Vr;
-            ocTemp->muRaCosDe = mpeRec.muRaCosDe;
-            ocTemp->muDe = mpeRec.muDe;
-            ocTemp->topDist = mpeRec.topDist;
-            if(useMiriade) ocTemp->catName = QString("miriade");
-            else ocTemp->catName = QString("mpeph");
-            ocTemp->rec2s(&tStr);
+            ocTemp.ocRaCosDe = grad_to_mas(orTemp->ra*cos(grad2rad(orTemp->de)) - mpeRec.ra*cos(grad2rad(mpeRec.de)));
+            ocTemp.ocDe = grad_to_mas(orTemp->de - mpeRec.de);
+            ocTemp.elong = mpeRec.elong;
+            ocTemp.ocMag = orTemp->mag - mpeRec.Vmag;
+            ocTemp.phase = mpeRec.phase;
+            ocTemp.Vr = mpeRec.Vr;
+            ocTemp.muRaCosDe = mpeRec.muRaCosDe;
+            ocTemp.muDe = mpeRec.muDe;
+            ocTemp.topDist = mpeRec.topDist;
+            if(useMiriade) ocTemp.catName = QString("miriade");
+            else ocTemp.catName = QString("mpeph");
+            ocTemp.rec2s(&tStr);
             qDebug() << tStr << "\n";
             eqResFile.ocList.append(ocTemp);
         }
         else qDebug() << "\ngetMpephObject\n";
     }
 */
-    qDebug() << QString("save %1\n").arg(oFileName);
-    eqResFile.saveAs(oFileName);
+    //qDebug() << QString("save %1\n").arg(oFileName);
+    //eqResFile.saveAs(oFileName);
 
     return 0;//a.exec();
 }

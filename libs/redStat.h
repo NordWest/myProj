@@ -80,6 +80,7 @@ public:
         double Dpixmag;         //[]
 */
         //double ra_oc, dec_oc;		//йННПДХМЮРШ НОРХВЕЯЙНЦН ЖЕМРПЮ
+        //QString obsCode;
         double topDist;                 //[au]
         double muRaCosDe;                    //mu_ra*cos(dec) [mas/min]
         double muDe;                    //mu_de [mas/min]
@@ -110,6 +111,15 @@ public:
         //1 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|ra_oc|de_oc|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
 	
 };
+
+class ocRecO : public ocRec
+{
+public:
+    QString obsCode;
+    ocRecO();
+    void rec2s(QString &str);
+};
+
 //ocRec
 //MJday		    |ra		         |de		   |mag0    |ocRaCosDe    |ocDe  |ocMag|ra_oc	       |de_oc		  |topDist	       |muRaCosDec	   |muDe     |Vr      |phase   |elong       |name   |catNum|expTime
 //2008 05 01.93212|14 26 14.5889|+00 05 12.342|13.279|  -113.6|    28.7|    -1.6|14 26 15.2930|+00 04 53.780| 1.906076352|  -467.40|   219.00|  2.21|   5.420| 164.300|00890|0	   | 180.000
