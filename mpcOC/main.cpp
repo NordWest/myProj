@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 
 
     OrbCat mpCat;
+
     if(mpCat.init(mpcOrbCat.toAscii().data()))
     {
         qDebug() << QString("mpoCat init error!\n");
@@ -147,6 +148,7 @@ int main(int argc, char *argv[])
             qDebug() << tStr << "\n";
             //eqResFile.ocList.append(ocTemp);
             eqStm << tStr << "\n";
+            eqStm.flush();
         }
         else qDebug() << "\ngetMpephObject\n";
 
