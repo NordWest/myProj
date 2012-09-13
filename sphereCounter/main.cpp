@@ -344,7 +344,7 @@ int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     rmsMeanRa = rmsOneRa/sqrt(pointNum);
     rmsMeanDe = rmsOneDe/sqrt(pointNum);
 
-    sigmaVal = (rmsMeanRa + rmsMeanDe)/(2.0*coefNum);
+    sigmaVal = sqrt((rmsMeanRa*rmsMeanRa + rmsMeanDe*rmsMeanDe))/2.0*coefNum;
 
     qDebug() << QString("ra: %1\t%2\t%3\n").arg(rad2mas(meanRa)).arg(rad2mas(rmsOneRa), 10, 'e').arg(rad2mas(rmsMeanRa), 10, 'e');
     qDebug() << QString("de: %1\t%2\t%3\n").arg(rad2mas(meanDe)).arg(rad2mas(rmsOneDe), 10, 'e').arg(rad2mas(rmsMeanDe), 10, 'e');

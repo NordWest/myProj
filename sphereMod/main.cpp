@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
     int pointNum = sett->value("general/pointNum", 0).toInt();
     int nsMax = sett->value("general/nsMax", 32).toInt();
     int rtype = sett->value("general/rtype", 0).toInt();
+    QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
@@ -129,28 +130,59 @@ int main(int argc, char *argv[])
     QVector <double> raVect;
     QVector <double> deVect;
 
+    QFile iFile;
+    QTextStream iStm;
+    QString tStr;
 
 
 //////////////////////////////////////////////////////////////////
-    if(rtype)
+    switch(rtype)
     {
-
-        randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
-        pointNum = raVect.size();
-        ra = new double[pointNum];
-        dec = new double[pointNum];
-
-        for(i=0; i<pointNum; i++)
+        case 1:
         {
-            ra[i] = raVect[i];
-            dec[i] = deVect[i];
+            randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+            pointNum = raVect.size();
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+
+            for(i=0; i<pointNum; i++)
+            {
+                ra[i] = raVect[i];
+                dec[i] = deVect[i];
+            }
         }
-    }
-    else
-    {
-        ra = new double[pointNum];
-        dec = new double[pointNum];
-        randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+        break;
+        case 0:
+        {
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+            randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+        }
+        break;
+        case 2:
+        {
+            iFile.setFileName(inpFileName);
+            iFile.open(QFile::ReadOnly);
+            iStm.setDevice(&iFile);
+
+            while(!iStm.atEnd())
+            {
+                tStr = iStm.readLine();
+                raVect << tStr.section("|", 0, 0).toDouble();
+                deVect << tStr.section("|", 1, 1).toDouble();
+            }
+            pointNum = raVect.size();
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+
+            for(i=0; i<pointNum; i++)
+            {
+                ra[i] = raVect[i];
+                dec[i] = deVect[i];
+            }
+        }
+        break;
+
     }
 
 

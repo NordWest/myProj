@@ -221,9 +221,11 @@ int main(int argc, char *argv[])
 
     //objSphere
      long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
-     int isEcl = settings->value("objSphere/isEcl", 0).toLongLong();
-     int pMin = settings->value("objSphere/pMin", 10).toLongLong();
-
+     int isEcl = settings->value("objSphere/isEcl", 0).toInt();
+     int pMin = settings->value("objSphere/pMin", 10).toInt();
+     double dMin = grad2rad(settings->value("objSphere/dMin", -90).toDouble());
+     double dMax = grad2rad(settings->value("objSphere/dMax", 90).toDouble());
+     int isZonal = settings->value("objSphere/isZonal", 0).toInt();
 //	QString workingFolder = settings->value("general/workingFolder").toString();
 //	QString outputFolder = settings->value("general/outputFolder").toString();
 //	int taskNum = settings->value("general/taskNum").toInt();
@@ -237,8 +239,7 @@ int main(int argc, char *argv[])
         int expMin = settings->value("general/expMin").toInt();
         int sigmaTest = settings->value("general/sigmaTest", 0).toInt();
 */
-     double dMin = grad2rad(-30);
-     double dMax = grad2rad(30);
+
 
      double s1 = sin(dMin);
      double s2 = sin(dMax);
@@ -273,6 +274,8 @@ int main(int argc, char *argv[])
 
         //nsMax = 32;//8192;
         QVector <int> iNum;
+        //QVector <> deRA;
+
         if(isSphere)
         {
             ipixMax = nsMax*nsMax*12;
@@ -328,7 +331,7 @@ int main(int argc, char *argv[])
 
 
 
-                dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
+                if(isZonal) dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
 
 
                 ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
@@ -443,9 +446,14 @@ QTextStream resStm;
                 for(i=0; i<ipixMax; i++)
                 {
                     if(iNum[i]<pMin) continue;// iNum[i]=0;
-                    pix2ang_ring( nsMax, i, &dect, &rat);
 
-                    resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect-M_PI/2.0, 13, 'e', 8).arg(iNum[i]);
+
+
+                    pix2ang_ring( nsMax, i, &dect, &rat);
+                    dect = dect-M_PI/2.0;
+                    if(isZonal) dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+
+                    resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect, 13, 'e', 8).arg(iNum[i]);
                 }
 
                 resFile.close();
