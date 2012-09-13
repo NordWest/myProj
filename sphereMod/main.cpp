@@ -375,10 +375,15 @@ int randomSphereHpix(QVector <double> &ra, QVector <double> &de, int nsMax, doub
     long ipix, ipixMax;
     ipixMax = nsMax*nsMax*12;
 
+    double s1 = sin(deMin);
+    double s2 = sin(deMax);
+
     for(ipix=0; ipix<ipixMax; ipix++)
     {
         pix2ang_ring( nsMax, ipix, &dect, &rat);
         dect = PI/2.0 - dect;
+
+        dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
 
         if((rat<=raMax)&&(rat>=raMin)&&(dect>=deMin)&&(dect<=deMax))
         {

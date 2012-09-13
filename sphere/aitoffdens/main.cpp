@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     for(int i=0;i<sl.count();i++)
     {
         line = sl[i].simplified();
-        if(fl==0)
+        /*if(fl==0)
         {
             L = M_PI*line.section('|',cl,cl).toDouble()/180-M_PI;
             B = -M_PI*line.section('|',cb,cb).toDouble()/180;
@@ -46,7 +46,21 @@ int main(int argc, char *argv[])
             L = M_PI*line.section(' ',cl,cl).toDouble()/180-M_PI;
             B = -M_PI*line.section(' ',cb,cb).toDouble()/180;
             MAG = line.section(' ',cm,cm).toDouble();
+        }*/
+
+        if(fl==0)
+        {
+            L = line.section('|',cl,cl).toDouble()-M_PI;
+            B = -line.section('|',cb,cb).toDouble();
+            MAG = line.section('|',cm,cm).toDouble();
         }
+        else
+        {
+            L = line.section(' ',cl,cl).toDouble()-M_PI;
+            B = -line.section(' ',cb,cb).toDouble();
+            MAG = line.section(' ',cm,cm).toDouble();
+        }
+
         X<<-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
         Y<< -sin(B)/sqrt(1+cos(B)*cos(L/2));
         M<<MAG;

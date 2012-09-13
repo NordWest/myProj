@@ -222,6 +222,7 @@ int main(int argc, char *argv[])
     //objSphere
      long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
      int isEcl = settings->value("objSphere/isEcl", 0).toLongLong();
+     int pMin = settings->value("objSphere/pMin", 10).toLongLong();
 
 //	QString workingFolder = settings->value("general/workingFolder").toString();
 //	QString outputFolder = settings->value("general/outputFolder").toString();
@@ -236,6 +237,11 @@ int main(int argc, char *argv[])
         int expMin = settings->value("general/expMin").toInt();
         int sigmaTest = settings->value("general/sigmaTest", 0).toInt();
 */
+     double dMin = grad2rad(-30);
+     double dMax = grad2rad(30);
+
+     double s1 = sin(dMin);
+     double s2 = sin(dMax);
 
         mpcRec mpR;
         QString mpNum, obsCode, catFlag;
@@ -280,6 +286,28 @@ int main(int argc, char *argv[])
         while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
+
+            dect = grad2rad(mpR.dec());
+            rat = grad2rad(mpR.ra());
+            if(isEcl==1)
+            {
+                lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
+
+                beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
+
+                if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                if((lam>2.0*PI)) lam -=2.0*PI;
+                if((lam<0.0)) lam +=2.0*PI;
+                rat = lam;
+                dect = beta;
+
+            }
+
+
+            if(dect<dMin||dect>dMax) continue;
+
             oNum++;
 
             mpR.getMpNumber(mpNum);
@@ -289,6 +317,7 @@ int main(int argc, char *argv[])
             mpR.getCatFlag(catFlag);
 
 
+
             if(isObs) addObsCode(obsList, obsCode);
             if(isYear) addYear(yrList, date_obs.year);
             if(isCatFlag) addCatFlag(cfList, catFlag);
@@ -296,23 +325,11 @@ int main(int argc, char *argv[])
 
             if(isSphere)
             {
-                dect = grad2rad(mpR.dec());
-                rat = grad2rad(mpR.ra());
-                if(isEcl==1)
-                {
-                    lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
 
-                    beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
 
-                    if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
-                    if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
 
-                    if((lam>2.0*PI)) lam -=2.0*PI;
-                    if((lam<0.0)) lam +=2.0*PI;
-                    rat = lam;
-                    dect = beta;
+                dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
 
-                }
 
                 ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
                 if(ipix>ipixMax||ipix<0) qDebug() << QString("WARN ipix: %1\n").arg(ipix);
@@ -425,9 +442,10 @@ QTextStream resStm;
                 resStm.setDevice(&resFile);
                 for(i=0; i<ipixMax; i++)
                 {
+                    if(iNum[i]<pMin) continue;// iNum[i]=0;
                     pix2ang_ring( nsMax, i, &dect, &rat);
 
-                    resStm << QString("%1|%2|%3\n").arg(rad2grad(rat)).arg(rad2grad(dect-M_PI/2.0)).arg(iNum[i]);
+                    resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect-M_PI/2.0, 13, 'e', 8).arg(iNum[i]);
                 }
 
                 resFile.close();
