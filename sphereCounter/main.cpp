@@ -267,12 +267,12 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
     qDebug() << QString("uweDe: %1\n").arg(rad2mas(sqrt(uweDe)),12, 'f', 8);
 
-    Eps[0] = Zra[0];
-    Eps[1] = Zra[1];
+    Eps[0] = Zde[0];
+    Eps[1] = Zde[1];
     Eps[2] = Zra[2];
 
-    sgEps[0] = sqrt(Dra[0][0]);
-    sgEps[1] = sqrt(Dra[1][1]);
+    sgEps[0] = sqrt(Dde[0][0]);
+    sgEps[1] = sqrt(Dde[1][1]);
     sgEps[2] = sqrt(Dra[2][2]);
 
     return 0;
@@ -344,8 +344,14 @@ int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     rmsMeanRa = rmsOneRa/sqrt(pointNum);
     rmsMeanDe = rmsOneDe/sqrt(pointNum);
 
-    sigmaVal = sqrt((rmsMeanRa*rmsMeanRa + rmsMeanDe*rmsMeanDe))/2.0*coefNum;
+    double sigmaVal0 = rmsMeanRa/2.0*coefNum;
+    double sigmaVal1 = rmsMeanDe/2.0*coefNum;
+
+
+    sigmaVal = sqrt((sigmaVal0*sigmaVal0 + sigmaVal1*sigmaVal1))/2.0;
 
     qDebug() << QString("ra: %1\t%2\t%3\n").arg(rad2mas(meanRa)).arg(rad2mas(rmsOneRa), 10, 'e').arg(rad2mas(rmsMeanRa), 10, 'e');
     qDebug() << QString("de: %1\t%2\t%3\n").arg(rad2mas(meanDe)).arg(rad2mas(rmsOneDe), 10, 'e').arg(rad2mas(rmsMeanDe), 10, 'e');
+
+    qDebug() << QString("sigma: %1\t%2\t:%3\n").arg(sigmaVal0).arg(sigmaVal1).arg(sigmaVal);
 }
