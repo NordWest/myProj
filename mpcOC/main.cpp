@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
             ocTemp.muRaCosDe = mpeRec.muRaCosDe;
             ocTemp.muDe = mpeRec.muDe;
             ocTemp.topDist = mpeRec.topDist;
-            ocTemp.catName =
+            ocTemp.catName = catName;
             //if(useMiriade) ocTemp.catName = QString("miriade");
             //else ocTemp.catName = QString("mpeph");
             ocTemp.catMagName = QString("Vmag");
