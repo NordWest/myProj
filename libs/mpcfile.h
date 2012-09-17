@@ -6,6 +6,8 @@
 #include "astro.h"
 #include "comfunc.h"
 
+QString trCatFlag(QString catFlag);
+
 class mpcRec
 {
     QString dataStr;
@@ -24,6 +26,7 @@ public:
     double magn();
     void getBand(QString &bandStr);
     void getCatFlag(QString &catFlag);
+    void getCatName(QString &catName);
     void getObsCode(QString &obsCode);
     int  getObsNum();
 

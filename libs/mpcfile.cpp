@@ -1,6 +1,35 @@
 #include "mpcfile.h"
 
 
+QString trCatFlag(QString catFlag)
+{
+    if(QString().compare(catFlag, "a", Qt::CaseInsensitive)==0||QString().compare(catFlag, "b", Qt::CaseInsensitive)==0) return QString("USNO-A1.0");
+    if(QString().compare(catFlag, "c", Qt::CaseInsensitive)==0||QString().compare(catFlag, "d", Qt::CaseInsensitive)==0) return QString("USNO-A2.0");
+    if(QString().compare(catFlag, "e", Qt::CaseInsensitive)==0) return QString("UCAC1");
+    if(QString().compare(catFlag, "f", Qt::CaseInsensitive)==0) return QString("Tycho-1");
+    if(QString().compare(catFlag, "g", Qt::CaseInsensitive)==0) return QString("Tycho-2");
+    if(QString().compare(catFlag, "f", Qt::CaseInsensitive)==0) return QString("Tycho-1");
+    if(QString().compare(catFlag, "h", Qt::CaseInsensitive)==0) return QString("GSC-1.0");
+    if(QString().compare(catFlag, "i", Qt::CaseInsensitive)==0) return QString("GSC-1.1");
+    if(QString().compare(catFlag, "j", Qt::CaseInsensitive)==0) return QString("GSC-1.2");
+    if(QString().compare(catFlag, "k", Qt::CaseInsensitive)==0) return QString("GSC-2.2");
+    if(QString().compare(catFlag, "l", Qt::CaseInsensitive)==0) return QString("ACT");
+    if(QString().compare(catFlag, "m", Qt::CaseInsensitive)==0) return QString("GSC-ACT");
+    if(QString().compare(catFlag, "n", Qt::CaseInsensitive)==0) return QString("TRC");
+    if(QString().compare(catFlag, "o", Qt::CaseInsensitive)==0) return QString("USNO-B1.0");
+    if(QString().compare(catFlag, "p", Qt::CaseInsensitive)==0) return QString("PPM");
+    if(QString().compare(catFlag, "q", Qt::CaseInsensitive)==0) return QString("UCAC2-beta");
+    if(QString().compare(catFlag, "r", Qt::CaseInsensitive)==0) return QString("UCAC2");
+    if(QString().compare(catFlag, "s", Qt::CaseInsensitive)==0) return QString("USNO-B2.0");
+    if(QString().compare(catFlag, "t", Qt::CaseInsensitive)==0) return QString("UCAC3-beta");
+    if(QString().compare(catFlag, "u", Qt::CaseInsensitive)==0) return QString("UCAC3");
+    if(QString().compare(catFlag, "v", Qt::CaseInsensitive)==0) return QString("NOMAD");
+    if(QString().compare(catFlag, "w", Qt::CaseInsensitive)==0) return QString("CMC");
+    if(QString().compare(catFlag, "x", Qt::CaseInsensitive)==0) return QString("Hip-2");
+    if(QString().compare(catFlag, "z", Qt::CaseInsensitive)==0) return QString("GSC");
+    return QString("Unspecified");
+}
+
 void mpcRec::getMpNumber(QString &mpNumber)
 {
     mpNumber.clear();
@@ -124,6 +153,15 @@ void mpcRec::getCatFlag(QString &catFlag)
 {
     catFlag.clear();
     catFlag.insert(0, dataStr.mid(71, 1));
+}
+
+void mpcRec::getCatName(QString &catName)
+{
+    QString catFlag;
+
+    getCatFlag(catFlag);
+    catName = trCatFlag(catFlag);
+
 }
 
 int mpcRec::fromStr(QString dStr)

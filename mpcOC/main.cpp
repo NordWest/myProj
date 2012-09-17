@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     eqResFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream eqStm(&eqResFile);
 
-    QString objName, obsCode;
+    QString objName, obsCode, catName;
     bool isNum;
     int objNum;
     double mjd, ra, de, magn;
@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
         de = mpFile.at(i)->dec();
         magn = mpFile.at(i)->magn();
         mpFile.at(i)->getObsCode(obsCode);
+        mpFile.at(i)->getCatName(catName);
 
         //if(useMiriade) getRes = getMiriadeObject(&mpeRec, mjd, objName, miriProcData);
         //else getRes = getMpephObject(&mpeRec, mjd, objName, 1, mpephProcData);
@@ -141,8 +142,9 @@ int main(int argc, char *argv[])
             ocTemp.muRaCosDe = mpeRec.muRaCosDe;
             ocTemp.muDe = mpeRec.muDe;
             ocTemp.topDist = mpeRec.topDist;
-            if(useMiriade) ocTemp.catName = QString("miriade");
-            else ocTemp.catName = QString("mpeph");
+            ocTemp.catName =
+            //if(useMiriade) ocTemp.catName = QString("miriade");
+            //else ocTemp.catName = QString("mpeph");
             ocTemp.catMagName = QString("Vmag");
             ocTemp.rec2s(tStr);
             qDebug() << tStr << "\n";
