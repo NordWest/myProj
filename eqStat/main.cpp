@@ -7,6 +7,7 @@
 #include "./../libs/ringpix.h"
 #include "./../libs/mpcStats.h"
 #include "./../libs/redStat.h"
+#include "./../libs/observ.h"
 
 
 /*
@@ -23,6 +24,9 @@ struct obsStat
 
 */
 
+#define CENTER CENTER_BARY
+#define SK SK_EKVATOR
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -37,13 +41,16 @@ int main(int argc, char *argv[])
 
     out_stream.setDevice(&fout);
 
-    QSettings *settings = new QSettings("./mpcStat.ini",QSettings::IniFormat);
+    QSettings *settings = new QSettings("./eqStat.ini",QSettings::IniFormat);
 
     int isObs = settings->value("general/isObs", 1).toInt();
     int isYear = settings->value("general/isYear", 1).toInt();
     int isCatFlag = settings->value("general/isCatFlag", 1).toInt();
     int isObj = settings->value("general/isObj", 1).toInt();
     int isSphere = settings->value("general/isSphere", 1).toInt();
+    int sphereMod = settings->value("general/sphereMod", 0).toInt();
+    QString obsFile = settings->value("general/obsFile", "Obs.txt").toString();
+    QString jplFile = settings->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
 
     //objSphere
      long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
@@ -65,17 +72,44 @@ int main(int argc, char *argv[])
         int expMin = settings->value("general/expMin").toInt();
         int sigmaTest = settings->value("general/sigmaTest", 0).toInt();
 */
+     double *Eps = new double[3];
+     Eps[0] = mas_to_rad(settings->value("rotation/w1", 0).toDouble());
+     Eps[1] = mas_to_rad(settings->value("rotation/w2", 0).toDouble());
+     Eps[2] = mas_to_rad(settings->value("rotation/w3", 0).toDouble());
+     double *mMatr = new double[9];
+     mMatr[0] = mas_to_rad(settings->value("rotation/M11", 0).toDouble());
+     mMatr[1] = mas_to_rad(settings->value("rotation/M12", 0).toDouble());
+     mMatr[2] = mas_to_rad(settings->value("rotation/M13", 0).toDouble());
+     mMatr[3] = mas_to_rad(settings->value("rotation/M21", 0).toDouble());
+     mMatr[4] = mas_to_rad(settings->value("rotation/M22", 0).toDouble());
+     mMatr[5] = mas_to_rad(settings->value("rotation/M23", 0).toDouble());
+     mMatr[6] = mas_to_rad(settings->value("rotation/M31", 0).toDouble());
+     mMatr[7] = mas_to_rad(settings->value("rotation/M32", 0).toDouble());
+     mMatr[8] = mas_to_rad(settings->value("rotation/M33", 0).toDouble());
+     double disp = mas_to_rad(settings->value("rotation/disp", 0).toDouble());
+     double kPar = mas_to_rad(settings->value("rotation/kPar", 0).toDouble());
+     double bPar = mas_to_rad(settings->value("rotation/bPar", 0).toDouble());
+
 
 
      double s1 = sin(dMin);
      double s2 = sin(dMax);
 
         ocRecO ocR;
-        QString mpNum, obsCode, catFlag;
-        double mjd;
+        QString tStr, obsCode, catName, objName;
+        double mjd, disp1;
+
         DATEOBS date_obs;
         QString mpcFile(argv[1]);
 
+        observ oPos;
+
+        int oires = oPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+        if(oires)
+        {
+            qDebug() << QString("oPos init error\n");
+            return 1;
+        }
 
 
         QList <obsCodeCounter*> obsList;
@@ -85,7 +119,7 @@ int main(int argc, char *argv[])
 
 
         QFile inFile(mpcFile);
-        if(!inFile.open(QIODevice::ReadOnly))
+        if(!inFile.open(QIODevice::ReadOnly | QFile::Text))
         {
             qDebug() << QString("File %1 not open. stop\n").arg(mpcFile);
             return 1;
@@ -96,7 +130,10 @@ int main(int argc, char *argv[])
         QString wDirName = QString(mpcI.absolutePath());
 
         double dect, rat, lam, beta;
+        double Az, hVal, zet, lns;
         double oc_ra, oc_de;
+        double objR[2];
+        double x, y, s, z0, z1;
         long ipix, ipixMax;
 
         //nsMax = 32;//8192;
@@ -113,15 +150,75 @@ int main(int argc, char *argv[])
         }
         //int *iNum = new int[ipixMax];
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
-        int oNum=0;
+        long oNum=0;
+srand(time(NULL));
 
-
-        while(!inStm.atEnd())
+        while(!inFile.atEnd())
         {
-            ocR.s2rec(inStm.readLine());
+            tStr = inStm.readLine();
+            //if(tStr==0) break;
 
-            dect = grad2rad(ocR.ra);
-            rat = grad2rad(ocR.de);
+            ocR.s2rec(tStr);
+
+            dect = grad2rad(ocR.de);
+            rat = grad2rad(ocR.ra);
+
+            objName = ocR.name;//.getMpNumber(mpNum);
+            obsCode = ocR.obsCode;
+            mjd = ocR.MJday;
+            getDATEOBSfromMJD(&date_obs, mjd);
+            catName = ocR.catName;
+
+            if(sphereMod)
+            {
+                do
+                {
+            //           srand(time(NULL));
+                    x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    s = x*x + y*y;
+                }while((s==0)||(s>1));
+                lns = sqrt(-2.0*log(s)/s);
+                z0 = x*lns;
+                z1 = y*lns;
+
+
+                objR[0] = -(sin(dect)*cos(rat))*Eps[0]+(-(sin(dect)*sin(rat)))*Eps[1]+(cos(dect))*Eps[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + disp*z0;
+                objR[1] = sin(rat)*Eps[0]+(-cos(rat))*Eps[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + disp*z1;
+
+                do
+                {
+            //           srand(time(NULL));
+                    x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    s = x*x + y*y;
+                }while((s==0)||(s>1));
+                lns = sqrt(-2.0*log(s)/s);
+                z0 = x*lns;
+                z1 = y*lns;
+
+//////////////////////
+                if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam\n");
+                oPos.det_observ(mjd2jd(mjd));
+                detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
+                zet = PI/2.0 - hVal;
+                disp1 = kPar*zet + bPar;
+                qDebug() << QString("obsCode:%1\thVal: %2\tzet: %3\n").arg(obsCode).arg(rad2grad(hVal)).arg(rad2grad(zet));
+
+//////////////////////
+
+                objR[0] += disp1*z0;
+                objR[1] += disp1*z1;
+
+                oc_ra = objR[0] - rat;
+                oc_de = objR[1] - dect;
+            }
+            else
+            {
+                oc_ra = ocR.ocRaCosDe;
+                oc_de = ocR.ocDe;
+            }
+
             if(isEcl==1)
             {
                 lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
@@ -139,23 +236,28 @@ int main(int argc, char *argv[])
             }
 
 
-            if(dect<dMin||dect>dMax) continue;
+            if((dect<dMin)||(dect>dMax))
+            {
+                //qDebug() << QString("%1\t%2\t%3\n").arg(dMin).arg(dect).arg(dMax);
+                continue;
+            }
 
-            oNum++;
-
+oNum++;
+qDebug() << QString("oNum: %1\n").arg(oNum);
+/*
             objName = ocR.name;//.getMpNumber(mpNum);
             obsCode = ocR.obsCode;
             mjd = ocR.MJday;
             getDATEOBSfromMJD(&date_obs, mjd);
             catName = ocR.catName;
-            oc_ra = ocR.ocRaCosDe;
-            oc_de = ocR.ocDe;
-
+//            oc_ra = ocR.ocRaCosDe;
+//            oc_de = ocR.ocDe;
+*/
 
             if(isObs) addObsCode(obsList, obsCode);
             if(isYear) addYear(yrList, date_obs.year);
             if(isCatFlag) addCatFlag(cfList, catName);
-            if(isObj) addObjNum(objList, mpNum);
+            if(isObj) addObjNum(objList, objName);
 
             if(isSphere)
             {
@@ -170,6 +272,59 @@ int main(int argc, char *argv[])
             else
                 {
                     iNum[ipix]++;
+
+
+/////////////////////////
+                    if(sphereMod)
+                    {
+                        do
+                        {
+                    //           srand(time(NULL));
+                            x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                            y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                            s = x*x + y*y;
+                        }while((s==0)||(s>1));
+                        lns = sqrt(-2.0*log(s)/s);
+                        z0 = x*lns;
+                        z1 = y*lns;
+
+
+                        objR[0] = -(sin(dect)*cos(rat))*Eps[0]+(-(sin(dect)*sin(rat)))*Eps[1]+(cos(dect))*Eps[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + disp*z0;
+                        objR[1] = sin(rat)*Eps[0]+(-cos(rat))*Eps[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + disp*z1;
+
+                        do
+                        {
+                    //           srand(time(NULL));
+                            x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                            y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                            s = x*x + y*y;
+                        }while((s==0)||(s>1));
+                        lns = sqrt(-2.0*log(s)/s);
+                        z0 = x*lns;
+                        z1 = y*lns;
+
+    //////////////////////
+                        oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+                        oPos.det_observ(mjd2jd(mjd));
+                        detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
+                        zet = PI/2.0 - hVal;
+                        disp1 = kPar*zet + bPar;
+                        qDebug() << QString("zet: %1\n").arg(rad2grad(zet));
+
+    //////////////////////
+
+                        objR[0] += disp1*z0;
+                        objR[1] += disp1*z1;
+
+                        oc_ra = objR[0] - rat;
+                        oc_de = objR[1] - dect;
+                    }
+
+
+
+/////////////////////////
+
+
                     ocRA[ipix] += oc_ra;
                     ocDE[ipix] += oc_de;
                 }
@@ -282,14 +437,20 @@ QTextStream resStm;
                 for(i=0; i<ipixMax; i++)
                 {
                     if(iNum[i]<pMin) continue;// iNum[i]=0;
+                    oc_ra = mas2rad(ocRA[i]/(1.0*iNum[i]));
+                    oc_de = mas2rad(ocDE[i]/(1.0*iNum[i]));
 
+                    if(sqrt(oc_ra*oc_ra + oc_de*oc_de)>mas2rad(1000)) continue;
 
 
                     pix2ang_ring( nsMax, i, &dect, &rat);
                     dect = dect-M_PI/2.0;
                     if(isZonal) dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
 
-                    resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect, 13, 'e', 8).arg(iNum[i]);
+
+
+
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(rat, 13, 'e', 8).arg(dect, 13, 'e', 8).arg(oc_ra*10000+rat, 13, 'e', 8).arg(oc_de*10000+dect, 13, 'e', 8).arg(oc_ra, 13, 'e', 8).arg(oc_de, 13, 'e', 8).arg(iNum[i]);
                 }
 
                 resFile.close();

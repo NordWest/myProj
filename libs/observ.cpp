@@ -131,9 +131,9 @@ int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
 	this->sk = sk;
 
 //	printf("end set obs param\n");
-	this->obs->getobsynumO(nobsy);
+    return(this->obs->getobsynumO(nobsy));
 
-	return 0;
+//	return 0;
 }
 
 int observ::det_observ(double tUTC)

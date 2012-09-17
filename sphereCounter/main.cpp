@@ -75,6 +75,12 @@ int main(int argc, char *argv[])
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
     int coefNum = sett->value("general/coefNum", 9).toInt();
 
+    QString colSep = sett->value("general/colSep", "|").toString();
+    int cx = sett->value("general/cx", 0).toInt();
+    int cy = sett->value("general/cy", 1).toInt();
+    int cdx = sett->value("general/cdx", 2).toInt();
+    int cdy = sett->value("general/cdy", 3).toInt();
+
     double coef1 = sett->value("vsf/coef1", 2.89).toDouble();
     double coef2 = sett->value("vsf/coef2", 2.89).toDouble();
     double coef3 = sett->value("vsf/coef3", 2.89).toDouble();
@@ -112,10 +118,10 @@ int main(int argc, char *argv[])
         data[1] = grad2rad(tStr.section(" ", 3, 3).toDouble());
         data[2] = grad2rad(tStr.section(" ", 4, 4).toDouble());
         data[3] = grad2rad(tStr.section(" ", 5, 5).toDouble());*/
-        data[0] = tStr.section(" ", 2, 2).toDouble();
-        data[1] = tStr.section(" ", 3, 3).toDouble();
-        data[2] = tStr.section(" ", 4, 4).toDouble();
-        data[3] = tStr.section(" ", 5, 5).toDouble();
+        data[0] = tStr.section(colSep, cx, cx).toDouble();
+        data[1] = tStr.section(colSep, cy, cy).toDouble();
+        data[2] = tStr.section(colSep, cdx, cdx).toDouble();
+        data[3] = tStr.section(colSep, cdy, cdy).toDouble();
         if(isZonal&&(data[1]<dMin||data[1]>dMax)) continue;
 
         dataVect << data;

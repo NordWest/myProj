@@ -2491,8 +2491,8 @@ int detAhnumGC(double *A, double *h, double s, double Cfi, double Sfi, double RA
 
 //	UTC2s(tUTC, lam, &s);
 
-	P1 = -cos(DEC)*sin(s - RA);
-	P2 = -cos(DEC)*cos(s - RA)*Sfi + sin(DEC)*Cfi;
+    P1 = cos(DEC)*sin(s - RA);
+    P2 = cos(DEC)*cos(s - RA)*Sfi - sin(DEC)*Cfi;
 	P3 = cos(DEC)*cos(s - RA)*Cfi + sin(DEC)*Sfi;
 
 	*A = atan2(P1, P2);

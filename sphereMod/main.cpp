@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
     //        qDebug() << "r[i]= " << r[i] << "\n";
 
         objListRot << objR;
-        oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9);
+        oData << QString("%1|%2|%3|%4|%5|%6\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(rad2grad(obj[0]), 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
     }

@@ -118,6 +118,7 @@ public:
     QString obsCode;
     ocRecO();
     void rec2s(QString &str);
+    void s2rec(QString str);
 };
 
 //ocRec

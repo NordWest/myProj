@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     QString style(argv[5]);
     /////////////////////////////
     QVector<double>X,Y;
+    QVector<double>X1,Y1;
     double L,B;
     double Ksi,Eta;
     QString line;

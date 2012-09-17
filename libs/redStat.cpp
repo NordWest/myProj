@@ -7517,6 +7517,46 @@ void ocRecO::rec2s(QString &str)
         str.clear();
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
 
-        str.insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(obsCode, 3).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
+        str.insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(obsCode, 3).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 12).arg(catMagName, 8).arg(mesureTimeCode));
 
+}
+
+void ocRecO::s2rec(QString str)
+{
+    QStringList sL = str.split("|");
+//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
+        /*if(sL.size()!=16&&sL.size()!=18) return;
+    if(sL.size()==16)
+    {
+        vers = 0;
+    }
+        else if(sL.size()==18){vers = 1;}*/
+        int szl = sL.size();
+        int k;
+
+    QString tstr = sL[0];
+
+        MJday = getMJDfromYMD(tstr);
+        ra = hms_to_deg(sL[1], " ");
+        de = damas_to_deg(sL[2], " ");
+    mag0 = sL[3].toFloat();
+        ocRaCosDe = sL[4].toDouble();
+    ocDe = sL[5].toDouble();
+    ocMag = sL[6].toDouble();
+
+
+        k=7;
+                obsCode = sL[k++];
+
+                topDist = sL[k++].toDouble();
+                muRaCosDe = sL[k++].toDouble();
+                muDe = sL[k++].toDouble();
+                Vr = sL[k++].toDouble();
+                phase = sL[k++].toFloat();
+                elong = sL[k++].toFloat();
+                expTime = sL[k++].toDouble();
+                name = sL[k++];
+                catName = sL[k++];
+                catMagName = sL[k++];
+                mesureTimeCode = sL.at(k++);
 };
