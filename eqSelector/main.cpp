@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         parStm.setDevice(&parFile);
         while(!parStm.atEnd())
         {
-            objNumList << QString("%1").arg(parStm.readLine().section("|", 0, 0).simplified(), 5, QLatin1Char( '0' ) );
+            objNumList << parStm.readLine().section("|", 0, 0).simplified();
         }
     }
     parFile.close();
@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
         parStm.setDevice(&parFile);
         while(!parStm.atEnd())
         {
-            obsCodeList << QString("%1").arg(parStm.readLine().section("|", 0, 0).simplified(), 5, QLatin1Char( '0' ) );
+            obsCodeList << parStm.readLine().section("|", 0, 0).simplified();
         }
     }
+    parFile.close();
 
     QString fileName = QString(argv[1]);
     QString fileNameRes = QString(argv[2]);
