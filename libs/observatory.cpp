@@ -203,7 +203,12 @@ int observatory::getobsyname_alt(char *name)
 
 int observatory::det_state(double tUTC)
 {
-	UTC2s(tUTC, this->record->Long, &this->stime);
+    //UTC2s_alt(tUTC, this->record->Long, &this->stime);
+
+    double gm1;
+    jdUT1_to_GMST1(&gm1, tUTC);//pady
+    //UTC2s(mjd2jd(refParam.utc), refParam.Long, &s);
+    stime = 2.0*PI*gm1 + this->record->Long;
 
 	this->dcx = this->h*this->record->Cos*cos(this->stime);
 	this->dcy = this->h*this->record->Cos*sin(this->stime);

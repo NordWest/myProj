@@ -198,12 +198,12 @@ srand(time(NULL));
                 z1 = y*lns;
 
 //////////////////////
-                if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam\n");
+                if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam, %1\n").arg(obsCode);
                 oPos.det_observ(mjd2jd(mjd));
                 detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
                 zet = PI/2.0 - hVal;
-                disp1 = kPar*zet + bPar;
-                qDebug() << QString("obsCode:%1\thVal: %2\tzet: %3\n").arg(obsCode).arg(rad2grad(hVal)).arg(rad2grad(zet));
+                disp1 = kPar*sin(zet) + bPar;
+                if(hVal<0.0) qDebug() << QString("obsCode:%1\thVal: %2\tzet: %3\n").arg(obsCode).arg(rad2grad(hVal)).arg(rad2grad(zet));
 
 //////////////////////
 
@@ -243,7 +243,7 @@ srand(time(NULL));
             }
 
 oNum++;
-qDebug() << QString("oNum: %1\n").arg(oNum);
+//qDebug() << QString("oNum: %1\n").arg(oNum);
 /*
             objName = ocR.name;//.getMpNumber(mpNum);
             obsCode = ocR.obsCode;
@@ -275,6 +275,7 @@ qDebug() << QString("oNum: %1\n").arg(oNum);
 
 
 /////////////////////////
+                    /*
                     if(sphereMod)
                     {
                         do
@@ -309,7 +310,7 @@ qDebug() << QString("oNum: %1\n").arg(oNum);
                         detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
                         zet = PI/2.0 - hVal;
                         disp1 = kPar*zet + bPar;
-                        qDebug() << QString("zet: %1\n").arg(rad2grad(zet));
+                        //qDebug() << QString("zet: %1\n").arg(rad2grad(zet));
 
     //////////////////////
 
@@ -320,7 +321,7 @@ qDebug() << QString("oNum: %1\n").arg(oNum);
                         oc_de = objR[1] - dect;
                     }
 
-
+*/
 
 /////////////////////////
 
