@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         {
             L = line.section('|',cl,cl).toDouble()-M_PI;
             B = -line.section('|',cb,cb).toDouble();
-            MAG = line.section('|',cm,cm).toDouble();
+            MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
         }
         else
         {
@@ -113,13 +113,17 @@ int main(int argc, char *argv[])
                     if(d<ed){ed=d;minIndex=i;}
                     //stream << QString("%1").arg(M[i],10,'f',5,QLatin1Char( ' ' )) <<endl;
                 }
-                if(M[minIndex]!=0)
-                 Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=M[minIndex];//(M[minIndex]-0.5*(minMag+maxMag))/(maxMag-minMag)/0.5;
+                if(ed>2.0*M_PI/npix)Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=0;
                 else
-                    Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=minMag;
-                //stream << QString("%1").arg(M[minIndex],10,'f',5,QLatin1Char( ' ' )) <<'|';
+                {
+                    //if(M[minIndex]!=0)
+                     Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=M[minIndex];//(M[minIndex]-0.5*(minMag+maxMag))/(maxMag-minMag)/0.5;
+                    //else
+                    //    Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=minMag;
+                    //stream << QString("%1").arg(M[minIndex],10,'f',5,QLatin1Char( ' ' )) <<'|';
+                }
              }
-             else Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=minMag;
+             else Z.a[(y+npix)*(4*npix+1)+(x+2*npix)]=0;
             //stream << QString("%1").arg(-1,10,'f',5,QLatin1Char( ' ' )) <<'|';//OM[(y+npix)*4*npix+(x+2*npix)]=-1;
     //////////////
         }

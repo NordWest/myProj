@@ -1,29 +1,29 @@
 #include <QtCore/QCoreApplication>
-#include "./../libs/mpcfile.h"
 #include "./../libs/comfunc.h"
+#include "./../libs/redStat.h"
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
-    mpcRec mpR;
+    ocRecO ocR;
     int obsNum, objNum, cfNum;
     int isObs, isObj, isTime, isCF;
     int k, r, i;
-    QString mpNum, obsCode, catFlag;
+    QString objName, obsCode, catName, tStr;
     double mjd0, mjd1, mjd;
-    QStringList objNumList;
+    QStringList objNumList, obsCodeList;
 
     QTime workTime;
     workTime.start();
 
-    QString cfgFileName = "mpcSelector.ini";
+    QString cfgFileName = "eqSelector.ini";
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
-    QStringList obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
+    QString obsFileName = sett->value("general/obsFileName", "").toString();
     QString objFileName = sett->value("general/objFileName", "").toString();
-    QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
+    QStringList catNameList = sett->value("general/catNameList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
 
@@ -31,14 +31,25 @@ int main(int argc, char *argv[])
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
 
 
-    QFile objFile(objFileName);
-    QTextStream objStm;
-    if(objFile.open(QFile::ReadOnly))
+    QFile parFile(objFileName);
+    QTextStream parStm;
+    if(parFile.open(QFile::ReadOnly))
     {
-        objStm.setDevice(&objFile);
-        while(!objStm.atEnd())
+        parStm.setDevice(&parFile);
+        while(!parStm.atEnd())
         {
-            objNumList << QString("%1").arg(objStm.readLine().section(" ", 0, 0), 5, QLatin1Char( '0' ) );
+            objNumList << QString("%1").arg(parStm.readLine().section("|", 0, 0).simplified(), 5, QLatin1Char( '0' ) );
+        }
+    }
+    parFile.close();
+
+    parFile.setFileName(obsFileName);
+    if(parFile.open(QFile::ReadOnly))
+    {
+        parStm.setDevice(&parFile);
+        while(!parStm.atEnd())
+        {
+            obsCodeList << QString("%1").arg(parStm.readLine().section("|", 0, 0).simplified(), 5, QLatin1Char( '0' ) );
         }
     }
 
@@ -65,46 +76,50 @@ int main(int argc, char *argv[])
 
     obsNum = obsCodeList.size();
     objNum = objNumList.size();
-    cfNum = catFlagList.size();
+    cfNum = catNameList.size();
     qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\n").arg(obsNum).arg(objNum).arg(cfNum);
 
     k=0; r=0;
     while(!inFile.atEnd())
     {
-        mpR.fromStr(inStm.readLine());
+        ocR.s2rec(inStm.readLine());
 
         isObj = 1;
         isObs = 1;
         isTime = 1;
         isCF = 1;
 
-        mpR.getMpNumber(mpNum);
+        //mpR.getMpNumber(mpNum);
+        objName = ocR.name;
         for(i=0; i<objNum && objNumList.at(i).size()>0;i++)
         {
-            isObj = (QString().compare(mpNum, objNumList.at(i))==0);
+            isObj = (QString().compare(objName, objNumList.at(i))==0);
             if(isObj) break;
         }
 
-        mpR.getObsCode(obsCode);
+        //mpR.getObsCode(obsCode);
+        obsCode = ocR.obsCode;
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
         {
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
 
-        mjd = mpR.mjd();
+        mjd = ocR.MJday;
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
 
-        mpR.getCatFlag(catFlag);
-        for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
+        //mpR.getCatFlag(catName);
+        catName = ocR.catName;
+        for(i=0; i<cfNum && catNameList.at(i).size()>0;i++)
         {
-            isCF = (QString().compare(catFlag, catFlagList.at(i))==0);
+            isCF = (QString().compare(catName, catNameList.at(i))==0);
             if(isCF) break;
         }
 
         if(isObj&&isObs&&isTime&&isCF)
         {
-            resStm << mpR.toStr() << "\n";
+            ocR.rec2s(tStr);
+            resStm << tStr << "\n";
             r++;
         }
         k++;
@@ -117,6 +132,6 @@ int main(int argc, char *argv[])
 
 
     qDebug() << QString("Time: %1 sec").arg(workTime.elapsed()/1000.0);
-
+    
     return 0;//a.exec();
 }

@@ -423,10 +423,10 @@ void ocRec::s2rec(QString str)
                 phase = sL[k++].toFloat();
                 elong = sL[k++].toFloat();
                 expTime = sL[k++].toDouble();
-                name = sL[k++];
-                catName = sL[k++];
-                catMagName = sL[k++];
-                mesureTimeCode = sL.at(k++);
+                name = sL.at(k++).simplified();
+                catName = sL.at(k++).simplified();
+                catMagName = sL.at(k++).simplified();
+                mesureTimeCode = sL.at(k++).simplified();
 //		expTime = sL[15].toFloat();
 /*	}
 	if(vers==1)
@@ -7546,7 +7546,7 @@ void ocRecO::s2rec(QString str)
 
 
         k=7;
-                obsCode = sL[k++];
+                obsCode = sL.at(k++).simplified();
 
                 topDist = sL[k++].toDouble();
                 muRaCosDe = sL[k++].toDouble();
@@ -7555,8 +7555,8 @@ void ocRecO::s2rec(QString str)
                 phase = sL[k++].toFloat();
                 elong = sL[k++].toFloat();
                 expTime = sL[k++].toDouble();
-                name = sL[k++];
-                catName = sL[k++];
-                catMagName = sL[k++];
-                mesureTimeCode = sL.at(k++);
+                name = sL.at(k++).simplified();
+                catName = sL.at(k++).simplified();
+                catMagName = sL.at(k++).simplified();
+                mesureTimeCode = sL.at(k++).simplified();
 };

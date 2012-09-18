@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
         double dect, rat, lam, beta;
         double Az, hVal, zet, lns;
         double oc_ra, oc_de;
+        double rat1, dect1;
         double objR[2];
         double x, y, s, z0, z1;
         long ipix, ipixMax;
@@ -221,6 +222,9 @@ srand(time(NULL));
 
             if(isEcl==1)
             {
+                rat1 = rat + mas2rad(oc_ra)/cos(dect);
+                dect1 = dect + mas2rad(oc_de);
+
                 lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
 
                 beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
@@ -232,6 +236,22 @@ srand(time(NULL));
                 if((lam<0.0)) lam +=2.0*PI;
                 rat = lam;
                 dect = beta;
+
+                lam = atan2(cos(dect1)*sin(rat1)*cos(-EKV)-sin(dect1)*sin(-EKV), cos(dect1)*cos(rat1));
+
+                beta = asin(cos(dect1)*sin(rat1)*sin(-EKV)+sin(dect1)*cos(-EKV));
+
+                if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                if((lam>2.0*PI)) lam -=2.0*PI;
+                if((lam<0.0)) lam +=2.0*PI;
+                rat1 = lam;
+                dect1 = beta;
+
+                oc_ra = rad2mas((rat1 - rat)*cos(dect));
+                oc_de = rad2mas(dect1 - dect);
+
 
             }
 
