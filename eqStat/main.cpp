@@ -208,7 +208,7 @@ srand(time(NULL));
 
 //////////////////////
 
-                objR[0] += disp1*z0;
+                //objR[0] += disp1*z0;
                 objR[1] += disp1*z1;
 
                 oc_ra = objR[0] - rat;
