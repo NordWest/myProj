@@ -27,10 +27,12 @@ public:
     void getBand(QString &bandStr);
     void getCatFlag(QString &catFlag);
     void getCatName(QString &catName);
+    //void getCatFamName(QString &catName);
     void getObsCode(QString &obsCode);
     int  getObsNum();
 
-    void setPos(double mjdt, double radeg, double deDeg);
+    void setPos(double radeg, double deDeg);
+    void setTimePos(double mjdt, double radeg, double deDeg);
     void setMagn(double magn);
     void setName(QString name);
     void setProvDest(QString pName);

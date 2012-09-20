@@ -8,7 +8,6 @@ QString trCatFlag(QString catFlag)
     if(QString().compare(catFlag, "e", Qt::CaseInsensitive)==0) return QString("UCAC1");
     if(QString().compare(catFlag, "f", Qt::CaseInsensitive)==0) return QString("Tycho-1");
     if(QString().compare(catFlag, "g", Qt::CaseInsensitive)==0) return QString("Tycho-2");
-    if(QString().compare(catFlag, "f", Qt::CaseInsensitive)==0) return QString("Tycho-1");
     if(QString().compare(catFlag, "h", Qt::CaseInsensitive)==0) return QString("GSC-1.0");
     if(QString().compare(catFlag, "i", Qt::CaseInsensitive)==0) return QString("GSC-1.1");
     if(QString().compare(catFlag, "j", Qt::CaseInsensitive)==0) return QString("GSC-1.2");
@@ -163,7 +162,16 @@ void mpcRec::getCatName(QString &catName)
     catName = trCatFlag(catFlag);
 
 }
+/*
+void mpcRec::getCatFamName(QString &catName)
+{
+    QString catFlag;
 
+    getCatFlag(catFlag);
+    catName = trCatFlag(catFlag);
+
+}
+*/
 int mpcRec::fromStr(QString dStr)
 {
     if(dStr.size()<80) return 1;
@@ -194,7 +202,14 @@ mpcRec::mpcRec(QString nStr)
     dataStr.insert(0, nStr);
 }
 
-void mpcRec::setPos(double mjdt, double radeg, double deDeg)
+void mpcRec::setTimePos(double mjdt, double radeg, double deDeg)
+{
+    QString strT(dataStr);
+    dataStr.clear();
+    dataStr = QString("%1%2%3%4%5").arg(strT.mid(0));
+}
+
+void mpcRec::setPos(double radeg, double deDeg)
 {
     QString strT(dataStr);
     dataStr.clear();
