@@ -108,7 +108,7 @@ void addYear(QList <yearCounter*> &yrList, int year)
 
 }
 
-void addObjNum(QList <objCounter*> &objList, QString objNum)
+void addObjNum(QList <objCounter*> &objList, QString objNum, int objMax)
 {
     int i, sz;
     objCounter* objRec;
@@ -122,10 +122,13 @@ void addObjNum(QList <objCounter*> &objList, QString objNum)
         }
 
     }
-    objRec = new objCounter;
-    objRec->objNum = objNum;
-    objRec->count=1;
-    objList << objRec;
+    if(objList.size()<objMax||objMax==-1)
+    {
+        objRec = new objCounter;
+        objRec->objNum = objNum;
+        objRec->count=1;
+        objList << objRec;
+    }
 
 }
 

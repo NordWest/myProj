@@ -55,6 +55,9 @@ int main(int argc, char *argv[])
     int isObj = settings->value("general/isObj", 1).toInt();
     int isSphere = settings->value("general/isSphere", 1).toInt();
 
+//objCounter
+     int objMax = settings->value("objCounter/objMax", 32).toLongLong();
+
     //objSphere
      long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
      int isEcl = settings->value("objSphere/isEcl", 0).toInt();
