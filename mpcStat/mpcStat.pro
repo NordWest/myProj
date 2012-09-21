@@ -20,3 +20,5 @@ TARGET = ./../../lab/mpcTools/mpcStat
 CONFIG += console \
     qt \
     warn_off
+CONFIG -= gui
+

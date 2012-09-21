@@ -1,4 +1,4 @@
-#include <QApplication>
+#include <QCoreApplication>
 //#include <QtGui>
 //#include "OpenFileExDlg.h"
 //#include "fitsio.h"
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
        mainWin->show(); */
        
 	
-	QApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
     setlocale(LC_NUMERIC, "C");
 	
 	
