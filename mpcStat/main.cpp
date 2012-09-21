@@ -1,5 +1,5 @@
 #include <QApplication>
-#include <QtGui>
+//#include <QtGui>
 //#include "OpenFileExDlg.h"
 //#include "fitsio.h"
 #include <iostream>
