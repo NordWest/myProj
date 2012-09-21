@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     QString mpNum, obsCode, catFlag;
     double mjd0, mjd1, mjd;
     QStringList objNumList;
+    QStringList obsCodeList;
 
     QTime workTime;
     workTime.start();
@@ -21,7 +22,7 @@ int main(int argc, char *argv[])
     QString cfgFileName = "mpcSelector.ini";
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
-    QStringList obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
+    QString obsFileName = sett->value("general/obsFileName", "").toString();
     QString objFileName = sett->value("general/objFileName", "").toString();
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
@@ -31,14 +32,24 @@ int main(int argc, char *argv[])
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
 
 
-    QFile objFile(objFileName);
-    QTextStream objStm;
-    if(objFile.open(QFile::ReadOnly))
+    QFile parFile(objFileName);
+    QTextStream parStm;
+    if(parFile.open(QFile::ReadOnly))
     {
-        objStm.setDevice(&objFile);
-        while(!objStm.atEnd())
+        parStm.setDevice(&parFile);
+        while(!parStm.atEnd())
         {
-            objNumList << QString("%1").arg(objStm.readLine().section(" ", 0, 0), 5, QLatin1Char( '0' ) );
+            objNumList << QString("%1").arg(parStm.readLine().section("|", 0, 0), 5, QLatin1Char( '0' ) );
+        }
+    }
+
+    parFile.setFileName(obsFileName);
+    if(parFile.open(QFile::ReadOnly))
+    {
+        parStm.setDevice(&parFile);
+        while(!parStm.atEnd())
+        {
+            obsCodeList << QString("%1").arg(parStm.readLine().section("|", 0, 0));
         }
     }
 
