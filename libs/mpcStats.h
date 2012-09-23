@@ -108,6 +108,8 @@ void addYear(QList <yearCounter*> &yrList, int year)
 
 }
 
+void addObjNum(QList <objCounter*> &objList, QString objNum, int objMax = -1);
+
 void addObjNum(QList <objCounter*> &objList, QString objNum, int objMax)
 {
     int i, sz;
