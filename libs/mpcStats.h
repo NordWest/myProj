@@ -33,7 +33,18 @@ struct yearCounter
         count = 0;
     };
 };
-
+/*
+struct magnitudeCounter
+{
+    double magn;
+    int count;
+    yearCounter()
+    {
+        magn=0;
+        count = 0;
+    };
+};
+*/
 struct catFlagCounter
 {
     QString catFlag;
@@ -107,7 +118,28 @@ void addYear(QList <yearCounter*> &yrList, int year)
     yrList << yrRec;
 
 }
+/*
+void addMagnitude(QList <magnitudeCounter*> &magList, double magn)
+{
+    int i, sz;
+    yearCounter* yrRec;
+    sz = yrList.count();
+    for(i=0; i<sz; i++)
+    {
+        if(yrList.at(i)->year==year)
+        {
+            yrList.at(i)->count++;
+            return;
+        }
 
+    }
+    yrRec = new yearCounter;
+    yrRec->year = year;
+    yrRec->count=1;
+    yrList << yrRec;
+
+}
+*/
 void addObjNum(QList <objCounter*> &objList, QString objNum, int objMax = -1);
 
 void addObjNum(QList <objCounter*> &objList, QString objNum, int objMax)

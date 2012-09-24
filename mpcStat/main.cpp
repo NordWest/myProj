@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 	
 	
-    int i, sz;
+   int i, sz, mnum;
     QTextStream out_stream;
 
 	QFile fout("./fout.dat");
@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     int isCatFlag = settings->value("general/isCatFlag", 1).toInt();
     int isObj = settings->value("general/isObj", 1).toInt();
     int isSphere = settings->value("general/isSphere", 1).toInt();
+    int isMagn = settings->value("general/isMagn", 1).toInt();
 
 //objCounter
      int objMax = settings->value("objCounter/objMax", 32).toLongLong();
@@ -65,6 +66,10 @@ int main(int argc, char *argv[])
      double dMin = grad2rad(settings->value("objSphere/dMin", -90).toDouble());
      double dMax = grad2rad(settings->value("objSphere/dMax", 90).toDouble());
      int isZonal = settings->value("objSphere/isZonal", 0).toInt();
+
+     int magNum = settings->value("magCounter/magNum", 1).toInt();
+     double mag0 = settings->value("magCounter/mag0", -30).toDouble();
+     double mag1 = settings->value("magCounter/mag1", 30).toDouble();
 //	QString workingFolder = settings->value("general/workingFolder").toString();
 //	QString outputFolder = settings->value("general/outputFolder").toString();
 //	int taskNum = settings->value("general/taskNum").toInt();
@@ -73,7 +78,7 @@ int main(int argc, char *argv[])
 	double velMax = settings->value("general/velMax").toDouble();
 	
 	int isSysCorr = settings->value("general/isSysCorr").toInt();
-	QString sysCorrFile = settings->value("general/sysCorrFile").toString();
+    QString sysCorrFile = settings->value("general/sysCorrFile").toString();
         QStringList excNames = settings->value("general/excNames").toString().split("|");
         int expMin = settings->value("general/expMin").toInt();
         int sigmaTest = settings->value("general/sigmaTest", 0).toInt();
@@ -82,10 +87,13 @@ int main(int argc, char *argv[])
 
      double s1 = sin(dMin);
      double s2 = sin(dMax);
-
+/*
+     double rs1 = sin(grad2rad(250));
+     double rs2 = sin(grad2rad(300));
+*/
         mpcRec mpR;
         QString mpNum, obsCode, catFlag;
-        double mjd;
+        double mjd, magn;
         DATEOBS date_obs;
         QString mpcFile(argv[1]);
 
@@ -95,6 +103,9 @@ int main(int argc, char *argv[])
         QList <yearCounter*> yrList;
         QList <catFlagCounter*> cfList;
         QList <objCounter*> objList;
+
+        int* magnCount = new int[magNum];
+        for(i=0; i<magNum;i++) magnCount[i] = 0;
 
 
         QFile inFile(mpcFile);
@@ -147,8 +158,11 @@ int main(int argc, char *argv[])
 
             }
 
+            magn = mpR.magn();
+
 
             if(dect<dMin||dect>dMax) continue;
+            if((magn<mag0||magn>mag1)&&isMagn) continue;
 
             oNum++;
 
@@ -170,12 +184,22 @@ int main(int argc, char *argv[])
 
 
 
-                if(isZonal) dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
+                if(isZonal)
+                {
+                    dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
+                    //rat = asin((2.0*sin(rat)/(rs2-rs1))-(rs2+rs1)/(rs2-rs1));
+                }
 
 
                 ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
                 if(ipix>ipixMax||ipix<0) qDebug() << QString("WARN ipix: %1\n").arg(ipix);
             else iNum[ipix]++;
+            }
+
+            if(isMagn)
+            {
+                mnum = ((magn-mag0)/(mag1-mag0))*magNum;
+                magnCount[mnum]++;
             }
         }
 
@@ -290,9 +314,35 @@ QTextStream resStm;
 
                     pix2ang_ring( nsMax, i, &dect, &rat);
                     dect = dect-M_PI/2.0;
-                    if(isZonal) dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+                    if(isZonal)
+                    {
+                        dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+                        //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
+                    }
 
                     resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect, 13, 'e', 8).arg(iNum[i]);
+                }
+
+                resFile.close();
+            }
+        }
+
+        double mDiap;
+
+        if(isMagn)
+        {
+            resFile.setFileName(QString("%1/magnCount.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+            {
+                resStm.setDevice(&resFile);
+                for(i=0; i<magNum; i++)
+                {
+                    //if(iNum[i]<pMin) continue;// iNum[i]=0;
+
+                    mDiap = (i+0.5)*((mag1-mag0)/magNum)+mag0;
+
+                    resStm << QString("%1|%2\n").arg(mDiap, 5, 'f', 2).arg(magnCount[i]);
                 }
 
                 resFile.close();

@@ -9,10 +9,10 @@ int main(int argc, char *argv[])
 
     mpcRec mpR;
     int obsNum, objNum, cfNum;
-    int isObs, isObj, isTime, isCF;
+    int isObs, isObj, isTime, isCF, isMag;
     int k, r, i;
     QString mpNum, obsCode, catFlag;
-    double mjd0, mjd1, mjd;
+    double mjd0, mjd1, mjd, tMag;
     QStringList objNumList;
     QStringList obsCodeList;
 
@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
+
+    double mag0 = sett->value("general/mag0", -30).toDouble();
+    double mag1 = sett->value("general/mag1", 30).toDouble();
 
     if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0, 0);
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
@@ -88,6 +91,7 @@ int main(int argc, char *argv[])
         isObs = 1;
         isTime = 1;
         isCF = 1;
+        isMag = 1;
 
         mpR.getMpNumber(mpNum);
         for(i=0; i<objNum && objNumList.at(i).size()>0;i++)
@@ -113,7 +117,10 @@ int main(int argc, char *argv[])
             if(isCF) break;
         }
 
-        if(isObj&&isObs&&isTime&&isCF)
+        tMag = mpR.magn();
+        if(tMag<mag0||tMag>mag1) isMag = 0;
+
+        if(isObj&&isObs&&isTime&&isCF&&isMag)
         {
             resStm << mpR.toStr() << "\n";
             r++;

@@ -115,7 +115,7 @@ double mpcRec::magn()
 {
     QString tStr;
     tStr = dataStr.mid(65, 5);
-    qDebug() << QString("magn: %1\n").arg(tStr);
+    //qDebug() << QString("magn: %1\n").arg(tStr);
     return(tStr.toDouble());
 }
 
