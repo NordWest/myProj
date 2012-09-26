@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 
     QString obsFileName = sett->value("general/obsFileName", "").toString();
     QString objFileName = sett->value("general/objFileName", "").toString();
+    obsCodeList << sett->value("general/obsCodeList", "").toString().split("|");
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
