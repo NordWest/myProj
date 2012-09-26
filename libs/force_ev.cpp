@@ -7,6 +7,7 @@
 //#include "mymatrix.h"
 #include "dele.h"
 #include "DynArr.h"
+#include "moody/capsule/capsuleBase/particle/Particle.h"
 
 
 //  #define k2 6.672590000e-8
@@ -21,6 +22,8 @@
   extern ever_params *eparam;
   extern double *mass;
   int iterNum;
+
+  extern QList <ParticleStruct*> pList;
 
  // extern dele *nbody;
  // extern int nofzbody;
@@ -144,7 +147,7 @@
                       res0 = 0.0;
                       for(j=0, teloj=0; j<Nj; j+=3, teloj++)
                       {
-                             if(teloi!=teloj)
+                          if(teloi!=teloj&&pList[teloj]->interactionPermission==Advisor::interactALL)
                              {
                                 Rij = dist(teloi, teloj, X);
                                 //Rj = dist(teloj, 0, X);
@@ -159,7 +162,7 @@
                                     exit(1);
                                 }
 
-                                res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
+                                res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
                                 //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
 
                              }
@@ -224,7 +227,7 @@
                       res4 = 0.0;
                       for(j=0, teloj=0; j<Nj; j+=3, teloj++)
                       {
-                             if(teloi!=teloj)
+                             if(teloi!=teloj&&pList[teloj]->interactionPermission==Advisor::interactALL)
                              {
                                 Rij = dist(teloi, teloj, X);
                                 //Rj = dist(teloj, 0, X);
@@ -245,8 +248,8 @@
 
                                 for(k=0, telok=0; k<Nj; k+=3, telok++)
                                 {
-                                    muk = ka*ka*pow(mass[telok], -1.0);
-                                       if(telok!=teloi)
+                                    muk = ka*ka*pow(pList[telok]->mass, -1.0);
+                                       if(telok!=teloi&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
                                           Rik = dist(teloi, telok, X);
                                           //Rj = dist(teloj, 0, X);
@@ -265,7 +268,7 @@
 
                                        }
 
-                                       if(telok!=teloj)
+                                       if(telok!=teloj&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
                                           Rjk = dist(teloj, telok, X);
                                           //Rj = dist(teloj, 0, X);
@@ -293,7 +296,7 @@
                                     V1[k] = V[i+k] - V[j+k];
                                 }
 
-                                muj = ka*ka*pow(mass[teloj], -1.0);
+                                muj = ka*ka*pow(pList[teloj]->mass, -1.0);
 
                                 r0 = -(2.0*(beta+gamma)*res1/(CAU*CAU));
                                 r1 = -(2.0*beta-1)*res2/(CAU*CAU);

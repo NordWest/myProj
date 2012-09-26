@@ -84,6 +84,7 @@ int nofzbody;
 dele *nbody;
 ever_params *eparam;
 double *mass;
+QList <ParticleStruct*> pList;
 
 void CM_int(double *CM, double X[], double V[])
 {
@@ -207,7 +208,7 @@ int main(int argc, char *argv[])
 
     Everhardt *solSys;
 
-    QList <ParticleStruct*> pList;
+    //QList <ParticleStruct*> pList;
     dele *nbody;
     nbody = new dele();
 

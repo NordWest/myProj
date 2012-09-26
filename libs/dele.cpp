@@ -800,7 +800,13 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
             npl = 1;
             nplanet = EARTH_NUM;
     }
-
+/*
+    if(nplanet==MOON_NUM)
+    {
+            npl = 2;
+            nplanet = EARTH_NUM;
+    }
+*/
     double *Position = new double[3];
 
     //Initialize_Ephemeris(fname_bin);
@@ -835,11 +841,12 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
     if(npl)
     {
         xt = yt = zt = 0.0;
-        Em = H1.data.EMRAT;
+        Em = 1.0/H1.data.EMRAT;
         //this->g1041->getElemByName(&unitRec, "EMRAT");
         //unitRec.value;
         //Em = 81.300559999999983223729606289923;
-        Em = Em + 1.0;
+//        if(npl!=2)
+            Em = Em + 1.0;
 
         //qDebug() << QString("EM: %1\n").arg(Em);
 
@@ -850,6 +857,7 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 
         xtnorm = sqrt(xt*xt + yt*yt + zt*zt);
         rznorm = xtnorm/Em;
+
 
         xt = -xt/xtnorm*rznorm;
         yt = -yt/xtnorm*rznorm;
