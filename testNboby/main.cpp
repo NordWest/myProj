@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
     //int useConfMasses = sett->value("general/useConfMasses", 0).toInt();
     int useMoody = sett->value("general/useMoody", 0).toInt();
-    t0 = sett->value("general/t0", 0).toDouble();
+    t0 = sett->value("general/time0", 0).toDouble();
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
     nofzbody = pList.size();
     mass = new double[nofzbody];
 
-    N = (nofzbody-1)*3;
+    N = (nofzbody)*3;
 
     X = new double[N];
     V = new double[N];
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
         name = QString(pList[i]->name.data());
         if(QString().compare(name, "Sol")==0) plaNum = 10;
         else plaNum = planet_num(name.toAscii().data());
-        if(plaNum==10) continue;
+        //if(plaNum==10) continue;
 
         X[p] = pList[i]->x;
         X[p+1] = pList[i]->y;
@@ -451,7 +451,7 @@ int main(int argc, char *argv[])
 
         for(teloi=0, i=0; teloi<nofzbody-1; teloi++, i+=3)
         {
-            name = QString(pList[teloi+1]->name.data());
+            name = QString(pList[teloi]->name.data());
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
 

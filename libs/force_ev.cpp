@@ -20,6 +20,7 @@
   extern double col, vout;
   extern ever_params *eparam;
   extern double *mass;
+  int iterNum;
 
  // extern dele *nbody;
  // extern int nofzbody;
@@ -29,6 +30,9 @@
       return(sqrt(pow(X[j*3+0] - X[i*3+0], 2) + pow(X[j*3+1] - X[i*3+1], 2) + pow(X[j*3+2] - X[i*3+2], 2)));
   }
 
+    void force_N(double X[], double V[], double F[]);
+    int force_PPN(double X[], double V[], double F[]);
+/*
   void force_N(double X[], double V[], double F[])
   {
       int i, j, N, komp, teloi, teloj;
@@ -88,36 +92,38 @@
       }
   }
 
-
+*/
 
 
   // BARYCENTR Particles
   void Everhardt::force(double X[], double V[], double TS, double F[])
   {
-          int i, j, N, komp, teloi, teloj;
+ /*         int i, j, N, komp, teloi, teloj;
           double Rij, Rik, Rjk;
           int iNum = nofzbody;
           int Ni = nofzbody*3;
           int jNum = iNum;//eparam->NV;
           int Nj = Ni;//eparam->NV*3;
           double Ri, Rj, *D, res0, res1;
-
+*/
           double beta = 1.0;
           double gamma = 1.0;
+          iterNum = 0;
 
         force_N(X, V, F);
-
+        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        //else printf("iterateNum %d\n\n", iterNum);
 
 
   }
-/*
+
   void force_N(double X[], double V[], double F[])
   {
       int i, j, N, komp, teloi, teloj;
       double Rij, Ri, Rj, res1, res0;
 
-      int iNum = nofzbody-1;
-      int Ni = (nofzbody-1)*3;
+      int iNum = nofzbody;
+      int Ni = (nofzbody)*3;
       int jNum = iNum;//eparam->NV;
       int Nj = Ni;//eparam->NV*3;
 
@@ -153,12 +159,13 @@
                                     exit(1);
                                 }
 
-                                //res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
-                                res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+                                res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
+                                //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
 
                              }
                       }
-                      res1 = -((pow(mass[0], -1.0) + pow(mass[teloi], -1.0))*X[i+komp])/(pow(Ri, 3));
+                      //res1 = -((pow(mass[0], -1.0) + pow(mass[teloi], -1.0))*X[i+komp])/(pow(Ri, 3));
+                      res1 = 0;
 
 
                       F[i+komp] = ka*ka*(res0+res1);
@@ -167,7 +174,181 @@
               //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
       }
   }
+
+  int force_PPN(double X[], double V[], double F[])
+  {
+      int i, j, k, N, komp, teloi, teloj, telok;
+      double Rij, Rik, Rk, Rjk, Ri, Rj, res1, res0, res2, res3, res4, Vi, Vj;
+      iterNum++;
+      if(iterNum>100) return 0;
+
+      int iNum = nofzbody;
+      int Ni = (nofzbody)*3;
+      int jNum = iNum;//eparam->NV;
+      int Nj = Ni;//eparam->NV*3;
+      double FN[Ni];
+      double summ0, summ1;
+      summ0 = summ1 = 0.0;
+      for(i=0;i<Ni;i++)
+      {
+          FN[i] = F[i];
+          summ0 += F[i];
+      }
+      summ0 /= Ni;
+      double beta, gamma;
+      double muj, muk;
+      beta = gamma = 1.0;
+      double R0[3], R1[3];
+      double V0[3], V1[3];
+      double r0, r1, r2, r3, r4, r5, r6, rr;
+
+
+
+      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+      {
+              //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+          Ri = norm(&X[i]);
+          Vi = norm(&V[i]);
+
+              if(Ri>(eparam->vout))
+              {
+                  printf("WARN!!!! V OUT!!!!\n");
+                  printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+                  exit(1);
+              }
+
+              for(komp=0; komp<3; komp++)
+              {
+                      res0 = 0.0;
+                      res3 = 0.0;
+                      res4 = 0.0;
+                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                      {
+                             if(teloi!=teloj)
+                             {
+                                Rij = dist(teloi, teloj, X);
+                                //Rj = dist(teloj, 0, X);
+                                Rj = norm(&X[j]);
+                                Vj = norm(&V[j]);
+
+                                if(Rij<eparam->col)
+                                {
+
+                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                    printf("Rij= %f\n", Rij);
+                                    printf("WARN!!!! CRASH!!!!\n");
+                                    exit(1);
+                                }
+
+                                res1 = 0.0;
+                                res2 = 0.0;
+
+                                for(k=0, telok=0; k<Nj; k+=3, telok++)
+                                {
+                                    muk = ka*ka*pow(mass[telok], -1.0);
+                                       if(telok!=teloi)
+                                       {
+                                          Rik = dist(teloi, telok, X);
+                                          //Rj = dist(teloj, 0, X);
+                                          //Rk = norm(&X[k]);
+
+                                          if(Rik<eparam->col)
+                                          {
+
+                                              printf("teloi= %d\ttelok= %d\n", teloi, telok);
+                                              printf("Rij= %f\n", Rik);
+                                              printf("WARN!!!! CRASH!!!!\n");
+                                              exit(1);
+                                          }
+
+                                          res1 += muk/Rik;
+
+                                       }
+
+                                       if(telok!=teloj)
+                                       {
+                                          Rjk = dist(teloj, telok, X);
+                                          //Rj = dist(teloj, 0, X);
+                                          //Rk = norm(&X[k]);
+
+                                          if(Rjk<eparam->col)
+                                          {
+
+                                              printf("teloj= %d\ttelok= %d\n", teloj, telok);
+                                              printf("Rij= %f\n", Rjk);
+                                              printf("WARN!!!! CRASH!!!!\n");
+                                              exit(1);
+                                          }
+
+                                          res2 += muk/Rjk;
+
+                                       }
+                                }
+
+                                for(k=0;k<3;k++)
+                                {
+                                    R0[k] = X[i+k] - X[j+k];
+                                    R1[k] = X[j+k] - X[i+k];
+                                    V0[k] = (2+2*gamma)*V[i+k] - (1.0+2.0*gamma)*V[j+k];
+                                    V1[k] = V[i+k] - V[j+k];
+                                }
+
+                                muj = ka*ka*pow(mass[teloj], -1.0);
+
+                                r0 = -(2.0*(beta+gamma)*res1/(CAU*CAU));
+                                r1 = -(2.0*beta-1)*res2/(CAU*CAU);
+                                r2 = gamma*pow(Vi/CAU, 2.0);
+                                r3 = (1+gamma)*pow(Vj/CAU, 2.0);
+                                r4 = -(2.0*(1+gamma)/(CAU*CAU))*Smul3(&V[i], &V[j]);
+                                r5 = -(3.0/(2.0*CAU*CAU))*pow(Smul3(R0, &V[j])/Rij, 2.0);
+                                r6 = (1.0/(2.0*CAU*CAU))*Smul3(R1, &FN[j]);
+
+                                rr = (1.0 + r0 + r1 + r2 + r3 + r4 + r5 + r6);
+
+                                res0 += (muj*(X[j+komp] - X[i+komp])/pow(Rij,3))*rr;
+
+/*
+                                res0 += (muj*((X[j+komp] - X[i+komp])/(pow(Rij,3))))
+                                        *(1.0
+                                          -(2.0*(beta+gamma)*res1/(CAU*CAU))
+                                          -(2.0*beta-1)*res2/(CAU*CAU)
+                                          +gamma*pow(Vi/CAU, 2.0)
+                                          +(1+gamma)*pow(Vj/CAU, 2.0)
+                                          -(2.0*(1+gamma)/(CAU*CAU))*Smul3(&V[i], &V[j])
+                                          -(3.0/(2.0*CAU*CAU))*pow(Smul3(R0, &V[j])/Rij, 2.0)
+                                          +(1.0/(2.0*CAU*CAU))*Smul3(R1, &FN[j]));
 */
+
+                                //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                                res3 += ((muj/pow(Rij,3))*Smul3(R0, V0)*V1[komp]);
+                                res4 += muj*FN[j+komp]/Rij;
+
+
+                             }
+                      }
+
+                      res3 /= CAU*CAU;
+                      res4 = res4*(3+4*gamma)/(2.0*CAU*CAU);
+
+                      //printf("res: %e %e %e\n\n", res0, res3, res4);
+
+                      F[i+komp] = res0 + res3 + res4;
+
+                      summ1 += fabs(F[i+komp]-FN[i+komp]);
+                  }
+              //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+              //printf("forceN: %e %e %e\n\n", FN[i], FN[i+1], FN[i+2]);
+              //printf("d_force: %e %e %e\n\n", F[i]-FN[i], F[i+1]-FN[i+1], F[i+2]-FN[i+2]);
+      }
+
+      summ1/= Ni;
+     //printf("summ1: %e\n\n", summ1);
+
+      if(summ1<1e-10) return 0;
+      else return(force_PPN(X, V, F));
+  }
+
 /*
   // BARYCENTR Particles [SAVE 16 avg]
   void Everhardt::force(double X[], double V[], double TS, double F[])
