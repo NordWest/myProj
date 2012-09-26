@@ -450,7 +450,7 @@ int main(int argc, char *argv[])
         CM_int(CM, X, V);
         qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
 
-        for(teloi=0, i=0; teloi<nofzbody-1; teloi++, i+=3)
+        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             name = QString(pList[teloi]->name.data());
             if(QString().compare(name, "Sol")==0) plaNum = 10;
@@ -463,6 +463,13 @@ int main(int argc, char *argv[])
 
                 saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
 
+                X[i]=X0[i];
+                X[i+1]=X0[i+1];
+                X[i+2]=X0[i+2];
+
+                V[i]=V0[i];
+                V[i+1]=V0[i+1];
+                V[i+2]=V0[i+2];
 
             }
 

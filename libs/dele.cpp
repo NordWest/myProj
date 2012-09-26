@@ -795,18 +795,19 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
     double xt, yt, zt, rznorm, xtnorm;
     double Em;
     int npl = 0;
-    if(nplanet==GEOCENTR_NUM)
+    //if(nplanet==SUN_NUM) centr = !centr;
+    if((nplanet==GEOCENTR_NUM))
     {
             npl = 1;
             nplanet = EARTH_NUM;
     }
-/*
+
     if(nplanet==MOON_NUM)
     {
             npl = 2;
             nplanet = EARTH_NUM;
     }
-*/
+
     double *Position = new double[3];
 
     //Initialize_Ephemeris(fname_bin);
@@ -819,6 +820,13 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
         *x = State.Velocity[0];
         *y = State.Velocity[1];
         *z = State.Velocity[2];
+        /*if(nplanet==MOON_NUM)
+        {
+            Interpolate_State( Time , EARTH_NUM , &State );
+            *x += State.Velocity[0];
+            *y += State.Velocity[1];
+            *z += State.Velocity[2];
+        }*/
         *x = *x/H1.data.AU*86400.0;
         *y = *y/H1.data.AU*86400.0;
         *z = *z/H1.data.AU*86400.0;
@@ -829,6 +837,13 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
         *x = Position[0];
         *y = Position[1];
         *z = Position[2];
+        /*if(nplanet==MOON_NUM)
+        {
+            Interpolate_State( Time , EARTH_NUM , &State );
+            *x += State.Position[0];
+            *y += State.Position[1];
+            *z += State.Position[2];
+        }*/
         *x = *x/H1.data.AU;
         *y = *y/H1.data.AU;
         *z = *z/H1.data.AU;
@@ -841,27 +856,65 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
     if(npl)
     {
         xt = yt = zt = 0.0;
-        Em = 1.0/H1.data.EMRAT;
+
         //this->g1041->getElemByName(&unitRec, "EMRAT");
         //unitRec.value;
         //Em = 81.300559999999983223729606289923;
-//        if(npl!=2)
-            Em = Em + 1.0;
+        Interpolate_State( Time , MOON_NUM , &State );
+        if(proizv)
+        {
+            xt = State.Velocity[0];
+            yt = State.Velocity[1];
+            zt = State.Velocity[2];
+            xt = xt/H1.data.AU*86400.0;
+            yt = yt/H1.data.AU*86400.0;
+            zt = zt/H1.data.AU*86400.0;
+        }
+        else
+        {
+            xt = State.Position[0];
+            yt = State.Position[1];
+            zt = State.Position[2];
+            xt = xt/H1.data.AU;
+            yt = yt/H1.data.AU;
+            zt = zt/H1.data.AU;
+        }
+
+        //this->detR(&xt, &yt, &zt, Time, MOON_NUM, proizv, 0, 0);
+        /*if(npl!=2)
+        {*/
+            Em = H1.data.EMRAT;
+            //Em = Em+1;
 
         //qDebug() << QString("EM: %1\n").arg(Em);
 
-        this->detR(&xt, &yt, &zt, Time, MOON_NUM, proizv, 0, 0);
+            if(npl==1)
+            {
+                *x = *x - (1.0/(1.0+Em))*xt;
+                *y = *y - (1.0/(1.0+Em))*yt;
+                *z = *z - (1.0/(1.0+Em))*zt;
+
+            }
+
+            if(npl==2)
+            {
+                *x = *x + (Em/(1.0+Em))*xt;
+                *y = *y + (Em/(1.0+Em))*yt;
+                *z = *z + (Em/(1.0+Em))*zt;
+            }
+/*
 
                 //printf("\nEarth-Moon:\t%17.15e %17.15e %17.15e\n", xt/AUKM, yt/AUKM, zt/AUKM);
         //qDebug() << QString("Earth-Moon:\t%1\t%2\t%3\n").arg(xt).arg(yt).arg(zt);
 
-        xtnorm = sqrt(xt*xt + yt*yt + zt*zt);
-        rznorm = xtnorm/Em;
+            xtnorm = sqrt(xt*xt + yt*yt + zt*zt);
+            rznorm = xtnorm/Em;
 
 
-        xt = -xt/xtnorm*rznorm;
-        yt = -yt/xtnorm*rznorm;
-        zt = -zt/xtnorm*rznorm;
+            xt = -xt/xtnorm*rznorm;
+            yt = -yt/xtnorm*rznorm;
+            zt = -zt/xtnorm*rznorm;
+        //}
 
                 //printf("%17.15e %17.15e %17.15e\n", xt/AUKM, yt/AUKM, zt/AUKM);
 
@@ -869,7 +922,7 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 
         *x += xt;
         *y += yt;
-        *z += zt;
+        *z += zt;*/
     }
 
     if(centr)
@@ -1066,7 +1119,8 @@ int dele::Initialize_Ephemeris( char *fileName )
 
        /*..................................................Return status code */
 
-       if ( headerID == EPHEMERIS )
+       return SUCCESS;
+       /*if ( headerID == EPHEMERIS )
           {
             return SUCCESS;
           }
@@ -1075,7 +1129,7 @@ int dele::Initialize_Ephemeris( char *fileName )
             printf("\n Opened wrong file: %s",fileName);
             printf(" for ephemeris: %d.\n",EPHEMERIS);
             return FAILURE;
-          }
+          }*/
      }
 }
 

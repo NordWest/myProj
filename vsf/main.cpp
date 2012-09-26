@@ -142,10 +142,25 @@ long double SBJ(int J, double L, double B)
 
 int main(int argc, char *argv[])
 {
-    int N = QString(argv[1]).toInt();
-    int M = QString(argv[2]).toInt();
+    int N, M;
+//    int N = QString(argv[1]).toInt();
+//    int M = QString(argv[2]).toInt();
     ///
     QTextStream stream(stdout);
+
+    QString tStr, tFileName;
+    QString inFileName = QString(argv[1]);
+
+    QFile inpFile(inFileName);
+    inpFile.open(QIODevice::ReadOnly);
+    QTextStream inpStm(&inpFile);
+
+    QSettings *sett = new QSettings("vsf.ini", QSettings::IniFormat);
+
+    int coefNum = sett->value("general/coefNum", 0).toInt();
+    QString colSep = sett->value("general/colSep", "|").toString();
+    int cx = sett->value("general/cx", 0).toInt();
+    int cy = sett->value("general/cy", 1).toInt();
 
     double deMin = grad2rad(-30);
     double deMax = grad2rad(30);
@@ -157,10 +172,21 @@ int main(int argc, char *argv[])
     double *theta = new double;
     double L,B;
     double I[4];
-    int kNum = 0;
-    for(int k=0;k<4;k++)I[k]=0;
-    for(int pn=0;pn<12288;pn++)
+    int i, j, k;
+    double *data;
+    QVector <double*> dataVect;
+    double *iRes;
+    QVector <double*> iVect;
+    int kNum;
+    for(k=0;k<4;k++)
     {
+        I[k]=0;
+        iRes = new double[coefNum*coefNum];
+        iVect << iRes;
+    }
+    /*for(int pn=0;pn<12288;pn++)
+    {
+
         pix2ang_ring(32,pn,theta,phi);//get phi and theta from current index of the area
         L = phi[0];
         B = M_PI/2-theta[0];
@@ -179,10 +205,78 @@ int main(int argc, char *argv[])
         I[3]+=(SLJ(N,L,B)*TLJ(M,L,B)+SBJ(N,L,B)*TBJ(M,L,B))*4*M_PI;//12288;
         //stream << QString("%1").arg(sfj(N,L,B),10,'f',5,QLatin1Char( '0' )) <<endl;
     }
+    */
 
+    while(!inpStm.atEnd())
+    {
+        tStr = inpStm.readLine();
+
+        data = new double[2];
+        data[0] = tStr.section(colSep, cx, cx).toDouble();
+        data[1] = tStr.section(colSep, cy, cy).toDouble();
+
+        dataVect << data;
+    }
+
+    kNum=dataVect.size();
     qDebug() << QString("kNum: %1\n").arg(kNum);
+    for(i=0;i<coefNum;i++)
+    {
 
-    for(int k=0;k<4;k++)I[k]/=kNum;
+        for(j=0;j<coefNum;j++)
+        {
+            for(k=0;k<4;k++) I[k]=0;
+
+            N = i+1;
+            M = j+1;
+
+
+
+            for(k=0;k<kNum;k++)
+            {
+                L = dataVect[k][0];
+                B = dataVect[k][1];
+
+                I[0]+=(TLJ(N,L,B)*TLJ(M,L,B)+TBJ(N,L,B)*TBJ(M,L,B));//*4*M_PI;///kNum;
+                I[1]+=(SLJ(N,L,B)*SLJ(M,L,B)+SBJ(N,L,B)*SBJ(M,L,B));//*4*M_PI;///kNum;
+                I[2]+=(TLJ(N,L,B)*SLJ(M,L,B)+TBJ(N,L,B)*SBJ(M,L,B));//*4*M_PI;///kNum;
+                I[3]+=(SLJ(N,L,B)*TLJ(M,L,B)+SBJ(N,L,B)*TBJ(M,L,B));//*4*M_PI;///kNum;
+            }
+
+            for(k=0;k<4;k++)iVect[k][i*coefNum+j] = I[k]*4*M_PI/kNum;
+
+        }
+    }
+
+    QFile outFile;
+    QTextStream outStm;
+
+    for(k=0;k<4;k++)
+    {
+        tFileName = QString("I%1.txt").arg(k);
+
+        outFile.setFileName(tFileName);
+        outFile.open(QFile::WriteOnly | QFile::Truncate);
+        outStm.setDevice(&outFile);
+
+        for(i=0;i<coefNum;i++)
+        {
+
+            for(j=0;j<coefNum;j++)
+            {
+                outStm << QString("%1\t").arg(iVect[k][i*coefNum+j], 8, 'f', 6);
+            }
+
+            outStm << "\n";
+        }
+
+        outFile.close();
+    }
+
+
+
+/*
+    //for(int k=0;k<4;k++)I[k]/=kNum;
     //
     //I[1]=I[0];I[2]=I[0];I[3]=I[0];
     //for(int k=0;k<4;k++) stream << QString("%1").arg(I[k],10,'f',5,QLatin1Char( '0' )) <<endl;
@@ -192,6 +286,7 @@ int main(int argc, char *argv[])
     stream <<"Sl_n x Tl_m +Sb_n x Tb_m = "<<QString("%1").arg(I[3],10,'f',6,QLatin1Char( '0' )) <<endl;
     stream <<"n => N,K,P " << indexesStr(N)<<endl<<"m => N,K,P " << indexesStr(M)<<endl;
     //
+    */
     delete phi;delete theta;
     return 0;
 
