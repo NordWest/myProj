@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
                     //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                 }*/
 
-                queryStr = QString("SELECT healStore, r0, d0, %1tmN, %1tmMiss, %1tmXbar, %1tmXsig, %1tmYbar, %1tmYsig, %1tmFract, %1tmRadius FROM xcat  WHERE healStore=%2").arg(catPref).arg(ipix);
+                queryStr = QString("SELECT healStore, r0, d0, %1tmN, %1tmMiss, %1tmXbar, %1tmXsig, %1tmYbar, %1tmYsig, %1tmFract, %1tmRadius FROM xcat  WHERE healStore=%2").arg(catPref).arg(i);
 
                 if(!query.exec(queryStr))
                 {
