@@ -120,6 +120,12 @@ int main(int argc, char *argv[])
 
                 queryStr = QString("SELECT healStore, r0, d0, %1tmN, %1tmMiss, %1tmXbar, %1tmXsig, %1tmYbar, %1tmYsig, %1tmFract, %1tmRadius FROM xcat  WHERE healStore=%2").arg(catPref).arg(ipix);
 
+                if(!query.exec(queryStr))
+                {
+                    lastErr = query.lastError();
+                    qDebug() << QString("exec error:%1\n").arg(lastErr.databaseText());
+                }
+
                 query.first();
                 rat = query.value(1).toDouble();
                 dect = query.value(2).toDouble();
