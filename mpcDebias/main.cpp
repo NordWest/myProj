@@ -55,14 +55,15 @@ int main(int argc, char *argv[])
      QSqlQuery query(db);
     QSqlError lastErr;
      QString queryStr;
+     QString wDirName = ".";
 
 
 
 
-        QString mpcFile(argv[1]);
-        QString fileNameRes = QString(argv[2]);
+  //      QString mpcFile(argv[1]);
+        QString fileNameRes = QString(argv[1]);
 
-
+/*
 
         QFile inFile(mpcFile);
         if(!inFile.open(QIODevice::ReadOnly))
@@ -79,10 +80,10 @@ int main(int argc, char *argv[])
             return 1;
         }
         QTextStream resStm(&resFile);
-*/
+
         QFileInfo mpcI(mpcFile);
         QString wDirName = QString(mpcI.absolutePath());
-
+*/
         double dect, rat, lam, beta;
         long ipix, ipixMax;
 
