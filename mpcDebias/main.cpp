@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
         int uc;
 
-        resFile.setFileName(QString("%1/objSphere.txt").arg(wDirName).arg(fileNameRes));
+        resFile.setFileName(QString("%1/%2").arg(wDirName).arg(fileNameRes));
 
         if(resFile.open(QFile::WriteOnly | QFile::Truncate))
         {
