@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
         int oNum=0;
 
-
+srand(time(NULL));
         while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
@@ -205,16 +205,7 @@ dRa = dDe = 0.0;
             mpNumber = mpR.mpNumber();
             magn = mpR.magn();
 
-            if(isSphMod)
-            {
 
-                for(j=0; j<coefNum; j++)
-                {
-
-                    dRa += sCoef[j]*SLJ(j+1, rat, dect) + tCoef[j]*TLJ(j+1, rat, dect);
-                    dDe += sCoef[j]*SBJ(j+1, rat, dect) + tCoef[j]*TBJ(j+1, rat, dect);
-                }
-            }
 
             if(isObsMod)
             {
@@ -245,6 +236,7 @@ dRa = dDe = 0.0;
             }
             if(isUBmod)
             {
+
                 do
                 {
             //           srand(time(NULL));
@@ -341,6 +333,17 @@ dRa = dDe = 0.0;
             if(isYear) addYear(yrList, date_obs.year);
             if(isCatFlag) addCatFlag(cfList, catFlag);
             if(isObj) addObjNum(objList, mpNum);
+
+            if(isSphMod)
+            {
+
+                for(j=0; j<coefNum; j++)
+                {
+
+                    dRa += sCoef[j]*SLJ(j+1, rat, dect) + tCoef[j]*TLJ(j+1, rat, dect);
+                    dDe += sCoef[j]*SBJ(j+1, rat, dect) + tCoef[j]*TBJ(j+1, rat, dect);
+                }
+            }
 
             if(isSphere)
             {

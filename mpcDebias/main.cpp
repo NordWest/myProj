@@ -14,6 +14,12 @@ int main(int argc, char *argv[])
     int i, sz;
     QTextStream out_stream;
 
+    mpcRec mpR;
+    QString catName, catPref, tstr;
+
+    QFile resFile;
+    QTextStream resStm;
+
     QFile fout("./fout.dat");
     fout.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 
@@ -23,7 +29,7 @@ int main(int argc, char *argv[])
 
     //objSphere
      long nsMax = settings->value("general/nsMax", 64).toLongLong();
-
+    catPref = settings->value("general/catPref", "t2").toString();
 
 
      //QSettings sett("./ccdobsDB.ini", QSettings::IniFormat);
@@ -52,8 +58,7 @@ int main(int argc, char *argv[])
 
 
 
-        mpcRec mpR;
-        QString catName, catPref, tstr;
+
         QString mpcFile(argv[1]);
         QString fileNameRes = QString(argv[2]);
 
@@ -66,7 +71,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         QTextStream inStm(&inFile);
-
+/*
         QFile resFile(fileNameRes);
         if(!resFile.open(QIODevice::WriteOnly | QIODevice::Append))
         {
@@ -74,7 +79,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         QTextStream resStm(&resFile);
-
+*/
         QFileInfo mpcI(mpcFile);
         QString wDirName = QString(mpcI.absolutePath());
 
@@ -96,6 +101,38 @@ int main(int argc, char *argv[])
 
         int uc;
 
+        resFile.setFileName(QString("%1/objSphere.txt").arg(wDirName).arg(fileNameRes));
+
+        if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+        {
+            resStm.setDevice(&resFile);
+
+            for(i=0; i<ipixMax; i++)
+            {
+                pix2ang_ring( nsMax, i, &dect, &rat);
+                dect = dect-M_PI/2.0;
+                /*if(isZonal)
+                {
+                    dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+                    //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
+                }*/
+
+                queryStr = QString("SELECT healStore, r0, d0, %1tmN, %1tmMiss, %1tmXbar, %1tmXsig, %1tmYbar, %1tmYsig, %1tmFract, %1tmRadius FROM xcat  WHERE healStore=%2").arg(catPref).arg(ipix);
+
+                query.first();
+                rat = query.value(1).toDouble();
+                dect = query.value(2).toDouble();
+                dx = query.value(5).toDouble()/206265.0;
+                dy = query.value(7).toDouble()/206265.0;
+
+                resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(rat-dx, 15, 'e', 10).arg(dect-dy, 15, 'e', 10).arg(dx, 15, 'e', 10).arg(dy, 15, 'e', 10);
+            }
+
+            resFile.close();
+
+        }
+
+/*
         while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
@@ -111,11 +148,6 @@ int main(int argc, char *argv[])
             //getDATEOBSfromMJD(&date_obs, mjd);
             mpR.getCatName(catName);
 
-
-
-
-
-
             ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
 
             queryStr.clear();
@@ -130,7 +162,6 @@ int main(int argc, char *argv[])
             else if(QString().compare(catName, "USNO-B1.0", Qt::CaseInsensitive)==0) catPref = "ub";
             else if(QString().compare(catName, "GSC-2.2", Qt::CaseInsensitive)==0) catPref = "g2";
             else uc = 1;
-
 
             if(!uc)
             {
@@ -150,7 +181,7 @@ int main(int argc, char *argv[])
                 while (query.next()) {
                          tstr = query.value(0).toString();
                          qDebug() << QString("query: %1\n").arg(tstr);
-                     }*/
+                     }/
 
                 query.first();
                 dx = query.value(5).toDouble();
@@ -160,7 +191,7 @@ int main(int argc, char *argv[])
 
         }
 
-
+*/
 
 
     
