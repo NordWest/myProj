@@ -13,6 +13,9 @@
 #include "./../libs/comfunc.h"
 #include "./../libs/ringpix.h"
 #include "./../libs/mpcStats.h"
+
+#include "./../libs/vsfFunc.h"
+#include "./../libs/observ.h"
 //#include "./../libs/redStat.h"
 //#include "./../libs/multidim.h"
 //#include "./../libs/vectGrid3D.h"
@@ -22,6 +25,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 */
 
+#define CENTER CENTER_BARY
+#define SK SK_EKVATOR
 
 
 int main(int argc, char *argv[])
@@ -39,7 +44,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 	
 	
-   int i, sz, mnum;
+   int i, j, sz, mnum;
     QTextStream out_stream;
 
 	QFile fout("./fout.dat");
@@ -70,6 +75,38 @@ int main(int argc, char *argv[])
      int magNum = settings->value("magCounter/magNum", 1).toInt();
      double mag0 = settings->value("magCounter/mag0", -30).toDouble();
      double mag1 = settings->value("magCounter/mag1", 30).toDouble();
+
+     int isSphMod =  settings->value("sphereMod/isSphMod", 0).toInt();
+     QStringList sjList = settings->value("sphereMod/sj", "").toString().split("|");
+     QStringList tjList = settings->value("sphereMod/tj", "").toString().split("|");
+
+     int coefNum = sjList.size();
+     double *sCoef, *tCoef;
+
+     sCoef = new double[coefNum];
+     tCoef = new double[coefNum];
+
+     for(i=0; i<coefNum; i++)
+     {
+         sCoef[i] = sjList[i].toDouble();
+         tCoef[i] = tjList[i].toDouble();
+         qDebug() << QString("index: %1:\t%2\t%3\n").arg(indexesStr(i+1)).arg(sCoef[i]).arg(tCoef[i]);
+     }
+
+
+     int isObsMod =  settings->value("obsMod/isObsMod", 0).toInt();
+     int numLev = settings->value("obsMod/numLev", 100000).toInt();
+     double kParObj = settings->value("obsMod/kParObj", 500).toDouble();
+     double bParObj = settings->value("obsMod/bParObj", -100).toDouble();
+     double dispObs = settings->value("obsMod/dispObs", 200).toDouble();
+
+     int isUBmod =  settings->value("ubMod/isUBmod", 0).toInt();
+     double kParUB = mas_to_rad(settings->value("ubMod/kPar", 0).toDouble());
+     double bParUB = mas_to_rad(settings->value("ubMod/bPar", 0).toDouble());
+     QString obsFile = settings->value("ubMod/obsFile", "Obs.txt").toString();
+     QString jplFile = settings->value("ubMod/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+
+
 //	QString workingFolder = settings->value("general/workingFolder").toString();
 //	QString outputFolder = settings->value("general/outputFolder").toString();
 //	int taskNum = settings->value("general/taskNum").toInt();
@@ -93,9 +130,19 @@ int main(int argc, char *argv[])
 */
         mpcRec mpR;
         QString mpNum, obsCode, catFlag;
-        double mjd, magn;
+        double mjd, magn, Az, hVal, zet, disp1;
         DATEOBS date_obs;
         QString mpcFile(argv[1]);
+        double dRa, dDe, rat1, dect1;
+
+        observ oPos;
+
+        int oires = oPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+        if(oires)
+        {
+            qDebug() << QString("oPos init error\n");
+            return 1;
+        }
 
 
 
@@ -120,16 +167,24 @@ int main(int argc, char *argv[])
         QString wDirName = QString(mpcI.absolutePath());
 
         double dect, rat, lam, beta;
+        double x, y, s, lns, z0, z1, disp;
         long ipix, ipixMax;
+        int mpNumber;
 
         //nsMax = 32;//8192;
         QVector <int> iNum;
-        //QVector <> deRA;
+        QVector <double> vDRA;
+        QVector <double> vDDE;
+
+
 
         if(isSphere)
         {
             ipixMax = nsMax*nsMax*12;
+            qDebug() << QString("ipix: %1\n").arg(ipixMax);
             iNum.fill(0, ipixMax);
+            vDRA.fill(0, ipixMax);
+            vDDE.fill(0, ipixMax);
         }
         //int *iNum = new int[ipixMax];
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
@@ -139,9 +194,86 @@ int main(int argc, char *argv[])
         while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
-
+dRa = dDe = 0.0;
             dect = grad2rad(mpR.dec());
             rat = grad2rad(mpR.ra());
+            mpR.getMpNumber(mpNum);
+            mpR.getObsCode(obsCode);
+            mjd = mpR.mjd();
+            getDATEOBSfromMJD(&date_obs, mjd);
+            mpR.getCatFlag(catFlag);
+            mpNumber = mpR.mpNumber();
+            magn = mpR.magn();
+
+            if(isSphMod)
+            {
+
+                for(j=0; j<coefNum; j++)
+                {
+
+                    dRa += sCoef[j]*SLJ(j+1, rat, dect) + tCoef[j]*TLJ(j+1, rat, dect);
+                    dDe += sCoef[j]*SBJ(j+1, rat, dect) + tCoef[j]*TBJ(j+1, rat, dect);
+                }
+            }
+
+            if(isObsMod)
+            {
+
+            /////////////   dispersion  ////////////////
+                    do
+                    {
+                //           srand(time(NULL));
+                        x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                        y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                        s = x*x + y*y;
+                    }while((s==0)||(s>1));
+                    lns = sqrt(-2.0*log(s)/s);
+                    z0 = x*lns;
+                    z1 = y*lns;
+
+                    //zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
+
+            ////////////////////////////////////////////
+
+
+                disp = dispObs + kParObj*(mpNumber*1.0/numLev) + bParObj;
+
+                //qDebug() << QString("mpNumber: %4\ndisp: %1\tz0: %2\tz1: %3\n").arg(disp).arg(z0).arg(z1).arg(mpNumber);
+
+                dRa += disp*z0;
+                dDe += disp*z1;
+            }
+            if(isUBmod)
+            {
+                do
+                {
+            //           srand(time(NULL));
+                    x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                    s = x*x + y*y;
+                }while((s==0)||(s>1));
+                lns = sqrt(-2.0*log(s)/s);
+                z0 = x*lns;
+                z1 = y*lns;
+
+//////////////////////
+                if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam, %1\n").arg(obsCode);
+                oPos.det_observ(mjd2jd(mjd));
+                detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
+                zet = PI/2.0 - hVal;
+                disp1 = kParUB*sin(zet) + bParUB;
+                if(hVal<0.0) qDebug() << QString("obsCode:%1\thVal: %2\tzet: %3\n").arg(obsCode).arg(rad2grad(hVal)).arg(rad2grad(zet));
+
+//////////////////////
+
+                //dRa += disp1*z0;
+                dDe += disp1*z1;
+            }
+
+
+
+
+/*
             if(isEcl==1)
             {
                 lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
@@ -157,8 +289,43 @@ int main(int argc, char *argv[])
                 dect = beta;
 
             }
+  */
+            if(isEcl==1)
+            {
+                rat1 = rat + mas2rad(dRa)/cos(dect);
+                dect1 = dect + mas2rad(dDe);
 
-            magn = mpR.magn();
+                lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
+
+                beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
+
+                if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                if((lam>2.0*PI)) lam -=2.0*PI;
+                if((lam<0.0)) lam +=2.0*PI;
+                rat = lam;
+                dect = beta;
+
+                lam = atan2(cos(dect1)*sin(rat1)*cos(-EKV)-sin(dect1)*sin(-EKV), cos(dect1)*cos(rat1));
+
+                beta = asin(cos(dect1)*sin(rat1)*sin(-EKV)+sin(dect1)*cos(-EKV));
+
+                if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                if((lam>2.0*PI)) lam -=2.0*PI;
+                if((lam<0.0)) lam +=2.0*PI;
+                rat1 = lam;
+                dect1 = beta;
+
+                dRa = rad2mas((rat1 - rat)*cos(dect));
+                dDe = rad2mas(dect1 - dect);
+
+
+            }
+
+
 
 
             if(dect<dMin||dect>dMax) continue;
@@ -166,11 +333,7 @@ int main(int argc, char *argv[])
 
             oNum++;
 
-            mpR.getMpNumber(mpNum);
-            mpR.getObsCode(obsCode);
-            mjd = mpR.mjd();
-            getDATEOBSfromMJD(&date_obs, mjd);
-            mpR.getCatFlag(catFlag);
+
 
 
 
@@ -184,6 +347,7 @@ int main(int argc, char *argv[])
 
 
 
+
                 if(isZonal)
                 {
                     dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
@@ -192,8 +356,22 @@ int main(int argc, char *argv[])
 
 
                 ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
-                if(ipix>ipixMax||ipix<0) qDebug() << QString("WARN ipix: %1\n").arg(ipix);
-            else iNum[ipix]++;
+                if(ipix>ipixMax||ipix<0)
+                {
+                    qDebug() << QString("WARN ipix: %1\n").arg(ipix);
+                    continue;
+                }
+                iNum[ipix]++;
+
+//////////////////////////////
+
+
+                //qDebug() << QString("dRa: %1\tdDe: %2\n").arg(dRa).arg(dDe);
+
+                vDRA[ipix] += dRa;
+                vDDE[ipix] += dDe;
+
+//////////////////////////////
             }
 
             if(isMagn)
@@ -320,7 +498,7 @@ QTextStream resStm;
                         //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                     }
 
-                    resStm << QString("%1|%2|%3\n").arg(rat, 13, 'e', 8).arg(dect, 13, 'e', 8).arg(iNum[i]);
+                    resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(iNum[i]).arg(log10(iNum[i])).arg(mas2rad(vDRA[i]/iNum[i]), 15, 'e', 10).arg(mas2rad(vDDE[i]/iNum[i]), 15, 'e', 10);
                 }
 
                 resFile.close();

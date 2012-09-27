@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
             }
             break;
         }
-        plot.savePlot(outfname, "BMP");
+        plot.savePlot(outfname, "JPG");
 
         //
        /* double *x, *y, *dx, *dy;

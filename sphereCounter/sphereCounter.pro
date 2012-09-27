@@ -18,13 +18,13 @@ TEMPLATE = app
 SOURCES += main.cpp \
     ../libs/ringpix.cpp \
     ../libs/comfunc.cpp \
-    vsfFunc.cpp
+    ../libs/vsfFunc.cpp
 
 HEADERS += ../libs/astro.h \
     ../libs/mb.h \
     ../libs/ringpix.h \
     ../libs/comfunc.h \
-    vsfFunc.h
+    ../libs/vsfFunc.h
 
 win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
