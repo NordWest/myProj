@@ -153,12 +153,15 @@ int main(int argc, char *argv[])
         double dRa, dDe, rat1, dect1;
 
         observ oPos;
-
-        int oires = oPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-        if(oires)
+int oires;
+        if(isUBmod)
         {
-            qDebug() << QString("oPos init error\n");
-            return 1;
+            oires = oPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+            if(oires)
+            {
+                qDebug() << QString("oPos init error\n");
+                return 1;
+            }
         }
 
 
