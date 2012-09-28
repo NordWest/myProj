@@ -175,7 +175,14 @@ int main(int argc, char *argv[])
         }
 */
         mpR.getObsCode(obsCode);
-        if(!isObs) isObs = obsCodeList.indexOf(obsCode)!=-1;
+        if(!isObs)
+        {
+            //isObs =
+            if(obsCodeList.indexOf(obsCode)!=-1)
+            {
+                isObs=1;
+            }
+        }
         /*
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
         {
