@@ -2,6 +2,8 @@
 #include "./../libs/mpcfile.h"
 #include "./../libs/comfunc.h"
 
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -10,7 +12,7 @@ int main(int argc, char *argv[])
     mpcRec mpR;
     int obsNum, objNum, cfNum;
     int isObs, isObj, isTime, isCF, isMag;
-    int k, r, i;
+    int k, r, i, j, sz;
     QString mpNum, obsCode, catFlag;
     double mjd0, mjd1, mjd, tMag;
     QStringList objNumList;
@@ -36,24 +38,81 @@ int main(int argc, char *argv[])
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
 
 
-    QFile parFile(objFileName);
+    QVector <int> mpcNums;
+
+    bool isOk;
+    QString upStr;
+
+
+    //unpackString(&upStr, dataStr.mid(0, 5));
+
+    int objn, pMin, nMin;
+
+
+    QFile parFile;//(objFileName);
     QTextStream parStm;
-    if(parFile.open(QFile::ReadOnly))
+    if(QFile().exists(objFileName))
     {
-        parStm.setDevice(&parFile);
-        while(!parStm.atEnd())
+        parFile.setFileName(objFileName);
+        if(parFile.open(QFile::ReadOnly))
         {
-            objNumList << QString("%1").arg(parStm.readLine().section("|", 0, 0), 5, QLatin1Char( '0' ) );
+            parStm.setDevice(&parFile);
+            while(!parStm.atEnd())
+            {
+                objNumList << QString("%1").arg(parStm.readLine().section("|", 0, 0), 5, QLatin1Char( '0' ) );
+            }
+            parFile.close();
         }
+/*
+        sz = objNumList.size();
+        mpcNums.size();
+        for(i=0; i<sz; i++)
+        {
+            unpackString(&upStr, objNumList.at(i));
+            objn = upStr.toInt(&isOk);
+            if(isOk)
+            {
+                mpcNums.append(objn);
+            }
+        }
+        sz = mpcNums.size();
+
+
+
+        for(i=0; i<sz-1; i++)
+        {
+            pMin = -1;
+            nMin = mpcNums.at(i);
+            for(j=i+1; j<sz; j++)
+            {
+                if(mpcNums.at(j)<nMin)
+                {
+                    nMin = mpcNums.at(j);
+                    pMin = j;
+                }
+            }
+            if(pMin!=-1)
+            {
+                mpcNums[pMin] = mpcNums[i];
+                mpcNums[i] = nMin;
+                //mpcNums.swap(i, j);
+            }
+        }
+        */
     }
 
-    parFile.setFileName(obsFileName);
-    if(parFile.open(QFile::ReadOnly))
+    if(QFile().exists(obsFileName))
     {
-        parStm.setDevice(&parFile);
-        while(!parStm.atEnd())
+        parFile.setFileName(obsFileName);
+        if(parFile.open(QFile::ReadOnly))
         {
-            obsCodeList << QString("%1").arg(parStm.readLine().section("|", 0, 0));
+            parStm.setDevice(&parFile);
+            while(!parStm.atEnd())
+            {
+                obsCodeList << QString("%1").arg(parStm.readLine().section("|", 0, 0));
+            }
+
+            parFile.close();
         }
     }
 
@@ -88,26 +147,42 @@ int main(int argc, char *argv[])
     {
         mpR.fromStr(inStm.readLine());
 
-        isObj = 1;
-        isObs = 1;
+        isObj = !objNum;
+        isObs = !obsNum;
         isTime = 1;
         isCF = 1;
         isMag = 1;
 
         mpR.getMpNumber(mpNum);
-        for(i=0; i<objNum && objNumList.at(i).size()>0;i++)
+        if(!isObj) isObj = objNumList.indexOf(mpNum)!=-1;
+        /*objn = mpR.mpNumber();
+        if(!isObj)
         {
-            isObj = (QString().compare(mpNum, objNumList.at(i))==0);
-            if(isObj) break;
+            isObj = (mpcNums.indexOf(objn)!=-1);
         }
+/*
+        for(i=0; i<objNum;i++)
+        {
+            if(objn==mpcNums.at(i))
+            {
+                isObj=1;
+                break;
+            }
+            if(objn>mpcNums.at(i)) break;
 
+            //isObj = (QString().compare(mpNum, objNumList.at(i))==0);
+            //if(isObj) break;
+        }
+*/
         mpR.getObsCode(obsCode);
+        if(!isObs) isObs = obsCodeList.indexOf(obsCode)!=-1;
+        /*
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
         {
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
-
+*/
         mjd = mpR.mjd();
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
 

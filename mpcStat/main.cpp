@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
     QSettings *settings = new QSettings("./mpcStat.ini",QSettings::IniFormat);
 
+//general
     int isObs = settings->value("general/isObs", 1).toInt();
     int isYear = settings->value("general/isYear", 1).toInt();
     int isCatFlag = settings->value("general/isCatFlag", 1).toInt();
@@ -61,10 +62,18 @@ int main(int argc, char *argv[])
     int isSphere = settings->value("general/isSphere", 1).toInt();
     int isMagn = settings->value("general/isMagn", 1).toInt();
 
+//model
+    int isSphMod =  settings->value("model/isSphMod", 0).toInt();
+    int isObsMod =  settings->value("model/isObsMod", 0).toInt();
+    int isMagMod =  settings->value("model/isMagMod", 0).toInt();
+    int isUBmod =  settings->value("model/isUBmod", 0).toInt();
+
+
 //objCounter
      int objMax = settings->value("objCounter/objMax", 32).toLongLong();
 
-    //objSphere
+
+//objSphere
      long nsMax = settings->value("objSphere/nsMax", 32).toLongLong();
      int isEcl = settings->value("objSphere/isEcl", 0).toInt();
      int pMin = settings->value("objSphere/pMin", 10).toInt();
@@ -72,11 +81,15 @@ int main(int argc, char *argv[])
      double dMax = grad2rad(settings->value("objSphere/dMax", 90).toDouble());
      int isZonal = settings->value("objSphere/isZonal", 0).toInt();
 
+//obj
+     int isSortObj = settings->value("obj/isSortObj", 0).toInt();
+
+//magCounter
      int magNum = settings->value("magCounter/magNum", 1).toInt();
      double mag0 = settings->value("magCounter/mag0", -30).toDouble();
      double mag1 = settings->value("magCounter/mag1", 30).toDouble();
 
-     int isSphMod =  settings->value("sphereMod/isSphMod", 0).toInt();
+//sphereMod
      QStringList sjList = settings->value("sphereMod/sj", "").toString().split("|");
      QStringList tjList = settings->value("sphereMod/tj", "").toString().split("|");
 
@@ -93,15 +106,19 @@ int main(int argc, char *argv[])
          qDebug() << QString("index: %1:\t%2\t%3\n").arg(indexesStr(i+1)).arg(sCoef[i]).arg(tCoef[i]);
      }
 
-
-     int isObsMod =  settings->value("obsMod/isObsMod", 0).toInt();
+//obsMod
      int numLev = settings->value("obsMod/numLev", 100000).toInt();
      double kParObj = settings->value("obsMod/kParObj", 500).toDouble();
      double bParObj = settings->value("obsMod/bParObj", -100).toDouble();
      double dispObs = settings->value("obsMod/dispObs", 200).toDouble();
 
-     int isUBmod =  settings->value("ubMod/isUBmod", 0).toInt();
-     double kParUB = mas_to_rad(settings->value("ubMod/kPar", 0).toDouble());
+//magMod
+     int magNorm = settings->value("magMod/magNorm", 17.5).toInt();
+     double kParMag = settings->value("magMod/kParMag", 500).toDouble();
+     double bParMag = settings->value("magMod/bParMag", 200).toDouble();
+//     double dispObs = settings->value("magMod/dispObs", 200).toDouble();
+//ubMod
+    double kParUB = mas_to_rad(settings->value("ubMod/kPar", 0).toDouble());
      double bParUB = mas_to_rad(settings->value("ubMod/bPar", 0).toDouble());
      QString obsFile = settings->value("ubMod/obsFile", "Obs.txt").toString();
      QString jplFile = settings->value("ubMod/jplFile", "./../../data/cats/binp1940_2020.405").toString();
@@ -190,6 +207,8 @@ int main(int argc, char *argv[])
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
         int oNum=0;
 
+        objCounter *objc = new objCounter;;
+
 srand(time(NULL));
         while(!inStm.atEnd())
         {
@@ -234,6 +253,35 @@ dRa = dDe = 0.0;
                 dRa += disp*z0;
                 dDe += disp*z1;
             }
+
+            if(isMagMod)
+            {
+
+            /////////////   dispersion  ////////////////
+                    do
+                    {
+                //           srand(time(NULL));
+                        x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                        y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+                        s = x*x + y*y;
+                    }while((s==0)||(s>1));
+                    lns = sqrt(-2.0*log(s)/s);
+                    z0 = x*lns;
+                    z1 = y*lns;
+
+                    //zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
+
+            ////////////////////////////////////////////
+
+
+                disp = kParMag*(magn*1.0/magNorm) + bParMag;
+
+                //qDebug() << QString("mpNumber: %4\ndisp: %1\tz0: %2\tz1: %3\n").arg(disp).arg(z0).arg(z1).arg(mpNumber);
+
+                dRa += disp*z0;
+                dDe += disp*z1;
+            }
+
             if(isUBmod)
             {
 
@@ -332,7 +380,18 @@ dRa = dDe = 0.0;
             if(isObs) addObsCode(obsList, obsCode);
             if(isYear) addYear(yrList, date_obs.year);
             if(isCatFlag) addCatFlag(cfList, catFlag);
-            if(isObj) addObjNum(objList, mpNum);
+            if(isObj)
+            {
+                if(QString().compare(objc->objNum, mpNum)!=0)
+                {
+                    objc = new objCounter;
+                    objc->objNum = mpNum;
+                    objc->count = 1;
+                    objList << objc;
+                }
+                else objc->count++;
+
+            }
 
             if(isSphMod)
             {
@@ -392,7 +451,7 @@ QTextStream resStm;
         //save obsList
         if(isObs)
         {
-            sortObsNum(obsList);
+            if(isSortObj) sortObsNum(obsList);
 
             resFile.setFileName(QString("%1/obsCounter.txt").arg(wDirName));
 
@@ -501,7 +560,7 @@ QTextStream resStm;
                         //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                     }
 
-                    resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(iNum[i]).arg(log10(iNum[i])).arg(mas2rad(vDRA[i]/iNum[i]), 15, 'e', 10).arg(mas2rad(vDDE[i]/iNum[i]), 15, 'e', 10);
+                    resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(iNum[i], 6).arg(log10(iNum[i]), 8).arg(mas2rad(vDRA[i]/iNum[i]), 16, 'e', 10).arg(mas2rad(vDDE[i]/iNum[i]), 16, 'e', 10);
                 }
 
                 resFile.close();
