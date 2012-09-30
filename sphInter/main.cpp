@@ -175,7 +175,7 @@ k=0;
 
 
 
-    rMin = sqrt(2.0*PI*PI/npix);
+    rMin = r_mult*sqrt(2.0*PI*PI/npix);
     //nMin = 3;
 
     qDebug() << QString("rMin: %1\n").arg(rMin);
