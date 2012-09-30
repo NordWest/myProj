@@ -71,9 +71,9 @@ setlocale(LC_NUMERIC, "C");
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog = new QTextStream(logFile);
 
-    long ns = 64;
+    long ns;// = 64;
 
-    long npix = nside2npix(ns);
+
     long ipnest;
 
     double *data;
@@ -85,6 +85,7 @@ setlocale(LC_NUMERIC, "C");
     double dMin = grad2rad(sett->value("general/dMin", -90).toDouble());
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
 //    int coefNum = sett->value("general/coefNum", 9).toInt();
+     ns = sett->value("general/ns", 64).toInt();
 
     QString colSep = sett->value("general/colSep", "|").toString();
     int cx = sett->value("general/cx", 0).toInt();
@@ -96,6 +97,8 @@ setlocale(LC_NUMERIC, "C");
     QVector <double*> dataVect;
     QVector <double> numVect;
     QVector <int> npixVect;
+
+    long npix = nside2npix(ns);
 
     for(i=0; i<npix; i++)
     {
