@@ -61,6 +61,15 @@ setlocale(LC_NUMERIC, "C");
 
     QString tStr;
     int iNum, i, j;
+    int nNum, rNum, nrNum, nearNum;
+    double dist;
+    int minNr, maxNr, nrNum0;
+
+    int k;//=0;
+    double adx, ady, dx, dy, tNum;
+    double nC = 1.0;
+    double rMin;
+    int nMin;
 
     QFile inFile(inFN);
     if(!inFile.open(QFile::ReadOnly)) exit(1);
@@ -86,6 +95,8 @@ setlocale(LC_NUMERIC, "C");
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
 //    int coefNum = sett->value("general/coefNum", 9).toInt();
      ns = sett->value("general/ns", 64).toInt();
+     double r_mult = sett->value("general/r_mult", 1.0).toDouble();
+    nMin = sett->value("general/nMin", 4).toInt();
 
     QString colSep = sett->value("general/colSep", "|").toString();
     int cx = sett->value("general/cx", 0).toInt();
@@ -118,12 +129,12 @@ setlocale(LC_NUMERIC, "C");
     double s1 = sin(dMin);
     double s2 = sin(dMax);
 
-    double rMin;
-    int nMin;
+
 
     qDebug() << QString("npix: %1\tsz: %2\n").arg(npix).arg(dataVect.size());
 
 data = new double[4];
+k=0;
     while(!inStm.atEnd())
     {
         tStr = inStm.readLine();
@@ -156,22 +167,16 @@ data = new double[4];
         dataVect[ipnest][1] = data[1];
         dataVect[ipnest][2] = data[2];
         dataVect[ipnest][3] = data[3];
+        k++;
 //        npixVect.replace(ipnest, ipnest);
     }
 
-    int nNum, rNum, nrNum, nearNum;
+    qDebug() << QString("readed num: %1\n").arg(k);
 
 
-    double dist;
-
-    int minNr, maxNr, nrNum0;
-
-    int k;//=0;
-    double adx, ady, dx, dy, tNum;
-    double nC = 1.0;
 
     rMin = sqrt(2.0*PI*PI/npix);
-    nMin = 3;
+    //nMin = 3;
 
     qDebug() << QString("rMin: %1\n").arg(rMin);
 
@@ -235,11 +240,11 @@ data = new double[4];
             if(minNr>nearNum) minNr = nearNum;
             if(maxNr<nearNum) maxNr = nearNum;
             //qDebug() << QString("%1: %2\n").arg(i).arg(nearNum);
- /*           if((i/1000)>k)
+            if((i/1000)>k)
             {
-                qDebug() << QString("%1\r").arg(i);
+                qDebug() << QString("%1\n").arg(i);
                 k = i/1000;
-            }*/
+            }
         }
 
         qDebug() << QString("\n%1\n").arg(iterNum);
