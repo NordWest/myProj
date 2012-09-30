@@ -1,6 +1,9 @@
 #ifndef MPCSTATS_H
 #define MPCSTATS_H
 
+#include <QString>
+
+
 struct obsCodeCounter
 {
     QString obsCode;
