@@ -556,7 +556,7 @@ QTextStream resStm;
 
 
                     pix2ang_ring( nsMax, i, &dect, &rat);
-                    dect = dect-M_PI/2.0;
+                    dect = M_PI/2.0-dect;
                     if(isZonal)
                     {
                         dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));

@@ -73,7 +73,7 @@ setlocale(LC_NUMERIC, "C");
     QFile resFile;
     QTextStream resStm;
     QString resFN;
-    double rMax;
+    double rMax, distMin;
     int iterNum, riterNum;
 
     QFile inFile(inFN);
@@ -161,7 +161,7 @@ k=0;
             //rat = asin((2.0*sin(rat)/(rs2-rs1))-(rs2+rs1)/(rs2-rs1));
         }
 
-        ang2pix_nest(ns, data[1]+PI/2.0, data[0], &ipnest);
+        ang2pix_ring(ns, data[1]+PI/2.0, data[0], &ipnest);
         //ang2pix_nest(ns, data[1]+PI/2.0, data[0], &ipnest);
         //pix2ang_ring(ns, npix, &dect+PI/2.0, &rat);
         //dect = PI/2.0 - dect;
@@ -212,7 +212,7 @@ k=0;
             maxNr = 0;
             for(i=0; i<npix; i++)
             {
-                if(numVect.at(i)>0)
+                if(numVect.at(i)>=10)
                 {
                     rNum++;
 
@@ -224,11 +224,13 @@ k=0;
                 tNum = nearNum = 0;
                 dx = dy = 0.0;
 
+                distMin = 2.0*PI;
 
                 for(j=0; j<npix; j++)
                 {
                     if(i==j||numVect.at(j)<10) continue;
                     dist = sqrt(pow(dataVect[j][0]-dataVect[i][0], 2.0) + pow(dataVect[j][1]-dataVect[i][1], 2.0));
+                    if(distMin>dist) distMin = dist;
                     if(dist<=rMax)
                     {
                         dx += dataVect[j][2]*(1.0-(dist/rMin))*nC;
@@ -251,7 +253,7 @@ k=0;
                 }
                 if(minNr>nearNum) minNr = nearNum;
                 if(maxNr<nearNum) maxNr = nearNum;
-                //qDebug() << QString("%1: %2\n").arg(i).arg(nearNum);
+                qDebug() << QString("distMin %1\n").arg(distMin);
                 /*if((i/1000)>k)
                 {
                     qDebug() << QString("%1\n").arg(i);
