@@ -270,7 +270,7 @@ k=0;
         }while((nNum<npix)&&(nrNum>0));
 
 
-        qDebug() << QString("iterNum: %1").arg(iterNum);
+        qDebug() << QString("iterNum: %1\n\n").arg(iterNum);
 
     }
 
