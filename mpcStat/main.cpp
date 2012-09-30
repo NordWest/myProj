@@ -193,6 +193,7 @@ int oires;
 
         //nsMax = 32;//8192;
         QVector <int> iNum;
+        QVector <double*> dataVect;
         QVector <double> vDRA;
         QVector <double> vDDE;
 
@@ -556,7 +557,7 @@ QTextStream resStm;
 
 
                     pix2ang_ring( nsMax, i, &dect, &rat);
-                    dect = M_PI/2.0-dect;
+                    dect = dect-M_PI/2.0;
                     if(isZonal)
                     {
                         dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));

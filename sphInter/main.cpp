@@ -91,6 +91,7 @@ setlocale(LC_NUMERIC, "C");
     long ipnest;
 
     double *data;
+    double rat, dect;
 
     QSettings *sett = new QSettings("sphI.ini", QSettings::IniFormat);
 
@@ -117,23 +118,64 @@ setlocale(LC_NUMERIC, "C");
 
     long npix = nside2npix(ns);
 
+    double s1 = sin(dMin);
+    double s2 = sin(dMax);
+
+    resFN = QString("./sphIter/initial0.txt");
+    resFile.setFileName(resFN);
+    resFile.open(QFile::WriteOnly | QFile::Truncate);
+    resStm.setDevice(&resFile);
+
+    QFile iniFile1("./sphIter/initial1.txt");
+    iniFile1.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream iniStm1(&iniFile1);
+
+    QFile iniFile2("./sphIter/initial2.txt");
+    iniFile2.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream iniStm2(&iniFile2);
+
     for(i=0; i<npix; i++)
     {
         data = new double[4];
 
-        pix2ang_nest(ns, i, &data[1], &data[0]);
-        data[1] = PI/2.0 - data[1];
+        pix2ang_ring(ns, i, &data[1], &data[0]);
+        data[1] = data[1] - PI/2.0;
 
         data[2] = 0;
         data[3] = 0;
 
         dataVect << data;
         numVect << 0;
+
+        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0]).arg(dataVect[i][1]).arg(dataVect[i][0]-dataVect[i][2]).arg(dataVect[i][1]-dataVect[i][3]).arg(dataVect[i][2]).arg(dataVect[i][3]).arg(numVect[i]);
+
+        rat = data[0];
+        dect = data[1];
+
+        if(isZonal)
+        {
+
+            //rat = asin((2.0*sin(rat)/(rs2-rs1))-(rs2+rs1)/(rs2-rs1));
+
+            dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+            //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
+
+            iniStm1 << QString("%1|%2\n").arg(rat).arg(dect);
+
+            dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
+
+            iniStm2 << QString("%1|%2\n").arg(rat).arg(dect);
+        }
+
+
+
 //        npixVect<< i;
     }
 
-    double s1 = sin(dMin);
-    double s2 = sin(dMax);
+    resFile.close();
+    iniFile1.close();
+    iniFile2.close();
+
 
 
 
@@ -216,7 +258,7 @@ k=0;
                 {
                     rNum++;
 
-                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0]).arg(dataVect[i][1]).arg(dataVect[i][0]-dataVect[i][2]).arg(dataVect[i][1]-dataVect[i][3]).arg(dataVect[i][2]).arg(dataVect[i][3]).arg(numVect[i]);
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0], 16, 'e', 10).arg(dataVect[i][1], 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2], 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
 
                     continue;
                 }
@@ -248,12 +290,12 @@ k=0;
                     dataVect[i][2] = dx/nearNum;
                     dataVect[i][3] = dx/nearNum;
                     numVect[i] = tNum/nearNum;
-                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0]).arg(dataVect[i][1]).arg(dataVect[i][0]-dataVect[i][2]).arg(dataVect[i][1]-dataVect[i][3]).arg(dataVect[i][2]).arg(dataVect[i][3]).arg(numVect[i]);
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0], 16, 'e', 10).arg(dataVect[i][1], 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2], 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
                     nrNum++;
                 }
                 if(minNr>nearNum) minNr = nearNum;
                 if(maxNr<nearNum) maxNr = nearNum;
-                qDebug() << QString("distMin %1\n").arg(distMin);
+                //qDebug() << QString("distMin %1\n").arg(distMin);
                 /*if((i/1000)>k)
                 {
                     qDebug() << QString("%1\n").arg(i);
