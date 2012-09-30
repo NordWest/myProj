@@ -228,7 +228,7 @@ k=0;
                 {
                     if(i==j||numVect.at(j)<10) continue;
                     dist = sqrt(pow(dataVect[j][0]-dataVect[i][0], 2.0) + pow(dataVect[j][1]-dataVect[i][1], 2.0));
-                    if(dist<=rMin)
+                    if(dist<=rMax)
                     {
                         dx += dataVect[j][2]*(1.0-(dist/rMin))*nC;
                         dy += dataVect[j][3]*(1.0-(dist/rMin))*nC;
