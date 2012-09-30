@@ -194,7 +194,7 @@ k=0;
     {
 
         rMax = (riterNum+1)*rMin;
-        nMin = (riterNum+1)*3;
+        nMin = (riterNum+1)*3-riterNum;
         qDebug() << QString("riterNum: %1\nrMin: %2\tnMin: %3\n").arg(riterNum).arg(rMax).arg(nMin);
 
         iterNum=0;
