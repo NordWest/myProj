@@ -109,6 +109,7 @@ setlocale(LC_NUMERIC, "C");
     int cdx = sett->value("general/cdx", 2).toInt();
     int cdy = sett->value("general/cdy", 3).toInt();
     int cn = sett->value("general/cn", 4).toInt();
+    int riter = sett->value("general/riter", 4).toInt();
 
     QVector <double*> dataVect;
     QVector <double> numVect;
@@ -189,11 +190,11 @@ k=0;
 
     riterNum = 0;
 
-    for(riterNum=1; riterNum<3; riterNum+=1.0)
+    for(riterNum=0; riterNum<riter; riterNum++)
     {
 
-        rMax = riterNum*rMin;
-        nMin = riterNum*3;
+        rMax = (riterNum+1)*rMin;
+        nMin = (riterNum+1)*3;
         qDebug() << QString("riterNum: %1\nrMin: %2\tnMin: %3\n").arg(riterNum).arg(rMax).arg(nMin);
 
         iterNum=0;
