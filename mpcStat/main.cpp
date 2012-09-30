@@ -278,12 +278,15 @@ dRa = dDe = 0.0;
             ////////////////////////////////////////////
 
 
-                disp = kParMag*(magn*1.0/magNorm) + bParMag;
+                if(magn>8)
+                {
+                    disp = kParMag*(magn*1.0/magNorm) + bParMag;
 
                 //qDebug() << QString("mpNumber: %4\ndisp: %1\tz0: %2\tz1: %3\n").arg(disp).arg(z0).arg(z1).arg(mpNumber);
 
-                dRa += disp*z0;
-                dDe += disp*z1;
+                    dRa += disp*z0;
+                    dDe += disp*z1;
+                }
             }
 
             if(isUBmod)

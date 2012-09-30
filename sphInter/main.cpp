@@ -62,7 +62,7 @@ setlocale(LC_NUMERIC, "C");
     QString tStr;
     int iNum, i, j;
     int nNum, rNum, nrNum, nearNum;
-    double dist;
+    double dist, distMin, distMax;
     int minNr, maxNr, nrNum0;
 
     int k;//=0;
@@ -73,7 +73,7 @@ setlocale(LC_NUMERIC, "C");
     QFile resFile;
     QTextStream resStm;
     QString resFN;
-    double rMax, distMin;
+    double rMax;
     int iterNum, riterNum;
 
     QFile inFile(inFN);
@@ -120,7 +120,7 @@ setlocale(LC_NUMERIC, "C");
 
     double s1 = sin(dMin);
     double s2 = sin(dMax);
-
+/*
     resFN = QString("./sphIter/initial0.txt");
     resFile.setFileName(resFN);
     resFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -133,6 +133,10 @@ setlocale(LC_NUMERIC, "C");
     QFile iniFile2("./sphIter/initial2.txt");
     iniFile2.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream iniStm2(&iniFile2);
+*/
+    distMin = PI;
+    distMax = 0.0;
+    double distRA, distDE;
 
     for(i=0; i<npix; i++)
     {
@@ -147,7 +151,20 @@ setlocale(LC_NUMERIC, "C");
         dataVect << data;
         numVect << 0;
 
-        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0]).arg(dataVect[i][1]).arg(dataVect[i][0]-dataVect[i][2]).arg(dataVect[i][1]-dataVect[i][3]).arg(dataVect[i][2]).arg(dataVect[i][3]).arg(numVect[i]);
+
+
+        if(i>0)
+        {
+
+            dist = sqrt(pow((dataVect[i][0]-dataVect[i-1][0])*cos(dataVect[i][1]), 2.0) + pow(dataVect[i][1]-dataVect[i-1][1], 2.0));
+            distRA = fabs(dataVect[i][0]-dataVect[i-1][0]);
+            distDE = fabs(dataVect[i][1]-dataVect[i-1][1]);
+            qDebug() << QString("dist: %1\t%2\t%3\n").arg(distRA).arg(distDE).arg(dist);
+            if(distMin>dist) distMin = dist;
+            if(distMax<dist) distMax = dist;
+        }
+
+        /*resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0]).arg(dataVect[i][1]).arg(dataVect[i][0]-dataVect[i][2]).arg(dataVect[i][1]-dataVect[i][3]).arg(dataVect[i][2]).arg(dataVect[i][3]).arg(numVect[i]);
 
         rat = data[0];
         dect = data[1];
@@ -167,14 +184,16 @@ setlocale(LC_NUMERIC, "C");
             iniStm2 << QString("%1|%2\n").arg(rat).arg(dect);
         }
 
-
+*/
 
 //        npixVect<< i;
     }
 
-    resFile.close();
-    iniFile1.close();
-    iniFile2.close();
+    qDebug() << QString("distMin= %1\tdistMax= %2\n").arg(distMin).arg(distMax);
+
+    //resFile.close();
+    //iniFile1.close();
+    //iniFile2.close();
 
 
 
@@ -183,6 +202,10 @@ setlocale(LC_NUMERIC, "C");
 
 data = new double[4];
 k=0;
+resFN = QString("./sphIter/sphi000_000.txt");
+resFile.setFileName(resFN);
+resFile.open(QFile::WriteOnly | QFile::Truncate);
+resStm.setDevice(&resFile);
     while(!inStm.atEnd())
     {
         tStr = inStm.readLine();
@@ -215,13 +238,16 @@ k=0;
         dataVect[ipnest][1] = data[1];
         dataVect[ipnest][2] = data[2];
         dataVect[ipnest][3] = data[3];
+
+        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[ipnest][0]).arg(dataVect[ipnest][1]).arg(dataVect[ipnest][0]-dataVect[ipnest][2]).arg(dataVect[ipnest][1]-dataVect[ipnest][3]).arg(dataVect[ipnest][2]).arg(dataVect[ipnest][3]).arg(numVect[ipnest]);
+
         k++;
 //        npixVect.replace(ipnest, ipnest);
     }
 
     qDebug() << QString("readed num: %1\n").arg(k);
 
-
+resFile.close();
 
     rMin = sqrt(2.0*PI*PI/npix);
     //nMin = 3;
@@ -231,18 +257,19 @@ k=0;
 
 
     riterNum = 0;
+    int iterTot = 0;
 
     for(riterNum=0; riterNum<riter; riterNum++)
     {
 
-        rMax = (riterNum+1)*rMin;
+        rMax = (riterNum+1.0001)*rMin;
         nMin = (riterNum+1)*3-riterNum;
         qDebug() << QString("riterNum: %1\nrMin: %2\tnMin: %3\n").arg(riterNum).arg(rMax).arg(nMin);
 
         iterNum=0;
         do
         {
-            resFN = QString("./sphIter/sphi%1_%2.txt").arg(riterNum, 3, 10, QLatin1Char( '0' )).arg(iterNum, 3, 10, QLatin1Char( '0' ));
+            resFN = QString("./sphIter/sphi%1_%2.txt").arg(riterNum, 3, 10, QLatin1Char( '0' )).arg(iterNum+1, 3, 10, QLatin1Char( '0' ));
             resFile.setFileName(resFN);
             resFile.open(QFile::WriteOnly | QFile::Truncate);
             resStm.setDevice(&resFile);
@@ -271,7 +298,7 @@ k=0;
                 for(j=0; j<npix; j++)
                 {
                     if(i==j||numVect.at(j)<10) continue;
-                    dist = sqrt(pow(dataVect[j][0]-dataVect[i][0], 2.0) + pow(dataVect[j][1]-dataVect[i][1], 2.0));
+                    dist = sqrt(pow((dataVect[j][0]-dataVect[i][0])*cos(dataVect[i][1]), 2.0) + pow(dataVect[j][1]-dataVect[i][1], 2.0));
                     if(distMin>dist) distMin = dist;
                     if(dist<=rMax)
                     {
@@ -316,8 +343,12 @@ k=0;
 
 
         qDebug() << QString("iterNum: %1\n\n").arg(iterNum);
+        iterTot+=iterNum;
 
+        if(nNum==0) break;
     }
+
+    qDebug() << QString("total:\nriterNum: %1\niterTot: %2\n\n").arg(riterNum).arg(iterTot);
 
     ///////////
         logFile->close();
