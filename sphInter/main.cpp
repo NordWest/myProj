@@ -183,7 +183,7 @@ data = new double[4];
 //    nrNum = 0;
     do
     {
-        resFN = QString("./sphIter/sphi%1.txt").arg(iterNum, 3);
+        resFN = QString("./sphIter/sphi%1.txt").arg(iterNum, 3, 10, QLatin1Char( '0' ));
         resFile.setFileName(resFN);
         resFile.open(QFile::WriteOnly | QFile::Truncate);
         resStm.setDevice(&resFile);
