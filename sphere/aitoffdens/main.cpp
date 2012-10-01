@@ -205,7 +205,33 @@ int main(int argc, char *argv[])
     Q.Set(q.data(),q.count());
     gr->Plot(P,Q," h.");
     //////////////
-
+    double Ksi, Eta;
+    ///////////////
+    /*
+    for (int i=0;i<=4;i++)
+    {
+        L = M_PI*i*90/180-M_PI;
+        B = 0;
+        Ksi=-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
+        Eta= -sin(B)/sqrt(1+cos(B)*cos(L/2));
+        if(i*90!=180)
+        gr->Puts(mglPoint(Ksi,Eta-0.2),
+                 qPrintable(QString("%1").arg(i*90,2,10,QLatin1Char( ' ' ))));
+        L = -M_PI;
+        B = -M_PI*(-90+i*45)/180;
+        Ksi=-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
+        Eta= -sin(B)/sqrt(1+cos(B)*cos(L/2));
+        if(B!=0)
+        {
+            if(i*45-90>0)
+                gr->Puts(mglPoint(Ksi+0.2,Eta),
+                 qPrintable(QString("%1").arg(-90+i*45,2,10,QLatin1Char( ' ' ))));
+            else
+                gr->Puts(mglPoint(Ksi+0.2,Eta-0.2),
+                 qPrintable(QString("%1").arg(-90+i*45,2,10,QLatin1Char( ' ' ))));
+        }
+    }*/
+    ////////////////
     ///////////////
     /*mglData Mu,Nu;
     Mu.Set(X.data(),X.count());

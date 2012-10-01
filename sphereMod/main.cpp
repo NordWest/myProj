@@ -87,6 +87,13 @@ int main(int argc, char *argv[])
     int rtype = sett->value("general/rtype", 0).toInt();
     QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
+    QString colSep = sett->value("general/colSep", "|").toString();
+    int cx = sett->value("general/cx", 0).toInt();
+    int cy = sett->value("general/cy", 1).toInt();
+//    int cdx = sett->value("general/cdx", 2).toInt();
+//    int cdy = sett->value("general/cdy", 3).toInt();
+    int cn = sett->value("general/cn", 4).toInt();
+
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
     Eps[1] = mas_to_rad(sett->value("rotation/w2", 0).toDouble());
@@ -134,6 +141,7 @@ int main(int argc, char *argv[])
 
     QVector <double> raVect;
     QVector <double> deVect;
+    QVector <int> numVect;
 
     QFile iFile;
     QTextStream iStm;
@@ -173,8 +181,9 @@ int main(int argc, char *argv[])
             while(!iStm.atEnd())
             {
                 tStr = iStm.readLine();
-                raVect << tStr.section("|", 0, 0).toDouble();
-                deVect << tStr.section("|", 1, 1).toDouble();
+                raVect << tStr.section(colSep, cx, cx).toDouble();
+                deVect << tStr.section(colSep, cy, cy).toDouble();
+                numVect << tStr.section(colSep, cn, cn).toDouble();
             }
             pointNum = raVect.size();
             ra = new double[pointNum];
@@ -331,7 +340,7 @@ int main(int argc, char *argv[])
     //        qDebug() << "r[i]= " << r[i] << "\n";
 
         objListRot << objR;
-        oData << QString("%1|%2|%3|%4|%5|%6\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9);
+        oData << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9).arg(numVect[i]);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(rad2grad(obj[0]), 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
     }
