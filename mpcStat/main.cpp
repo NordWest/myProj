@@ -339,8 +339,8 @@ dRa = dDe = 0.0;
   */
             if(isEcl==1)
             {
-                rat1 = rat + mas2rad(dRa)/cos(dect);
-                dect1 = dect + mas2rad(dDe);
+                rat1 = rat - mas2rad(dRa)/cos(dect);
+                dect1 = dect - mas2rad(dDe);
 
                 lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
 
@@ -366,8 +366,8 @@ dRa = dDe = 0.0;
                 rat1 = lam;
                 dect1 = beta;
 
-                dRa = rad2mas((rat1 - rat)*cos(dect));
-                dDe = rad2mas(dect1 - dect);
+                dRa = rad2mas((rat - rat1))*cos(dect1);
+                dDe = rad2mas(dect - dect1);
 
 
             }
