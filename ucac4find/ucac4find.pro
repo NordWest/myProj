@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = /home/ymax/bin/ucac4find
+TARGET = ucac4find
 CONFIG   += console
 CONFIG   -= app_bundle
 
