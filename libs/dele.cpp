@@ -792,7 +792,7 @@ double dele::headParam(QString name)
 
 int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk)
 {
-    double xt, yt, zt, rznorm, xtnorm;
+    double xt, yt, zt;
     double Em;
     int npl = 0;
     //if(nplanet==SUN_NUM) centr = !centr;
@@ -938,22 +938,27 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 
     if(sk)
     {
-        double *vect = new double[3];
+        //Em = H2.data.constValue;
+        //double *vect = new double[3];
 
         //H1.data.
-        vect[0] = *x;
-        vect[1] = *y;
-        vect[2] = *z;
+        xt = *x;
+        yt = *y;
+        zt = *z;
             /*Vt->set(0, *x);
             Vt->set(1, *y);
             Vt->set(2, *z);*/
 
+        //*x = xt;
+        *y = cos(EKV)*yt + sin(EKV)*zt;
+        *z = -sin(EKV)*yt + cos(EKV)*zt;
+/*
             RotX(vect, -EKV);
 
         *x = vect[0];
         *y = vect[1];
         *z = vect[2];
-
+*/
     }
 
 

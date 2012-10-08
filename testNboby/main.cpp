@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     Everhardt *solSys;
 
     //QList <ParticleStruct*> pList;
-    dele *nbody;
+    //dele *nbody;
     nbody = new dele();
 
     double t0, nstep, ti, dt;
