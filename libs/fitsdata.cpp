@@ -3668,6 +3668,14 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             if(FD_LOG_LEVEL) qDebug() << sCat->exeName << outerArguments.join(" ");
                             outerProcess.start(sCat->exeName, outerArguments);
                             break;
+                    case UCAC4FIND_PROG_TYPE://ucac4
+                            outerProcess.setWorkingDirectory(sCat->exePath);
+                            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                            outerProcess.setReadChannel(QProcess::StandardOutput);
+                            outerArguments << mas_to_hms(grad_to_mas(raOc), ":", 3) << mas_to_damas(grad_to_mas(deOc),":",2) << QString("r=%1").arg(fov/2.0) << QString("%1").arg(sCat->catPath);
+                            if(FD_LOG_LEVEL) qDebug() << sCat->exeName << outerArguments.join(" ");
+                            outerProcess.start(sCat->exeName, outerArguments);
+                            break;
                     }
 
                     outerProcess.waitForFinished(-1);
@@ -10522,6 +10530,15 @@ int initCatList(QList <catFinder*> *starCatList, QString catiniFileName)
     starCat->catName = sett->value("lspmFind/catName").toString();
     starCat->catMagName = sett->value("lspmFind/catMagName").toString();
     starCat->catPath = sett->value("lspmFind/catPath").toString();
+    starCatList->append(starCat);
+///////////////////////////////
+    starCat = new catFinder;
+    starCat->exeName = sett->value("ucac4find/exeName", "./ucac4find").toString();
+    starCat->exePath = sett->value("ucac4find/exePath", "./").toString();
+    starCat->catType = sett->value("ucac4find/catType").toInt();
+    starCat->catName = sett->value("ucac4find/catName").toString();
+    starCat->catMagName = sett->value("ucac4find/catMagName").toString();
+    starCat->catPath = sett->value("ucac4find/catPath").toString();
     starCatList->append(starCat);
     //
     //if(FD_LOG_LEVEL) qDebug() << QString("starCatList count: %1\n").arg(starCatList->count());

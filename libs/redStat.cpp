@@ -1919,6 +1919,120 @@ void ucac3Rec::copy(const ucac3Rec &source)
     rn = source.rn;
 }
 
+
+
+/////////////////////////////////////////////////////////////////////
+
+////////////////////        ucac4Rec   /////////////////////////////
+
+int ucac4Rec::fromString(QString tStr)
+{
+    QStringList opers = tStr.split("|");
+    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
+    ra = hms_to_deg(opers.at(0), ":");
+    dec = damas_to_deg(opers.at(1), ":");
+    mag1 = opers.at(2).toDouble();
+    mag2 = opers.at(3).toDouble();
+    mag_sigma = opers.at(4).toDouble();
+    obj_type = opers.at(5).toInt();
+    double_star_flag = opers.at(6).toInt();
+    ra_sigma = opers.at(7).toDouble();
+    dec_sigma = opers.at(8).toDouble();
+    n_ucac_total = opers.at(9).toInt();
+    n_ucac_used = opers.at(10).toInt();
+    n_cats_used = opers.at(11).toInt();
+    epoch_ra = opers.at(12).toDouble();
+    epoch_dec = opers.at(13).toDouble();
+    pm_ra = opers.at(14).toDouble();
+    pm_dec = opers.at(15).toDouble();
+    pm_ra_sigma = opers.at(16).toDouble();
+    pm_dec_sigma = opers.at(17).toDouble();
+    twomass_id = opers.at(18).toInt();
+    mag_j = opers.at(19).toDouble();
+    mag_h = opers.at(20).toDouble();
+    mag_k = opers.at(21).toDouble();
+    icq_flag[0] = opers.at(22).toInt();
+    icq_flag[1] = opers.at(23).toInt();
+    icq_flag[2] = opers.at(24).toInt();
+    e2mpho[0] = opers.at(25).toDouble();
+    e2mpho[1] = opers.at(26).toDouble();
+    e2mpho[2] = opers.at(27).toDouble();
+    apass_mag[0] = opers.at(28).toDouble();
+    apass_mag[1] = opers.at(29).toDouble();
+    apass_mag[2] = opers.at(30).toDouble();
+    apass_mag[3] = opers.at(31).toDouble();
+    apass_mag[4] = opers.at(32).toDouble();
+    apass_mag_sigma[0] = opers.at(33).toDouble();
+    apass_mag_sigma[1] = opers.at(34).toDouble();
+    apass_mag_sigma[2] = opers.at(35).toDouble();
+    apass_mag_sigma[3] = opers.at(36).toDouble();
+    apass_mag_sigma[4] = opers.at(37).toDouble();
+    yale_gc_flags = opers.at(38).toInt();
+    catalog_flags = opers.at(39).toInt();
+    leda_flag = opers.at(39).toInt();
+    twomass_ext_flag = opers.at(39).toInt();
+    id_number = opers.at(39).toInt();
+    ucac2_zone = opers.at(39).toInt();
+    ucac2_number = opers.at(39).toInt();
+}
+
+void ucac4Rec::toString(QString &tStr)
+{
+    /*
+    tStr = RAtoHMS(a,":",4)                                                    +"|"+  //0 ra
+            DEtoDAMAS(d,":",3)                                                  +"|"+  //1 dec
+            QString("%1").arg((double)magm/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //2
+            QString("%1").arg((double)maga/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //3
+            QString("%1").arg((double)sigmag/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //4
+            QString("%1").arg(objt,3,10,QLatin1Char( ' ' ))                      +"|"+  //5
+            QString("%1").arg(cdf,3,10,QLatin1Char( ' ' ))                      +"|"+  //6
+            QString("%1").arg(128.0+sigra,4,'f',0,QLatin1Char( ' ' ))           +"|"+  //7
+            QString("%1").arg(128.0+sigdc,4,'f',0,QLatin1Char( ' ' ))          +"|"+  //8
+            QString("%1").arg(na1,3,10,QLatin1Char( ' ' ))                      +"|"+  //9
+            QString("%1").arg(nu1,3,10,QLatin1Char( ' ' ))                      +"|"+  //10
+            QString("%1").arg(cu1,3,10,QLatin1Char( ' ' ))                      +"|"+  //11
+            QString("%1").arg(1900+(double)cepra/100.0,7,'f',2,QLatin1Char( ' ' ))   +"|"+  //12
+            QString("%1").arg(1900+(double)cepdc/100.0,7,'f',2,QLatin1Char( ' ' ))   +"|"+  //13
+            QString("%1").arg((double)pmra2/10.0,8,'f',1,QLatin1Char( ' ' ))   +"|"+  //14
+            QString("%1").arg((double)pmdc2/10.0,8,'f',1,QLatin1Char( ' ' ))   +"|"+  //15
+            QString("%1").arg(Sigpmr,6,'f',1,QLatin1Char( ' ' ))   +"|"+  //16
+            QString("%1").arg(Sigpmd,6,'f',1,QLatin1Char( ' ' ))   +"|"+  //17
+            QString("%1").arg(pts_key,10,10,QLatin1Char( ' ' ))                  +"|"+  //18
+            QString("%1").arg((double)j_m/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //19
+            QString("%1").arg((double)h_m/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //20
+            QString("%1").arg((double)k_m/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //21
+            QString("%1").arg(icqflg[0],3,10,QLatin1Char( ' ' ))                      +"|"+  //22
+            QString("%1").arg(icqflg[1],3,10,QLatin1Char( ' ' ))                      +"|"+  //23
+            QString("%1").arg(icqflg[2],3,10,QLatin1Char( ' ' ))                      +"|"+  //24
+            QString("%1").arg((double)q2mflg[0]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //25
+            QString("%1").arg((double)q2mflg[1]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //26
+            QString("%1").arg((double)q2mflg[2]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //27
+            ////////////////////////////////////////////////////////////////////////////////////
+            QString("%1").arg((double)apasm[0]/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //28
+            QString("%1").arg((double)apasm[1]/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //29
+            QString("%1").arg((double)apasm[2]/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //30
+            QString("%1").arg((double)apasm[3]/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //31
+            QString("%1").arg((double)apasm[4]/1000.0,6,'f',3,QLatin1Char( ' ' ))   +"|"+  //32
+            ////////////////////////////////////////////////////////////////////////////////////
+            QString("%1").arg((double)apase[0]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //33
+            QString("%1").arg((double)apase[1]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //34
+            QString("%1").arg((double)apase[2]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //35
+            QString("%1").arg((double)apase[3]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //36
+            QString("%1").arg((double)apase[4]/100.0,6,'f',2,QLatin1Char( ' ' ))   +"|"+  //37
+            /////////////////////////////////////////////////////////////////////////////////////
+            QString("%1").arg(gcflg,3,10,QLatin1Char( ' ' ))                      +"|"+  //38
+            QString("%1").arg(mcf,10,10,QLatin1Char( ' ' ))                      +"|"+  //39
+            QString("%1").arg(leda,3,10,QLatin1Char( ' ' ))                      +"|"+  //40
+            QString("%1").arg(x2m,3,10,QLatin1Char( ' ' ))                      +"|"+  //41
+            /////////////////////////////////////////////////////////////////////////////////////
+            QString("%1").arg(rnm,10,10,QLatin1Char( ' ' ))                      +"|"+  //42
+            QString("%1").arg(zn2,10,10,QLatin1Char( ' ' ))                      +"|"+  //43
+            QString("%1").arg(rnz,10,10,QLatin1Char( ' ' ))                        //44
+            ;
+    stream << u3str << endl;
+    */
+}
+
 /////////////////////////////////////////////////////////////////////
 
 ////////////////////        ppmxl_rec   /////////////////////////////

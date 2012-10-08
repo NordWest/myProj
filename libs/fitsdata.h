@@ -69,6 +69,7 @@ class reductionMaker;
 #define CDSFIND_PROG_TYPE 0
 #define UCAC3FIND_PROG_TYPE 1
 #define LSPMFIND_PROG_TYPE 2
+#define UCAC4FIND_PROG_TYPE 3
 
 void getCatName(QString *cname, int ctype);
 void marksDist(marksP *m1, marksP *m2, marksP *mRes);

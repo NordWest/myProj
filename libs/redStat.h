@@ -418,6 +418,41 @@ class ucac3Rec
     void copy(const ucac3Rec &source);
 };
 
+class ucac4Rec
+{
+public:
+   double ra, dec;         /* RA/dec at J2000.0,  ICRS,  in milliarcsec */
+   double mag1, mag2;     /* UCAC fit model & aperture mags, .001 mag */
+   double mag_sigma;
+   int obj_type, double_star_flag;
+   double ra_sigma, dec_sigma;    /* sigmas in RA and dec at central epoch */
+   int n_ucac_total;      /* Number of UCAC observations of this star */
+   int n_ucac_used;      /* # UCAC observations _used_ for this star */
+   int n_cats_used;      /* # catalogs (epochs) used for prop motion */
+   double epoch_ra;        /* Central epoch for mean RA, minus 1900, .01y */
+   double epoch_dec;       /* Central epoch for mean DE, minus 1900, .01y */
+   double pm_ra;            /* prop motion, .1 mas/yr = .01 arcsec/cy */
+   double pm_dec;           /* prop motion, .1 mas/yr = .01 arcsec/cy */
+   double pm_ra_sigma;       /* sigma in same units */
+   double pm_dec_sigma;
+   int twomass_id;        /* 2MASS pts_key star identifier */
+   double mag_j, mag_h, mag_k;  /* 2MASS J, H, K_s mags,  in millimags */
+   int icq_flag[3];
+   double e2mpho[3];          /* 2MASS error photometry (in centimags) */
+   double apass_mag[5];      /* in millimags */
+   double apass_mag_sigma[5]; /* also in millimags */
+   int yale_gc_flags;      /* Yale SPM g-flag * 10 + c-flag */
+   int catalog_flags;
+   int leda_flag;          /* LEDA galaxy match flag */
+   int twomass_ext_flag;   /* 2MASS extended source flag */
+   int id_number;
+   int ucac2_zone;
+   int ucac2_number;
+
+   int fromString(QString tStr);
+   void toString(QString &tStr);
+};
+
 class ppmxl_rec
 {
 public:
