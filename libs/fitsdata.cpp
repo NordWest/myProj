@@ -3892,11 +3892,11 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 */
 
                                     mkTemp = new marksP(OBJ_TYPE_UCAC4);
-                                    mkTemp->u3Rec->s2rec(catLine);
+                                    mkTemp->u4Rec->fromString(catLine);
 
                                         break;
                                     case 0:
-
+/*
                                         if(hlCount<3)
                                         {
                                             if(hlCount<1)headLine = catLine;
@@ -3907,14 +3907,14 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 
                                         mkTemp = new marksP(OBJ_TYPE_UCAC4);
                                         mkTemp->u3Rec->s2recCDS(headLine, catLine);
-
+*/
                                         break;
                                     }
 
-                                    ra = mkTemp->u3Rec->ra;
-                                    de = mkTemp->u3Rec->dec;
-                                    pmra = mkTemp->u3Rec->pmrac;
-                                    pmde = mkTemp->u3Rec->pmdc;
+                                    ra = mkTemp->u4Rec->ra;
+                                    de = mkTemp->u4Rec->dec;
+                                    pmra = mkTemp->u4Rec->pm_ra;
+                                    pmde = mkTemp->u4Rec->pm_dec;
                                     mkTemp->catMagName = sCat->catMagName;
                                     if(mkTemp->catMagName.toLower()=="mag1") magn = mkTemp->u4Rec->mag1;
                                     else if(mkTemp->catMagName.toLower()=="mag2") magn = mkTemp->u4Rec->mag2;

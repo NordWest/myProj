@@ -1927,9 +1927,20 @@ void ucac3Rec::copy(const ucac3Rec &source)
 
 ////////////////////        ucac4Rec   /////////////////////////////
 
+ucac4Rec::ucac4Rec()
+{
+    //icq_flag = new double[3];
+}
+
+ucac4Rec::ucac4Rec(QString str)
+{
+    fromString(str);
+}
+
 int ucac4Rec::fromString(QString tStr)
 {
     QStringList opers = tStr.split("|");
+    if(opers.size()<44) return 1;
     ////if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
     ra = hms_to_deg(opers.at(0), ":");
     dec = damas_to_deg(opers.at(1), ":");
@@ -1976,6 +1987,7 @@ int ucac4Rec::fromString(QString tStr)
     id_number = opers.at(42).toInt();
     ucac2_zone = opers.at(43).toInt();
     ucac2_number = opers.at(44).toInt();
+    return 0;
 }
 
 void ucac4Rec::toString(QString &tStr)

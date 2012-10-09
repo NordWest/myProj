@@ -466,6 +466,8 @@ public:
    int ucac2_zone;
    int ucac2_number;
 
+   ucac4Rec();
+   ucac4Rec(QString str);
    int fromString(QString tStr);
    void toString(QString &tStr);
    void copy(const ucac4Rec &source);
