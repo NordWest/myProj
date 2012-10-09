@@ -22,6 +22,7 @@
 #define OBJ_TYPE_SKYBOT 3
 #define OBJ_TYPE_USNOB 4
 #define OBJ_TYPE_PPMXL 5
+#define OBJ_TYPE_UCAC4 6
 
 class ocRec;
 class colRec;
@@ -359,6 +360,22 @@ public:
     void copy(const usnoRec &source);
 };
 
+class abstractCatRec
+{
+    double ra;              //right ascension at  epoch J2000.0 (ICRS); [ra]=deg
+    double dec;             //declination at  epoch J2000.0 (ICRS); [dec]=deg
+    double magn;            //magnitude;
+    double sigra;           //s.e. at central epoch in RA (*cos Dec); [mas]
+    double sigdc;           //s.e. at central epoch in Dec; [mas]
+    double sigmag;          //UCAC error on magnitude (larger of sc.mod); [sigmag]=mag
+    double cepra;           //central epoch for mean RA, minus 1900; [yr]
+    double cepdc;           //central epoch for mean Dec, minus 1900; [yr]
+    double pmrac;           //proper motion in RA*cos(Dec); [mas/yr]
+    double pmdc;            //proper motion in Dec; [mas/yr]
+    double sigpmr;          //s.e. of pmRA * cos Dec; [mas/yr]
+    double sigpmd;          //s.e. of pmDec; [mas/yr]
+};
+
 class ucac3Rec
 {
  public:
@@ -451,6 +468,7 @@ public:
 
    int fromString(QString tStr);
    void toString(QString &tStr);
+   void copy(const ucac4Rec &source);
 };
 
 class ppmxl_rec

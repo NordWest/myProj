@@ -64,7 +64,8 @@ class reductionMaker;
 #define USNOB_CAT_NUM 0
 #define UCAC3_CAT_NUM 1
 #define LSPMFIND_CAT_NUM 2
-#define PPMXL_CAT_NUM 2
+#define PPMXL_CAT_NUM 3
+#define UCAC4_CAT_NUM 4
 
 #define CDSFIND_PROG_TYPE 0
 #define UCAC3FIND_PROG_TYPE 1
@@ -623,6 +624,7 @@ public:
         skybotRec *sbot;        //3
         usnoRec *usnobRec;   //4
         ppmxl_rec *ppmxlRec;   //5
+        ucac4Rec *u4Rec;        //6
 
 //work
         double *data;
