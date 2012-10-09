@@ -3892,7 +3892,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 */
 
                                     mkTemp = new marksP(OBJ_TYPE_UCAC4);
-                                    mkTemp->u4Rec->fromString(catLine);
+                                    if(mkTemp->u4Rec->fromString(catLine)) continue;
 
                                         break;
                                     case 0:
