@@ -1939,9 +1939,11 @@ ucac4Rec::ucac4Rec(QString str)
 
 int ucac4Rec::fromString(QString tStr)
 {
+    qDebug() << QString("ucac4Rec::fromString\n");
     QStringList opers = tStr.split("|");
     if(opers.size()<44) return 1;
-    ////if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("opers num = %1\n").arg(opers.size());
+    ////if(REDSTAT_LOG_LEVEL>0)
+    qDebug() << QString("opers num = %1\n").arg(opers.size());
     ra = hms_to_deg(opers.at(0), ":");
     dec = damas_to_deg(opers.at(1), ":");
     mag1 = opers.at(2).toDouble();

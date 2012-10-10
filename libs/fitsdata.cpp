@@ -3688,6 +3688,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             catLine = catStream.readLine();
 
 
+                            qDebug() << QString("mGr->ctype: %1\n").arg(mGr->ctype);
 
                             switch(mGr->ctype)
                             {
@@ -3875,11 +3876,11 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 
                                     break;
                                 }
-                            case UCAC4_CAT_NUM://ucac3
+                            case UCAC4_CAT_NUM://ucac4
                                 {
                                     if(catLine.indexOf('#')==0) continue;
                                     else if(catLine.size()==0) continue;
-
+/*
                                     switch(catProgType)
                                     {
                                     case 1:
@@ -3892,8 +3893,13 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 */
 
                                     mkTemp = new marksP(OBJ_TYPE_UCAC4);
-                                    if(mkTemp->u4Rec->fromString(catLine)) continue;
-
+                                    if(mkTemp->u4Rec->fromString(catLine))
+                                    {
+                                        qDebug() << QString("fromString err\n");
+                                        continue;
+                                    }
+                                    qDebug() << QString("fromString ok\n");
+/*
                                         break;
                                     case 0:
 /*
@@ -3907,10 +3913,10 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 
                                         mkTemp = new marksP(OBJ_TYPE_UCAC4);
                                         mkTemp->u3Rec->s2recCDS(headLine, catLine);
-*/
+/
                                         break;
                                     }
-
+*/
                                     ra = mkTemp->u4Rec->ra;
                                     de = mkTemp->u4Rec->dec;
                                     pmra = mkTemp->u4Rec->pm_ra;
