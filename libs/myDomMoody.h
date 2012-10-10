@@ -3,6 +3,8 @@
 
 #include "moody/capsule/capsuleBase/particle/Particle.h"
 
+#include <QDomDocument>
+
 int readCFG(QString fileName, QList <ParticleStruct*> &pList)
 {
     QString errorStr;

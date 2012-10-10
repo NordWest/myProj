@@ -1,4 +1,9 @@
 #include <QtCore/QCoreApplication>
+#include <QDebug>
+#include <QSettings>
+#include <QDataStream>
+#include <QDomDocument>
+
 
 #include "./../libs/dele.h"
 //#include "./../libs/orbcat.h"
@@ -11,6 +16,19 @@
 #include "./../libs/rada.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcs.h"
+
+#define OMPLIB
+
+#include "./../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
+#include "./../libs/moody/moody.h"
+#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../libs/moody/capsule/Capsule.h"
+#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
+#include "./../libs/myDomMoody.h"
+
+int nofzbody;
+ever_params *eparam;
+QList <ParticleStruct*> pList;
 
 static QDataStream* clog0 = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -95,6 +113,7 @@ int main(int argc, char *argv[])
 
     dele *nbody;
 
+
     nbody = new dele();
     double t0, nstep, ti, dt;
     int centerNum, skNum;
@@ -106,6 +125,7 @@ int main(int argc, char *argv[])
     t0 = sett->value("general/time0", 0).toDouble();
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
+    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
 
     centerNum = sett->value("general/center", 0).toInt();
     skNum = sett->value("general/sk", 0).toInt();
@@ -117,7 +137,9 @@ int main(int argc, char *argv[])
     QTextStream resStm;
     QString resFileName;
 
-    plaNum = 11;
+    QString name;
+
+//    plaNum = 11;
 
     int iniJplRes = nbody->init(jplFile.toAscii().data());
     if(iniJplRes) return 1;
@@ -125,10 +147,22 @@ int main(int argc, char *argv[])
     double X[3], V[3];
     double x, y, z, vx, vy, vz;
 
-
-    for(i=0; i<plaNum; i++)
+    if(readCFG(confFile, pList))
     {
-        resFileName = QString("%1/%2.txt").arg(resDir.absolutePath()).arg(i, 2, 10, QLatin1Char('0'));
+        qDebug() << QString("readCFG error\n");
+        return 1;
+    }
+
+    nofzbody = pList.size();
+
+
+    for(i=0; i<nofzbody; i++)
+    {
+        name = QString(pList[i]->name.data());
+        if(QString().compare(name, "Sol")==0) plaNum = 10;
+        else plaNum = planet_num(name.toAscii().data());
+
+        resFileName = QString("%1/%2.txt").arg(resDir.absolutePath()).arg(name);
         qDebug() << QString("%1\n").arg(resFileName);
         resFile.setFileName(resFileName);
         resFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -138,8 +172,8 @@ int main(int argc, char *argv[])
         {
             ti = t0+dt*j;
 
-            nbody->detR(&x, &y, &z, ti, i, 0, centerNum, skNum);
-            nbody->detR(&vx, &vy, &vz, ti, i, 1, centerNum, skNum);
+            nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
+            nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
 
             resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti, 12, 'f', 4).arg(x, 20, 'e', 12).arg(y, 20, 'e', 12).arg(z, 20, 'e', 12).arg(vx, 20, 'e', 12).arg(vy, 20, 'e', 12).arg(vz, 20, 'e', 12);
 
