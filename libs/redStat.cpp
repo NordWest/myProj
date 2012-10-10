@@ -1929,11 +1929,26 @@ void ucac3Rec::copy(const ucac3Rec &source)
 
 ucac4Rec::ucac4Rec()
 {
-    //icq_flag = new double[3];
+    /*
+    icq_flag = new int[3];
+    e2mpho = new double[3];
+    apass_mag = new double[5];
+    apass_mag_sigma = new double[5];*/
 }
+
+ucac4Rec::~ucac4Rec()
+{
+    /*
+    delete [] icq_flag;
+    delete [] e2mpho;
+    delete [] apass_mag;
+    delete [] apass_mag_sigma;*/
+}
+
 
 ucac4Rec::ucac4Rec(QString str)
 {
+    ucac4Rec();
     fromString(str);
 }
 

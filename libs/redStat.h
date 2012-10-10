@@ -468,6 +468,7 @@ public:
 
    ucac4Rec();
    ucac4Rec(QString str);
+   ~ucac4Rec();
    int fromString(QString tStr);
    void toString(QString &tStr);
    void copy(const ucac4Rec &source);
