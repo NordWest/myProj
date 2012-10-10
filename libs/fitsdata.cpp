@@ -3688,7 +3688,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             catLine = catStream.readLine();
 
 
-                            qDebug() << QString("mGr->ctype: %1\n").arg(mGr->ctype);
+                            if(FD_LOG_LEVEL) qDebug() << QString("mGr->ctype: %1\n").arg(mGr->ctype);
 
                             switch(mGr->ctype)
                             {
@@ -3895,10 +3895,10 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                                     mkTemp = new marksP(OBJ_TYPE_UCAC4);
                                     if(mkTemp->u4Rec->fromString(catLine))
                                     {
-                                        qDebug() << QString("fromString err\n");
+                                        if(FD_LOG_LEVEL) qDebug() << QString("fromString err\n");
                                         continue;
                                     }
-                                    qDebug() << QString("fromString ok\n");
+                                    if(FD_LOG_LEVEL) qDebug() << QString("fromString ok\n");
 /*
                                         break;
                                     case 0:

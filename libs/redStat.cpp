@@ -592,7 +592,7 @@ void moveModelRec::rec2s(QString *str)
                 yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
-            case 1://relative positions in arcsec //РњР•Р”РќР”Р•РљР®РњРќ
+            case 1://relative positions in arcsec //� њ� •� ”� ќ� ”� •� љ� ®� њ� ќ
             {
                 xStr = mas_to_hms(xTm, " ", 5);
                 yStr = mas_to_damas(yTm, " ", 5);
@@ -1954,11 +1954,11 @@ ucac4Rec::ucac4Rec(QString str)
 
 int ucac4Rec::fromString(QString tStr)
 {
-    qDebug() << QString("ucac4Rec::fromString\n");
+    //qDebug() << QString("ucac4Rec::fromString\n");
     QStringList opers = tStr.split("|");
     if(opers.size()<44) return 1;
     ////if(REDSTAT_LOG_LEVEL>0)
-    qDebug() << QString("opers num = %1\n").arg(opers.size());
+    //qDebug() << QString("opers num = %1\n").arg(opers.size());
     ra = hms_to_deg(opers.at(0), ":");
     dec = damas_to_deg(opers.at(1), ":");
     mag1 = opers.at(2).toDouble();
