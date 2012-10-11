@@ -118,6 +118,8 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
     resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
 
+    resStm.flush();
+
 
 
     r[0] = X[pos]-X0[pos];
@@ -132,9 +134,13 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
 
     dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
 
+    dxStm.flush();
+
     Ri = sqrt(X0[pos+0]*X0[pos+0] + X0[pos+1]*X0[pos+1] + X0[pos+2]*r[pos+2]);
 
     deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[pos], 18, 'g', 9).arg(X0[pos+1], 18, 'g', 9).arg(X0[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V0[pos], 18, 'g', 9).arg(V0[pos+1], 18, 'g', 9).arg(V0[pos+2], 18, 'g', 9).arg(name);
+
+    deStm.flush();
 }
 
 void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm)
@@ -360,10 +366,8 @@ int main(int argc, char *argv[])
             nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
 
             saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
-
-
         }
-   /*     else
+/*        else
         {
             if(useMiriade)
             {
@@ -462,7 +466,7 @@ int main(int argc, char *argv[])
                 nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
 
                 saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
-
+/*
                 X[i]=X0[i];
                 X[i+1]=X0[i+1];
                 X[i+2]=X0[i+2];
@@ -470,7 +474,7 @@ int main(int argc, char *argv[])
                 V[i]=V0[i];
                 V[i+1]=V0[i+1];
                 V[i+2]=V0[i+2];
-
+*/
             }
 
             if(useMoody)
