@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
         }
 */
 
-
+/*
 
         if(useMoody)
         {
@@ -423,7 +423,7 @@ int main(int argc, char *argv[])
                 saveResultsM(t0-t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
             }
         }
-
+*/
 
 
 /*
@@ -468,8 +468,9 @@ int main(int argc, char *argv[])
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
-    double *ssb, mui, mui1;
+    double *ssb, *ssbv, mui, mui1;
     ssb= new double[3];
+    ssbv= new double[3];
     TF = t0;
     for(nt=0; nt<nstep; nt++)
     {
@@ -480,7 +481,8 @@ int main(int argc, char *argv[])
         TI = TF;
         TF += dt;
 
-        if(useMoody) mState = mFile->readCyclingState();
+        //if(useMoody) mState = mFile->readState();
+
 
         solSys->rada27(X, V, TI, TF);
 
@@ -494,9 +496,11 @@ int main(int argc, char *argv[])
         qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
         LF_int(&LF, X, V);
         qDebug() << QString("LF: %1\n").arg(LF);
-
-
-
+/*
+        nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
+        nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
+        qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+*/
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             name = QString(pList[teloi]->name.data());
@@ -508,6 +512,15 @@ int main(int argc, char *argv[])
                 nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
                 nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
 
+/*
+                X0[i]-=ssb[0];
+                X0[i+1]-=ssb[1];
+                X0[i+2]-=ssb[2];
+
+                V0[i]-=ssbv[0];
+                V0[i+1]-=ssbv[1];
+                V0[i+2]-=ssbv[2];
+*/
                 saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
 /*
                 X[i]=X0[i];
@@ -525,6 +538,7 @@ int main(int argc, char *argv[])
                 if(getMopName(mState, mItem, name)!=-1)
                 {
                     //mItem = mState->getMopItem(teloi);
+
                     Xm[i] = mItem.x/AUKM/1000;
                     Xm[i+1] = mItem.y/AUKM/1000;
                     Xm[i+2] = mItem.z/AUKM/1000;
@@ -532,7 +546,9 @@ int main(int argc, char *argv[])
                     Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
                     Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                    saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                    saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
+                    //saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+
                 }
             }
 /*
@@ -582,6 +598,8 @@ int main(int argc, char *argv[])
         qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
         LF_int(&LF0, X0, V0);
         qDebug() << QString("LF0: %1\n").arg(LF0);
+
+        if(useMoody) mState = mFile->readState();
 
  //       qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     }

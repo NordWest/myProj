@@ -114,7 +114,7 @@
           iterNum = 0;
 
         force_N(X, V, F);
-        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
 
@@ -305,6 +305,7 @@
                                 r4 = -(2.0*(1+gamma)/(CAU*CAU))*Smul3(&V[i], &V[j]);
                                 r5 = -(3.0/(2.0*CAU*CAU))*pow(Smul3(&R0[0], &V[j])/Rij, 2.0);
                                 r6 = (1.0/(2.0*CAU*CAU))*Smul3(&R1[0], &FN[j]);
+                                qDebug() << QString("\nr0: %1\nr1: %2\nr2:%3\nr3:%4\nr4:%5\nr5:%6\nr6:%7\nsumm: %8\n\n").arg(r0).arg(r1).arg(r2).arg(r3).arg(r4).arg(r5).arg(r6).arg(r0 + r1 + r2 + r3 + r4 + r5 + r6);
 
                                 rr = (1.0 + r0 + r1 + r2 + r3 + r4 + r5 + r6);
 
@@ -334,7 +335,7 @@
                       res3 /= CAU*CAU;
                       res4 = res4*(3+4*gamma)/(2.0*CAU*CAU);
 
-                      //printf("res: %e %e %e\n\n", res0, res3, res4);
+                      printf("res: %e %e %e\n\n", res0, res3, res4);
 
                       F[i+komp] = res0 + res3 + res4;
 
@@ -348,7 +349,7 @@
       summ1/= Ni;
      //printf("summ1: %e\n\n", summ1);
 
-      if(summ1<1e-10) return 0;
+      if(summ1<1e-15) return 0;
       else return(force_PPN(X, V, F));
   }
 

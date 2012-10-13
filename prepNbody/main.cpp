@@ -190,6 +190,7 @@ int main(int argc, char *argv[])
             pList[i]->xd = coefXD*V[0];
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
+            if(si) pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
 
 //            if(plaNum==10) pList[i]->mass = mass[9];
 //            else pList[i]->mass = mass[plaNum];
