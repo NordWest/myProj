@@ -221,32 +221,32 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
          vector = domDocument.createElement("vector");
 
          child = domDocument.createElement("X");
-         childText = domDocument.createTextNode(QString("%1").arg(p->x, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->x, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("Y");
-         childText = domDocument.createTextNode(QString("%1").arg(p->y, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->y, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("Z");
-         childText = domDocument.createTextNode(QString("%1").arg(p->z, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->z, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("XD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->xd, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->xd, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("YD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->yd, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->yd, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 
          child = domDocument.createElement("ZD");
-         childText = domDocument.createTextNode(QString("%1").arg(p->zd, 20, 'e', 12));
+         childText = domDocument.createTextNode(QString("%1").arg(p->zd, 26, 'e', 20));
          child.appendChild(childText);
          vector.appendChild(child);
 

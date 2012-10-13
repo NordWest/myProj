@@ -249,7 +249,7 @@
                                 for(k=0, telok=0; k<Nj; k+=3, telok++)
                                 {
                                     muk = ka*ka*pow(pList[telok]->mass, -1.0);
-                                       if(telok!=teloi&&pList[telok]->interactionPermission==Advisor::interactALL)
+                                       if(telok!=teloi)//&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
                                           Rik = dist(teloi, telok, X);
                                           //Rj = dist(teloj, 0, X);
@@ -268,7 +268,7 @@
 
                                        }
 
-                                       if(telok!=teloj&&pList[telok]->interactionPermission==Advisor::interactALL)
+                                       if(telok!=teloj)//&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
                                           Rjk = dist(teloj, telok, X);
                                           //Rj = dist(teloj, 0, X);
@@ -303,8 +303,8 @@
                                 r2 = gamma*pow(Vi/CAU, 2.0);
                                 r3 = (1+gamma)*pow(Vj/CAU, 2.0);
                                 r4 = -(2.0*(1+gamma)/(CAU*CAU))*Smul3(&V[i], &V[j]);
-                                r5 = -(3.0/(2.0*CAU*CAU))*pow(Smul3(R0, &V[j])/Rij, 2.0);
-                                r6 = (1.0/(2.0*CAU*CAU))*Smul3(R1, &FN[j]);
+                                r5 = -(3.0/(2.0*CAU*CAU))*pow(Smul3(&R0[0], &V[j])/Rij, 2.0);
+                                r6 = (1.0/(2.0*CAU*CAU))*Smul3(&R1[0], &FN[j]);
 
                                 rr = (1.0 + r0 + r1 + r2 + r3 + r4 + r5 + r6);
 

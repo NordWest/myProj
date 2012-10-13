@@ -98,12 +98,32 @@ void CM_int(double *CM, double X[], double V[])
     }
 }
 
-int S_int(double X[], double V[])
+void S_int(double *S, double X[], double V[])
 {
+    int i;
+    S[0] = S[1] = S[2] = 0.0;
+    for(i=0; i<nofzbody; i++)
+    {
+        S[0] += pow(mass[i], -1.0)*(X[i*3+1]*V[i*3+2]+V[i*3+1]*X[i*3+2]);
+        S[1] += pow(mass[i], -1.0)*(X[i*3+2]*V[i*3]+V[i*3+2]*X[i*3]);
+        S[2] += pow(mass[i], -1.0)*(X[i*3]*V[i*3+1]+V[i*3]*X[i*3+1]);
+    }
+
 
 }
 
-int LF_int(double X[], double V[]);
+void LF_int(double *LF, double X[], double V[])
+{
+    int i;
+    *LF = 0.0;
+    for(i=0; i<nofzbody; i++)
+    {
+        *LF += pow(mass[i], -1.0)*(V[i*3]*V[i*3]+V[i*3+1]*V[i*3+1]+V[i*3+2]*V[i*3+2]);
+        //SM[1] += pow(mass[i], -1.0)*(X[i*3+2]*V[i*3]+V[i*3+2]*X[i*3]);
+        //SM[2] += pow(mass[i], -1.0)*(X[i*3]*V[i*3+1]+V[i*3]*X[i*3+1]);
+    }
+    *LF*=0.5;
+}
 
 //#define CENTER CENTER_BARY
 //#define SK SK_EKVATOR
@@ -205,6 +225,12 @@ int main(int argc, char *argv[])
     double *Xm, *Vm;
     int SK, CENTER;
     double *CM = new double[3];
+    double *S = new double[3];
+    double LF;
+
+    double *CM0 = new double[3];
+    double *S0 = new double[3];
+    double LF0;
 
     QString name;
     int plaNum, resMiri;
@@ -365,7 +391,7 @@ int main(int argc, char *argv[])
             nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
             nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
 
-            saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+            saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
         }
 /*        else
         {
@@ -394,7 +420,7 @@ int main(int argc, char *argv[])
                 Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
                 Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+                saveResultsM(t0-t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
             }
         }
 
@@ -428,6 +454,17 @@ int main(int argc, char *argv[])
 
     CM_int(CM, X, V);
     qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+    S_int(S, X, V);
+    qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
+    LF_int(&LF, X, V);
+    qDebug() << QString("LF: %1\n").arg(LF);
+
+    CM_int(CM0, X0, V0);
+    qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
+    S_int(S0, X0, V0);
+    qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
+    LF_int(&LF0, X0, V0);
+    qDebug() << QString("LF0: %1\n").arg(LF0);
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
@@ -453,6 +490,12 @@ int main(int argc, char *argv[])
 
         CM_int(CM, X, V);
         qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+        S_int(S, X, V);
+        qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
+        LF_int(&LF, X, V);
+        qDebug() << QString("LF: %1\n").arg(LF);
+
+
 
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
@@ -465,7 +508,7 @@ int main(int argc, char *argv[])
                 nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
                 nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
 
-                saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
 /*
                 X[i]=X0[i];
                 X[i+1]=X0[i+1];
@@ -489,7 +532,7 @@ int main(int argc, char *argv[])
                     Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
                     Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                    saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                    saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
                 }
             }
 /*
@@ -532,6 +575,13 @@ int main(int argc, char *argv[])
             deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
             */
         }
+
+        CM_int(CM0, X0, V0);
+        qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
+        S_int(S0, X0, V0);
+        qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
+        LF_int(&LF0, X0, V0);
+        qDebug() << QString("LF0: %1\n").arg(LF0);
 
  //       qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     }

@@ -206,11 +206,11 @@ int main(int argc, char *argv[])
             }
 
 */
-
+            xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(dist, 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20).arg(vel, 26, 'e', 20);
         }
 
 
-        xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 18, 'e', 9).arg(X[1], 18, 'e', 9).arg(X[2], 18, 'e', 9).arg(dist, 18, 'e', 9).arg(V[0], 18, 'e', 9).arg(V[1], 18, 'e', 9).arg(V[2], 18, 'e', 9).arg(vel, 18, 'e', 9);
+
         //Particle *p = new Particle;
 
         //p->fillFromExistingParticleStruct(*pList[i]);
