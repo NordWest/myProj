@@ -503,9 +503,32 @@ int main(int argc, char *argv[])
 */
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
+            mui1=0.0;
+
+            for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
+            {
+                if(teloi!=teloj) mui1+=pow(mass[teloj], -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+            }
+            mui1 *= 1.0/(2.0*CAU*CAU);
+            mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
+
+            mui = pow(pList[teloi]->mass, -1.0)*mui1;
+
+            ssb[0] += mui*X[i];
+            ssb[1] += mui*X[i+1];
+            ssb[2] += mui*X[i+2];
+        }
+
+
+        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
+        {
             name = QString(pList[teloi]->name.data());
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
+
+            X[i]+=ssb[0];
+            X[i+1]+=ssb[1];
+            X[i+2]+=ssb[2];
 
             if(plaNum!=-1)
             {
@@ -551,21 +574,8 @@ int main(int argc, char *argv[])
 
                 }
             }
-/*
-            mui1=0.0;
 
-            for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
-            {
-                if(teloi!=teloj) mui1+=pow(mass[teloj], -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
-            }
-            mui1 *= 1.0/(2.0*CAU*CAU);
-            mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
 
-            mui = pow(mass[teloi], -1.0)*mui1;
-
-            ssb[0] += mui*X[i];
-            ssb[1] += mui*X[i+1];
-            ssb[2] += mui*X[i+2];
 
 /*
             Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
@@ -601,7 +611,7 @@ int main(int argc, char *argv[])
 
         if(useMoody) mState = mFile->readState();
 
- //       qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+        qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     }
 
 
