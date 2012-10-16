@@ -35,68 +35,7 @@
 
     void force_N(double X[], double V[], double F[]);
     int force_PPN(double X[], double V[], double F[]);
-/*
-  void force_N(double X[], double V[], double F[])
-  {
-      int i, j, N, komp, teloi, teloj;
-      double Rij, Ri, Rj, res1, res0;
-
-      int iNum = nofzbody-1;
-      int Ni = (nofzbody-1)*3;
-      int jNum = iNum;//eparam->NV;
-      int Nj = Ni;//eparam->NV*3;
-
-
-      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
-      {
-              //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
-          Ri = norm(&X[i]);
-
-              if(Ri>(eparam->vout))
-              {
-                  printf("WARN!!!! V OUT!!!!\n");
-                  printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
-                  exit(1);
-              }
-
-              for(komp=0; komp<3; komp++)
-              {
-                      res0 = 0.0;
-                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
-                      {
-                             if(teloi!=teloj)
-                             {
-                                Rij = dist(teloi, teloj, X);
-                                //Rj = dist(teloj, 0, X);
-                                Rj = norm(&X[j]);
-
-                                if(Rij<eparam->col)
-                                {
-
-                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
-                                    printf("Rij= %f\n", Rij);
-                                    printf("WARN!!!! CRASH!!!!\n");
-                                    exit(1);
-                                }
-
-                                res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
-                                //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
-
-                             }
-                      }
-                      //res1 = -((pow(mass[0], -1.0) + pow(mass[teloi], -1.0))*X[i+komp])/(pow(Ri, 3));
-                      res1=0;
-
-
-                      F[i+komp] = ka*ka*(res0+res1);
-
-                  }
-              //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
-      }
-  }
-
-*/
-
+    void force_GN(double X[], double V[], double F[]);
 
   // BARYCENTR Particles
   void Everhardt::force(double X[], double V[], double TS, double F[])
@@ -109,12 +48,12 @@
           int Nj = Ni;//eparam->NV*3;
           double Ri, Rj, *D, res0, res1;
 */
-          double beta = 1.0;
-          double gamma = 1.0;
+  //        double beta = 1.0;
+  //        double gamma = 1.0;
           iterNum = 0;
 
         force_N(X, V, F);
-        //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
 
@@ -305,7 +244,7 @@
                                 r4 = -(2.0*(1+gamma)/(CAU*CAU))*Smul3(&V[i], &V[j]);
                                 r5 = -(3.0/(2.0*CAU*CAU))*pow(Smul3(&R0[0], &V[j])/Rij, 2.0);
                                 r6 = (1.0/(2.0*CAU*CAU))*Smul3(&R1[0], &FN[j]);
-                                qDebug() << QString("\nr0: %1\nr1: %2\nr2:%3\nr3:%4\nr4:%5\nr5:%6\nr6:%7\nsumm: %8\n\n").arg(r0).arg(r1).arg(r2).arg(r3).arg(r4).arg(r5).arg(r6).arg(r0 + r1 + r2 + r3 + r4 + r5 + r6);
+                                //qDebug() << QString("\nr0: %1\nr1: %2\nr2:%3\nr3:%4\nr4:%5\nr5:%6\nr6:%7\nsumm: %8\n\n").arg(r0).arg(r1).arg(r2).arg(r3).arg(r4).arg(r5).arg(r6).arg(r0 + r1 + r2 + r3 + r4 + r5 + r6);
 
                                 rr = (1.0 + r0 + r1 + r2 + r3 + r4 + r5 + r6);
 
@@ -335,7 +274,7 @@
                       res3 /= CAU*CAU;
                       res4 = res4*(3+4*gamma)/(2.0*CAU*CAU);
 
-                      printf("res: %e %e %e\n\n", res0, res3, res4);
+                      //printf("res: %e %e %e\n\n", res0, res3, res4);
 
                       F[i+komp] = res0 + res3 + res4;
 
@@ -352,6 +291,201 @@
       if(summ1<1e-15) return 0;
       else return(force_PPN(X, V, F));
   }
+
+//GELIOCENTR
+  void force_GN(double X[], double V[], double F[])
+  {
+      int i, j, N, komp, teloi, teloj;
+      double Rij, Ri, Rj, res1, res0;
+
+      int iNum = nofzbody-1;
+      int Ni = (nofzbody-1)*3;
+      int jNum = iNum;//eparam->NV;
+      int Nj = Ni;//eparam->NV*3;
+
+      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+      {
+              //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+          Ri = norm(&X[i]);
+
+              if(Ri>(eparam->vout))
+              {
+                  printf("WARN!!!! V OUT!!!!\n");
+                  printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+                  exit(1);
+              }
+
+              for(komp=0; komp<3; komp++)
+              {
+                      res0 = res1 = 0.0;
+                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                      {
+                          if(teloi!=teloj&&teloj!=0&&pList[teloj]->interactionPermission==Advisor::interactALL)
+                             {
+                                Rij = dist(teloi, teloj, X);
+                                //Rj = dist(teloj, 0, X);
+                                Rj = norm(&X[j]);
+
+                                if(Rij<eparam->col)
+                                {
+
+                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                    printf("Rij= %f\n", Rij);
+                                    printf("WARN!!!! CRASH!!!!\n");
+                                    exit(1);
+                                }
+
+
+
+                                res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                             }
+                      }
+                      if(teloi!=0) res1 = -((pow(pList[0]->mass, -1.0) + pow(pList[teloi]->mass, -1.0))*X[i+komp])/(pow(Ri, 3));
+
+
+                      F[i+komp] = ka*ka*(res0+res1);
+
+                  }
+              //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+      }
+  }
+  /*
+ void force_GN(double X[], double V[], double TS, double F[])
+ {
+         int i, j, N, komp, teloi, teloj;
+         //double k2 = 6.672590000e-8;
+         //double ka = 0.017202098955;//f?
+         //double k2 = 1.0325429631115171592476225138836e-4;
+         //double k2 = 1;
+         double fconst = 6.673e-8;
+ //	N = (mass->n-1)*3;
+         int jNum = eparam->NV/3;
+         int Ni = eparam->NV;
+ //        int Nj = jNum*3;
+         double Ri, Rj, *D, res0, res1;
+         //int k;
+
+         printf("TS: %12.2f\n", TS);
+
+         //printf("X: %f %f %f\n", X[0], X[1])
+
+         if(nbody==NULL) return;
+
+         D = new double[jNum];
+   //      Y = new double[Nj];
+
+         double mass[11] = {
+                     1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
+         };
+
+         int pla[11] = {
+                 SUN_NUM, MERCURY_NUM, VENUS_NUM, GEOCENTR_NUM, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM, 0
+         };
+ /*
+         for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+         {
+                 nbody->detR(&Y[j], &Y[j+1], &Y[j+2], TS, pla[teloj], 0, CENTER_SUN, SK_ECLIPTIC);
+                 printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloj], Y[j], Y[j+1], Y[j+2]);
+         }
+ */
+   /*      for(i=0, teloi=0; j<Ni; i+=3, teloi++)
+         {
+
+                 printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloi], X[i], X[i+1], X[i+2]);
+         }
+ /
+         printf("eparam->col= %f\teparam->vout= %f\n", eparam->col, eparam->vout);
+
+         for(i=0, teloi=0; i<Ni; i+=3, teloi++)
+         {
+                 Ri = sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+                 printf("R[%d]= %f\n", teloi, Ri);
+                 if(Ri<eparam->col)
+                 {
+ //		    cout << "WARN!!!! CRASH!!!!" << endl;
+                     printf("WARN!!!! CRASH!!!!\n");
+                     exit(1);
+                 }
+                 if(Ri>(eparam->vout))
+                 {
+ //		    cout << "WARN!!!! V OUT!!!!" << endl;
+                     printf("WARN!!!! V OUT!!!!\n");
+                     exit(1);
+                 }
+                 //k=0;
+                 for(j=0, teloj=0; teloj<jNum; j+=3, teloj++)
+                 {
+                         if(teloi!=teloj)
+                         {
+                             D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                             //D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                             printf("D[%d]= %f\n", teloj, D[teloj]);
+
+ //			    cout << "D[j]= " << D[j] << endl;
+                             if(D[teloj]<eparam->col)
+                             {
+ //				cout << "WARN!!!! CRASH!!!!" << endl;
+                                 printf("WARN!!!! CRASH!!!!\n");
+                                 exit(1);
+                             }
+                             if(D[teloj]>eparam->vout)
+                             {
+ //				cout << "WARN!!!! V OUT!!!!" << endl;
+                                 printf("WARN!!!! V OUT!!!!\n");
+                                 exit(1);
+                             }
+
+                         }
+                             //k++;
+                 }
+
+
+
+                 for(komp=0; komp<3; komp++)
+                 {
+                         res0 = res1 = 0.0;
+                         for(j=0, teloj=0; j<Ni; j+=3, teloj++)
+                         {
+                                if(teloi!=teloj)
+                                {
+                                     //Rj = sqrt(Y[j]*Y[j] + Y[j+1]*Y[j+1] + Y[j+2]*Y[j+2]);
+                                     Rj = sqrt(X[j]*X[j] + X[j+1]*X[j+1] + X[j+2]*X[j+2]);
+                                     printf("Rj= %f\n", Rj);
+ //				    cout << "Rj= " << Rj << endl;
+                                     if(Rj<eparam->col)
+                                     {
+         //				cout << "WARN!!!! CRASH!!!!" << endl;
+                                         printf("WARN!!!! CRASH!!!!\n");
+                                         exit(1);
+ //					error = 1;
+                                     }
+                                     if(Rj>eparam->vout)
+                                     {
+         //				cout << "WARN!!!! V OUT!!!!" << endl;
+                                         printf("WARN!!!! V OUT!!!!\n");
+                                         exit(1);
+                                     }
+
+                                     res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)) - X[j+komp]/(pow(Rj, 3)));
+                                     //res0 += pow(mass[teloj], -1.0)*((Y[j+komp] - X[i+komp])/(pow(D[teloj],3)));
+                                     //res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)));
+                                }
+                         }
+
+                         res1 = -((pow(mass[0], -1.0)+pow(mass[teloi+1], -1.0))*X[i+komp])/(pow(Ri, 3));
+                         //res1 = 0.0;
+
+                         printf("res0= %e\nres1= %e\n", res0, res1);
+
+                         F[i+komp] = ka*ka*(res1 + res0);
+
+                     }
+                 printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+         }
+
+ }
+
 
 /*
   // BARYCENTR Particles [SAVE 16 avg]
@@ -612,143 +746,8 @@ void Everhardt::force(double X[], double V[], double TS, double F[])
         }
 
 }
-/*
- GELIOCENTR
-void Everhardt::force(double X[], double V[], double TS, double F[])
-{
-        int i, j, N, komp, teloi, teloj;
-        //double k2 = 6.672590000e-8;
-        //double ka = 0.017202098955;//f?
-        //double k2 = 1.0325429631115171592476225138836e-4;
-        //double k2 = 1;
-        double fconst = 6.673e-8;
-//	N = (mass->n-1)*3;
-        int jNum = eparam->NV/3;
-        int Ni = eparam->NV;
-//        int Nj = jNum*3;
-        double Ri, Rj, *D, res0, res1;
-        //int k;
-
-        printf("TS: %12.2f\n", TS);
-
-        //printf("X: %f %f %f\n", X[0], X[1])
-
-        if(nbody==NULL) return;
-
-        D = new double[jNum];
-  //      Y = new double[Nj];
-
-        double mass[11] = {
-                    1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
-        };
-
-        int pla[11] = {
-                SUN_NUM, MERCURY_NUM, VENUS_NUM, GEOCENTR_NUM, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM, 0
-        };
-/*
-        for(j=0, teloj=0; j<Nj; j+=3, teloj++)
-        {
-                nbody->detR(&Y[j], &Y[j+1], &Y[j+2], TS, pla[teloj], 0, CENTER_SUN, SK_ECLIPTIC);
-                printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloj], Y[j], Y[j+1], Y[j+2]);
-        }
-*/
-  /*      for(i=0, teloi=0; j<Ni; i+=3, teloi++)
-        {
-
-                printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloi], X[i], X[i+1], X[i+2]);
-        }
 /
-        printf("eparam->col= %f\teparam->vout= %f\n", eparam->col, eparam->vout);
 
-        for(i=0, teloi=0; i<Ni; i+=3, teloi++)
-        {
-                Ri = sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
-                printf("R[%d]= %f\n", teloi, Ri);
-                if(Ri<eparam->col)
-                {
-//		    cout << "WARN!!!! CRASH!!!!" << endl;
-                    printf("WARN!!!! CRASH!!!!\n");
-                    exit(1);
-                }
-                if(Ri>(eparam->vout))
-                {
-//		    cout << "WARN!!!! V OUT!!!!" << endl;
-                    printf("WARN!!!! V OUT!!!!\n");
-                    exit(1);
-                }
-                //k=0;
-                for(j=0, teloj=0; teloj<jNum; j+=3, teloj++)
-                {
-                        if(teloi!=teloj)
-                        {
-                            D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
-                            //D[teloj] = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
-                            printf("D[%d]= %f\n", teloj, D[teloj]);
-
-//			    cout << "D[j]= " << D[j] << endl;
-                            if(D[teloj]<eparam->col)
-                            {
-//				cout << "WARN!!!! CRASH!!!!" << endl;
-                                printf("WARN!!!! CRASH!!!!\n");
-                                exit(1);
-                            }
-                            if(D[teloj]>eparam->vout)
-                            {
-//				cout << "WARN!!!! V OUT!!!!" << endl;
-                                printf("WARN!!!! V OUT!!!!\n");
-                                exit(1);
-                            }
-
-                        }
-                            //k++;
-                }
-
-
-
-                for(komp=0; komp<3; komp++)
-                {
-                        res0 = res1 = 0.0;
-                        for(j=0, teloj=0; j<Ni; j+=3, teloj++)
-                        {
-                               if(teloi!=teloj)
-                               {
-                                    //Rj = sqrt(Y[j]*Y[j] + Y[j+1]*Y[j+1] + Y[j+2]*Y[j+2]);
-                                    Rj = sqrt(X[j]*X[j] + X[j+1]*X[j+1] + X[j+2]*X[j+2]);
-                                    printf("Rj= %f\n", Rj);
-//				    cout << "Rj= " << Rj << endl;
-                                    if(Rj<eparam->col)
-                                    {
-        //				cout << "WARN!!!! CRASH!!!!" << endl;
-                                        printf("WARN!!!! CRASH!!!!\n");
-                                        exit(1);
-//					error = 1;
-                                    }
-                                    if(Rj>eparam->vout)
-                                    {
-        //				cout << "WARN!!!! V OUT!!!!" << endl;
-                                        printf("WARN!!!! V OUT!!!!\n");
-                                        exit(1);
-                                    }
-
-                                    res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)) - X[j+komp]/(pow(Rj, 3)));
-                                    //res0 += pow(mass[teloj], -1.0)*((Y[j+komp] - X[i+komp])/(pow(D[teloj],3)));
-                                    //res0 += pow(mass[teloj], -1.0)*((X[j+komp] - X[i+komp])/(pow(D[teloj],3)));
-                               }
-                        }
-
-                        res1 = -((pow(mass[0], -1.0)+pow(mass[teloi+1], -1.0))*X[i+komp])/(pow(Ri, 3));
-                        //res1 = 0.0;
-
-                        printf("res0= %e\nres1= %e\n", res0, res1);
-
-                        F[i+komp] = ka*ka*(res1 + res0);
-
-                    }
-                printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
-        }
-
-}
-*/
 
 /*
   void Everhardt::force(double X[], double V[], double TS, double F[])

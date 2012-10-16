@@ -83,7 +83,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 int nofzbody;
 dele *nbody;
 ever_params *eparam;
-double *mass;
+//double *mass;
 QList <ParticleStruct*> pList;
 
 void CM_int(double *CM, double X[], double V[])
@@ -92,9 +92,9 @@ void CM_int(double *CM, double X[], double V[])
     CM[0] = CM[1] = CM[2] = 0.0;
     for(i=0; i<nofzbody; i++)
     {
-        CM[0] += pow(mass[i], -1.0)*V[i*3];
-        CM[1] += pow(mass[i], -1.0)*V[i*3+1];
-        CM[2] += pow(mass[i], -1.0)*V[i*3+2];
+        CM[0] += pow(pList[i]->mass, -1.0)*V[i*3];
+        CM[1] += pow(pList[i]->mass, -1.0)*V[i*3+1];
+        CM[2] += pow(pList[i]->mass, -1.0)*V[i*3+2];
     }
 }
 
@@ -104,9 +104,9 @@ void S_int(double *S, double X[], double V[])
     S[0] = S[1] = S[2] = 0.0;
     for(i=0; i<nofzbody; i++)
     {
-        S[0] += pow(mass[i], -1.0)*(X[i*3+1]*V[i*3+2]+V[i*3+1]*X[i*3+2]);
-        S[1] += pow(mass[i], -1.0)*(X[i*3+2]*V[i*3]+V[i*3+2]*X[i*3]);
-        S[2] += pow(mass[i], -1.0)*(X[i*3]*V[i*3+1]+V[i*3]*X[i*3+1]);
+        S[0] += pow(pList[i]->mass, -1.0)*(X[i*3+1]*V[i*3+2]+V[i*3+1]*X[i*3+2]);
+        S[1] += pow(pList[i]->mass, -1.0)*(X[i*3+2]*V[i*3]+V[i*3+2]*X[i*3]);
+        S[2] += pow(pList[i]->mass, -1.0)*(X[i*3]*V[i*3+1]+V[i*3]*X[i*3+1]);
     }
 
 
@@ -118,7 +118,7 @@ void LF_int(double *LF, double X[], double V[])
     *LF = 0.0;
     for(i=0; i<nofzbody; i++)
     {
-        *LF += pow(mass[i], -1.0)*(V[i*3]*V[i*3]+V[i*3+1]*V[i*3+1]+V[i*3+2]*V[i*3+2]);
+        *LF += pow(pList[i]->mass, -1.0)*(V[i*3]*V[i*3]+V[i*3+1]*V[i*3+1]+V[i*3+2]*V[i*3+2]);
         //SM[1] += pow(mass[i], -1.0)*(X[i*3+2]*V[i*3]+V[i*3+2]*X[i*3]);
         //SM[2] += pow(mass[i], -1.0)*(X[i*3]*V[i*3+1]+V[i*3]*X[i*3+1]);
     }
@@ -302,7 +302,9 @@ int main(int argc, char *argv[])
     if(iniJplRes) return 1;
 
     nofzbody = pList.size();
-    mass = new double[nofzbody];
+
+    //mass = new double[nofzbody];
+    //if(CENTER) nofzbody-=1;
 
     N = (nofzbody)*3;
 
@@ -335,7 +337,7 @@ int main(int argc, char *argv[])
 
 
 
-    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
+    solSys = new Everhardt(N-3*CENTER, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
     if(useMoody)
     {
@@ -369,7 +371,7 @@ int main(int argc, char *argv[])
     int p = 0;
     for(i=0; i<nofzbody; i++)
     {
-        mass[i] = pList[i]->mass;
+        //mass[i] = pList[i]->mass;
 
         name = QString(pList[i]->name.data());
         if(QString().compare(name, "Sol")==0) plaNum = 10;
@@ -468,7 +470,7 @@ int main(int argc, char *argv[])
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
-    double *ssb, *ssbv, mui, mui1;
+    double *ssb, *ssbv, mui, mui1, muis;
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
@@ -484,7 +486,7 @@ int main(int argc, char *argv[])
         //if(useMoody) mState = mFile->readState();
 
 
-        solSys->rada27(X, V, TI, TF);
+        solSys->rada27(&X[3*CENTER], &V[3*CENTER], TI, TF);
 
         ssb[0] = 0;
         ssb[1] = 0;
@@ -501,13 +503,15 @@ int main(int argc, char *argv[])
         nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
         qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
 */
+ /*       muis = 0;
+
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             mui1=0.0;
 
             for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
             {
-                if(teloi!=teloj) mui1+=pow(mass[teloj], -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                if(teloi!=teloj) mui1+=pow(pList[teloj]->mass, -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
             }
             mui1 *= 1.0/(2.0*CAU*CAU);
             mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
@@ -517,19 +521,23 @@ int main(int argc, char *argv[])
             ssb[0] += mui*X[i];
             ssb[1] += mui*X[i+1];
             ssb[2] += mui*X[i+2];
+            muis += mui;
         }
 
-
+        ssb[0] /= muis;
+        ssb[1] /= muis;
+        ssb[2] /= muis;
+*/
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             name = QString(pList[teloi]->name.data());
             if(QString().compare(name, "Sol")==0) plaNum = 10;
             else plaNum = planet_num(name.toAscii().data());
-
+/*
             X[i]+=ssb[0];
             X[i+1]+=ssb[1];
             X[i+2]+=ssb[2];
-
+*/
             if(plaNum!=-1)
             {
                 nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
@@ -569,8 +577,8 @@ int main(int argc, char *argv[])
                     Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
                     Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                    saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
-                    //saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                    //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
+                    saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
 
                 }
             }
