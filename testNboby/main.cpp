@@ -13,6 +13,8 @@
 #include "./../libs/redStat.h"
 #include "./../libs/mpcs.h"
 
+#include "./../libs/calc_epm.h"
+
 #include <QDebug>
 #include <QSettings>
 #include <QDataStream>
@@ -203,6 +205,28 @@ int getMopName(MopState *mState, MopItem &mItem, QString name)
 
 }
 
+int epm_planet_num(QString name)
+{
+    if(QString().compare(name, "MERCURY", Qt::CaseInsensitive)==0) return 1;
+    if(QString().compare(name, "VENUS", Qt::CaseInsensitive)==0) return 2;
+    if(QString().compare(name, "EARTH", Qt::CaseInsensitive)==0) return 3;
+    if(QString().compare(name, "GEOCENTR", Qt::CaseInsensitive)==0) return 3;
+    if(QString().compare(name, "MARS", Qt::CaseInsensitive)==0) return 4;
+    if(QString().compare(name, "JUPITER", Qt::CaseInsensitive)==0) return 5;
+    if(QString().compare(name, "SATURN", Qt::CaseInsensitive)==0) return 6;
+    if(QString().compare(name, "URANUS", Qt::CaseInsensitive)==0) return 7;
+    if(QString().compare(name, "NEPTUNE", Qt::CaseInsensitive)==0) return 8;
+    if(QString().compare(name, "PLUTO", Qt::CaseInsensitive)==0) return 9;
+    if(QString().compare(name, "MOON", Qt::CaseInsensitive)==0) return 10;
+    if(QString().compare(name, "SUN", Qt::CaseInsensitive)==0) return 11;
+    if(QString().compare(name, "SOL", Qt::CaseInsensitive)==0) return 11;
+    if(QString().compare(name, "SSB", Qt::CaseInsensitive)==0) return 12;
+    if(QString().compare(name, "SOLAR-SYSTEM BARYCENTER", Qt::CaseInsensitive)==0) return 12;
+    if(QString().compare(name, "EMB", Qt::CaseInsensitive)==0) return 13;
+    if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
+    return -1;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -266,11 +290,14 @@ int main(int argc, char *argv[])
 
     CENTER = sett->value("general/center", 0).toInt();
     SK = sett->value("general/sk", 0).toInt();
+    int useEPM = sett->value("general/useEPM", 0).toInt();
 
     miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
     miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
     miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
     if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
+
+    QString epmDir = sett->value("general/epmDir", "./").toString();
 
     eparam = new ever_params;
 
@@ -291,6 +318,11 @@ int main(int argc, char *argv[])
 
 
 
+    int centr_num;
+    double *emb = new double[3];
+    double *embv = new double[3];
+
+
 
     if(readCFG(confFile, pList))
     {
@@ -298,8 +330,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int iniJplRes = nbody->init(jplFile.toAscii().data());
-    if(iniJplRes) return 1;
+    int status;
+
+    if(useEPM)
+    {
+        status = !InitTxt(epmDir.toAscii().data());
+        centr_num = 11+!CENTER;
+    }
+    else
+    {
+        status = nbody->init(jplFile.toAscii().data());
+    }
+
+    if(status) return 1;
 
     nofzbody = pList.size();
 
@@ -374,7 +417,8 @@ int main(int argc, char *argv[])
         //mass[i] = pList[i]->mass;
 
         name = QString(pList[i]->name.data());
-        if(QString().compare(name, "Sol")==0) plaNum = 10;
+
+        if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
         //if(plaNum==10) continue;
 
@@ -390,8 +434,20 @@ int main(int argc, char *argv[])
 
         if(plaNum!=-1)
         {
-            nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
-            nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
+            if(useEPM)
+            {
+                status = calc_EPM(plaNum, centr_num, (int)t0, t0 - (int)t0, &X0[p], &V0[p]);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
+            }
+            else
+            {
+                nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
+                nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
+            }
 
             saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
         }
@@ -498,6 +554,16 @@ int main(int argc, char *argv[])
         qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
         LF_int(&LF, X, V);
         qDebug() << QString("LF: %1\n").arg(LF);
+
+        if(useEPM)
+        {
+            status = calc_EPM(3, 13, (int)TF, TF - (int)TF, emb, embv);
+             if(!status)
+             {
+                 qDebug() << QString("error EPM\n");
+                 return 1;
+             }
+        }
 /*
         nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
         nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
@@ -531,7 +597,7 @@ int main(int argc, char *argv[])
         for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
         {
             name = QString(pList[teloi]->name.data());
-            if(QString().compare(name, "Sol")==0) plaNum = 10;
+            if(useEPM) plaNum = epm_planet_num(name);
             else plaNum = planet_num(name.toAscii().data());
 /*
             X[i]+=ssb[0];
@@ -540,8 +606,32 @@ int main(int argc, char *argv[])
 */
             if(plaNum!=-1)
             {
-                nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-                nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                if(useEPM)
+                {
+                    status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         return 1;
+                     }
+                     /*if(plaNum==3)
+                     {
+                         for(int k=0; k<3; k++)
+                         {
+                             X0[i+0] -= emb[0];
+                             X0[i+1] -= emb[1];
+                             X0[i+2] -= emb[2];
+                             V0[i+0] -= embv[0];
+                             V0[i+1] -= embv[1];
+                             V0[i+2] -= embv[2];
+                         }
+                     }*/
+                }
+                else
+                {
+                    nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+                    nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                }
 
 /*
                 X0[i]-=ssb[0];
@@ -553,6 +643,9 @@ int main(int argc, char *argv[])
                 V0[i+2]-=ssbv[2];
 */
                 saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+
+                if(plaNum==3)saveResults(TF-t0, &X[i], &V[i], emb, embv, 0, "EMB", resStm, dxStm, deStm);
+
 /*
                 X[i]=X0[i];
                 X[i+1]=X0[i+1];
@@ -609,6 +702,8 @@ int main(int argc, char *argv[])
             deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
             */
         }
+
+
 
         CM_int(CM0, X0, V0);
         qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);

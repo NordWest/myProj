@@ -14,6 +14,7 @@ int planet_num(char *pname)
 	if(strstr(pname, "Pluto")) return PLUTO_NUM;
 	if(strstr(pname, "Moon")) return MOON_NUM;
 	if(strstr(pname, "Sun")) return SUN_NUM;
+    if(strstr(pname, "Sol")) return SUN_NUM;
 	if(strstr(pname, "Nutations")) return NUTATIONS_NUM;
 	if(strstr(pname, "Librations")) return LIBRATIONS_NUM;
 	if(strstr(pname, "Geocentr")) return GEOCENTR_NUM;
