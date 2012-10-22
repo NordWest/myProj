@@ -344,10 +344,19 @@ int main(int argc, char *argv[])
 
     if(status) return 1;
 
-    nofzbody = pList.size();
+    //nofzbody = pList.size();
+    nofzbody=0;
+    for(i=0; i<pList.size(); i++)
+    {
+        if(pList.at(i)->interactionPermission!=Advisor::interactNONE) nofzbody++;
+    }
 
     //mass = new double[nofzbody];
     //if(CENTER) nofzbody-=1;
+
+
+
+
 
     N = (nofzbody)*3;
 
@@ -412,9 +421,10 @@ int main(int argc, char *argv[])
 
 
     int p = 0;
-    for(i=0; i<nofzbody; i++)
+    for(i=0; i<pList.size(); i++)
     {
         //mass[i] = pList[i]->mass;
+        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
 
         name = QString(pList[i]->name.data());
 
@@ -530,192 +540,207 @@ int main(int argc, char *argv[])
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
-    for(nt=0; nt<nstep; nt++)
+    int obrat = 1;
+    do
     {
-
-
-        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
-
-        TI = TF;
-        TF += dt;
-
-        //if(useMoody) mState = mFile->readState();
-
-
-        solSys->rada27(&X[3*CENTER], &V[3*CENTER], TI, TF);
-
-        ssb[0] = 0;
-        ssb[1] = 0;
-        ssb[2] = 0;
-
-        CM_int(CM, X, V);
-        qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
-        S_int(S, X, V);
-        qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
-        LF_int(&LF, X, V);
-        qDebug() << QString("LF: %1\n").arg(LF);
-
-        if(useEPM)
+        for(nt=0; nt<nstep; nt++)
         {
-            status = calc_EPM(3, 13, (int)TF, TF - (int)TF, emb, embv);
-             if(!status)
-             {
-                 qDebug() << QString("error EPM\n");
-                 return 1;
-             }
-        }
-/*
-        nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
-        nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
-        qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
-*/
- /*       muis = 0;
 
-        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
-        {
-            mui1=0.0;
 
-            for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
+            qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+
+            TI = TF;
+            TF += dt;
+
+            //if(useMoody) mState = mFile->readState();
+
+
+            solSys->rada27(&X[3*CENTER], &V[3*CENTER], 0, dt);
+
+            ssb[0] = 0;
+            ssb[1] = 0;
+            ssb[2] = 0;
+
+            CM_int(CM, X, V);
+            qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+            S_int(S, X, V);
+            qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
+            LF_int(&LF, X, V);
+            qDebug() << QString("LF: %1\n").arg(LF);
+
+            if(useEPM)
             {
-                if(teloi!=teloj) mui1+=pow(pList[teloj]->mass, -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                status = calc_EPM(3, 13, (int)TF, TF - (int)TF, emb, embv);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
             }
-            mui1 *= 1.0/(2.0*CAU*CAU);
-            mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
+    /*
+            nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
+            nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
+            qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+    */
+     /*       muis = 0;
 
-            mui = pow(pList[teloi]->mass, -1.0)*mui1;
-
-            ssb[0] += mui*X[i];
-            ssb[1] += mui*X[i+1];
-            ssb[2] += mui*X[i+2];
-            muis += mui;
-        }
-
-        ssb[0] /= muis;
-        ssb[1] /= muis;
-        ssb[2] /= muis;
-*/
-        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
-        {
-            name = QString(pList[teloi]->name.data());
-            if(useEPM) plaNum = epm_planet_num(name);
-            else plaNum = planet_num(name.toAscii().data());
-/*
-            X[i]+=ssb[0];
-            X[i+1]+=ssb[1];
-            X[i+2]+=ssb[2];
-*/
-            if(plaNum!=-1)
+            for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
             {
-                if(useEPM)
+                mui1=0.0;
+
+                for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
                 {
-                    status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
-                     /*if(plaNum==3)
-                     {
-                         for(int k=0; k<3; k++)
+                    if(teloi!=teloj) mui1+=pow(pList[teloj]->mass, -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+                }
+                mui1 *= 1.0/(2.0*CAU*CAU);
+                mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
+
+                mui = pow(pList[teloi]->mass, -1.0)*mui1;
+
+                ssb[0] += mui*X[i];
+                ssb[1] += mui*X[i+1];
+                ssb[2] += mui*X[i+2];
+                muis += mui;
+            }
+
+            ssb[0] /= muis;
+            ssb[1] /= muis;
+            ssb[2] /= muis;
+    */
+            for(teloi=0, i=0; teloi<pList.size(); teloi++, i+=3)
+            {
+                if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+                name = QString(pList[teloi]->name.data());
+                if(useEPM) plaNum = epm_planet_num(name);
+                else plaNum = planet_num(name.toAscii().data());
+    /*
+                X[i]+=ssb[0];
+                X[i+1]+=ssb[1];
+                X[i+2]+=ssb[2];
+    */
+                if(plaNum!=-1)
+                {
+                    if(useEPM)
+                    {
+                        status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
+                         if(!status)
                          {
-                             X0[i+0] -= emb[0];
-                             X0[i+1] -= emb[1];
-                             X0[i+2] -= emb[2];
-                             V0[i+0] -= embv[0];
-                             V0[i+1] -= embv[1];
-                             V0[i+2] -= embv[2];
+                             qDebug() << QString("error EPM\n");
+                             return 1;
                          }
-                     }*/
+                         /*if(plaNum==3)
+                         {
+                             for(int k=0; k<3; k++)
+                             {
+                                 X0[i+0] -= emb[0];
+                                 X0[i+1] -= emb[1];
+                                 X0[i+2] -= emb[2];
+                                 V0[i+0] -= embv[0];
+                                 V0[i+1] -= embv[1];
+                                 V0[i+2] -= embv[2];
+                             }
+                         }*/
+                    }
+                    else
+                    {
+                        nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+                        nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                    }
+
+    /*
+                    X0[i]-=ssb[0];
+                    X0[i+1]-=ssb[1];
+                    X0[i+2]-=ssb[2];
+
+                    V0[i]-=ssbv[0];
+                    V0[i+1]-=ssbv[1];
+                    V0[i+2]-=ssbv[2];
+    */
+                    saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+
+                    //if(plaNum==3)saveResults(TF-t0, &X[i], &V[i], emb, embv, 0, "EMB", resStm, dxStm, deStm);
+
+    /*
+                    X[i]=X0[i];
+                    X[i+1]=X0[i+1];
+                    X[i+2]=X0[i+2];
+
+                    V[i]=V0[i];
+                    V[i+1]=V0[i+1];
+                    V[i+2]=V0[i+2];
+    */
                 }
-                else
+
+                if(useMoody)
                 {
-                    nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-                    nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                    if(getMopName(mState, mItem, name)!=-1)
+                    {
+                        //mItem = mState->getMopItem(teloi);
+
+                        Xm[i] = mItem.x/AUKM/1000;
+                        Xm[i+1] = mItem.y/AUKM/1000;
+                        Xm[i+2] = mItem.z/AUKM/1000;
+                        Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                        Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                        Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+
+                        //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
+                        saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+
+                    }
                 }
 
-/*
-                X0[i]-=ssb[0];
-                X0[i+1]-=ssb[1];
-                X0[i+2]-=ssb[2];
 
-                V0[i]-=ssbv[0];
-                V0[i+1]-=ssbv[1];
-                V0[i+2]-=ssbv[2];
-*/
-                saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
 
-                if(plaNum==3)saveResults(TF-t0, &X[i], &V[i], emb, embv, 0, "EMB", resStm, dxStm, deStm);
+    /*
+                Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
+                Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 13, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
 
-/*
-                X[i]=X0[i];
-                X[i+1]=X0[i+1];
-                X[i+2]=X0[i+2];
 
-                V[i]=V0[i];
-                V[i+1]=V0[i+1];
-                V[i+2]=V0[i+2];
-*/
+
+                r[0] = X[i]-X0[i];
+                r[1] = X[i+1]-X0[i+1];
+                r[2] = X[i+2]-X0[i+2];
+
+                Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+
+                v[0] = V[i]-V0[i];
+                v[1] = V[i+1]-V0[i+1];
+                v[2] = V[i+2]-V0[i+2];
+
+                dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[teloi]->name.data());
+
+                Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
+
+                deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+                */
             }
 
-            if(useMoody)
-            {
-                if(getMopName(mState, mItem, name)!=-1)
-                {
-                    //mItem = mState->getMopItem(teloi);
-
-                    Xm[i] = mItem.x/AUKM/1000;
-                    Xm[i+1] = mItem.y/AUKM/1000;
-                    Xm[i+2] = mItem.z/AUKM/1000;
-                    Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
-                    Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
-                    Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
-
-                    //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
-                    saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
-
-                }
-            }
 
 
+            CM_int(CM0, X0, V0);
+            qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
+            S_int(S0, X0, V0);
+            qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
+            LF_int(&LF0, X0, V0);
+            qDebug() << QString("LF0: %1\n").arg(LF0);
 
-/*
-            Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
-            Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-            resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 13, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
+            if(useMoody) mState = mFile->readState();
 
-
-
-            r[0] = X[i]-X0[i];
-            r[1] = X[i+1]-X0[i+1];
-            r[2] = X[i+2]-X0[i+2];
-
-            Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-
-            v[0] = V[i]-V0[i];
-            v[1] = V[i+1]-V0[i+1];
-            v[2] = V[i+2]-V0[i+2];
-
-            dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[teloi]->name.data());
-
-            Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
-
-            deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
-            */
+            qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
         }
+        if(obrat) break;
+        dt = -dt;
+        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
+        {
+            V[i] = -V[i];
+            V[i+1] = -V[i+1];
+            V[i+2] = -V[i+2];
+        }
+        obrat = 1;
 
-
-
-        CM_int(CM0, X0, V0);
-        qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
-        S_int(S0, X0, V0);
-        qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
-        LF_int(&LF0, X0, V0);
-        qDebug() << QString("LF0: %1\n").arg(LF0);
-
-        if(useMoody) mState = mFile->readState();
-
-        qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
-    }
+    }while(1);
 
 
 

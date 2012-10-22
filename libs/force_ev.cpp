@@ -28,9 +28,9 @@
  // extern dele *nbody;
  // extern int nofzbody;
 
-  double dist(int i, int j, double X[])
+  double dist(double X0[], double X1[])
   {
-      return(sqrt(pow(X[j*3+0] - X[i*3+0], 2) + pow(X[j*3+1] - X[i*3+1], 2) + pow(X[j*3+2] - X[i*3+2], 2)));
+      return(sqrt(pow(X1[0] - X0[0], 2) + pow(X1[1] - X0[1], 2) + pow(X1[2] - X0[2], 2)));
   }
 
     void force_N(double X[], double V[], double F[]);
@@ -53,7 +53,7 @@
           iterNum = 0;
 
         force_N(X, V, F);
-        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
 
@@ -64,14 +64,26 @@
       int i, j, N, komp, teloi, teloj;
       double Rij, Ri, Rj, res1, res0;
 
+      int pNum, iNum, Ni, jNum, Nj;
+/*
       int iNum = nofzbody;
       int Ni = (nofzbody)*3;
       int jNum = iNum;//eparam->NV;
       int Nj = Ni;//eparam->NV*3;
+  */
+      pNum = pList.size();
+      double *Xj, *Vj;
+      Xj = new double[3];
+      Vj = new double[3];
 
-      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+
+
+      i=0;
+      for(teloi=0; teloi<pNum; teloi++)
       {
+          if(pList[teloi]->interactionPermission==Advisor::interactNONE) continue;
               //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+
           Ri = norm(&X[i]);
 
               if(Ri>(eparam->vout))
@@ -84,27 +96,36 @@
               for(komp=0; komp<3; komp++)
               {
                       res0 = 0.0;
-                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                      for(teloj=0; teloj<pNum; teloj++)
                       {
-                          if(teloi!=teloj&&pList[teloj]->interactionPermission==Advisor::interactALL)
-                             {
-                                Rij = dist(teloi, teloj, X);
-                                //Rj = dist(teloj, 0, X);
-                                Rj = norm(&X[j]);
+                         if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
+                         {
+                             Xj[0] = pList.at(teloj)->x;
+                             Xj[1] = pList.at(teloj)->y;
+                             Xj[2] = pList.at(teloj)->z;
 
-                                if(Rij<eparam->col)
-                                {
+                             Vj[0] = pList.at(teloj)->xd;
+                             Vj[1] = pList.at(teloj)->yd;
+                             Vj[2] = pList.at(teloj)->zd;
 
-                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
-                                    printf("Rij= %f\n", Rij);
-                                    printf("WARN!!!! CRASH!!!!\n");
-                                    exit(1);
-                                }
+                             Rij = dist(&X[i], Xj);
+                            //Rij = sqrt(pow(X[i] - pList.at(teloj)->x, 2.0) + pow(X[i+1] - pList.at(teloj)->y, 2.0) + pow(X[i+2] - pList.at(teloj)->z, 2.0));
+                            //Rj = dist(teloj, 0, X);
+                            Rj = norm(Xj);//sqrt(pList.at(teloj)->x*pList.at(teloj)->x + pList.at(teloj)->y*pList.at(teloj)->y + pList.at(teloj)->z*pList.at(teloj)->z);
 
-                                res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
-                                //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+                            if(Rij<eparam->col)
+                            {
 
-                             }
+                                printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                printf("Rij= %f\n", Rij);
+                                printf("WARN!!!! CRASH!!!!\n");
+                                exit(1);
+                            }
+
+                            res0 += pow(pList[teloj]->mass, -1.0)*((Xj[komp] - X[i+komp])/(pow(Rij,3)));
+                            //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                         }
                       }
                       //res1 = -((pow(mass[0], -1.0) + pow(mass[teloi], -1.0))*X[i+komp])/(pow(Ri, 3));
                       res1 = 0;
@@ -113,6 +134,7 @@
                       F[i+komp] = ka*ka*(res0+res1);
 
                   }
+            i+=3;
               //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
       }
   }
@@ -168,7 +190,7 @@
                       {
                              if(teloi!=teloj&&pList[teloj]->interactionPermission==Advisor::interactALL)
                              {
-                                Rij = dist(teloi, teloj, X);
+                                 Rij = dist(&X[i], &X[j]);
                                 //Rj = dist(teloj, 0, X);
                                 Rj = norm(&X[j]);
                                 Vj = norm(&V[j]);
@@ -190,7 +212,7 @@
                                     muk = ka*ka*pow(pList[telok]->mass, -1.0);
                                        if(telok!=teloi)//&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
-                                          Rik = dist(teloi, telok, X);
+                                          Rik = dist(&X[teloi*3], &X[telok*3]);
                                           //Rj = dist(teloj, 0, X);
                                           //Rk = norm(&X[k]);
 
@@ -209,7 +231,7 @@
 
                                        if(telok!=teloj)//&&pList[telok]->interactionPermission==Advisor::interactALL)
                                        {
-                                          Rjk = dist(teloj, telok, X);
+                                          Rjk = dist(&X[teloj*3], &X[telok*3]);
                                           //Rj = dist(teloj, 0, X);
                                           //Rk = norm(&X[k]);
 
@@ -291,7 +313,7 @@
       if(summ1<1e-15) return 0;
       else return(force_PPN(X, V, F));
   }
-
+/*
 //GELIOCENTR
   void force_GN(double X[], double V[], double F[])
   {
