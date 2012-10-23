@@ -344,13 +344,13 @@ int main(int argc, char *argv[])
 
     if(status) return 1;
 
-    //nofzbody = pList.size();
-    nofzbody=0;
+    nofzbody = pList.size();
+    /*nofzbody=0;
     for(i=0; i<pList.size(); i++)
     {
         if(pList.at(i)->interactionPermission!=Advisor::interactNONE) nofzbody++;
     }
-
+*/
     //mass = new double[nofzbody];
     //if(CENTER) nofzbody-=1;
 
@@ -371,6 +371,7 @@ int main(int argc, char *argv[])
     QTextStream dxmStm;
     QFile resmFile;
     QTextStream resmStm;
+    double ra, de, ra0, de0;
 
 
     QFile resFile("res.txt");
@@ -419,18 +420,19 @@ int main(int argc, char *argv[])
         //}
     }
 
-/*
-    int p = 0;
+
+   // p = 0;
     for(i=0; i<pList.size(); i++)
     {
         //mass[i] = pList[i]->mass;
-        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
+//        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
 
         name = QString(pList[i]->name.data());
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
         //if(plaNum==10) continue;
+        p = i*3;
 
         X[p] = pList[i]->x;
         X[p+1] = pList[i]->y;
@@ -459,7 +461,7 @@ int main(int argc, char *argv[])
                 nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
             }
 
-            saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+            //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
         }
 /*        else
         {
@@ -516,8 +518,7 @@ int main(int argc, char *argv[])
         Ri = sqrt(X0[i*3+0]*X0[i*3+0] + X0[i*3+1]*X0[i*3+1] + X0[i*3+2]*r[i*3+2]);
 
         deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[i*3], 13, 'f', 9).arg(X0[i*3+1], 13, 'f', 9).arg(X0[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i*3], 13, 'f', 9).arg(V0[i*3+1], 13, 'f', 9).arg(V0[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
-        /
-        p+=3;
+        */
     }
 
     CM_int(CM, X, V);
@@ -533,7 +534,7 @@ int main(int argc, char *argv[])
     qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
     LF_int(&LF0, X0, V0);
     qDebug() << QString("LF0: %1\n").arg(LF0);
-*/
+
 
 //    for(ti=t0; ti<t1; ti+=dt)
     double *ssb, *ssbv, mui, mui1, muis;
@@ -555,50 +556,8 @@ int main(int argc, char *argv[])
 
 
 
-            p = 0;
-            for(i=0; i<pList.size(); i++)
-            {
-                //mass[i] = pList[i]->mass;
-                if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
+            //p = 0;
 
-                name = QString(pList[i]->name.data());
-
-                if(useEPM) plaNum = epm_planet_num(name);
-                else plaNum = planet_num(name.toAscii().data());
-                //if(plaNum==10) continue;
-/*
-                X[p] = pList[i]->x;
-                X[p+1] = pList[i]->y;
-                X[p+2] = pList[i]->z;
-                V[p] = pList[i]->xd;
-                V[p+1] = pList[i]->yd;
-                V[p+2] = pList[i]->zd;
-*/
-
-
-
-                if(plaNum!=-1)
-                {
-                    if(useEPM)
-                    {
-                        status = calc_EPM(plaNum, centr_num, (int)TI, TI - (int)TI, &X[p], &V[p]);
-                         if(!status)
-                         {
-                             qDebug() << QString("error EPM\n");
-                             return 1;
-                         }
-                    }
-                    else
-                    {
-                        nbody->detR(&X[p+0], &X[p+1], &X[p+2], TI, plaNum, 0, CENTER, SK);
-                        nbody->detR(&V[p+0], &V[p+1], &V[p+2], TI, plaNum, 1, CENTER, SK);
-                    }
-
-                    //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
-                }
-
-                p+=3;
-            }
 
 
 
@@ -619,7 +578,7 @@ int main(int argc, char *argv[])
             qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
             LF_int(&LF, X, V);
             qDebug() << QString("LF: %1\n").arg(LF);
-
+/*
             if(useEPM)
             {
                 status = calc_EPM(3, 13, (int)TF, TF - (int)TF, emb, embv);
@@ -659,10 +618,10 @@ int main(int argc, char *argv[])
             ssb[1] /= muis;
             ssb[2] /= muis;
     */
-            i=0;
+            //i=0;
             for(teloi=0; teloi<pList.size(); teloi++)
             {
-                if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+                //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
                 name = QString(pList[teloi]->name.data());
                 if(useEPM) plaNum = epm_planet_num(name);
                 else plaNum = planet_num(name.toAscii().data());
@@ -671,8 +630,10 @@ int main(int argc, char *argv[])
                 X[i+1]+=ssb[1];
                 X[i+2]+=ssb[2];
     */
+
                 if(plaNum!=-1)
                 {
+                    i = teloi*3;
                     if(useEPM)
                     {
                         status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
@@ -709,19 +670,30 @@ int main(int argc, char *argv[])
                     V0[i+1]-=ssbv[1];
                     V0[i+2]-=ssbv[2];
     */
-                    saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                    if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+                    {
+                        saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
 
-                    //if(plaNum==3)saveResults(TF-t0, &X[i], &V[i], emb, embv, 0, "EMB", resStm, dxStm, deStm);
+                        detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], X[9], X[10], X[11], 0, 0, 0);
+                        detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
 
-    /*
-                    X[i]=X0[i];
-                    X[i+1]=X0[i+1];
-                    X[i+2]=X0[i+2];
+                        ra = ra - ra0;
+                        de = de - de0;
 
-                    V[i]=V0[i];
-                    V[i+1]=V0[i+1];
-                    V[i+2]=V0[i+2];
-    */
+                        qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
+                    }
+                    else
+                    {
+
+                        X[i]=X0[i];
+                        X[i+1]=X0[i+1];
+                        X[i+2]=X0[i+2];
+
+                        V[i]=V0[i];
+                        V[i+1]=V0[i+1];
+                        V[i+2]=V0[i+2];
+
+                    }
                 }
 
                 if(useMoody)
@@ -744,7 +716,7 @@ int main(int argc, char *argv[])
                 }
 
 
-                i+=3;
+                //i+=3;
 
     /*
                 Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
@@ -770,8 +742,53 @@ int main(int argc, char *argv[])
                 deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
                 */
             }
+/*
+            for(i=0; i<pList.size(); i++)
+            {
+                //mass[i] = pList[i]->mass;
+                if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
+
+                name = QString(pList[i]->name.data());
+
+                if(useEPM) plaNum = epm_planet_num(name);
+                else plaNum = planet_num(name.toAscii().data());
+                //if(plaNum==10) continue;
+/*
+                X[p] = pList[i]->x;
+                X[p+1] = pList[i]->y;
+                X[p+2] = pList[i]->z;
+                V[p] = pList[i]->xd;
+                V[p+1] = pList[i]->yd;
+                V[p+2] = pList[i]->zd;
+/
+
+                p = i*3;
 
 
+                if(plaNum!=-1)
+                {
+                    if(useEPM)
+                    {
+                        status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X[p], &V[p]);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else
+                    {
+                        nbody->detR(&X[p+0], &X[p+1], &X[p+2], TF, plaNum, 0, CENTER, SK);
+                        nbody->detR(&V[p+0], &V[p+1], &V[p+2], TF, plaNum, 1, CENTER, SK);
+                    }
+
+                    //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+                }
+
+                //p+=3;
+            }
+
+*/
 
             CM_int(CM0, X0, V0);
             qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);

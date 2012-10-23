@@ -53,7 +53,7 @@
           iterNum = 0;
 
         force_N(X, V, F);
-        //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
 
@@ -64,26 +64,27 @@
       int i, j, N, komp, teloi, teloj;
       double Rij, Ri, Rj, res1, res0;
 
-      int pNum, iNum, Ni, jNum, Nj;
-/*
-      int iNum = nofzbody;
-      int Ni = (nofzbody)*3;
-      int jNum = iNum;//eparam->NV;
-      int Nj = Ni;//eparam->NV*3;
-  */
-      pNum = pList.size();
-      double *Xj, *Vj;
+      int pNum, iNum, Ni;
+
+      iNum = nofzbody;
+      Ni = (nofzbody)*3;
+      //jNum = iNum;//eparam->NV;
+      //int Nj = Ni;//eparam->NV*3;
+
+  //    pNum = pList.size();
+  /*    double *Xj, *Vj;
       Xj = new double[3];
       Vj = new double[3];
+*/
 
 
-
-      i=0;
-      for(teloi=0; teloi<pNum; teloi++)
+      //i=0;
+      for(teloi=0; teloi<nofzbody; teloi++)
       {
-          if(pList[teloi]->interactionPermission==Advisor::interactNONE) continue;
+          //if(pList[teloi]->interactionPermission==Advisor::interactNONE) continue;
               //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
 
+          i = teloi*3;
           Ri = norm(&X[i]);
 
               if(Ri>(eparam->vout))
@@ -96,22 +97,24 @@
               for(komp=0; komp<3; komp++)
               {
                       res0 = 0.0;
-                      for(teloj=0; teloj<pNum; teloj++)
+                      for(teloj=0; teloj<nofzbody; teloj++)
                       {
+                          j = teloj*3;
                          if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
                          {
+                             /*
                              Xj[0] = pList.at(teloj)->x;
                              Xj[1] = pList.at(teloj)->y;
                              Xj[2] = pList.at(teloj)->z;
 
                              Vj[0] = pList.at(teloj)->xd;
                              Vj[1] = pList.at(teloj)->yd;
-                             Vj[2] = pList.at(teloj)->zd;
+                             Vj[2] = pList.at(teloj)->zd;*/
 
-                             Rij = dist(&X[i], Xj);
+                             Rij = dist(&X[i], &X[j]);
                             //Rij = sqrt(pow(X[i] - pList.at(teloj)->x, 2.0) + pow(X[i+1] - pList.at(teloj)->y, 2.0) + pow(X[i+2] - pList.at(teloj)->z, 2.0));
                             //Rj = dist(teloj, 0, X);
-                            Rj = norm(Xj);//sqrt(pList.at(teloj)->x*pList.at(teloj)->x + pList.at(teloj)->y*pList.at(teloj)->y + pList.at(teloj)->z*pList.at(teloj)->z);
+                            Rj = norm(&X[j]);//sqrt(pList.at(teloj)->x*pList.at(teloj)->x + pList.at(teloj)->y*pList.at(teloj)->y + pList.at(teloj)->z*pList.at(teloj)->z);
 
                             if(Rij<eparam->col)
                             {
@@ -122,7 +125,7 @@
                                 exit(1);
                             }
 
-                            res0 += pow(pList[teloj]->mass, -1.0)*((Xj[komp] - X[i+komp])/(pow(Rij,3)));
+                            res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
                             //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
 
                          }
@@ -134,7 +137,7 @@
                       F[i+komp] = ka*ka*(res0+res1);
 
                   }
-            i+=3;
+            //i+=3;
               //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
       }
   }
@@ -148,8 +151,7 @@
 
       int iNum = nofzbody;
       int Ni = (nofzbody)*3;
-      int jNum = iNum;//eparam->NV;
-      int Nj = Ni;//eparam->NV*3;
+
       double FN[Ni];
       double summ0, summ1;
       summ0 = summ1 = 0.0;
@@ -168,7 +170,7 @@
 
 
 
-      for(i=0, teloi=0; teloi<iNum; i+=3, teloi++)
+      for(i=0, teloi=0; teloi<nofzbody; i+=3, teloi++)
       {
               //Ri = dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
           Ri = norm(&X[i]);
@@ -186,9 +188,10 @@
                       res0 = 0.0;
                       res3 = 0.0;
                       res4 = 0.0;
-                      for(j=0, teloj=0; j<Nj; j+=3, teloj++)
+                      for(teloj=0; teloj<nofzbody; teloj++)
                       {
-                             if(teloi!=teloj&&pList[teloj]->interactionPermission==Advisor::interactALL)
+                          j = teloj*3;
+                             if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
                              {
                                  Rij = dist(&X[i], &X[j]);
                                 //Rj = dist(teloj, 0, X);
@@ -207,12 +210,13 @@
                                 res1 = 0.0;
                                 res2 = 0.0;
 
-                                for(k=0, telok=0; k<Nj; k+=3, telok++)
+                                for(telok=0; telok<nofzbody; telok++)
                                 {
+                                    k = telok*3;
                                     muk = ka*ka*pow(pList[telok]->mass, -1.0);
-                                       if(telok!=teloi)//&&pList[telok]->interactionPermission==Advisor::interactALL)
+                                       if(telok!=teloi&&pList[telok]->identity==Advisor::ordinary)
                                        {
-                                          Rik = dist(&X[teloi*3], &X[telok*3]);
+                                          Rik = dist(&X[i], &X[k]);
                                           //Rj = dist(teloj, 0, X);
                                           //Rk = norm(&X[k]);
 
@@ -229,9 +233,9 @@
 
                                        }
 
-                                       if(telok!=teloj)//&&pList[telok]->interactionPermission==Advisor::interactALL)
+                                       if(telok!=teloj&&pList[telok]->identity==Advisor::ordinary)
                                        {
-                                          Rjk = dist(&X[teloj*3], &X[telok*3]);
+                                          Rjk = dist(&X[j], &X[k]);
                                           //Rj = dist(teloj, 0, X);
                                           //Rk = norm(&X[k]);
 
