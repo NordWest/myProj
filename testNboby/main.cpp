@@ -142,6 +142,7 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
 
     resStm.flush();
 
+    if(X0==NULL||V0==NULL) return;
 
 
     r[0] = X[pos]-X0[pos];
@@ -269,6 +270,7 @@ int main(int argc, char *argv[])
     nbody = new dele();
 
     double t0, nstep, ti, dt;
+    mpc mrec;
 /*
     t0 = 2455201.0;
     t1 = t0+300;
@@ -372,6 +374,7 @@ int main(int argc, char *argv[])
     QFile resmFile;
     QTextStream resmStm;
     double ra, de, ra0, de0;
+    double ksi, zet, teta, T, t;
 
 
     QFile resFile("res.txt");
@@ -535,9 +538,15 @@ int main(int argc, char *argv[])
     LF_int(&LF0, X0, V0);
     qDebug() << QString("LF0: %1\n").arg(LF0);
 
+    char *astr = new char[256];
+    QFile mpcFile("./mpc.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
 
 //    for(ti=t0; ti<t1; ti+=dt)
+    double *P = new double[9];
     double *ssb, *ssbv, mui, mui1, muis;
+    double xt, yt, zt;
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
@@ -552,16 +561,6 @@ int main(int argc, char *argv[])
 
             TI = TF;
             TF += dt;
-
-
-
-
-            //p = 0;
-
-
-
-
-
 
 
 
@@ -630,10 +629,10 @@ int main(int argc, char *argv[])
                 X[i+1]+=ssb[1];
                 X[i+2]+=ssb[2];
     */
-
+                i = teloi*3;
                 if(plaNum!=-1)
                 {
-                    i = teloi*3;
+
                     if(useEPM)
                     {
                         status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
@@ -670,17 +669,45 @@ int main(int argc, char *argv[])
                     V0[i+1]-=ssbv[1];
                     V0[i+2]-=ssbv[2];
     */
+                    /*
+                    if(plaNum==EARTH_NUM)
+                    {
+                        T = (TF - 2451545)/36525.0;
+                        ksi = mas2rad((2306.2181*T + 0.30188*T*T + 0.017998*T*T*T)*1000);
+                        teta = mas2rad((2004.3109*T - 0.42665*T*T - 0.041833*T*T*T)*1000);
+                        zet = mas2rad((2306.2181*T + 1.09468*T*T + 0.018203*T*T*T)*1000);
+/*
+                        xt = (-sin(ksi)*sin(zet) + cos(ksi)*cos(zet)*cos(teta))*X[i] + (-cos(ksi)*sin(zet) - sin(ksi)*cos(zet)*cos(teta))*X[i+1] + (-cos(zet)*sin(teta))*X[i+2];
+                        yt = (sin(ksi)*cos(zet) + cos(ksi)*sin(zet)*cos(teta))*X[i] + (cos(ksi)*cos(zet) - sin(ksi)*sin(zet)*cos(teta))*X[i+1] + (-sin(zet)*sin(teta))*X[i+2];
+                        zt = (cos(ksi)*sin(teta))*X[i] + (-sin(ksi)*sin(teta))*X[i+1] + (cos(teta))*X[i+2];
+  /
+                        P[0] = (-sin(ksi)*sin(zet) + cos(ksi)*cos(zet)*cos(teta));
+                        P[1] = (-cos(ksi)*sin(zet) - sin(ksi)*cos(zet)*cos(teta));
+                        P[2] = (-cos(zet)*sin(teta));
+                        P[3] = (sin(ksi)*cos(zet) + cos(ksi)*sin(zet)*cos(teta));
+                        P[4] = (cos(ksi)*cos(zet) - sin(ksi)*sin(zet)*cos(teta));
+                        P[5] = (-sin(zet)*sin(teta));
+                        P[6] = (cos(ksi)*sin(teta));
+                        P[7] = (-sin(ksi)*sin(teta));
+                        P[8] = (cos(teta));
+
+                        xt = P[0]*X[i] + P[1]*X[i+1] + P[2]*X[i+2];
+                        yt = P[3]*X[i] + P[4]*X[i+1] + P[5]*X[i+2];
+                        zt = P[6]*X[i] + P[7]*X[i+1] + P[8]*X[i+2];
+ /*
+                        xt = P[0]*X[i] + P[3]*X[i+1] + P[6]*X[i+2];
+                        yt = P[1]*X[i] + P[4]*X[i+1] + P[7]*X[i+2];
+                        zt = P[2]*X[i] + P[5]*X[i+1] + P[8]*X[i+2];
+/
+                        qDebug() << QString("prec: %1").arg(sqrt(pow(xt-X[i], 2.0)+pow(yt-X[i+1], 2.0)+pow(zt-X[i+2], 2.0)));
+                        X[i] = xt;
+                        X[i+1] = yt;
+                        X[i+2] = zt;
+                    }
+*/
                     if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {
                         saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
-
-                        detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], X[9], X[10], X[11], 0, 0, 0);
-                        detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
-
-                        ra = ra - ra0;
-                        de = de - de0;
-
-                        qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
                     }
                     else
                     {
@@ -694,6 +721,28 @@ int main(int argc, char *argv[])
                         V[i+2]=V0[i+2];
 
                     }
+                }
+
+
+                if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+                {
+                    saveResults(TF-t0, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
+
+                    detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], X[9], X[10], X[11], 0, 0, 0);
+                    //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
+
+                    //ra = ra - ra0;
+                    //de = de - de0;
+                    mrec.r = ra;
+                    mrec.d = de;
+                    mrec.eJD = TF;
+                    mrec.num = 1;
+                    strcpy(mrec.head->Snum, "00001");
+                    mrec.tail->set_numOfObs("500");
+                    mrec.toString(astr);
+
+                    mpcStm << astr << "\n";
+                    //qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
                 }
 
                 if(useMoody)
@@ -819,6 +868,8 @@ int main(int argc, char *argv[])
 
     dxFile.close();
     deFile.close();
+
+    mpcFile.close();
 
     if(useMoody)
     {

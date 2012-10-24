@@ -181,6 +181,73 @@ int mpc::set_mpc(mpc *donor)
 
 	return 0;
 }
+
+void mpc::toString(char *arec)
+{
+//	if(arec==NULL) return 1;
+
+    strcpy(arec, "");
+
+    char *zero1, *zero2, *zero3, *zero4, *zero5, *s2;
+
+    zero1 = new char[32];
+    zero2 = new char[32];
+    zero3 = new char[32];
+    zero4 = new char[32];
+    zero5 = new char[32];
+
+    s2 = new char[32];
+
+    strcpy(zero1, "");
+    strcpy(zero2, "");
+    strcpy(zero3, "");
+    strcpy(zero4, "");
+    strcpy(zero5, "");
+    strcpy(s2, "+");
+
+
+
+    int y, m;
+    double day;
+
+    int hour, min, grad, l;
+    double sec, ll;
+    int sign1, sign2;
+
+        dat2YMD(eJD, &y, &m, &day);
+    rad2hms(r, &sign1, &hour, &min, &sec);
+    rad2gms(d, &sign2, &grad, &l, &ll);
+
+    if(m<10) strcpy(zero1, "0");
+    if(hour<10) strcpy(zero2, "0");
+    if(min<10) strcpy(zero3, "0");
+    if(grad<10) strcpy(zero4, "0");
+    if(l<10) strcpy(zero5, "0");
+
+    if(!sign2) strcpy(s2, "-");
+
+    char *hd, *tl;
+    hd = new char[128];
+    tl = new char[128];
+
+    head->get_head(hd);
+    tail->get_tail(tl);
+
+
+        sprintf(arec, "%s%4d %02d %09.6f%02d %02d %06.3f%s%02d %02d %05.2f%23s%s", hd, y, m, day, hour, min, sec, s2, grad, l, ll, tl, tnull);
+
+    delete [] zero1;
+    delete [] zero2;
+    delete [] zero3;
+    delete [] zero4;
+    delete [] zero5;
+    delete [] s2;
+    delete [] hd;
+    delete [] tl;
+
+
+}
+
 /*
 int mpc::initstr(char *str)
 {

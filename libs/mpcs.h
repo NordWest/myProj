@@ -91,6 +91,7 @@ public:
 	~mpc();
 
 	int set_mpc(mpc *donor);
+    void toString(char *arec);
 };
 
 class mpcL
