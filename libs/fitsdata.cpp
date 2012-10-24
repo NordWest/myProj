@@ -11480,6 +11480,14 @@ void rsSelector6(marksGrid *refMarks, QVector<int> &rsindex, int targ_us1, int m
                rsindex.remove(i);
            }
        }
+       else if(refMarks->marks.at(j)->u4Rec!=NULL)
+       {
+
+           if(refMarks->marks.at(j)->u4Rec->n_cats_used<targ_us1)
+           {
+               rsindex.remove(i);
+           }
+       }
     }
     if(FD_LOG_LEVEL) qDebug() << QString("szRef after= %1\n").arg(rsindex.count());
 }
