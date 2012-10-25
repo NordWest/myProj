@@ -53,7 +53,7 @@
           iterNum = 0;
 
         force_N(X, V, F);
-        if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+        //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
 
@@ -65,6 +65,7 @@
       double Rij, Ri, Rj, res1, res0;
 
       int pNum, iNum, Ni;
+      double mui, muj;
 
       iNum = nofzbody;
       Ni = (nofzbody)*3;
@@ -86,6 +87,7 @@
 
           i = teloi*3;
           Ri = norm(&X[i]);
+            mui = pow(pList[teloi]->mass, -1.0);
 
               if(Ri>(eparam->vout))
               {
@@ -102,6 +104,7 @@
                           j = teloj*3;
                          if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
                          {
+                             muj = ka*ka*pow(pList[teloj]->mass, -1.0);
                              /*
                              Xj[0] = pList.at(teloj)->x;
                              Xj[1] = pList.at(teloj)->y;
@@ -125,16 +128,16 @@
                                 exit(1);
                             }
 
-                            res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
+                            res0 += muj*((X[j+komp] - X[i+komp])/(pow(Rij,3)));
                             //res0 += pow(mass[teloj+1], -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
 
                          }
                       }
                       //res1 = -((pow(mass[0], -1.0) + pow(mass[teloi], -1.0))*X[i+komp])/(pow(Ri, 3));
-                      res1 = 0;
+                      //res1 = 0;
 
 
-                      F[i+komp] = ka*ka*(res0+res1);
+                      F[i+komp] = res0;
 
                   }
             //i+=3;

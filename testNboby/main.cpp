@@ -289,6 +289,7 @@ int main(int argc, char *argv[])
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
+    int obrat = !sett->value("general/obrat", 1).toInt();
 
     CENTER = sett->value("general/center", 0).toInt();
     SK = sett->value("general/sk", 0).toInt();
@@ -460,8 +461,9 @@ int main(int argc, char *argv[])
             }
             else
             {
-                nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
-                nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
+                //nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
+                //nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
+                nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], t0, plaNum, CENTER, SK);
             }
 
             //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
@@ -550,7 +552,15 @@ int main(int argc, char *argv[])
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
-    int obrat = 1;
+/*
+    for(teloi=0; teloi<nofzbody; teloi++)
+    {
+        i=teloi*3;
+        V[i] = -V[i];
+        V[i+1] = -V[i+1];
+        V[i+2] = -V[i+2];
+    }
+*/
     do
     {
         for(nt=0; nt<nstep; nt++)
@@ -565,7 +575,7 @@ int main(int argc, char *argv[])
 
 
 
-            solSys->rada27(&X[3*CENTER], &V[3*CENTER], 0, dt);
+            solSys->rada27(&X[3*CENTER], &V[3*CENTER], 0, fabs(dt));
 
             ssb[0] = 0;
             ssb[1] = 0;
@@ -592,7 +602,7 @@ int main(int argc, char *argv[])
             nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
             qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     */
-     /*       muis = 0;
+            muis = 0;
 
             for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
             {
@@ -616,7 +626,7 @@ int main(int argc, char *argv[])
             ssb[0] /= muis;
             ssb[1] /= muis;
             ssb[2] /= muis;
-    */
+
             //i=0;
             for(teloi=0; teloi<pList.size(); teloi++)
             {
@@ -656,19 +666,19 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-                        nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                        //nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+                        //nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                        nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, CENTER, SK);
                     }
+/*
 
-    /*
-                    X0[i]-=ssb[0];
-                    X0[i+1]-=ssb[1];
-                    X0[i+2]-=ssb[2];
-
-                    V0[i]-=ssbv[0];
-                    V0[i+1]-=ssbv[1];
-                    V0[i+2]-=ssbv[2];
-    */
+                    X[i]-=ssb[0];
+                    X[i+1]-=ssb[1];
+                    X[i+2]-=ssb[2];
+                    V[i]-=ssbv[0];
+                    V[i+1]-=ssbv[1];
+                    V[i+2]-=ssbv[2];
+*/
                     /*
                     if(plaNum==EARTH_NUM)
                     {
@@ -722,9 +732,7 @@ int main(int argc, char *argv[])
 
                     }
                 }
-
-
-                if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+                else if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                 {
                     saveResults(TF-t0, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
 
@@ -852,8 +860,9 @@ int main(int argc, char *argv[])
         }
         if(obrat) break;
         dt = -dt;
-        for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
+        for(teloi=0; teloi<nofzbody; teloi++)
         {
+            i=teloi*3;
             V[i] = -V[i];
             V[i+1] = -V[i+1];
             V[i+2] = -V[i+2];

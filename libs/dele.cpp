@@ -292,6 +292,143 @@ double dele::headParam(QString name)
     return res;
 }
 
+int dele::detState(double *x, double *y, double *z, double *vx, double *vy, double *vz, double Time, int nplanet, int centr, int sk)
+{
+    double xt, yt, zt;
+    double vxt, vyt, vzt;
+    double Em;
+    int npl = 0;
+    stateData State;
+    //if(nplanet==SUN_NUM) centr = !centr;
+    if((nplanet==GEOCENTR_NUM))
+    {
+            npl = 1;
+            nplanet = EARTH_NUM;
+    }
+
+    if(nplanet==MOON_NUM)
+    {
+            npl = 2;
+            nplanet = EARTH_NUM;
+    }
+
+
+Interpolate_State( Time , nplanet , &State );
+
+
+        *vx = State.Velocity[0];
+        *vy = State.Velocity[1];
+        *vz = State.Velocity[2];
+        *vx = *vx/H1.data.AU*86400.0;
+        *vy = *vy/H1.data.AU*86400.0;
+        *vz = *vz/H1.data.AU*86400.0;
+
+        *x = State.Position[0];
+        *y = State.Position[1];
+        *z = State.Position[2];
+        *x = *x/H1.data.AU;
+        *y = *y/H1.data.AU;
+        *z = *z/H1.data.AU;
+
+    if(npl)
+    {
+        xt = yt = zt = 0.0;
+        vxt = vyt = vzt = 0.0;
+
+        //this->g1041->getElemByName(&unitRec, "EMRAT");
+        //unitRec.value;
+        //Em = 81.300559999999983223729606289923;
+        Interpolate_State( Time , MOON_NUM , &State );
+ //       if(proizv)
+ //       {
+            vxt = State.Velocity[0];
+            vyt = State.Velocity[1];
+            vzt = State.Velocity[2];
+            vxt = vxt/H1.data.AU*86400.0;
+            vyt = vyt/H1.data.AU*86400.0;
+            vzt = vzt/H1.data.AU*86400.0;
+  /*      }
+        else
+        {*/
+            xt = State.Position[0];
+            yt = State.Position[1];
+            zt = State.Position[2];
+            xt = xt/H1.data.AU;
+            yt = yt/H1.data.AU;
+            zt = zt/H1.data.AU;
+   //    }
+
+        //this->detR(&xt, &yt, &zt, Time, MOON_NUM, proizv, 0, 0);
+        /*if(npl!=2)
+        {*/
+            Em = H1.data.EMRAT;
+            //Em = Em+1;
+
+        //qDebug() << QString("EM: %1\n").arg(Em);
+
+            if(npl==1)
+            {
+                *x = *x - (1.0/(1.0+Em))*xt;
+                *y = *y - (1.0/(1.0+Em))*yt;
+                *z = *z - (1.0/(1.0+Em))*zt;
+
+                *vx = *vx - (1.0/(1.0+Em))*vxt;
+                *vy = *vy - (1.0/(1.0+Em))*vyt;
+                *vz = *vz - (1.0/(1.0+Em))*vzt;
+
+
+            }
+
+            if(npl==2)
+            {
+                *x = *x + (Em/(1.0+Em))*xt;
+                *y = *y + (Em/(1.0+Em))*yt;
+                *z = *z + (Em/(1.0+Em))*zt;
+
+                *vx = *vx + (Em/(1.0+Em))*vxt;
+                *vy = *vy + (Em/(1.0+Em))*vyt;
+                *vz = *vz + (Em/(1.0+Em))*vzt;
+            }
+    }
+
+    if(centr)
+    {
+        Interpolate_State( Time , SUN_NUM , &State );
+ //           this->detR(&xt, &yt, &zt, Time, SUN_NUM, proizv, 0, 0);
+
+            //printf("sun_pos: %f %f %f\n", xt, yt, zt);
+
+            *x -= State.Position[0];
+            *y -= State.Position[1];
+            *z -= State.Position[2];
+
+            *vx -= State.Velocity[0];
+            *vy -= State.Velocity[1];
+            *vz -= State.Velocity[2];
+    }
+
+    if(sk)
+    {
+        xt = *x;
+        yt = *y;
+        zt = *z;
+        *y = cos(EKV)*yt + sin(EKV)*zt;
+        *z = -sin(EKV)*yt + cos(EKV)*zt;
+
+        xt = *vx;
+        yt = *vy;
+        zt = *vz;
+        *vy = cos(EKV)*yt + sin(EKV)*zt;
+        *vz = -sin(EKV)*yt + cos(EKV)*zt;
+    }
+
+
+
+    //fclose(Ephemeris_File);
+
+    return 0;
+}
+
 
 int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk)
 {
@@ -479,6 +616,8 @@ int dele::Read_Coefficients( double Time )
   int fr;
 
     Ephemeris_File = fopen(fileName,"rb");
+
+    fseek(Ephemeris_File, 0, SEEK_SET);
 
   /*--------------------------------------------------------------------------*/
   /*  Read header & first coefficient array, then return status code.         */

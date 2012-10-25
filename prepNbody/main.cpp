@@ -232,8 +232,9 @@ int main(int argc, char *argv[])
             else
             {
 
-                nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
-                nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
+                //nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
+                //nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
+                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], time0, plaNum, CENTER, SK);
             }
             xVect << X;
             vVect << V;
