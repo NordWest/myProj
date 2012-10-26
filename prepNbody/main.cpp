@@ -123,6 +123,9 @@ int main(int argc, char *argv[])
     SK = sett->value("general/sk", 0).toInt();
     CENTER = sett->value("general/center", 0).toInt();
 
+    int jday = (int)time0;
+    double pday = time0 - jday;
+
     dele *nbody;
     nbody = new dele();
     int centr_num;
@@ -222,7 +225,7 @@ int main(int argc, char *argv[])
 
             if(useEPM)
             {
-                status = calc_EPM(plaNum, centr_num, (int)time0, time0 - (int)time0, X, V);
+                status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
                  if(!status)
                  {
                      qDebug() << QString("error EPM\n");

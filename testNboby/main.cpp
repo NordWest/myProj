@@ -552,6 +552,8 @@ int main(int argc, char *argv[])
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
+    int jday;
+    double pday;
 /*
     for(teloi=0; teloi<nofzbody; teloi++)
     {
@@ -573,9 +575,11 @@ int main(int argc, char *argv[])
             TF += dt;
 
 
+            jday = int(TF);
+            pday = TF - jday;
+            qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
 
-
-            solSys->rada27(&X[3*CENTER], &V[3*CENTER], 0, fabs(dt));
+            solSys->rada27(X, V, 0, fabs(dt));
 
             ssb[0] = 0;
             ssb[1] = 0;
@@ -602,7 +606,7 @@ int main(int argc, char *argv[])
             nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
             qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     */
-            muis = 0;
+ /*           muis = 0;
 
             for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
             {
@@ -626,7 +630,7 @@ int main(int argc, char *argv[])
             ssb[0] /= muis;
             ssb[1] /= muis;
             ssb[2] /= muis;
-
+*/
             //i=0;
             for(teloi=0; teloi<pList.size(); teloi++)
             {
@@ -645,7 +649,7 @@ int main(int argc, char *argv[])
 
                     if(useEPM)
                     {
-                        status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X0[i], &V0[i]);
+                        status = calc_EPM(plaNum, centr_num, jday, pday, &X0[i], &V0[i]);
                          if(!status)
                          {
                              qDebug() << QString("error EPM\n");

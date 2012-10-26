@@ -1169,11 +1169,11 @@ void vfPlot::drawDotPlot1(double *x, double *y, double *dx, double *dy, int num,
         //painter.drawEllipse(pPos, pointSize, pointSize);
         //dataText = QString("%1").arg(nums[i]);
 
-        if(isColorList)
+        if(isColorList&&uniqNum<colorList.size())
         {
 
-            if(uniqNum<colorList.size())
-            {
+           // if()
+           // {
                 //qDebug() << QString("nums= %1\tcolor= %2\n").arg(uniqNum).arg(colorList.at(uniqNum));
                 pointPen.setColor(colorList.at(uniqNum));
                 pointBrush.setColor(colorList.at(uniqNum));
@@ -1183,16 +1183,18 @@ void vfPlot::drawDotPlot1(double *x, double *y, double *dx, double *dy, int num,
                 pointPen.setColor(Qt::black);
                 pointBrush.setColor(Qt::black);
             }
-            painter.setPen(pointPen);
-            painter.setBrush(pointBrush);
-            painter.drawEllipse(pPos, pointSize, pointSize);
-        }
-        else
-        {
-            tempRect.setRect(pixX-40, pixY-20, 80, 40);
-            painter.drawText(tempRect, QString("%1").arg(uniqNames[uniqNum]), xAxeLabelOpt);
-        }
 
+        //}
+
+        painter.setPen(pointPen);
+        painter.setBrush(pointBrush);
+        painter.drawEllipse(pPos, pointSize, pointSize);
+/*       else
+        {
+            //tempRect.setRect(pixX-40, pixY-20, 80, 40);
+            //painter.drawText(tempRect, QString("%1").arg(uniqNames[uniqNum]), xAxeLabelOpt);
+        }
+*/
 
         if(isLines)
         {
