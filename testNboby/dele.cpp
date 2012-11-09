@@ -846,7 +846,7 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 }
 
 
-/*
+
 int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk)
 {
 	double *granul;
@@ -983,13 +983,13 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 		xt = *x;
 		yt = *y;
 		zt = *z;
-/
+*/
 		RotX(V, Vt, -EKV);
 /*
 		*x = xt;
 		*y = cos(-EKV)*yt - sin(-EKV)*zt;
 		*z = sin(-EKV)*yt + cos(-EKV)*zt;
-/
+*/
 		*x = V->get(0);
 		*y = V->get(1);
 		*z = V->get(2);
@@ -1001,4 +1001,4 @@ int dele::detR(double *x, double *y, double *z, double Time, int nplanet, int pr
 
 	return 0;
 }
-*/
+

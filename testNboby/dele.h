@@ -1,18 +1,18 @@
 //#pragma once
 #ifndef COMF_H
-#include "comfunc.h"
+#include "./../libs/comfunc.h"
 #endif
 
 #ifndef COORD_H
-#include "coord.h"
+#include "./../libs/coord.h"
 #endif
 
 #ifndef DA_H
-#include "DynArr.h"
+#include "./../libs/DynArr.h"
 #endif
 
-#include "ephem_types.h"
-#include "ephem_read.h"
+#include "./../libs/ephem_types.h"
+#include "./../libs/ephem_read.h"
 
 #ifndef DELE_H
 
@@ -173,6 +173,8 @@ public:
 
 	int detR(double *x, double *y, double *z, double Time, int nplanet, int proizv, int centr, int sk);
 	int detR(double *x, double *y, double *z, double Time, char *planet, int proizv, int centr, int sk);
+    int detState(double *x, double *y, double *z, double *vx, double *vy, double *vz, double Time, char *planet, int centr, int sk);
+    int detState(double *x, double *y, double *z, double *vx, double *vy, double *vz, double Time, int nplanet, int centr, int sk);
 	int detRtt(double *x, double *y, double *z, double Time, int nplanet, int centr, int sk);
 
 	/*

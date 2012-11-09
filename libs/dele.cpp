@@ -172,7 +172,19 @@ int dele::detR(double *x, double *y, double *z, double Time, char *planet, int p
 
 	return(detR(x, y, z, Time, nplanet, proizv, centr, sk));
 }
+/*
+int dele::detState(double *x, double *y, double *z, double *vx, double *vy, double *vz, double Time, char *planet, int centr, int sk)
+{
+    detR(x, y, z, Time, planet, 0, centr, sk);
+    detR(vx, vy, vz, Time, planet, 1, centr, sk);
+}
 
+int dele::detState(double *x, double *y, double *z, double *vx, double *vy, double *vz, double Time, int nplanet, int centr, int sk)
+{
+    detR(x, y, z, Time, nplanet, 0, centr, sk);
+    detR(vx, vy, vz, Time, nplanet, 1, centr, sk);
+}
+*/
 int dele::detRtt(double *x, double *y, double *z, double Time, int nplanet, int centr, int sk)
 {
     //Initialize_Ephemeris(fileName);
@@ -398,13 +410,13 @@ Interpolate_State( Time , nplanet , &State );
 
             //printf("sun_pos: %f %f %f\n", xt, yt, zt);
 
-            *x -= State.Position[0];
-            *y -= State.Position[1];
-            *z -= State.Position[2];
+            *x -= State.Position[0]/H1.data.AU;
+            *y -= State.Position[1]/H1.data.AU;
+            *z -= State.Position[2]/H1.data.AU;
 
-            *vx -= State.Velocity[0];
-            *vy -= State.Velocity[1];
-            *vz -= State.Velocity[2];
+            *vx -= State.Velocity[0]/H1.data.AU*86400.0;
+            *vy -= State.Velocity[1]/H1.data.AU*86400.0;
+            *vz -= State.Velocity[2]/H1.data.AU*86400.0;
     }
 
     if(sk)

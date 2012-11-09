@@ -39,7 +39,7 @@ int InitTxt(char* dir)
     for(i = 0; i < 11; i++)
 	{
 		printf("%s\n", names[i]);
-        if((lfn = fopen(names[i], "rb")) == NULL) 
+        if((lfn = fopen(names[i], "rb")) == NULL)
 		  { printf("error\n");
             return 0;
            }

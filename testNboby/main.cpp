@@ -138,7 +138,7 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
 
     Ri = sqrt(X[pos+0]*X[pos+0] + X[pos+1]*X[pos+1] + X[pos+2]*X[pos+2]);
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
-    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
+    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(Ri, 22, 'e', 15).arg(V[pos], 22, 'e', 15).arg(V[pos+1], 22, 'e', 15).arg(V[pos+2], 22, 'e', 15).arg(name);
 
     resStm.flush();
 
@@ -343,6 +343,7 @@ int main(int argc, char *argv[])
     else
     {
         status = nbody->init(jplFile.toAscii().data());
+        //status = nbody->init_jpl_bin(jplFile.toAscii().data());
     }
 
     if(status) return 1;

@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
                 //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
                 nbody->detState(&x, &y, &z, &vx, &vy, &vz, ti, plaNumDE, centerNum, skNum);
 
-                resStmDE << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti, 12, 'f', 4).arg(x, 20, 'e', 12).arg(y, 20, 'e', 12).arg(z, 20, 'e', 12).arg(vx, 20, 'e', 12).arg(vy, 20, 'e', 12).arg(vz, 20, 'e', 12);
+                resStmDE << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti-t0, 12, 'f', 4).arg(x, 20, 'e', 12).arg(y, 20, 'e', 12).arg(z, 20, 'e', 12).arg(vx, 20, 'e', 12).arg(vy, 20, 'e', 12).arg(vz, 20, 'e', 12);
 
                 status = calc_EPM(plaNumEPM, centr_num, jday, pday, X, V);
                  if(!status)
@@ -249,12 +249,12 @@ int main(int argc, char *argv[])
                      return 1;
                  }
 
-                 resStmEPM << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti, 12, 'f', 4).arg(X[0], 20, 'e', 12).arg(X[1], 20, 'e', 12).arg(X[2], 20, 'e', 12).arg(V[0], 20, 'e', 12).arg(V[1], 20, 'e', 12).arg(V[2], 20, 'e', 12);
+                 resStmEPM << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti-t0, 12, 'f', 4).arg(X[0], 20, 'e', 12).arg(X[1], 20, 'e', 12).arg(X[2], 20, 'e', 12).arg(V[0], 20, 'e', 12).arg(V[1], 20, 'e', 12).arg(V[2], 20, 'e', 12);
 
                  dR = sqrt(pow(x-X[0], 2.0) + pow(y-X[1], 2.0) + pow(z-X[2], 2.0));
                  dV = sqrt(pow(vx-V[0], 2.0) + pow(vy-V[1], 2.0) + pow(vz-V[2], 2.0));
 
-                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(ti, 12, 'f', 4).arg(x-X[0], 20, 'e', 12).arg(y-X[1], 20, 'e', 12).arg(z-X[2], 20, 'e', 12).arg(dR, 20, 'e', 12).arg(vx-V[0], 20, 'e', 12).arg(vy-V[1], 20, 'e', 12).arg(vz-V[2], 20, 'e', 12).arg(dV, 20, 'e', 12);
+                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(ti-t0, 12, 'f', 4).arg(x-X[0], 20, 'e', 12).arg(y-X[1], 20, 'e', 12).arg(z-X[2], 20, 'e', 12).arg(dR, 20, 'e', 12).arg(vx-V[0], 20, 'e', 12).arg(vy-V[1], 20, 'e', 12).arg(vz-V[2], 20, 'e', 12).arg(dV, 20, 'e', 12);
 
 
             }
