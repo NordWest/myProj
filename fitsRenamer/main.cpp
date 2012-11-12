@@ -149,9 +149,11 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
          fitsd.clear();
          tFile = dataFiles.at(i);
 
+         qDebug() << QString("tFile: %1\n").arg(tFile);
+
          if(fitsd.openFile(tFile))
          {
-             errStm << QString("%1\n").arg(tFile);
+             errStm << QString("err open file: %1\n").arg(tFile);
              continue;
          }
 
