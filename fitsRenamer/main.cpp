@@ -179,10 +179,10 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
          //QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
 
 
-         nFile = QString("%1%2.fit").arg(resPath).arg(fitsd.MJD).arg(dateCode);
+         nFile = QString("%1%2.fit").arg(resPath).arg(dateCode);
          //fileTemp.setFileName(tFile);
          //
-         qDebug() << QString("mJD: %1\tdateCode: %2\n").arg(dateCode);
+         qDebug() << QString("mJD: %1\tdateCode: %2\n").arg(fitsd.MJD).arg(dateCode);
 
          //if(cDir.rename(tFile, nFile)) logStm << QString("%1|%2\n").arg(tFile).arg(nFile);
          if(QFile().copy(tFile, nFile))
