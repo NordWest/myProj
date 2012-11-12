@@ -182,7 +182,7 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
          nFile = QString("%1%2.fit").arg(resPath).arg(dateCode);
          //fileTemp.setFileName(tFile);
          //
-         qDebug() << QString("mJD: %1\tdateCode: %2\n").arg(fitsd.MJD).arg(dateCode);
+         qDebug() << QString("mJD: %1\tdateCode: %2\n").arg(fitsd.MJD, 13, 'f', 7).arg(dateCode);
 
          //if(cDir.rename(tFile, nFile)) logStm << QString("%1|%2\n").arg(tFile).arg(nFile);
          if(QFile().copy(tFile, nFile))
