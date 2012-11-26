@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
      double dMin = grad2rad(settings->value("objSphere/dMin", -90).toDouble());
      double dMax = grad2rad(settings->value("objSphere/dMax", 90).toDouble());
      int isZonal = settings->value("objSphere/isZonal", 0).toInt();
+     int isZonalB = settings->value("objSphere/isZonalBack", 0).toInt();
 
 //obj
      int isSortObj = settings->value("obj/isSortObj", 0).toInt();
@@ -563,7 +564,7 @@ QTextStream resStm;
                     dect = dect-M_PI/2.0;
                     if(isZonal)
                     {
-                        dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
+                        //dect = asin(0.5*sin(dect)*(s2-s1) + 0.5*(s2+s1));
                         //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                     }
 
