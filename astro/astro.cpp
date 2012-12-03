@@ -303,10 +303,24 @@ int getMJDfromStrFTN(double *mjd, QString strT, double exp_time)
   return 0;
 }
 
+double getMJDfromStrT(QString strT)
+{
+  DATEOBS date_obs = timeFromStrFTN(strT);
+  return(jd2mjd(getJD(date_obs)));
+};
+
 int getStrFTNfromMJD(QString *strT, double mjd, double exp_time)
 {
     DATEOBS date_obs;
     getDATEOBSfromMJD(&date_obs, mjd - (exp_time/2.0)/86400.0);
+    getStrFromDATEOBS(strT, date_obs, "", 2, 3);
+    return 0;
+}
+
+int getStrTfromMJD(QString *strT, double mjd)
+{
+    DATEOBS date_obs;
+    getDATEOBSfromMJD(&date_obs, mjd);
     getStrFromDATEOBS(strT, date_obs, "", 2, 3);
     return 0;
 }

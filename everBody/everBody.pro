@@ -26,8 +26,9 @@ SOURCES += main.cpp \
     ../libs/sscat.cpp \
     ../libs/sscatFB.cpp \
 #    ../libs/astro.cpp \
-    ../libs/rada.cpp \
-    ../libs/force_ev.cpp
+    ./rada.cpp \
+#    ../libs/force_ev.cpp
+    ./force_ev.cpp
 HEADERS += \
     ../libs/skyarea.h \
     ../libs/rec.h \
@@ -47,7 +48,7 @@ HEADERS += \
     ../libs/sscatFB.h \
     ../libs/astro.h \
     ../libs/mb.h \
-    ../libs/rada.h \
+    ./rada.h \
     ../libs/ephem_types.h
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win/libmb.a

@@ -47,6 +47,9 @@ double getMJDfromStrNA(QString strT, double exp_time);
 double getMJDfromStrFTN(QString strT, double exp_time);
 double getMJDfromStrSDSS(QString strT1, QString strT2, double exp_time);
 double getMJDfromStrSDSS(QString strT, double exp_time);
+
+double getMJDfromStrT(QString strT);
+
 double getYearFromMJD(double mjd);
 double getMJDFromYear(double year);
 double getMJDfromYMD(QString strT);
@@ -62,6 +65,7 @@ double getAngleDeg(double cos_x, double sin_x);
 int timeFromStrFTN(DATEOBS *date_obs, QString strT);
 int getMJDfromStrFTN(double *mjd, QString strT, double exp_time);
 int getStrFTNfromMJD(QString *strT, double mjd, double exp_time);
+int getStrTfromMJD(QString *strT, double mjd);
 
 double getS(DATEOBS date_obs);
 QString getStrFromS(double s, QString spl_symb, int ndig);

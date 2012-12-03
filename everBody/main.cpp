@@ -41,7 +41,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 
-#include "./../libs/rada.h"
+#include "./rada.h"
 #include "./../libs/astro.h"
 #include "./../libs/dele.h"
 #include "./../libs/skyarea.h"
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
 
 
-    ever1(eparam, "./ini.lst", "./ini.cat", "./res.lst", 2456208.50);
+    ever(eparam, "./ini.lst", "./ini.cat", "./res.lst", 2456208.50);
 
 //    return a.exec();
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     logFile->close();
     return 0;
 }
-
+/*
 int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t)
 {
     int i, j, k, num0, num1;
@@ -276,7 +276,7 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
             rList->record->exp = 1.0;
             sprintf(rList->record->num, "%s", QString("%1").arg(iCat->record->number).toAscii().data());
             rList->AddRec(rList->record);
-            qDebug() << QString("%1: %2\t%3\n").arg(rList->record->get_name()).arg(mas_to_hms(grad_to_mas(rList->record->RA), " ", 3)).arg(mas_to_damas(grad_to_mas(rList->record->DEC), " ", 3));*/
+            qDebug() << QString("%1: %2\t%3\n").arg(rList->record->get_name()).arg(mas_to_hms(grad_to_mas(rList->record->RA), " ", 3)).arg(mas_to_damas(grad_to_mas(rList->record->DEC), " ", 3));/
         }
         //rList->Save();
     }
@@ -285,7 +285,7 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
 
     return 0;
 }
-
+*/
 
 int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t)
 {
@@ -340,7 +340,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
             qDebug() << QString("iList[%1] error\n").arg(i);
             continue;
         }
-        if(iCat->GetRecName(iList->record->name)==-1)
+        if(iCat->GetRecName(iList->record->name.toAscii().data())==-1)
         {
 //				AfxMessageBox("c1");
             qDebug() << QString("%1 is absent\n").arg(i);
@@ -388,7 +388,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     {
         rlRec = new RLRecord;
         iList->GetRec(i);
-        if(iCat->GetRecName(iList->record->name)==-1)
+        if(iCat->GetRecName(iList->record->name.toAscii().data())==-1)
         {
 //				AfxMessageBox("c1");
             qDebug() << QString("%1 is absent\n").arg(i);
