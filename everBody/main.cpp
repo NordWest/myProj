@@ -64,7 +64,7 @@ int ever(ifstream *file_date, ifstream *file_params, ofstream *file_res);
 int preever(ifstream *file_kepler, ofstream *file_date);
 int pe_graph(ifstream *file_inter, ofstream *file_res, int var);
 */
-int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t);
+int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t, QString obsCode);
 int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t);
 
 int fOrb(double x0, double x1, double x2, double v0, double v1, double v2, double t0, double mas, double *a, double *ecc, double *M0, double *Om, double *i, double *w);
@@ -102,6 +102,9 @@ int main(int argc, char *argv[])
     //int iniJplRes = nbody->init_jpl("./../../data/cats/ascp2000.405");
 
     //int iniJplRes = nbody->init("./../../../data/cats/bin1940_2020.win.405");
+
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
+
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
@@ -111,14 +114,13 @@ int main(int argc, char *argv[])
     if(iniJplRes) return 1;
 
     opos = new observ();
-    int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/binp1940_2020.405");
+    int oires = opos->init(obsFile.toAscii().data(), jplFile.toAscii().data());
     if(oires)
     {
         qDebug() << QString("observ init error:%1").arg(oires);
         return 1;
     }
     opos->set_obs_parpam(GEOCENTR_NUM, CENTER_BARY, SK_EKVATOR, obsCode.toAscii().data());
-
 
 
 
@@ -138,13 +140,208 @@ int main(int argc, char *argv[])
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
 
-    ever(eparam, "./ini.lst", "./ini.cat", "./res.lst", 2456208.50);
+    ever(eparam, "./ini.lst", "./ini.cat", "./res.lst", 2456000.5, obsCode);
 
 //    return a.exec();
 
     qInstallMsgHandler(0);
     logFile->close();
     return 0;
+}
+
+int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t, QString obsCode)
+{
+    int i, j, k, num0, num1;
+    double x, y, z;
+    //IList *iList;
+    OrbCat *iCat;
+    //RList *rList;
+    orbit *iOrb;
+    int N;
+    int nb;
+    double *X, *V, *r;
+    double t0;
+    mpc mpcRec;
+    double TI, TF;
+    double tc, tUTC, jdTT, jdTDB;
+    double ra, dec, magn;
+    double Sdist, Edist;
+    char *chStr = new char[256];
+
+    QString tStr;
+
+    iOrb = new orbit();
+
+    qDebug() << "\never\n";
+
+/*    RLRecord *rlRec;
+    iList = new IList();
+    iList->init(file_ilist.toAscii().data());
+    rList = new RList();
+    rList->init(file_ires.toAscii().data());*/
+/*
+    QFile iniFile(file_ilist);
+    iniFile.open(QFile::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    while(!iniStm.atEnd())
+    {
+
+    }
+  */
+    QFile mpcFile("./mpcRes.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+
+    iCat = new OrbCat();
+    iCat->is_buff = 1;
+    if(iCat->init(file_icat.toAscii().data()))
+    {
+        qDebug() << QString("file %1 not open\n").arg(file_icat);
+        return 1;
+    }
+
+    nb = iCat->nstr;
+    N = nb*3;
+    X = new double[N];
+    V = new double[N];
+    nofzbody = nb;
+
+    iCat->GetRec(0);
+    t0 = iCat->record->eJD;
+/*
+    for(i=0; i<nb;i++)
+    {
+        if(iCat->GetRec(i)) continue;
+        iOrb->get(iCat->record);
+        iOrb->detRecEkv(&X[i*3], &X[i*3+1], &X[i*3+2], t0);
+        iOrb->detRecEkvVel(&V[i*3], &V[i*3+1], &V[i*3+2], t0);
+    }
+*/
+
+    //r = new double[3];
+
+    //iCat->GetRec(0);
+
+    qDebug() << QString("first epoch: %1\t%2\n").arg(t0, 10, 'f', 2).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3));
+    TDB2UTC(t0, &tUTC);
+    UTC2TDB(tUTC, &jdTDB);
+    TDB2TT(t0, &jdTT);
+    opos->det_observ(tUTC);
+    for(i=0; i<nb;i++)
+    {
+        qDebug() << QString("inum %1\n").arg(i);
+
+        if(iCat->GetRec(i))
+        {
+//				AfxMessageBox("c1");
+            qDebug() << QString("%1 is absent\n").arg(i);
+            continue;
+        }
+
+        //rlRec = new RLRecord;
+        iOrb->get(iCat);
+        //iOrb->detRecEkv(&x, &y, &z, iCat->record->eJD);
+        iOrb->detRecEkv(&X[i*3], &X[i*3+1], &X[i*3+2], jdTT);
+        iOrb->detRecEkvVel(&V[i+3], &V[i*3+1], &V[i*3+2], jdTT);
+
+        x = X[i*3];
+        y = X[i*3+1];
+        z = X[i*3+2];
+
+
+        detRDnumGC(&ra, &dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+
+        Sdist = sqrt(x*x + y*y + z*z);
+        Edist = sqrt((opos->ox - x)*(opos->ox - x) + (opos->oy - y)*(opos->oy - y) + (opos->oz - z)*(opos->oz - z));
+
+        magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
+
+        mpcRec.head->set_Snum(iCat->record->number);
+        mpcRec.eJD = tUTC;
+        mpcRec.r = ra;
+        mpcRec.d = dec;
+        mpcRec.tail->set_magn(magn);
+        mpcRec.tail->set_numOfObs(obsCode.toAscii().data());
+
+        mpcRec.toString(chStr);
+
+        mpcStm << QString("%1\n").arg(QString(chStr));
+        qDebug() << QString("%1\n").arg(QString(chStr));
+
+    }
+/*
+    Everhardt *sun;
+    sun = new Everhardt(nb, epar->NCLASS, epar->NOR, epar->NI, epar->LL, epar->XL);
+
+
+
+    TI = t0;
+    TF = t0+100;
+
+
+    opos->det_observ(TF);
+
+    sun->rada27(X, V, TI, TF);
+
+    double Sdist, Edist;
+
+    for(i=0; i<nb;i++)
+    {
+        rlRec = new RLRecord;
+        iList->GetRec(i);
+        if(iCat->GetRecName(iList->record->name)==-1)
+        {
+//				AfxMessageBox("c1");
+            qDebug() << QString("%1 is absent\n").arg(i);
+            continue;
+        }
+        rlRec->name = iCat->record->name;
+        x = X[i*3];
+        y = X[i*3+1];
+        z = X[i*3+2];
+        detRDnumGC(&rlRec->ra, &rlRec->dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+
+        Sdist = sqrt(x*x + y*y + z*z);
+        Edist = sqrt((opos->ox - x)*(opos->ox - x) + (opos->oy - y)*(opos->oy - y) + (opos->oz - z)*(opos->oz - z));
+
+        rlRec->magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
+
+        rlRec->taskName = "";
+        rlRec->exp = 1.0;
+        rlRec->num = iCat->record->number;
+        //sprintf(rlRec->num, "%s", QString("%1").arg(iCat->record->number).toAscii().data());
+        rList->AddRec(rlRec);
+        qDebug() << QString("%1: %2\t%3\n").arg(rlRec->name).arg(mas_to_hms(grad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(grad_to_mas(rlRec->dec), " ", 3));
+    }
+    rList->save();
+*/
+    mpcFile.close();
+
+    return 0;
+}
+
+
+double _EK(double M, double ecc)
+{
+        double E, Ek, n;
+
+        E = M;
+        do
+        {
+                Ek = E;
+                E = M + ecc*sin(E);
+        }
+        while(fabs(E - Ek) > 1e-5);
+
+        return(E);
+}
+
+double _Sign(double z, double eps)
+{
+//	cout << "e " << e << endl;
+        if(fabs(z)>eps) return(z/sqrt(z*z));
+        return 0;
 }
 /*
 int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t)
@@ -301,188 +498,3 @@ int ever1(ever_params *epar, QString file_ilist, QString file_icat, QString file
     return 0;
 }
 */
-
-int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_ires, double t)
-{
-    int i, j, k, num0, num1;
-    double x, y, z;
-    //IList *iList;
-    OrbCat *iCat;
-    //RList *rList;
-    orbit *iOrb;
-    int N;
-    int nb;
-    double *X, *V, *r;
-    double t0;
-
-    iOrb = new orbit();
-
-    qDebug() << "\never\n";
-
-/*    RLRecord *rlRec;
-    iList = new IList();
-    iList->init(file_ilist.toAscii().data());
-    rList = new RList();
-    rList->init(file_ires.toAscii().data());*/
-/*
-    QFile iniFile(file_ilist);
-    iniFile.open(QFile::ReadOnly);
-    QTextStream iniStm(&iniFile);
-
-    while(!iniStm.atEnd())
-    {
-
-    }
-  */
-
-    iCat = new OrbCat();
-    iCat->is_buff = 1;
-    if(iCat->init(file_icat.toAscii().data()))
-    {
-        qDebug() << QString("file %1 not open\n").arg(file_icat);
-        return 1;
-    }
-
-    nb = iCat->nstr;
-    N = nb*3;
-    X = new double[N];
-    V = new double[N];
-    nofzbody = nb;
-
-    iCat->GetRec(0);
-    t0 = iCat->record->eJD;
-
-    for(i=0; i<nb;i++)
-    {
-        if(iCat->GetRec(i)) continue;
-        iOrb->get(iCat->record);
-        iOrb->detRecEkv(&X[i*3], &X[i*3+1], &X[i*3+2], t0);
-        iOrb->detRecEkvVel(&V[i*3], &V[i*3+1], &V[i*3+2], t0);
-    }
-
-    observ *opos = new observ();
-    //int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/header1980_2000.405", "./../../data/cats/binp1980_2000.405");
-    //int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/ascp2000.405");
-    int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/binp1940_2020.405");
-    if(oires)
-    {
-        qDebug() << QString("observ init error:%1").arg(oires);
-        return 1;
-    }
-    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_ECLIPTIC, "084");
-
-
-
-    r = new double[3];
-
-    //iCat->GetRec(0);
-
-    qDebug() << QString("first epoch: %1\t%2\n").arg(t0, 10, 'f', 2).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3));
-    opos->det_observ(t0);
-    for(i=0; i<nb;i++)
-    {
-        qDebug() << QString("inum %1\n").arg(i);
-        if(iList->GetRec(i))
-        {
-            qDebug() << QString("iList[%1] error\n").arg(i);
-            continue;
-        }
-        if(iCat->GetRecName(iList->record->name)==-1)
-        {
-//				AfxMessageBox("c1");
-            qDebug() << QString("%1 is absent\n").arg(i);
-            continue;
-        }
-        rlRec = new RLRecord;
-        iOrb->get(iCat);
-        //iOrb->detRecEkv(&x, &y, &z, iCat->record->eJD);
-        iOrb->detRecEcl(&X[i*3], &X[i*3+1], &X[i*3+2], t0);
-        iOrb->detRecEclVel(&V[i+3], &V[i*3+1], &V[i*3+2], t0);
-
-        r[0] = X[i*3];
-        r[1] = X[i*3+1];
-        r[2] = X[i*3+2];
-        //RotX(r, -EKV);
-        detRDnumGC(&rlRec->ra, &rlRec->dec, r[0], r[1], r[2], opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
-        qDebug() << QString("RA %1\tDEC %2\n").arg(rlRec->ra).arg(rlRec->dec);
-        qDebug() << QString("%1: %2\t%3\t%4\n").arg(iList->record->name).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3)).arg(mas_to_hms(rad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(rad_to_mas(rlRec->dec), " ", 3));
-        qDebug() << QString("%1: %2 \t %3 \t %4\n").arg(i).arg(X[(nb+i)*3]).arg(X[(nb+i)*3+1]).arg(X[(nb+i)*3+2]);
-        qDebug() << QString("  : %1 \t %2 \t %3\t %4\n").arg(V[(nb+i)*3]).arg(V[(nb+i)*3+1]).arg(V[(nb+i)*3+2]).arg(sqrt(V[(nb+i)*3]*V[(nb+i)*3] + V[(nb+i)*3+1]*V[(nb+i)*3+1] + V[(nb+i)*3+2]*V[(nb+i)*3+2])*AUKM/86400.0);
-
-        rList->AddRec(rlRec);
-
-        qDebug() << QString("%1: %2 \t %3 \t %4\n").arg(i).arg(X[i*3]).arg(X[i*3+1]).arg(X[i*3+2]);
-        qDebug() << QString("  : %1 \t %2 \t %3\n").arg(V[i*3]).arg(V[i*3+1]).arg(V[i*3+2]);
-    }
-
-    Everhardt *sun;
-    sun = new Everhardt(nb, epar->NCLASS, epar->NOR, epar->NI, epar->LL, epar->XL);
-
-    double TI, TF;
-    double tc;
-
-    TI = t0;
-    TF = t0+100;
-
-
-    opos->det_observ(TF);
-
-    sun->rada27(X, V, TI, TF);
-
-    double Sdist, Edist;
-
-    for(i=0; i<nb;i++)
-    {
-        rlRec = new RLRecord;
-        iList->GetRec(i);
-        if(iCat->GetRecName(iList->record->name)==-1)
-        {
-//				AfxMessageBox("c1");
-            qDebug() << QString("%1 is absent\n").arg(i);
-            continue;
-        }
-        rlRec->name = iCat->record->name;
-        x = X[i*3];
-        y = X[i*3+1];
-        z = X[i*3+2];
-        detRDnumGC(&rlRec->ra, &rlRec->dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
-
-        Sdist = sqrt(x*x + y*y + z*z);
-        Edist = sqrt((opos->ox - x)*(opos->ox - x) + (opos->oy - y)*(opos->oy - y) + (opos->oz - z)*(opos->oz - z));
-
-        rlRec->magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
-
-        rlRec->taskName = "";
-        rlRec->exp = 1.0;
-        rlRec->num = iCat->record->number;
-        //sprintf(rlRec->num, "%s", QString("%1").arg(iCat->record->number).toAscii().data());
-        rList->AddRec(rlRec);
-        qDebug() << QString("%1: %2\t%3\n").arg(rlRec->name).arg(mas_to_hms(grad_to_mas(rlRec->ra), " ", 3)).arg(mas_to_damas(grad_to_mas(rlRec->dec), " ", 3));
-    }
-    rList->save();
-
-    return 0;
-}
-
-
-double _EK(double M, double ecc)
-{
-        double E, Ek, n;
-
-        E = M;
-        do
-        {
-                Ek = E;
-                E = M + ecc*sin(E);
-        }
-        while(fabs(E - Ek) > 1e-5);
-
-        return(E);
-}
-
-double _Sign(double z, double eps)
-{
-//	cout << "e " << e << endl;
-        if(fabs(z)>eps) return(z/sqrt(z*z));
-        return 0;
-}

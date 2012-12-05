@@ -2,7 +2,7 @@
 # Project created by QtCreator 2009-11-07T17:37:18
 # -------------------------------------------------
 #QT -= gui
-TARGET = ./../../lab/testNbody/everBody
+TARGET = ./../../lab/everBody/everBody
 CONFIG += console \
     warn_off \
     debug
@@ -28,7 +28,8 @@ SOURCES += main.cpp \
 #    ../libs/astro.cpp \
     ./rada.cpp \
 #    ../libs/force_ev.cpp
-    ./force_ev.cpp
+    ./force_ev.cpp \
+    ../libs/mpcs.cpp
 HEADERS += \
 #    ../libs/skyarea.h \
     ../libs/rec.h \
@@ -49,7 +50,8 @@ HEADERS += \
     ../libs/astro.h \
     ../libs/mb.h \
     ./rada.h \
-    ../libs/ephem_types.h
+    ../libs/ephem_types.h \
+    ../libs/mpcs.h
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win/libmb.a
 

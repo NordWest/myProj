@@ -1665,14 +1665,103 @@ double p = pow( 10., signs );
 return floor( val * p + .5 ) / p;
 }
 
-int UTC2TDT(double utc, double *tdt)
+int UTC2TDT(double jdUTC, double *jdTDT)
 {
-	*tdt = utc + (32.184+TAIDUTC)/86400.0;
+    *jdTDT = jdUTC - TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0;
 
 	return 0;
 }
 
+int UTC2TDB(double jdUTC, double *jdTDB)
+{
+    double jdTDT;
+    UTC2TDT(jdUTC, &jdTDT);
+    double T=(jdTDT-2451545)/36525;
+    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
+    *jdTDB = jdTDT + 0.001658*sin(g+0.0167*sin(g))/86400.0;
+
+    return 0;
+}
+
+int TDT2UTC(double jdTDT, double *jdUTC)
+{
+    *jdUTC = jdTDT + TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0;
+
+    return 0;
+}
+
+int TDB2UTC(double jdTDB, double *jdUTC)
+{
+    double jdTDT;
+
+    double T=(jdTDB-2451545)/36525;
+    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
+    jdTDT = jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0;
+    TDT2UTC(jdTDT, jdUTC);
+
+    return 0;
+}
+
+int TDB2TT(double jdTDB, double *jdTT)
+{
+    double jdTDT;
+
+    double T=(jdTDB-2451545)/36525;
+    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
+    *jdTT = jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0;
+
+    return 0;
+}
+
 double dUT1() {return -0.39;}
+
+double TAImUTC(double mjd) // [day]
+{
+    double res;
+
+    if(mjd>=jd2mjd(2437300.5)&&mjd<jd2mjd(2437512.5)) res = 1.4228180 + (mjd - 37300.0)*0.001296;
+    if(mjd>=jd2mjd(2437512.5)&&mjd<jd2mjd(2437665.5)) res = 1.3728180 + (mjd - 37300.0)*0.001296;
+    if(mjd>=jd2mjd(2437665.5)&&mjd<jd2mjd(2438334.5)) res = 1.8458580 + (mjd - 37665.0)*0.0011232;
+    if(mjd>=jd2mjd(2438334.5)&&mjd<jd2mjd(2438395.5)) res = 1.9458580 + (mjd - 37665.0)*0.0011232;
+    if(mjd>=jd2mjd(2438395.5)&&mjd<jd2mjd(2438486.5)) res = 3.2401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2438486.5)&&mjd<jd2mjd(2438639.5)) res = 3.3401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2438639.5)&&mjd<jd2mjd(2438761.5)) res = 3.4401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2438761.5)&&mjd<jd2mjd(2438820.5)) res = 3.5401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2438820.5)&&mjd<jd2mjd(2438942.5)) res = 3.6401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2438942.5)&&mjd<jd2mjd(2439004.5)) res = 3.7401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2439004.5)&&mjd<jd2mjd(2439126.5)) res = 3.8401300 + (mjd - 38761.0)*0.001296;
+    if(mjd>=jd2mjd(2439126.5)&&mjd<jd2mjd(2439887.5)) res = 4.3131700 + (mjd - 39126.0)*0.002592;
+    if(mjd>=jd2mjd(2439887.5)&&mjd<jd2mjd(2441317.5)) res = 4.2131700 + (mjd - 39126.0)*0.002592;
+    if(mjd>=jd2mjd(2441317.5)&&mjd<jd2mjd(2441499.5)) res = 10.0;
+    if(mjd>=jd2mjd(2441499.5)&&mjd<jd2mjd(2441683.5)) res = 11.0;
+    if(mjd>=jd2mjd(2441683.5)&&mjd<jd2mjd(2442048.5)) res = 12.0;
+    if(mjd>=jd2mjd(2442048.5)&&mjd<jd2mjd(2442413.5)) res = 13.0;
+    if(mjd>=jd2mjd(2442413.5)&&mjd<jd2mjd(2442778.5)) res = 14.0;
+    if(mjd>=jd2mjd(2442778.5)&&mjd<jd2mjd(2443144.5)) res = 15.0;
+    if(mjd>=jd2mjd(2443144.5)&&mjd<jd2mjd(2443509.5)) res = 16.0;
+    if(mjd>=jd2mjd(2443509.5)&&mjd<jd2mjd(2443874.5)) res = 17.0;
+    if(mjd>=jd2mjd(2443874.5)&&mjd<jd2mjd(2444239.5)) res = 18.0;
+    if(mjd>=jd2mjd(2444239.5)&&mjd<jd2mjd(2444786.5)) res = 19.0;
+    if(mjd>=jd2mjd(2444786.5)&&mjd<jd2mjd(2445151.5)) res = 20.0;
+    if(mjd>=jd2mjd(2445151.5)&&mjd<jd2mjd(2445516.5)) res = 21.0;
+    if(mjd>=jd2mjd(2445516.5)&&mjd<jd2mjd(2446247.5)) res = 22.0;
+    if(mjd>=jd2mjd(2446247.5)&&mjd<jd2mjd(2447161.5)) res = 23.0;
+    if(mjd>=jd2mjd(2447161.5)&&mjd<jd2mjd(2447892.5)) res = 24.0;
+    if(mjd>=jd2mjd(2447892.5)&&mjd<jd2mjd(2448257.5)) res = 25.0;
+    if(mjd>=jd2mjd(2448257.5)&&mjd<jd2mjd(2448804.5)) res = 26.0;
+    if(mjd>=jd2mjd(2448804.5)&&mjd<jd2mjd(2449169.5)) res = 27.0;
+    if(mjd>=jd2mjd(2449169.5)&&mjd<jd2mjd(2449534.5)) res = 28.0;
+    if(mjd>=jd2mjd(2449534.5)&&mjd<jd2mjd(2450083.5)) res = 29.0;
+    if(mjd>=jd2mjd(2450083.5)&&mjd<jd2mjd(2450630.5)) res = 30.0;
+    if(mjd>=jd2mjd(2450630.5)&&mjd<jd2mjd(2451179.5)) res = 31.0;
+    if(mjd>=jd2mjd(2451179.5)&&mjd<jd2mjd(2453736.5)) res = 32.0;
+    if(mjd>=jd2mjd(2453736.5)&&mjd<jd2mjd(2454832.5)) res = 33.0;
+    if(mjd>=jd2mjd(2454832.5)&&mjd<jd2mjd(2456109.5)) res = 34.0;
+    if(mjd>=jd2mjd(2456109.5)) res = 35.0;
+
+    return(res/86400.0);
+}
+
 
 int UTC2s_alt(double utc, double lam, double *s)
 {

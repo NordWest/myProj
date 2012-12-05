@@ -1,9 +1,15 @@
+#ifndef COMF_H
+#define COMF_H
 //#pragma once
 //#include "..\DAster\Eassistant\StdAfx.h"
 //#include "..\DAster\DAster.h"
 
 #include <QtCore>
-#include "./../mb/mb.h"
+#include "mb.h"
+
+#ifndef ASTRO_H
+#include "astro.h"
+#endif
 
 //#include "..\DAster\MainFrm.h"
 /*
@@ -11,12 +17,14 @@
 #include "DynArr.h"
 //#endif
 */
-#ifndef COMF_H
+
 #include <stdio.h>
 //#include <conio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+
+
 /*
 #ifndef REC_H
 #include "rec.h"
@@ -201,7 +209,12 @@ int streqv1(char *str, char *strBase);
 
 int chet(int val);
 
-int UTC2TDT(double utc, double *tdt);
+int UTC2TDT(double jdUTC, double *jdTDT);
+int UTC2TDB(double jdUTC, double *jdTDB);
+double TAImUTC(double mjd);
+int TDT2UTC(double jdTDT, double *jdUTC);
+int TDB2UTC(double jdTDB, double *jdUTC);
+int TDB2TT(double jdTDB, double *jdTT);
 
 double dUT1();	//=UT1-UTC
 
@@ -444,6 +457,6 @@ int detDcorr(int corrModel, double x, double y, double *dx, double *dy, QVector 
 //orbit
 
 ////////////////////////////////////////////////////////////////////
-#define COMF_H
+//#define COMF_H
 
 #endif

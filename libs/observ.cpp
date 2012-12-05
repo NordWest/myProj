@@ -139,8 +139,9 @@ int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
 int observ::det_observ(double tUTC)
 {
 	this->obs->det_state(tUTC);
-	this->otime = tUTC;
-        UTC2TDT(tUTC, &this->otime);
+    //this->otime = tUTC;
+        //UTC2TDT(tUTC, &this->otime);
+        UTC2TDB(tUTC, &this->otime);
 
 	if(this->place->detR(&this->ox, &this->oy, &this->oz, this->otime, this->nplanet, 0, this->center, sk)) return 1;
 

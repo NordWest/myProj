@@ -5,9 +5,9 @@
 #include <math.h>
 #include "rada.h"
 //#include "mymatrix.h"
-#include "dele.h"
-#include "DynArr.h"
-#include "moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../libs/dele.h"
+//#include "DynArr.h"
+//#include "moody/capsule/capsuleBase/particle/Particle.h"
 
 
 //  #define k2 6.672590000e-8
@@ -23,7 +23,7 @@
   extern double *mass;
   int iterNum;
 
-  extern QList <ParticleStruct*> pList;
+  //extern QList <ParticleStruct*> pList;
 
  extern dele *nbody;
  // extern int nofzbody;
@@ -39,7 +39,7 @@
 
     void Everhardt::force(double X[], double V[], double TS, double F[])
     {
-        int i, j , k;
+        int i, j , komp;
         int teloi, teloj;
         double Ri, Dij;
         double res0;
@@ -61,7 +61,7 @@
         for(j=0, teloj=0; j<Nj; j+=3, teloj++)
         {
                 //nbody->detR(&Xj[j], &Xj[j+1], &Xj[j+2], TS, pla[teloj], 0, CENTER_BARY, SK_ECLIPTIC);
-                nbody->detState(&Xj[j], &Xj[j+1], &Xj[j+2], &Vj[j], &Vj[j+1], &Vj[j+2], TS, pla[teloj], CENTER_BARY, SK_ECLIPTIC);
+                nbody->detState(&Xj[j], &Xj[j+1], &Xj[j+2], &Vj[j], &Vj[j+1], &Vj[j+2], TS, pla[teloj], CENTER_BARY, SK_EKVATOR);
                 //printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloj], Y[j], Y[j+1], Y[j+2]);
 
         }

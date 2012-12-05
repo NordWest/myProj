@@ -9,10 +9,6 @@
 #include "comfunc.h"
 #endif
 
-#ifndef OBSY_H
-#include "observatory.h"
-#endif
-
 #ifndef MPCS_H
 #include "mpcs.h"
 #endif

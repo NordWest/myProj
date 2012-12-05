@@ -420,10 +420,11 @@ int orbit::detPolarOrb(double *r, double *v, double t)
 {
 	if(this->elem->isElips())
 	{
-		double T, n, M, E, p;
+        double T, n, M, E, p, a;
 
 		p = this->elem->q*(1.0 + this->elem->ec);
-		n = Xi*pow((double)(this->elem->q/(1.0-this->elem->ec)), (double)-1.5);
+        a = this->elem->q/(1.0-this->elem->ec);
+        n = grad2rad(kaGRAD*pow(a, -1.5));
 
 		T = this->elem->eJD - this->elem->M0/n;
 		M = n*(t - this->elem->eJD) + this->elem->M0;
@@ -432,14 +433,18 @@ int orbit::detPolarOrb(double *r, double *v, double t)
     //            printf("p= %f\tn= %f\tT= %f\tM= %f\tE=%f\n", p, n, T, M, E);
 
 		double Pr1, Pr2;
-		Pr1 = this->elem->q*sqrt((1.0 + this->elem->ec)/(1.0 - this->elem->ec))*sin(E);
-		Pr2 = this->elem->q*(cos(E) - this->elem->ec)/(1.0 - this->elem->ec);
+        //Pr1 = this->elem->q*sqrt((1.0 + this->elem->ec)/(1.0 - this->elem->ec))*sin(E);
+        //Pr2 = this->elem->q*(cos(E) - this->elem->ec)/(1.0 - this->elem->ec);
+
+        Pr1 = sqrt(1.0+this->elem->ec)*tan(E/2.0);
+        Pr2 = sqrt(1.0-this->elem->ec);
 
 		double viu;
 
-		viu = fatan(Pr1, Pr2);
+        viu = 2.0*atan2(Pr1, Pr2);
 
-		*r = p/(1.0 + this->elem->ec*cos(viu));
+        //*r = p/(1.0 + this->elem->ec*cos(viu));
+        *r = a*(1.0 - this->elem->ec*this->elem->ec)/(1.0 + this->elem->ec*cos(viu));
 		*v = viu;
 
 		return 1;
