@@ -85,6 +85,7 @@ class CatList;
 class IListBuf;
 class IListBuffer;
 class iniRecord;
+class iniList;
 class IListR;
 
 int addIniListNames(TLRecord task, QString inpStr);
@@ -287,24 +288,25 @@ class LRecord : tRecord
 {
 public:
 	int noftask;
-    QString name;
+    char* name;
 	double exp;
 	int flag0;					//0 - DE/LE; 1 - numbered; 2 - rapid stars
 	double t0, t1;
-    QString desc;
+    char* desc;
+    char* tail;
 
 	LRecord();
 	~LRecord();
 
-//	int set_desc(QString desc);
-//	int set_name(char *nm);
-//	char* get_desc();
-//	void copyTo(LRecord *rec);
-//	int IsEqv(LRecord *rec);
-
+    int set_desc(char *desc);
+    int set_name(char *nm);
+    char* get_desc();
+    void copyTo(LRecord *rec);
+    int IsEqv(LRecord *rec);
+/*
     int fromString(QString tStr);
     void toString(QString &tStr);
-    LRecord& operator=(const LRecord &rhs);
+    LRecord& operator=(const LRecord &rhs);*/
 };
 
 bool operator==( const LogRecord& lhs, const LogRecord& rhs );
@@ -376,7 +378,7 @@ public:
 bool operator==( const iniRecord& lhs, const iniRecord& rhs );
 
 
-class IListR// : listFile <iniRecord>
+class iniList : listFile <iniRecord>
 {
 
 /*
@@ -564,21 +566,21 @@ class ERecord
 	char *desc;
 	
 public:
-    QString name;
-    QString taskName;
+    char *name;
+    int noftask;
 	double Tun;
-//	char *tail;
+    char *tail;
 	
 	ERecord();
 	~ERecord();
 
 	void copyTo(ERecord *recp);
-/*
+
 	int set_desc(char *desc);
     int set_name(char *name);
 	char* get_desc();
 	char* get_name();
-*/
+
 };
 
 class EList :public fBuffer

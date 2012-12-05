@@ -44,8 +44,9 @@ void customMessageHandler(QtMsgType type, const char* msg)
 #include "./rada.h"
 #include "./../libs/astro.h"
 #include "./../libs/dele.h"
-#include "./../libs/skyarea.h"
+//#include "./../libs/skyarea.h"
 #include "./../libs/orbcat.h"
+#include "./../libs/orbit.h"
 #include "./../libs/observ.h"
 #include "./../libs/comfunc.h"
 #include <math.h>
@@ -79,8 +80,8 @@ int nofzbody;
 double a, CC, omega, Ltilde, A;
 double col, vout;
 
-
-QString jplFile;
+observ *opos;
+//QString jplFile;
 
 
 int main(int argc, char *argv[])
@@ -93,17 +94,33 @@ int main(int argc, char *argv[])
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog0 = new QDataStream(logFile);
 
-    jplFile = "./../../data/cats/binp1940_2020.405";
+    //jplFile = "./../../data/cats/binp1940_2020.405";
 
     nbody = new dele();
     //int iniHeadRes = nbody->init_header("./../../data/cats/header.405");
     //int iniHeadRes = nbody->init_header("./../../data/cats/header1980_2000.405");
     //int iniJplRes = nbody->init_jpl("./../../data/cats/ascp2000.405");
-    int iniJplRes = nbody->init(jplFile.toAscii().data());
-    //int iniJplRes = nbody->init("./../../../data/cats/bin1940_2020.win.405");
 
+    //int iniJplRes = nbody->init("./../../../data/cats/bin1940_2020.win.405");
+    QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
+    QString obsCode = sett->value("general/obsCode", "500").toString();
+
+    int iniJplRes = nbody->init(jplFile.toAscii().data());
     qDebug() << QString("iniJplRes: %1").arg(iniJplRes);
     if(iniJplRes) return 1;
+
+    opos = new observ();
+    int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/binp1940_2020.405");
+    if(oires)
+    {
+        qDebug() << QString("observ init error:%1").arg(oires);
+        return 1;
+    }
+    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_BARY, SK_EKVATOR, obsCode.toAscii().data());
+
+
+
 
     eparam = new ever_params;
 
@@ -120,8 +137,6 @@ int main(int argc, char *argv[])
     //eparam->shag = esett->value("shag", 10.0).toDouble();
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
-
-
 
     ever(eparam, "./ini.lst", "./ini.cat", "./res.lst", 2456208.50);
 
@@ -291,25 +306,59 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
 {
     int i, j, k, num0, num1;
     double x, y, z;
-    IList *iList;
+    //IList *iList;
     OrbCat *iCat;
-    RList *rList;
+    //RList *rList;
     orbit *iOrb;
     int N;
     int nb;
     double *X, *V, *r;
+    double t0;
+
+    iOrb = new orbit();
 
     qDebug() << "\never\n";
 
-    RLRecord *rlRec;
+/*    RLRecord *rlRec;
     iList = new IList();
     iList->init(file_ilist.toAscii().data());
     rList = new RList();
-    rList->init(file_ires.toAscii().data());
+    rList->init(file_ires.toAscii().data());*/
+/*
+    QFile iniFile(file_ilist);
+    iniFile.open(QFile::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
+    while(!iniStm.atEnd())
+    {
+
+    }
+  */
+
     iCat = new OrbCat();
     iCat->is_buff = 1;
-    iCat->init(file_icat.toAscii().data());
-    iOrb = new orbit();
+    if(iCat->init(file_icat.toAscii().data()))
+    {
+        qDebug() << QString("file %1 not open\n").arg(file_icat);
+        return 1;
+    }
+
+    nb = iCat->nstr;
+    N = nb*3;
+    X = new double[N];
+    V = new double[N];
+    nofzbody = nb;
+
+    iCat->GetRec(0);
+    t0 = iCat->record->eJD;
+
+    for(i=0; i<nb;i++)
+    {
+        if(iCat->GetRec(i)) continue;
+        iOrb->get(iCat->record);
+        iOrb->detRecEkv(&X[i*3], &X[i*3+1], &X[i*3+2], t0);
+        iOrb->detRecEkvVel(&V[i*3], &V[i*3+1], &V[i*3+2], t0);
+    }
 
     observ *opos = new observ();
     //int oires = opos->init("./../../data/cats/Obs.txt", "./../../data/cats/header1980_2000.405", "./../../data/cats/binp1980_2000.405");
@@ -322,14 +371,12 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     }
     opos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_ECLIPTIC, "084");
 
-    nb = iList->nstr;
-    N = nb*3;
-    X = new double[N];
-    V = new double[N];
+
+
     r = new double[3];
-    nofzbody = nb;
-    iCat->GetRec(0);
-    double t0 = iCat->record->eJD;
+
+    //iCat->GetRec(0);
+
     qDebug() << QString("first epoch: %1\t%2\n").arg(t0, 10, 'f', 2).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(t0)), ":", 0, 3));
     opos->det_observ(t0);
     for(i=0; i<nb;i++)
@@ -340,7 +387,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
             qDebug() << QString("iList[%1] error\n").arg(i);
             continue;
         }
-        if(iCat->GetRecName(iList->record->name.toAscii().data())==-1)
+        if(iCat->GetRecName(iList->record->name)==-1)
         {
 //				AfxMessageBox("c1");
             qDebug() << QString("%1 is absent\n").arg(i);
@@ -388,7 +435,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     {
         rlRec = new RLRecord;
         iList->GetRec(i);
-        if(iCat->GetRecName(iList->record->name.toAscii().data())==-1)
+        if(iCat->GetRecName(iList->record->name)==-1)
         {
 //				AfxMessageBox("c1");
             qDebug() << QString("%1 is absent\n").arg(i);

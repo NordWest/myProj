@@ -551,7 +551,7 @@ int LRecord::IsEqv(LRecord *rec)
 	return 0;
 }
 
-int LRecord::set_desc(QString desc)
+int LRecord::set_desc(char* desc)
 {
 	return(indexB(this->desc, desc, " ", 32));
 }

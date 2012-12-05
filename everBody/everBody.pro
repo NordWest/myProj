@@ -9,7 +9,7 @@ CONFIG += console \
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
-    ../libs/skyarea.cpp \
+#    ../libs/skyarea.cpp \
     ../libs/rec.cpp \
     ../libs/orbit.cpp \
     ../libs/orbcat.cpp \
@@ -30,7 +30,7 @@ SOURCES += main.cpp \
 #    ../libs/force_ev.cpp
     ./force_ev.cpp
 HEADERS += \
-    ../libs/skyarea.h \
+#    ../libs/skyarea.h \
     ../libs/rec.h \
     ../libs/orbit.h \
     ../libs/orbcat.h \
