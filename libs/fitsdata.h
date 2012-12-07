@@ -375,7 +375,7 @@ struct tmuRec
     double epoch, smul, epoch0, smul0;
     int fromStr(QString dstr);
 };
-
+/*
 class TAImUTC
 {
 public:
@@ -383,7 +383,7 @@ public:
     double getTmu(double mjd);
     int initTmsFile(QString fName);
 };
-
+*/
 
 int makeReduction(QString iniFile, QString resFolder);
 int initExpList(ExposureList *expList, HeadList headList, obsy *obsPos);
@@ -427,7 +427,7 @@ public:
 
         obsy *obsPos;       //observatory
 
-        TAImUTC *tmu;
+        double tmu;
         int is_empty;
 
         double Sx, Sy;

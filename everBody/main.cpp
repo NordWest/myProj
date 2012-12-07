@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         qDebug() << QString("observ init error:%1").arg(oires);
         return 1;
     }
-    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_BARY, SK_EKVATOR, obsCode.toAscii().data());
+    opos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, obsCode.toAscii().data());
 
 
 
@@ -153,6 +153,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
 {
     int i, j, k, num0, num1;
     double x, y, z;
+    double vx, vy, vz;
     //IList *iList;
     OrbCat *iCat;
     //RList *rList;
@@ -160,7 +161,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     int N;
     int nb;
     double *X, *V, *r;
-    double t0;
+    double t0, t1, dt;
     mpc mpcRec;
     double TI, TF;
     double tc, tUTC, jdTT, jdTDB;
@@ -192,6 +193,11 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     QFile mpcFile("./mpcRes.txt");
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStm(&mpcFile);
+
+    QFile recObj, recState, mpcObj;
+    QTextStream objStm, stateStm, mpcObjStm;
+
+
 
     iCat = new OrbCat();
     iCat->is_buff = 1;
@@ -227,10 +233,33 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     TDB2UTC(t0, &tUTC);
     UTC2TDB(tUTC, &jdTDB);
     TDB2TT(t0, &jdTT);
+
+    qDebug() << QString("t-UTC: %1\nt-TT: %2\nUTC-TT: %3\n").arg((t0-tUTC)*86400).arg((t0-jdTT)*86400).arg((tUTC-jdTT)*86400);
+
+
+
+    QDir dataDir("./data");//.remove("*.txt");
+    QStringList fList;
+    QStringList filterList;
+    filterList << "*.txt" << "*.mpc";
+    fList = dataDir.entryList(filterList);
+    //qDebug() << fList.join("\n") << "\n";
+    for(i=0; i<fList.size(); i++) dataDir.remove(fList.at(i));
+
+
+    recState.setFileName("./data/recState.txt");
+    recState.open(QFile::WriteOnly | QFile::Truncate);
+    stateStm.setDevice(&recState);
+
     opos->det_observ(tUTC);
+
+    stateStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(tUTC, 14, 'f', 5).arg(opos->ox, 15, 'f', 11).arg(opos->oy, 15, 'f', 11).arg(opos->oz, 15, 'f', 11).arg(sqrt(opos->ox*opos->ox + opos->oy*opos->oy + opos->oz*opos->oz), 15, 'f', 11).arg(opos->ovx, 15, 'f', 11).arg(opos->ovy, 15, 'f', 11).arg(opos->ovz, 15, 'f', 11).arg(sqrt(opos->ovx*opos->ovx + opos->ovy*opos->ovy + opos->ovz*opos->ovz), 15, 'f', 11);
+
     for(i=0; i<nb;i++)
     {
         qDebug() << QString("inum %1\n").arg(i);
+
+
 
         if(iCat->GetRec(i))
         {
@@ -239,15 +268,28 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
             continue;
         }
 
+        recObj.setFileName(QString("./data/%1.txt").arg(QString(iCat->record->name).simplified()));
+        recObj.open(QFile::WriteOnly | QFile::Append);
+        objStm.setDevice(&recObj);
+
+        mpcObj.setFileName(QString("./data/%1.mpc").arg(QString(iCat->record->name).simplified()));
+        mpcObj.open(QFile::WriteOnly | QFile::Append);
+        mpcObjStm.setDevice(&mpcObj);
+
         //rlRec = new RLRecord;
         iOrb->get(iCat);
         //iOrb->detRecEkv(&x, &y, &z, iCat->record->eJD);
-        iOrb->detRecEkv(&X[i*3], &X[i*3+1], &X[i*3+2], jdTT);
-        iOrb->detRecEkvVel(&V[i+3], &V[i*3+1], &V[i*3+2], jdTT);
+        iOrb->detRecEkv(&x, &y, &z, jdTT);
+        iOrb->detRecEkvVel(&vx, &vy, &vz, jdTT);
 
-        x = X[i*3];
-        y = X[i*3+1];
-        z = X[i*3+2];
+        X[i*3] = x;
+        X[i*3+1] = y;
+        X[i*3+2] = z;
+        V[i*3] = vx;
+        V[i*3+1] = vy;
+        V[i*3+2] = vz;
+
+        objStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(jdTT, 14, 'f', 5).arg(x, 15, 'f', 11).arg(y, 15, 'f', 11).arg(z, 15, 'f', 11).arg(sqrt(x*x + y*y + z*z), 15, 'f', 11).arg(vx, 15, 'f', 11).arg(vy, 15, 'f', 11).arg(vz, 15, 'f', 11).arg(sqrt(vx*vx + vy*vy + vz*vz), 15, 'f', 11);
 
 
         detRDnumGC(&ra, &dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
@@ -267,24 +309,98 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
         mpcRec.toString(chStr);
 
         mpcStm << QString("%1\n").arg(QString(chStr));
+        mpcObjStm << QString("%1\n").arg(QString(chStr));
         qDebug() << QString("%1\n").arg(QString(chStr));
 
+        recObj.close();
+        mpcObj.close();
     }
+
+
+
 /*
     Everhardt *sun;
     sun = new Everhardt(nb, epar->NCLASS, epar->NOR, epar->NI, epar->LL, epar->XL);
 
 
+    t1 = t0+20;
+    dt = 2;
 
-    TI = t0;
-    TF = t0+100;
+    for(k=0; k<10; k++)
+    {
+
+        TI = t0+k*dt;
+        TF = t0+(k+1)*dt;
+
+        TDB2UTC(TF, &tUTC);
+        UTC2TDB(tUTC, &jdTDB);
+        TDB2TT(TF, &jdTT);
 
 
-    opos->det_observ(TF);
+        opos->det_observ(tUTC);
 
-    sun->rada27(X, V, TI, TF);
+        sun->rada27(X, V, TI, TF);
 
-    double Sdist, Edist;
+
+        stateStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(tUTC, 14, 'f', 5).arg(opos->ox, 15, 'f', 11).arg(opos->oy, 15, 'f', 11).arg(opos->oz, 15, 'f', 11).arg(sqrt(opos->ox*opos->ox + opos->oy*opos->oy + opos->oz*opos->oz), 15, 'f', 11).arg(opos->ovx, 15, 'f', 11).arg(opos->ovy, 15, 'f', 11).arg(opos->ovz, 15, 'f', 11).arg(sqrt(opos->ovx*opos->ovx + opos->ovy*opos->ovy + opos->ovz*opos->ovz), 15, 'f', 11);
+
+        for(i=0; i<nb;i++)
+        {
+            qDebug() << QString("inum %1\n").arg(i);
+
+
+
+            if(iCat->GetRec(i))
+            {
+    //				AfxMessageBox("c1");
+                qDebug() << QString("%1 is absent\n").arg(i);
+                continue;
+            }
+
+            recObj.setFileName(QString("./data/%1.txt").arg(QString(iCat->record->name).simplified()));
+            recObj.open(QFile::WriteOnly | QFile::Append);
+            objStm.setDevice(&recObj);
+
+            mpcObj.setFileName(QString("./data/%1.mpc").arg(QString(iCat->record->name).simplified()));
+            mpcObj.open(QFile::WriteOnly | QFile::Append);
+            mpcObjStm.setDevice(&mpcObj);
+
+
+            x = X[i*3];
+            y = X[i*3+1];
+            z = X[i*3+2];
+            vx = V[i*3];
+            vy = V[i*3+1];
+            vz = V[i*3+2];
+
+            objStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(jdTT, 14, 'f', 5).arg(x, 15, 'f', 11).arg(y, 15, 'f', 11).arg(z, 15, 'f', 11).arg(sqrt(x*x + y*y + z*z), 15, 'f', 11).arg(vx, 15, 'f', 11).arg(vy, 15, 'f', 11).arg(vz, 15, 'f', 11).arg(sqrt(vx*vx + vy*vy + vz*vz), 15, 'f', 11);
+
+
+            detRDnumGC(&ra, &dec, x, y, z, opos->ox, opos->oy, opos->oz, opos->obs->dcx, opos->obs->dcy, opos->obs->dcz);
+
+            Sdist = sqrt(x*x + y*y + z*z);
+            Edist = sqrt((opos->ox - x)*(opos->ox - x) + (opos->oy - y)*(opos->oy - y) + (opos->oz - z)*(opos->oz - z));
+
+            magn = det_m(iCat->record->H, Sdist, Edist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, x, y, z));
+
+            mpcRec.head->set_Snum(iCat->record->number);
+            mpcRec.eJD = tUTC;
+            mpcRec.r = ra;
+            mpcRec.d = dec;
+            mpcRec.tail->set_magn(magn);
+            mpcRec.tail->set_numOfObs(obsCode.toAscii().data());
+
+            mpcRec.toString(chStr);
+
+            mpcStm << QString("%1\n").arg(QString(chStr));
+            mpcObjStm << QString("%1\n").arg(QString(chStr));
+            qDebug() << QString("%1\n").arg(QString(chStr));
+
+            recObj.close();
+            mpcObj.close();
+        }
+    }
+/*
 
     for(i=0; i<nb;i++)
     {
@@ -317,6 +433,7 @@ int ever(ever_params *epar, QString file_ilist, QString file_icat, QString file_
     rList->save();
 */
     mpcFile.close();
+    recState.close();
 
     return 0;
 }

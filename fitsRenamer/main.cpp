@@ -80,6 +80,7 @@ int main(int argc, char *argv[])//fitsRenamer workDir resDir
 
     QStringList filList;
     QString tFile;
+    QStringList dirList;
     QStringList dataFiles;
     int i, j, isSkip;
 

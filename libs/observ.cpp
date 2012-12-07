@@ -143,9 +143,11 @@ int observ::det_observ(double tUTC)
         //UTC2TDT(tUTC, &this->otime);
         UTC2TDB(tUTC, &this->otime);
 
-	if(this->place->detR(&this->ox, &this->oy, &this->oz, this->otime, this->nplanet, 0, this->center, sk)) return 1;
+    //if(this->place->detR(&this->ox, &this->oy, &this->oz, this->otime, this->nplanet, 0, this->center, sk)) return 1;
 
-	if(this->place->detR(&this->ovx, &this->ovy, &this->ovz, this->otime, this->nplanet, 1, this->center, sk)) return 2;
+    //if(this->place->detR(&this->ovx, &this->ovy, &this->ovz, this->otime, this->nplanet, 1, this->center, sk)) return 2;
+
+    if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, this->otime, this->nplanet, this->center, sk)) return 1;
 
 	if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, this->otime, this->nplanet, this->center, sk)) return 3;
 

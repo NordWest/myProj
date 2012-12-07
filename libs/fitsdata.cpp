@@ -1769,7 +1769,7 @@ fitsdata::fitsdata()
 
         obsPos = NULL;
 
-        tmu = NULL;
+        //tmu = NULL;
 
         //if(FD_LOG_LEVEL) qDebug() << "\ndetNaxes\n";
 
@@ -2132,8 +2132,8 @@ int fitsdata::openFile(QString fitsFileName, int headType)
                 return 1;
             }//determine MJD
             if(FD_LOG_LEVEL) qDebug() << QString("MJD: %1\n").arg(MJD);
-            if(tmu!=NULL) dtai = tmu->getTmu(mjd2jd(MJD));
-            else dtai = 32.0;
+            dtai = TAImUTC(MJD);
+            //else dtai = 32.0;
             if(FD_LOG_LEVEL) qDebug() << QString("dtai= %1\n").arg(dtai);
             MJD -= dtai/86400.0;
         }
@@ -2306,7 +2306,7 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     if(FD_LOG_LEVEL) qDebug() << "\nEND Open fits\n";
     return 0;
 }
-
+/*
 void fitsdata::initTmu(QString tmuFile)
 {
     tmu = new TAImUTC;
@@ -2316,6 +2316,7 @@ void fitsdata::initTmu(QString tmuFile)
         tmu = NULL;
     }
 }
+*/
 /*
 int fitsdata::openEmptyFile()
 {
@@ -2398,8 +2399,8 @@ void fitsdata::clear()
     //delete instr;
     if(imgArr!=NULL) delete imgArr;
     //fitsdata();
-    if(tmu!=NULL) delete tmu;
-    tmu = NULL;
+    //if(tmu!=NULL) delete tmu;
+    //tmu = NULL;
 
     catMarks->clearMarks();
     ipixMarks->clearMarks();
@@ -9391,7 +9392,7 @@ bool findStars(img2d *imgArr, QVector<double>& cmX, QVector<double>&cmY, QVector
     if(FD_LOG_LEVEL) qDebug() << QString("end findStars\n");
     return true;
 }
-
+/*
 int TAImUTC::initTmsFile(QString fName)
 {
     QFile inFile(fName);
@@ -9425,7 +9426,7 @@ double TAImUTC::getTmu(double jd)
         r0.fromStr(tmuStrL.at(i));
         r1.fromStr(tmuStrL.at(i+1));
     }
-    */
+    /
     do
     {
         r0 = r1;
@@ -9449,7 +9450,7 @@ int tmuRec::fromStr(QString dstr)
     smul0 = dstr.mid(70, 9).toDouble();//.section(" ", 4, 4, QString::SectionSkipEmpty);
     return 0;
 }
-
+*/
 /////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////
