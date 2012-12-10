@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
      szi = dirList.size();
      for(i=0; i<szi; i++)
      {
+         if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1) continue;
          tDir.setPath(dirList.at(i));
          dataFiles = tDir.entryList(filters, QDir::Files, QDir::Time | QDir::Reversed);
          qDebug() << dataFiles.join("\n") << "\n\n";
