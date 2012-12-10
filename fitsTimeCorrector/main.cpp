@@ -56,8 +56,10 @@ int main(int argc, char *argv[])
     QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
     Q_ASSERT( codec1 );
 
-    QString workDirName("./orig");
-    QString resDirName("./res");
+    QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
+
+    QString workDirName = sett->value("general/workDir", "./orig").toString();
+    QString resPathName = sett->value("general/resPath", "./res/").toString();
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
@@ -66,10 +68,11 @@ int main(int argc, char *argv[])
     int i, j, k, szi, szj, wfSz;
     double t0, t1, dt;
     fitsdata fitsd;
-    QString dateCode, dateCodeCur, nName, nDirName;
+    QString dateCode, dateCodeCur, dateCodeNew, nName, nDirName;
     QFileInfo fi;
+    double mjd0, mjd1, dmjd0, dmjd1, mjdN;
 
-    rDir.setPath(resDirName);
+    //rDir.setPath(resDirName);
 
     filters << "*.fit";
 
@@ -81,6 +84,11 @@ int main(int argc, char *argv[])
          dirList << tFile;
          qDebug() << tFile << "\n\n";
      }
+     int serieNum = 0;
+
+     QFile residFile("./timeRes.txt");
+     residFile.open(QFile::WriteOnly | QFile::Truncate);
+     QTextStream residStm(&residFile);
 
      szi = dirList.size();
      for(i=0; i<szi; i++)
@@ -90,16 +98,21 @@ int main(int argc, char *argv[])
          qDebug() << dataFiles.join("\n") << "\n\n";
          szj = dataFiles.size();
          wfList.clear();
-
+/*
          nDirName = dirList.at(i);
          nDirName.replace(workDirName, resDirName);
          qDebug() << QString("ndir: %1\n").arg(nDirName);
          QDir().mkpath(nDirName);
-
+*/
          for(j=0; j<szj; j++)
          {
+             mjd0 = mjd1;
+             dmjd0 = dmjd1;
+
+
              fitsd.clear();
              tFile = QString("%1/%2").arg(dirList.at(i)).arg(dataFiles.at(j));
+             wfList << tFile;
 
              qDebug() << QString("tFile: %1\n").arg(tFile);
 
@@ -109,57 +122,57 @@ int main(int argc, char *argv[])
                  continue;
              }
 
+             mjd1 = fitsd.MJD;
+             dmjd1 = fabs(mjd1-mjd0);
 
-             mjdDateCode_file(&dateCodeCur, fitsd.MJD);
 
+             mjdDateCode_file(&dateCode, fitsd.MJD);
+             //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
-             qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
-
-             if((QString().compare(dateCodeCur, dateCode)!=0))
+             if((dmjd1>(fitsd.exptime*2.0/86400.0)||j==szj-1)&&wfList.size()>1)
              {
+                 fitsd.clear();
+                 fitsd.openFile(wfList.at(0));
+                 t0 = fitsd.MJD;
+                 mjdDateCode_file(&dateCodeCur, fitsd.MJD);
+                 //nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
+                 //dateCode = dateCodeCur;
+                 dt = fitsd.exptime/86400.0;
                  wfSz = wfList.size();
-                 if(wfSz>0)
+                 qDebug() << QString("wfSz: %1\n").arg(wfSz);
+                 for(k=0; k<wfSz; k++)
                  {
-                     fitsd.clear();
-                     fitsd.openFile(wfList.at(0));
-                     t0 = fitsd.MJD;
-
-                     nName = wfList.at(0);
-                     nName.replace(workDirName, resDirName);
-                     qDebug() << QString("new file name: %1\n").arg(nName);
-                     fitsd.saveFitsAs(nName);
 
                      fitsd.clear();
-                     fitsd.openFile(wfList.at(wfSz-1));
-                     t1 = fitsd.MJD;
+                     fitsd.openFile(wfList.at(k));
+                     mjdDateCode_file(&dateCodeCur, fitsd.MJD);
 
-                     dt = fitsd.exptime;
-
-                     for(k=1; k<wfSz; k++)
+                     mjdN = t0+dt*k;
+                     if((QString().compare(dateCodeCur, dateCode)!=0))
                      {
-                         fitsd.clear();
-                         fitsd.openFile(wfList.at(k));
-                         fi.setFile(wfList.at(k));
-
-                         fitsd.MJD = t0+dt*k;
-                         nName = wfList.at(k);
-                                 nName.replace(workDirName, resDirName);
+                         if(k>0) residStm << QString("%1\n").arg((mjdN - fitsd.MJD)*86400);
+                     }
+                     else
+                     {
+                         fitsd.MJD = mjdN;
+                         mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                         nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
                          qDebug() << QString("new file name: %1\n").arg(nName);
                          fitsd.saveFitsAs(nName);
                      }
 
+                     dateCode = dateCodeCur;
                  }
-
-                wfList.clear();
-
-
-                dateCode = dateCodeCur;
+                 serieNum++;
+                 wfList.clear();
              }
 
-             wfList << tFile;
+
          }
      }
 
+     qDebug() << QString("series: %1\n").arg(serieNum);
+     residFile.close();
 
     
     return 0;//a.exec();

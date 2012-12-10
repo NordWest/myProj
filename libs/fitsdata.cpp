@@ -4471,6 +4471,13 @@ int fitsdata::saveFitsAs(QString fitsFileName)
 
         fits_copy_hdu(fptr, fptr_out, 0, &status);
         status = 0;
+    QString nTime;
+
+    getStrFTNfromMJD(&nTime, MJD, exptime);
+    qDebug() << QString("nTime: %1\n").arg(nTime);
+    fits_update_key(fptr_out, TSTRING, "DATE-OBS", nTime.toAscii().data(), "UTC of start(Corrected from app)", &status);
+    qDebug() << QString("status: %1\n").arg(status);
+    status = 0;
 
 
     long naxes[2];

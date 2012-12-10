@@ -45,8 +45,8 @@ unix:LIBS += ./../libs/unix/libmb.a
 win32:LIBS += ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libastro.a
 
-HEADERS += ../mb/mb.h \
-    ../astro/astro.h \
+HEADERS += ../libs/mb.h \
+    ../libs/astro.h \
     ../libs/comfunc.h \
     ../libs/sscat.h \
     ../libs/redStat.h \
