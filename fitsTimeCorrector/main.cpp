@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
 
     QDirIterator it(workDirName, QDir::Dirs|QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
 
+    dirList << workDirName;
      while (it.hasNext()) {
          //qDebug() << it.filePath();
          tFile = it.next();
