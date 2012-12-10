@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
              fitsd.clear();
              tFile = QString("%1/%2").arg(dirList.at(i)).arg(dataFiles.at(j));
-             wfList << tFile;
+
 
              qDebug() << QString("tFile: %1\n").arg(tFile);
 
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
                  wfList.clear();
              }
 
-
+             wfList << tFile;
          }
      }
 
