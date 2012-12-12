@@ -4506,8 +4506,8 @@ int fitsdata::saveFitsAs(QString fitsFileName)
 
     fileName = fitsFileName;
 
-    saveFitsHeader();
-    if(WCSdata[12]) saveWCS();
+    //saveFitsHeader();
+    //if(WCSdata[12]) saveWCS();
 }
 /*
 int fitsdata::readHeaderStr(QString headerStr)
