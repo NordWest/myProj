@@ -4449,7 +4449,7 @@ int fitsdata::saveFitsAs(QString fitsFileName)
 
     QFile().remove(fitsFileName);
 
-    fits_open_file(&fptr, fname, READWRITE, &status);
+    fits_open_file(&fptr, fname, READONLY, &status);
     if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fname).arg(status);
             status = 0;
 /*
