@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
                      mjdN = t0+dt*k;
                      if((QString().compare(dateCode0, dateCode1)!=0))
                      {
-                         if(k>0) residStm << QString("%1|%2\n").arg(k).arg((mjdN - fitsd.MJD)*86400);
+                         if(k>0) residStm << QString("%1|%2|%3\n").arg(k).arg((mjdN - fitsd.MJD)*86400).arg(wfList.at(k));
                          /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                          nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
                          qDebug() << QString("new file name: %1\n").arg(nName);
