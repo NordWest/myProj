@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
 
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
     QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
+    QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
@@ -85,7 +86,9 @@ int main(int argc, char *argv[])
          dirList << tFile;
          qDebug() << tFile << "\n\n";
      }
-     int serieNum = 0;
+     int serieTot = 0;
+     int serieGood = 0;
+     int serieCorr = 0;
 
      QFile residFile("./timeRes.txt");
      residFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -160,6 +163,10 @@ int main(int argc, char *argv[])
                      if((QString().compare(dateCode0, dateCode1)!=0))
                      {
                          if(k>0) residStm << QString("%1|%2\n").arg(k).arg((mjdN - fitsd.MJD)*86400);
+                         /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                         nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
+                         qDebug() << QString("new file name: %1\n").arg(nName);
+                         fitsd.saveFitsAs(nName);*/
                      }
                      else
                      {
@@ -172,7 +179,9 @@ int main(int argc, char *argv[])
 
                      //dateCode = dateCodeCur;
                  }
-                 serieNum++;
+                 serieTot++;
+                 if((QString().compare(dateCode0, dateCode1)!=0)) serieGood++;
+                 else serieCorr++;
                  wfList.clear();
              }
 
@@ -180,7 +189,7 @@ int main(int argc, char *argv[])
          }
      }
 
-     qDebug() << QString("series: %1\n").arg(serieNum);
+     qDebug() << QString("seriesTot: %1\nseriesGood: %1\nseriesCorr: %3\n").arg(serieTot).arg(serieGood).arg(serieCorr);
      residFile.close();
 
     
