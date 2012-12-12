@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
          }
      }
 
-     qDebug() << QString("seriesTot: %1\nseriesGood: %1\nseriesCorr: %3\n").arg(serieTot).arg(serieGood).arg(serieCorr);
+     qDebug() << QString("seriesTot: %1\nseriesGood: %2\nseriesCorr: %3\n").arg(serieTot).arg(serieGood).arg(serieCorr);
      residFile.close();
 
     
