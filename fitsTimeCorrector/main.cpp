@@ -1,7 +1,8 @@
 #include <QtCore>
 
 #include "./../libs/fitsdata.h"
-#include "./../astro/astro.h"
+#include "./../libs/astro.h"
+#include "./../libs/mb.h"
 
 
 static QDataStream* clog = 0;
@@ -43,6 +44,14 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
+
+struct expCorrRec
+{
+    int expSec;
+    QVector <double> corrL;
+    QVector <int> kNum;
+};
+
 int main(int argc, char *argv[])
 {
     qInstallMsgHandler(customMessageHandler);
@@ -61,12 +70,13 @@ int main(int argc, char *argv[])
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
     QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
     QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
+    int detCorr = sett->value("general/detCorr", 0).toInt();
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
     QString tFile;
     QDir tDir, rDir;
-    int i, j, k, szi, szj, wfSz;
+    int i, j, k, l, lNum, szi, szj, wfSz;
     double t0, t1, dt;
     fitsdata fitsd;
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
@@ -74,6 +84,8 @@ int main(int argc, char *argv[])
     double mjd0, mjd1, dmjd0, dmjd1, mjdN;
 
     //rDir.setPath(resDirName);
+    QList <expCorrRec*> expCorrList;
+    expCorrRec* ecRec;
 
     filters << "*.fit";
 
@@ -90,7 +102,8 @@ int main(int argc, char *argv[])
      int serieGood = 0;
      int serieCorr = 0;
 
-     QFile residFile("./timeRes.txt");
+     QFile residFile;
+     residFile.setFileName("./timeRes.txt");
      residFile.open(QFile::WriteOnly | QFile::Truncate);
      QTextStream residStm(&residFile);
 
@@ -147,9 +160,14 @@ int main(int argc, char *argv[])
                  //dateCode = dateCodeCur;
                  dt = fitsd.exptime/86400.0;
                  wfSz = wfList.size();
-                 fitsd.clear();
-                 fitsd.openFile(wfList.at(wfSz-1));
-                 mjdDateCode_file(&dateCode1, fitsd.MJD);
+                 if(wfSz>1)
+                 {
+                    fitsd.clear();
+                    fitsd.openFile(wfList.at(wfSz-1));
+                    mjdDateCode_file(&dateCode1, fitsd.MJD);
+
+                    //if((QString().compare(dateCode0, dateCode1)!=0))
+
 
                  qDebug() << QString("wfSz: %1\n").arg(wfSz);
                  for(k=0; k<wfSz; k++)
@@ -166,6 +184,29 @@ int main(int argc, char *argv[])
                          {
                              residStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(k, 3).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
                              residStm.flush();
+
+                             if(detCorr)
+                             {
+                                 lNum = -1;
+                                 for(l=0; l<expCorrList.size(); l++)
+                                 {
+                                     if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                     {
+                                         lNum = l;
+                                         expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
+                                         expCorrList.at(l)->kNum << k;
+                                         break;
+                                     }
+                                 }
+                                 if(lNum==-1)
+                                 {
+                                     ecRec = new expCorrRec;
+                                     ecRec->expSec = fitsd.exptime;
+                                     ecRec->corrL << (mjdN - fitsd.MJD)*86400;
+                                     ecRec->kNum << k;
+                                     expCorrList << ecRec;
+                                 }
+                             }
                          }
                          /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                          nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
@@ -183,9 +224,11 @@ int main(int argc, char *argv[])
 
                      //dateCode = dateCodeCur;
                  }
+
+                 if((QString().compare(dateCode0, dateCode1)==0)) serieCorr++;
+
+                 }
                  serieTot++;
-                 if((QString().compare(dateCode0, dateCode1)!=0)) serieGood++;
-                 else serieCorr++;
                  wfList.clear();
              }
 
@@ -193,8 +236,28 @@ int main(int argc, char *argv[])
          }
      }
 
-     qDebug() << QString("seriesTot: %1\nseriesGood: %2\nseriesCorr: %3\n").arg(serieTot).arg(serieGood).arg(serieCorr);
+     qDebug() << QString("seriesTot: %1\nseriesCorr: %2\n").arg(serieTot).arg(serieCorr);
      residFile.close();
+
+     if(detCorr)
+     {
+         lNum = expCorrList.size();
+
+         qDebug() << QString("exp num: %1\n").arg(lNum);
+
+         for(l=0; l<lNum; l++)
+         {
+             residFile.setFileName(QString("./timeRes_%1.txt").arg(expCorrList.at(l)->expSec, 3, 10, QLatin1Char( '0' ) ));
+             residFile.open(QFile::WriteOnly | QFile::Truncate);
+             residStm.setDevice(&residFile);
+
+             szi = expCorrList.at(l)->corrL.size();
+             qDebug() << QString("corrL num: %1\n").arg(szi);
+             for(i=0; i<szi; i++) residStm << QString("%1|%2\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4);
+
+
+         }
+     }
 
     
     return 0;//a.exec();
