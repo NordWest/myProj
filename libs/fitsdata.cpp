@@ -2276,7 +2276,9 @@ int fitsdata::openFile(QString fitsFileName, int headType)
 
 
     //Close FITS file
-    fits_close_file(fptr, &status); status = 0;
+    fits_close_file(fptr, &status);
+    if(FD_LOG_LEVEL) qDebug() << QString("fits_close_file %1\n").arg(status);
+    status = 0;
 
     //updateHist();
 /*
