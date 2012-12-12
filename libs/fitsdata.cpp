@@ -4372,6 +4372,7 @@ int fitsdata::saveFitsHeader()
     fits_close_file(fptr_out, &statuS);
     if(FD_LOG_LEVEL) qDebug() << QString("fits_close_file: %1\n").arg(statuS);
 */
+    fits_close_file(fptr_out, &statuS);
     return 0;
 }
 
@@ -4506,8 +4507,8 @@ int fitsdata::saveFitsAs(QString fitsFileName)
 
     fileName = fitsFileName;
 
-    //saveFitsHeader();
-    //if(WCSdata[12]) saveWCS();
+    saveFitsHeader();
+    if(WCSdata[12]) saveWCS();
 }
 /*
 int fitsdata::readHeaderStr(QString headerStr)
