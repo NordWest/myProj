@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                      {
                          if(k>0)
                          {
-                             residStm << QString("%1|%2|%3\n").arg(k).arg((mjdN - fitsd.MJD)*86400).arg(wfList.at(k));
+                             residStm << QString("%1|%2|%3|%4|%5|%6\n").arg(k, 3).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
                              residStm.flush();
                          }
                          /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
