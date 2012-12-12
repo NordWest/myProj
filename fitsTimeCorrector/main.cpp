@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     int i, j, k, szi, szj, wfSz;
     double t0, t1, dt;
     fitsdata fitsd;
-    QString dateCode, dateCodeCur, dateCodeNew, nName, nDirName;
+    QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
     QFileInfo fi;
     double mjd0, mjd1, dmjd0, dmjd1, mjdN;
 
@@ -128,31 +128,37 @@ int main(int argc, char *argv[])
              dmjd1 = fabs(mjd1-mjd0);
 
 
-             mjdDateCode_file(&dateCode, fitsd.MJD);
+             //mjdDateCode_file(&dateCode, fitsd.MJD);
              //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
              if((dmjd1>(fitsd.exptime*2.0/86400.0)||j==szj-1)&&wfList.size()>1)
              {
+                 if(j==szj-1) wfList << tFile;
                  fitsd.clear();
                  fitsd.openFile(wfList.at(0));
                  t0 = fitsd.MJD;
-                 mjdDateCode_file(&dateCodeCur, fitsd.MJD);
+                 mjdDateCode_file(&dateCode0, fitsd.MJD);
+                 //dateCode = dateCodeCur;
                  //nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
                  //dateCode = dateCodeCur;
                  dt = fitsd.exptime/86400.0;
                  wfSz = wfList.size();
+                 fitsd.clear();
+                 fitsd.openFile(wfList.at(wfSz-1));
+                 mjdDateCode_file(&dateCode1, fitsd.MJD);
+
                  qDebug() << QString("wfSz: %1\n").arg(wfSz);
                  for(k=0; k<wfSz; k++)
                  {
 
                      fitsd.clear();
                      fitsd.openFile(wfList.at(k));
-                     mjdDateCode_file(&dateCodeCur, fitsd.MJD);
+                     //mjdDateCode_file(&dateCodeCur, fitsd.MJD);
 
                      mjdN = t0+dt*k;
-                     if((QString().compare(dateCodeCur, dateCode)!=0))
+                     if((QString().compare(dateCode0, dateCode1)!=0))
                      {
-                         if(k>0) residStm << QString("%1\n").arg((mjdN - fitsd.MJD)*86400);
+                         if(k>0) residStm << QString("%1|%2\n").arg(k).arg((mjdN - fitsd.MJD)*86400);
                      }
                      else
                      {
@@ -163,7 +169,7 @@ int main(int argc, char *argv[])
                          fitsd.saveFitsAs(nName);
                      }
 
-                     dateCode = dateCodeCur;
+                     //dateCode = dateCodeCur;
                  }
                  serieNum++;
                  wfList.clear();
