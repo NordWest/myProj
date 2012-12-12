@@ -2078,7 +2078,7 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     int nkeys;//variable to store number of line of the header
     fits_get_hdrspace(fptr, &nkeys, NULL, &status);fitsErrors[3]=status;status = 0;//determination of number of line of the header
     if(FD_LOG_LEVEL) qDebug() << QString("header nkeys: %1\n").arg(nkeys);
-    char card[FLEN_CARD];//buffer to read keys from header
+    char *card = new char[FLEN_CARD];//buffer to read keys from header
     fitsHeader="";//strings from header
     for (int k = 1; k <= nkeys; k++)//reading strings from header
     {
@@ -2304,6 +2304,9 @@ int fitsdata::openFile(QString fitsFileName, int headType)
     WCSdata[1] = workFrame.center().y();*/
 
     //detNaxes();
+    delete [] card;
+    //delete fitsErrors;
+    //delete naxes;
 
     if(FD_LOG_LEVEL) qDebug() << "\nEND Open fits\n";
     return 0;
@@ -4443,16 +4446,16 @@ int fitsdata::saveFitsAs(QString fitsFileName)
     fitsfile *fptr_out;
     int status = 0;
 
-    char *fname = new char[256];
-    strcpy(fname, fileName.toAscii().data());
+    //char *fname = new char[256];
+    //strcpy(fname, fileName.toAscii().data());
 
-    char *fname1 = new char[256];
-    strcpy(fname1, fitsFileName.toAscii().data());
+    //char *fname1 = new char[256];
+    //strcpy(fname1, fitsFileName.toAscii().data());
 
     QFile().remove(fitsFileName);
 
-    fits_open_file(&fptr, fname, READONLY, &status);
-    if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fname).arg(status);
+    fits_open_file(&fptr, fileName.toAscii().data(), READONLY, &status);
+    if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fileName).arg(status);
             status = 0;
 /*
     if(status)
@@ -4463,7 +4466,7 @@ int fitsdata::saveFitsAs(QString fitsFileName)
         //fits_delete_file(fptr_out, &status);
         //if(FD_LOG_LEVEL) qDebug() << QString("delete %1\n").arg(status);
         //status = 0;
-        fits_create_file(&fptr_out, fname1, &status);
+        fits_create_file(&fptr_out, fitsFileName.toAscii().data(), &status);
         if(FD_LOG_LEVEL) qDebug() << QString("create %1\n").arg(status);
         status = 0;
         /*fits_create_hdu(fptr_out, &status);
@@ -4496,7 +4499,10 @@ int fitsdata::saveFitsAs(QString fitsFileName)
     fits_write_img(fptr_out, TUSHORT, 1, naxes[0]*naxes[1]+1, (void*) imgArr->ushD, &status);
     if(FD_LOG_LEVEL) qDebug() << QString("write_img %1\n").arg(status);
     status=0;
+    fits_close_file(fptr, &status);
+    status=0;
     fits_close_file(fptr_out, &status);
+    status=0;
 
     fileName = fitsFileName;
 
