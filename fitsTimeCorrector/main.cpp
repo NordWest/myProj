@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 
     QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
 
-    QString workDirName = sett->value("general/workDir", "./orig").toString();
-    QString resPathName = sett->value("general/resPath", "./res/").toString();
+    QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
+    QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
                      {
                          fitsd.MJD = mjdN;
                          mjdDateCode_file(&dateCodeNew, fitsd.MJD);
-                         nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
+                         nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
                          qDebug() << QString("new file name: %1\n").arg(nName);
                          fitsd.saveFitsAs(nName);
                      }
