@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
          if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1) continue;
          qDebug() << dirList.at(i) << "\n\n";
          tDir.setPath(dirList.at(i));
-         dataFiles = tDir.entryList(filters, QDir::Files, QDir::Time | QDir::Reversed);
+         dataFiles = tDir.entryList(filters, QDir::Files, QDir::Name);// | QDir::Reversed);
          //qDebug() << dataFiles.join("\n") << "\n\n";
          szj = dataFiles.size();
          wfList.clear();
@@ -170,7 +170,8 @@ int main(int argc, char *argv[])
              //mjdDateCode_file(&dateCode, fitsd.MJD);
              //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
-             if((dmjd1>(fitsd.exptime*2.0/86400.0)||j==szj-1)&&wfList.size()>0)
+             //if((dmjd1>(fitsd.exptime*1.5/86400.0)||j==szj-1)&&wfList.size()>0)
+             if((dmjd1>dmjd0*1.5||j==szj-1)&&wfList.size()>0)
              {
                  //if(j==szj-1) wfList << tFile;
                  fitsd.clear();
