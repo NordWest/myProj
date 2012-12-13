@@ -49,6 +49,7 @@ struct expCorrRec
 {
     int expSec;
     QVector <double> corrL;
+    QVector <double> durat;
     QVector <int> kNum;
 };
 
@@ -150,7 +151,7 @@ int main(int argc, char *argv[])
 
              if((dmjd1>(fitsd.exptime*2.0/86400.0)||j==szj-1)&&wfList.size()>0)
              {
-                 if(j==szj-1) wfList << tFile;
+                 //if(j==szj-1) wfList << tFile;
                  fitsd.clear();
                  fitsd.openFile(wfList.at(0));
                  t0 = fitsd.MJD;
@@ -182,7 +183,7 @@ int main(int argc, char *argv[])
                      {
                          if(k>0)
                          {
-                             residStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(k, 3).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
+                             residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
                              residStm.flush();
 
                              if(detCorr)
@@ -194,6 +195,7 @@ int main(int argc, char *argv[])
                                      {
                                          lNum = l;
                                          expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
+                                         expCorrList.at(l)->durat << k*dt*86400.0;
                                          expCorrList.at(l)->kNum << k;
                                          break;
                                      }
@@ -203,6 +205,7 @@ int main(int argc, char *argv[])
                                      ecRec = new expCorrRec;
                                      ecRec->expSec = fitsd.exptime;
                                      ecRec->corrL << (mjdN - fitsd.MJD)*86400;
+                                     ecRec->durat << k*dt*86400.0;
                                      ecRec->kNum << k;
                                      expCorrList << ecRec;
                                  }
@@ -242,6 +245,12 @@ int main(int argc, char *argv[])
      if(detCorr)
      {
          lNum = expCorrList.size();
+         QVector <double> expVal, aVal, bVal;
+         double aA, aB, bA, bB;
+         double *L, *Z, *C;
+         L = NULL;
+         Z = NULL;
+         C = NULL;
 
          qDebug() << QString("exp num: %1\n").arg(lNum);
 
@@ -253,10 +262,94 @@ int main(int argc, char *argv[])
 
              szi = expCorrList.at(l)->corrL.size();
              qDebug() << QString("corrL num: %1\n").arg(szi);
-             for(i=0; i<szi; i++) residStm << QString("%1|%2\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4);
 
+             if(L!=NULL)
+             {
+                 delete [] L;
+                 delete [] Z;
+                 delete [] C;
+             }
+             L = new double[szi];
+             Z = new double[2];
+             C = new double[szi*2];
+
+             for(i=0; i<szi; i++)
+             {
+                 residStm << QString("%1|%2\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4);
+                 L[i] = expCorrList.at(l)->corrL[i];
+                 C[i*2] = expCorrList.at(l)->kNum[i];
+                 C[i*2+1] = 1;
+             }
+
+             slsm(2, szi, Z, C, L);
+
+             qDebug() << QString("%1: %2\t%3\n").arg(expCorrList.at(l)->expSec).arg(Z[0]).arg(Z[1]);
+
+             expVal << expCorrList.at(l)->expSec;
+             aVal << Z[0];
+             bVal << Z[1];
+             residFile.close();
 
          }
+
+         szi = expVal.size();
+         /*if(L!=NULL)
+         {
+             delete [] L;
+             delete [] Z;
+             delete [] C;
+         }*/
+         double *aL, *aZ, *aC, *aW, *Da;
+         double uweA, uweB;
+         aL = new double[szi];
+         aZ = new double[2];
+         aC = new double[szi*2];
+         aW = new double[szi];
+         Da = new double[4];
+         for(i=0; i<szi; i++)
+         {
+             aL[i] = aVal[i];
+             aC[szi*2] = expVal[i];
+             aC[szi*2+1] = 1.0;
+             aW[szi] = 1.0;
+             qDebug() << QString("%1 = %2 + %3\n").arg(aL[i]).arg(aC[szi*2]).arg(aC[szi*2+1]);
+         }
+         lsm(2, szi, aZ, aC, aL, uweA, Da, aW);
+         aA = aZ[0];
+         aB = aZ[1];
+
+         qDebug() << QString("a: %1\t%2\n").arg(aA).arg(aB);
+
+         /*if(L!=NULL)
+         {
+             delete [] L;
+             delete [] Z;
+             delete [] C;
+         }*/
+         double *bL, *bZ, *bC, *bW, *Db;
+         bL = new double[szi];
+         bZ = new double[2];
+         bC = new double[szi*2];
+         bW = new double[szi];
+         Db = new double[4];
+         for(i=0; i<szi; i++)
+         {
+             bL[i] = bVal[i];
+             bC[szi*2] = expVal[i];
+             bC[szi*2+1] = 1.0;
+             bW[szi] = 1.0;
+             qDebug() << QString("%1 = %2 + %3\n").arg(bL[i]).arg(bC[szi*2]).arg(bC[szi*2+1]);
+         }
+         lsm(2, szi, bZ, bC, bL, uweB, Db, bW);
+         bA = bZ[0];
+         bB = bZ[1];
+         qDebug() << QString("b: %1\t%2\n").arg(bA).arg(bB);
+
+         for(i=0; i<szi; i++)
+         {
+             qDebug() << QString("%1: %2\t%3\n").arg(expVal[i]).arg(aA*i+aB).arg(bA*i+bB);
+         }
+
      }
 
     
