@@ -66,12 +66,9 @@ int main(int argc, char *argv[])
     QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
     Q_ASSERT( codec1 );
 
-    QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
-
-    QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
-    QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
-    QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
-    int detCorr = sett->value("general/detCorr", 0).toInt();
+    QList <expCorrRec*> expCorrListAply;
+    QList <expCorrRec*> expCorrList;
+    expCorrRec* ecRec;
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
@@ -84,9 +81,33 @@ int main(int argc, char *argv[])
     QFileInfo fi;
     double mjd0, mjd1, dmjd0, dmjd1, mjdN;
 
+
+    QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
+
+    QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
+    QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
+    QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
+    int detCorr = sett->value("general/detCorr", 0).toInt();
+    int aplyType = sett->value("general/aplyType", 0).toInt();
+    int saveCorr = sett->value("general/saveCorr", 0).toInt();
+
+    double aAcorr, aBcorr, bAcorr, bBcorr;
+    double aExpCorr, bExpCorr, expCorr;
+
+
+    aAcorr = sett->value("corr/aA", 0.0).toDouble();
+    aBcorr = sett->value("corr/aB", 0.0).toDouble();
+    bAcorr = sett->value("corr/bA", 0.0).toDouble();
+    bBcorr = sett->value("corr/bB", 0.0).toDouble();
+
+    QStringList eAplyL = sett->value("corrL/expList", "").toString().split("|");
+    QStringList aAplyL = sett->value("corrL/aList", "").toString().split("|");
+    QStringList bAplyL = sett->value("corrL/bList", "").toString().split("|");
+
+
+
     //rDir.setPath(resDirName);
-    QList <expCorrRec*> expCorrList;
-    expCorrRec* ecRec;
+
 
     filters << "*.fit";
 
@@ -177,8 +198,27 @@ int main(int argc, char *argv[])
                      fitsd.clear();
                      fitsd.openFile(wfList.at(k));
                      //mjdDateCode_file(&dateCodeCur, fitsd.MJD);
-
                      mjdN = t0+dt*k;
+                     switch(aplyType)
+                     {
+                         case 1:
+                         aExpCorr = aAcorr*fitsd.exptime + aBcorr;
+                         bExpCorr = bAcorr*fitsd.exptime + bBcorr;
+                         expCorr = (aExpCorr*k+bExpCorr)/86400.0;
+                         mjdN -= expCorr;
+                         break;
+                         case 2:
+                             for(l=0;l<eAplyL.size();l++)
+                             {
+                                 if(floor(eAplyL.at(l).toDouble())==floor(fitsd.exptime))
+                                 {
+                                     expCorr = (aAplyL.at(l).toDouble()*k+bAplyL.at(l).toDouble())/86400.0;
+                                     break;
+                                 }
+                             }
+                             mjdN -= expCorr;
+                             break;
+                     }
                      if((QString().compare(dateCode0, dateCode1)!=0))
                      {
                          if(k>0)
@@ -244,6 +284,7 @@ int main(int argc, char *argv[])
 
      if(detCorr)
      {
+         QStringList expResList, aResList, bResList;
          lNum = expCorrList.size();
          QVector <double> expVal, aVal, bVal;
          double aA, aB, bA, bB;
@@ -284,12 +325,23 @@ int main(int argc, char *argv[])
              slsm(2, szi, Z, C, L);
 
              qDebug() << QString("%1: %2\t%3\n").arg(expCorrList.at(l)->expSec).arg(Z[0]).arg(Z[1]);
+             expResList << QString("%1").arg(expCorrList.at(l)->expSec);
+             aResList << QString("%1").arg(Z[0]);
+             bResList << QString("%1").arg(Z[1]);
 
              expVal << expCorrList.at(l)->expSec;
              aVal << Z[0];
              bVal << Z[1];
              residFile.close();
 
+         }
+
+         if(!aplyType)
+         {
+             sett->setValue("corrL/expList", expResList.join("|"));
+             sett->setValue("corrL/aList", aResList.join("|"));
+             sett->setValue("corrL/bList", bResList.join("|"));
+             sett->sync();
          }
 
          szi = expVal.size();
@@ -309,16 +361,18 @@ int main(int argc, char *argv[])
          for(i=0; i<szi; i++)
          {
              aL[i] = aVal[i];
-             aC[szi*2] = expVal[i];
-             aC[szi*2+1] = 1.0;
-             aW[szi] = 1.0;
-             qDebug() << QString("%1 = %2 + %3\n").arg(aL[i]).arg(aC[szi*2]).arg(aC[szi*2+1]);
+             aC[i*2] = expVal[i];
+             aC[i*2+1] = 1.0;
+             aW[i] = 1.0;
+             qDebug() << QString("%1 = %2 + %3\n").arg(aL[i]).arg(aC[i*2]).arg(aC[i*2+1]);
          }
-         lsm(2, szi, aZ, aC, aL, uweA, Da, aW);
+         //lsm(2, szi, aZ, aC, aL, uweA, Da, aW);
+         slsm(2, szi, aZ, aC, aL, aW);
          aA = aZ[0];
          aB = aZ[1];
 
          qDebug() << QString("a: %1\t%2\n").arg(aA).arg(aB);
+         qDebug() << QString("uweA: %1\n").arg(uweA);
 
          /*if(L!=NULL)
          {
@@ -335,19 +389,21 @@ int main(int argc, char *argv[])
          for(i=0; i<szi; i++)
          {
              bL[i] = bVal[i];
-             bC[szi*2] = expVal[i];
-             bC[szi*2+1] = 1.0;
-             bW[szi] = 1.0;
-             qDebug() << QString("%1 = %2 + %3\n").arg(bL[i]).arg(bC[szi*2]).arg(bC[szi*2+1]);
+             bC[i*2] = expVal[i];
+             bC[i*2+1] = 1.0;
+             bW[i] = 1.0;
+             qDebug() << QString("%1 = %2 + %3\n").arg(bL[i]).arg(bC[i*2]).arg(bC[i*2+1]);
          }
-         lsm(2, szi, bZ, bC, bL, uweB, Db, bW);
+         //lsm(2, szi, bZ, bC, bL, uweB, Db, bW);
+         slsm(2, szi, bZ, bC, bL, bW);
          bA = bZ[0];
          bB = bZ[1];
          qDebug() << QString("b: %1\t%2\n").arg(bA).arg(bB);
+         qDebug() << QString("uweB: %1\n").arg(uweB);
 
          for(i=0; i<szi; i++)
          {
-             qDebug() << QString("%1: %2\t%3\n").arg(expVal[i]).arg(aA*i+aB).arg(bA*i+bB);
+             qDebug() << QString("%1: %2\t%3\n").arg(expVal[i]).arg(aA*expVal[i]+aB).arg(bA*expVal[i]+bB);
          }
 
      }
