@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
     QFileInfo fi;
     double mjd0, mjd1, dmjd0, dmjd1, mjdN;
+    QString objName0, objName1, tstr;
 
 
     QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
          {
              mjd0 = mjd1;
              dmjd0 = dmjd1;
+             objName0 = objName1;
 
 
              fitsd.clear();
@@ -166,111 +168,117 @@ int main(int argc, char *argv[])
              mjd1 = fitsd.MJD;
              dmjd1 = fabs(mjd1-mjd0);
 
+             fitsd.headList.getKeyName("TARGET", &tstr);
+             objName1 = tstr.section("\'", 1, 1);
+
 
              //mjdDateCode_file(&dateCode, fitsd.MJD);
              //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
              //if((dmjd1>(fitsd.exptime*1.5/86400.0)||j==szj-1)&&wfList.size()>0)
-             if((dmjd1>dmjd0*1.5||j==szj-1)&&wfList.size()>0)
+             if((dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
              {
-                 //if(j==szj-1) wfList << tFile;
-                 fitsd.clear();
-                 fitsd.openFile(wfList.at(0));
-                 t0 = fitsd.MJD;
-                 mjdDateCode_file(&dateCode0, fitsd.MJD);
-                 //dateCode = dateCodeCur;
-                 //nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
-                 //dateCode = dateCodeCur;
-                 dt = fitsd.exptime/86400.0;
-                 wfSz = wfList.size();
-                 if(wfSz>1)
+                 if(wfList.size()>0)
                  {
-                    fitsd.clear();
-                    fitsd.openFile(wfList.at(wfSz-1));
-                    mjdDateCode_file(&dateCode1, fitsd.MJD);
-
-                    //if((QString().compare(dateCode0, dateCode1)!=0))
-
-
-                 qDebug() << QString("wfSz: %1\n").arg(wfSz);
-                 for(k=0; k<wfSz; k++)
-                 {
-
+                     //if(j==szj-1) wfList << tFile;
                      fitsd.clear();
-                     fitsd.openFile(wfList.at(k));
-                     //mjdDateCode_file(&dateCodeCur, fitsd.MJD);
-                     mjdN = t0+dt*k;
-                     switch(aplyType)
+                     fitsd.openFile(wfList.at(0));
+                     t0 = fitsd.MJD;
+                     mjdDateCode_file(&dateCode0, fitsd.MJD);
+                     //dateCode = dateCodeCur;
+                     //nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
+                     //dateCode = dateCodeCur;
+                     dt = fitsd.exptime/86400.0;
+                     wfSz = wfList.size();
+                     if(wfSz>1)
                      {
-                         case 1:
-                         aExpCorr = aAcorr*fitsd.exptime + aBcorr;
-                         bExpCorr = bAcorr*fitsd.exptime + bBcorr;
-                         expCorr = (aExpCorr*k+bExpCorr)/86400.0;
-                         mjdN -= expCorr;
-                         break;
-                         case 2:
-                             for(l=0;l<eAplyL.size();l++)
-                             {
-                                 if(floor(eAplyL.at(l).toDouble())==floor(fitsd.exptime))
-                                 {
-                                     expCorr = (aAplyL.at(l).toDouble()*k+bAplyL.at(l).toDouble())/86400.0;
-                                     break;
-                                 }
-                             }
+                        fitsd.clear();
+                        fitsd.openFile(wfList.at(wfSz-1));
+                        mjdDateCode_file(&dateCode1, fitsd.MJD);
+
+                        //if((QString().compare(dateCode0, dateCode1)!=0))
+
+
+                     qDebug() << QString("wfSz: %1\n").arg(wfSz);
+                     for(k=0; k<wfSz; k++)
+                     {
+
+                         fitsd.clear();
+                         fitsd.openFile(wfList.at(k));
+                         //mjdDateCode_file(&dateCodeCur, fitsd.MJD);
+                         mjdN = t0+dt*k;
+                         switch(aplyType)
+                         {
+                             case 1:
+                             aExpCorr = aAcorr*fitsd.exptime + aBcorr;
+                             bExpCorr = bAcorr*fitsd.exptime + bBcorr;
+                             expCorr = (aExpCorr*k+bExpCorr)/86400.0;
                              mjdN -= expCorr;
                              break;
-                     }
-                     if((QString().compare(dateCode0, dateCode1)!=0))
-                     {
-                         if(k>0)
-                         {
-                             residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
-                             residStm.flush();
-
-                             if(detCorr)
-                             {
-                                 lNum = -1;
-                                 for(l=0; l<expCorrList.size(); l++)
+                             case 2:
+                                 for(l=0;l<eAplyL.size();l++)
                                  {
-                                     if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                     if(floor(eAplyL.at(l).toDouble())==floor(fitsd.exptime))
                                      {
-                                         lNum = l;
-                                         expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
-                                         expCorrList.at(l)->durat << k*dt*86400.0;
-                                         expCorrList.at(l)->kNum << k;
+                                         expCorr = (aAplyL.at(l).toDouble()*k+bAplyL.at(l).toDouble())/86400.0;
                                          break;
                                      }
                                  }
-                                 if(lNum==-1)
+                                 mjdN -= expCorr;
+                                 break;
+                         }
+                         if((QString().compare(dateCode0, dateCode1)!=0))
+                         {
+                             if(k>0)
+                             {
+                                 residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(dt*86400.0).arg(wfList.at(k));
+                                 residStm.flush();
+
+                                 if(detCorr)
                                  {
-                                     ecRec = new expCorrRec;
-                                     ecRec->expSec = fitsd.exptime;
-                                     ecRec->corrL << (mjdN - fitsd.MJD)*86400;
-                                     ecRec->durat << k*dt*86400.0;
-                                     ecRec->kNum << k;
-                                     expCorrList << ecRec;
+                                     lNum = -1;
+                                     for(l=0; l<expCorrList.size(); l++)
+                                     {
+                                         if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                         {
+                                             lNum = l;
+                                             expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
+                                             expCorrList.at(l)->durat << k*dt*86400.0;
+                                             expCorrList.at(l)->kNum << k;
+                                             break;
+                                         }
+                                     }
+                                     if(lNum==-1)
+                                     {
+                                         ecRec = new expCorrRec;
+                                         ecRec->expSec = fitsd.exptime;
+                                         ecRec->corrL << (mjdN - fitsd.MJD)*86400;
+                                         ecRec->durat << k*dt*86400.0;
+                                         ecRec->kNum << k;
+                                         expCorrList << ecRec;
+                                     }
                                  }
                              }
+                             /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                             nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
+                             qDebug() << QString("new file name: %1\n").arg(nName);
+                             fitsd.saveFitsAs(nName);*/
                          }
-                         /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
-                         nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
-                         qDebug() << QString("new file name: %1\n").arg(nName);
-                         fitsd.saveFitsAs(nName);*/
-                     }
-                     else
-                     {
-                         fitsd.MJD = mjdN;
-                         mjdDateCode_file(&dateCodeNew, fitsd.MJD);
-                         nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
-                         qDebug() << QString("new file name: %1\n").arg(nName);
-                         fitsd.saveFitsAs(nName);
+                         else
+                         {
+                             fitsd.MJD = mjdN;
+                             mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                             nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
+                             qDebug() << QString("new file name: %1\n").arg(nName);
+                             fitsd.saveFitsAs(nName);
+                         }
+
+                         //dateCode = dateCodeCur;
                      }
 
-                     //dateCode = dateCodeCur;
-                 }
+                     if((QString().compare(dateCode0, dateCode1)==0)) serieCorr++;
 
-                 if((QString().compare(dateCode0, dateCode1)==0)) serieCorr++;
-
+                     }
                  }
                  serieTot++;
                  wfList.clear();
