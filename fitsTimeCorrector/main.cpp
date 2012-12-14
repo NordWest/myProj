@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
                              mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                              nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
                              qDebug() << QString("new file name: %1\n").arg(nName);
-                             fitsd.saveFitsAs(nName);
+                             //fitsd.saveFitsAs(nName);
                          }
 
                          //dateCode = dateCodeCur;
