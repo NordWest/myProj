@@ -170,13 +170,14 @@ int main(int argc, char *argv[])
 
              fitsd.headList.getKeyName("TARGET", &tstr);
              objName1 = tstr.section("\'", 1, 1);
+             if(objName1.indexOf("target")!=-1) continue;
 
 
              //mjdDateCode_file(&dateCode, fitsd.MJD);
              //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
              //if((dmjd1>(fitsd.exptime*1.5/86400.0)||j==szj-1)&&wfList.size()>0)
-             if((dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
+             if((dmjd1>(fitsd.exptime*2.0/86400.0))||(dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
              {
                  if(wfList.size()>0)
                  {
