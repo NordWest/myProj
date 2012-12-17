@@ -9,7 +9,6 @@
 #ifndef ASTRO_H
 
 
-
 #define MAS_IN_GRAD 3600000.0
 //#define PI 3.141592653589
 //#define PI atan(1)*4
