@@ -48,6 +48,7 @@
 #define MS 1
 #define SUN_MASS_GRAM 1.9891e+33
 #define SUN_MASS_KG 1.9891e+30
+#define SUN_MASS 1.0
 #define VE 2979256.9529966
 #define PI 3.141592653589
 #define ka 0.017202098955

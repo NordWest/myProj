@@ -333,6 +333,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+
     int status;
 
     if(useEPM)
@@ -395,7 +396,7 @@ int main(int argc, char *argv[])
 
 
 
-    solSys = new Everhardt(N-3*CENTER, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
+    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
     if(useMoody)
     {

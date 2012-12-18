@@ -179,6 +179,7 @@ int main(int argc, char *argv[])
     int centr_num = 11+!centerNum;
 
 
+    qDebug() << QString("sk: %1\ncenter de: %2\ncenter EPM: %3\n").arg(skNum).arg(centerNum).arg(centr_num);
 
 
 
@@ -234,7 +235,9 @@ int main(int argc, char *argv[])
             {
                 ti = t0+dt*j;
                 jday = int(ti);
-                pday = ti - jday;
+                pday = ti - jday;// + 60.0/86400.0;
+
+                qDebug() << QString("ti: %1\tjday: %2\tpday: %3\n").arg(ti, 12, 'f').arg(jday).arg(pday);
 
                 //nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
                 //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);

@@ -6,7 +6,7 @@
 #include "rada.h"
 //#include "mymatrix.h"
 #include "dele.h"
-#include "DynArr.h"
+#include "comfunc.h"
 #include "moody/capsule/capsuleBase/particle/Particle.h"
 
 
@@ -52,7 +52,7 @@
   //        double gamma = 1.0;
           iterNum = 0;
 
-        force_N(X, V, F);
+        force_GN(X, V, F);
         //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
         //else printf("iterateNum %d\n\n", iterNum);
 
@@ -320,15 +320,15 @@
       if(summ1<1e-15) return 0;
       else return(force_PPN(X, V, F));
   }
-/*
+
 //GELIOCENTR
   void force_GN(double X[], double V[], double F[])
   {
       int i, j, N, komp, teloi, teloj;
       double Rij, Ri, Rj, res1, res0;
 
-      int iNum = nofzbody-1;
-      int Ni = (nofzbody-1)*3;
+      int iNum = nofzbody;
+      int Ni = (nofzbody)*3;
       int jNum = iNum;//eparam->NV;
       int Nj = Ni;//eparam->NV*3;
 
@@ -351,7 +351,7 @@
                       {
                           if(teloi!=teloj&&teloj!=0&&pList[teloj]->interactionPermission==Advisor::interactALL)
                              {
-                                Rij = dist(teloi, teloj, X);
+                                Rij = dist(&X[i], &X[j]);
                                 //Rj = dist(teloj, 0, X);
                                 Rj = norm(&X[j]);
 
@@ -370,7 +370,7 @@
 
                              }
                       }
-                      if(teloi!=0) res1 = -((pow(pList[0]->mass, -1.0) + pow(pList[teloi]->mass, -1.0))*X[i+komp])/(pow(Ri, 3));
+                      res1 = -((pow(SUN_MASS, -1.0) + pow(pList[teloi]->mass, -1.0))*X[i+komp])/(pow(Ri, 3));
 
 
                       F[i+komp] = ka*ka*(res0+res1);
