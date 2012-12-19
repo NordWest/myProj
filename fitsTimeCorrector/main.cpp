@@ -294,10 +294,12 @@ int main(int argc, char *argv[])
                                                          expCorrList << ecRec;
                                                      }
                                                  }
+
+                                                 residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
+                                                 residStm.flush();
                                              }
 
-                                             residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
-                                             residStm.flush();
+
                                         }
 
                                  /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
