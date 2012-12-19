@@ -230,7 +230,9 @@ int main(int argc, char *argv[])
 
                              mjdBeg = fitsd.MJD - fitsd.exptime/86400.0/2.0;
 
-                             expNum = wfList.at(0).section("_", -1, -1).section(".", 0,0).toInt()-1;
+                             tstr = wfList.at(k).section("_", -1, -1).section(".", 0,0);
+                             expNum = tstr.toInt()-1;
+                             //qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
 
                              mjdN = t0+dt*expNum;
                              switch(aplyType)
