@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     int detCorr = sett->value("general/detCorr", 0).toInt();
     int aplyType = sett->value("general/aplyType", 0).toInt();
     int saveCorr = sett->value("general/saveCorr", 0).toInt();
+    double dTcorr = sett->value("general/dTcorr", 0.0).toDouble();
 
     double aAcorr, aBcorr, bAcorr, bBcorr;
     double aExpCorr, bExpCorr, expCorr;
@@ -209,7 +210,7 @@ int main(int argc, char *argv[])
                      //dateCode = dateCodeCur;
                      //nName = QString("%1%2.fit").arg(resPathName).arg(dateCodeNew);
                      //dateCode = dateCodeCur;
-                     dt = fitsd.exptime/86400.0;
+                     dt = (fitsd.exptime-dTcorr)/86400.0;
                      wfSz = wfList.size();
                      if(wfSz>1)
                      {
