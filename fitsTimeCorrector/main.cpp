@@ -50,8 +50,17 @@ struct expCorrRec
     int expSec;
     QVector <double> corrL;
     QVector <double> durat;
+    QVector <double> dExp;
     QVector <int> kNum;
 };
+
+double detCorr0(double expTime, int k, double aA, double aB, double bA, double bB)
+{
+    double aExpCorr = aA*expTime + aB;
+    double bExpCorr = bA*expTime + bB;
+    double expCorr = (aExpCorr*k+bExpCorr)/86400.0;
+    return(expCorr);
+}
 
 int main(int argc, char *argv[])
 {
@@ -86,6 +95,7 @@ int main(int argc, char *argv[])
     fitsfile *fptr;
     fitsfile *fptr_out;
     int status = 0;
+    int isCorr;
 
 
     QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
@@ -101,10 +111,10 @@ int main(int argc, char *argv[])
     double aExpCorr, bExpCorr, expCorr;
 
 
-    aAcorr = sett->value("corr/aA", 0.0).toDouble();
-    aBcorr = sett->value("corr/aB", 0.0).toDouble();
-    bAcorr = sett->value("corr/bA", 0.0).toDouble();
-    bBcorr = sett->value("corr/bB", 0.0).toDouble();
+    aAcorr = sett->value("corr0/aA", 0.0).toDouble();
+    aBcorr = sett->value("corr0/aB", 0.0).toDouble();
+    bAcorr = sett->value("corr0/bA", 0.0).toDouble();
+    bBcorr = sett->value("corr0/bB", 0.0).toDouble();
 
     QStringList eAplyL = sett->value("corrL/expList", "").toString().split("|");
     QStringList aAplyL = sett->value("corrL/aList", "").toString().split("|");
@@ -221,19 +231,22 @@ int main(int argc, char *argv[])
                              switch(aplyType)
                              {
                                  case 1:
-                                 aExpCorr = aAcorr*fitsd.exptime + aBcorr;
-                                 bExpCorr = bAcorr*fitsd.exptime + bBcorr;
-                                 expCorr = (aExpCorr*k+bExpCorr)/86400.0;
-                                 mjdN -= expCorr;
+                                 mjdN -= detCorr0(fitsd.exptime, k, aAcorr, aBcorr, bAcorr, bBcorr);
                                  break;
                                  case 2:
+                                 isCorr=0;
                                      for(l=0;l<eAplyL.size();l++)
                                      {
                                          if(floor(eAplyL.at(l).toDouble())==floor(fitsd.exptime))
                                          {
                                              expCorr = (aAplyL.at(l).toDouble()*k+bAplyL.at(l).toDouble())/86400.0;
+                                             isCorr=1;
                                              break;
                                          }
+                                     }
+                                     if(!isCorr)
+                                     {
+                                         expCorr = detCorr0(fitsd.exptime, k, aAcorr, aBcorr, bAcorr, bBcorr);
                                      }
                                      mjdN -= expCorr;
                                      break;
@@ -281,6 +294,7 @@ int main(int argc, char *argv[])
                                                              expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
                                                              expCorrList.at(l)->durat << k*dt*86400.0;
                                                              expCorrList.at(l)->kNum << k;
+                                                             expCorrList.at(l)->dExp << realExp-fitsd.exptime;
                                                              break;
                                                          }
                                                      }
@@ -291,6 +305,7 @@ int main(int argc, char *argv[])
                                                          ecRec->corrL << (mjdN - fitsd.MJD)*86400;
                                                          ecRec->durat << k*dt*86400.0;
                                                          ecRec->kNum << k;
+                                                         ecRec->dExp << realExp-fitsd.exptime;
                                                          expCorrList << ecRec;
                                                      }
                                                  }
@@ -493,6 +508,15 @@ int main(int argc, char *argv[])
          for(i=0; i<szi; i++)
          {
              qDebug() << QString("%1: %2\t%3\n").arg(expVal[i]).arg(aA*expVal[i]+aB).arg(bA*expVal[i]+bB);
+         }
+
+         if(saveCorr)
+         {
+             sett->setValue("corr0/aA", aA);
+             sett->setValue("corr0/aB", aB);
+             sett->setValue("corr0/bA", bA);
+             sett->setValue("corr0/bB", bB);
+             sett->sync();
          }
 
      }
