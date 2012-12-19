@@ -420,7 +420,7 @@ int main(int argc, char *argv[])
 
              for(i=0; i<szi; i++)
              {
-                 residStm << QString("%1|%2\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4);
+                 residStm << QString("%1|%2|%3|%4\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4).arg(expCorrList.at(l)->durat[i], 8, 'f', 4).arg(expCorrList.at(l)->dExp[i], 8, 'f', 4);
                  L[i] = expCorrList.at(l)->corrL[i];
                  C[i*2] = expCorrList.at(l)->kNum[i];
                  C[i*2+1] = 1;
