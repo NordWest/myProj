@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 
 
                      fitsd.clear();
-                     fitsd.openFile(wfList.at(0));
+                     if(fitsd.openFile(wfList.at(0))) break;
                      t0 = fitsd.MJD;
                      mjdDateCode_file(&dateCode0, fitsd.MJD);
                      //dateCode = dateCodeCur;
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
                      if(wfSz>1)
                      {
                         fitsd.clear();
-                        fitsd.openFile(wfList.at(wfSz-1));
+                        if(fitsd.openFile(wfList.at(wfSz-1))) break;
                         mjdDateCode_file(&dateCode1, fitsd.MJD);
 
                         //if((QString().compare(dateCode0, dateCode1)!=0))
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
                              tstr = wfList.at(k).section("_", -1, -1).section(".", 0,0);
                              expNum = tstr.toInt()-1;
-                             //qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
+                             qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
 
                              mjdN = t0+dt*expNum;
                              switch(aplyType)
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
                                              realExp = (mjdEnd-mjdBeg)*86400.0;
                                              fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
 
-                                             if(k>0&&(k==expNum-1))
+                                             if(k>0&&k==expNum)
                                              {
                                                  if(detCorr)
                                                  {
