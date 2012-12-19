@@ -249,56 +249,57 @@ int main(int argc, char *argv[])
 
                                  mjdNend = fitsd.MJD+fitsd.exptime/86400.0/2.0;
                                  //qDebug() << QString("mjdEnd: %1\tmjdNend: %2\n").arg(mjdEnd).arg(mjdNend);
-                                 if(fabs(mjdEnd-mjdNend)>(fitsd.exptime/86400.0/2.0))
-                                 {
-                                     mjdEnd = mjdNend;
-                                    dendCounter++;
-                                 }
 
-
-                                 realExp = (mjdEnd-mjdBeg)*86400.0;
-                                 realMJD = (mjdEnd+mjdBeg)/2.0;
-                                 //qDebug() << QString("realExp: %1\n").arg(realExp);
+                                     //qDebug() << QString("realExp: %1\n").arg(realExp);
 
 
 
-                                 if((QString().compare(dateCode0, dateCode1)!=0))
-                                 {
-                                     if(k>0)
+                                     if((QString().compare(dateCode0, dateCode1)!=0))
                                      {
-                                         if(detCorr)
+
+                                         if(fabs(mjdEnd-mjdNend)>(fitsd.exptime/86400.0/2.0))
                                          {
-                                             lNum = -1;
-                                             for(l=0; l<expCorrList.size(); l++)
+                                             mjdEnd = mjdNend;
+                                            dendCounter++;
+                                         }
+                                         else
+                                         {
+
+                                             realExp = (mjdEnd-mjdBeg)*86400.0;
+                                             fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
+
+                                             if(k>0)
                                              {
-                                                 if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                                 if(detCorr)
                                                  {
-                                                     lNum = l;
-                                                     expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
-                                                     expCorrList.at(l)->durat << k*dt*86400.0;
-                                                     expCorrList.at(l)->kNum << k;
-                                                     break;
+                                                     lNum = -1;
+                                                     for(l=0; l<expCorrList.size(); l++)
+                                                     {
+                                                         if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                                         {
+                                                             lNum = l;
+                                                             expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
+                                                             expCorrList.at(l)->durat << k*dt*86400.0;
+                                                             expCorrList.at(l)->kNum << k;
+                                                             break;
+                                                         }
+                                                     }
+                                                     if(lNum==-1)
+                                                     {
+                                                         ecRec = new expCorrRec;
+                                                         ecRec->expSec = fitsd.exptime;
+                                                         ecRec->corrL << (mjdN - fitsd.MJD)*86400;
+                                                         ecRec->durat << k*dt*86400.0;
+                                                         ecRec->kNum << k;
+                                                         expCorrList << ecRec;
+                                                     }
                                                  }
                                              }
-                                             if(lNum==-1)
-                                             {
-                                                 ecRec = new expCorrRec;
-                                                 ecRec->expSec = fitsd.exptime;
-                                                 ecRec->corrL << (mjdN - fitsd.MJD)*86400;
-                                                 ecRec->durat << k*dt*86400.0;
-                                                 ecRec->kNum << k;
-                                                 expCorrList << ecRec;
-                                             }
-                                         }
-                                     }
 
+                                             residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
+                                             residStm.flush();
+                                        }
 
-
-
-
-
-                                 residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
-                                 residStm.flush();
                                  /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
                                  qDebug() << QString("new file name: %1\n").arg(nName);
