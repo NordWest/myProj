@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     QStringList dataFiles, filters, wfList;
     QString tFile;
     QDir tDir, rDir;
-    int i, j, k, l, lNum, szi, szj, wfSz;
+    int i, j, k, l, lNum, szi, szj, wfSz, expNum;
     double t0, t1, dt;
     fitsdata fitsd;
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
@@ -199,6 +199,9 @@ int main(int argc, char *argv[])
                  if(wfList.size()>0)
                  {
                      //if(j==szj-1) wfList << tFile;
+
+
+
                      fitsd.clear();
                      fitsd.openFile(wfList.at(0));
                      t0 = fitsd.MJD;
@@ -227,11 +230,13 @@ int main(int argc, char *argv[])
 
                              mjdBeg = fitsd.MJD - fitsd.exptime/86400.0/2.0;
 
-                             mjdN = t0+dt*k;
+                             expNum = wfList.at(0).section("_", -1, -1).section(".", 0,0).toInt()-1;
+
+                             mjdN = t0+dt*expNum;
                              switch(aplyType)
                              {
                                  case 1:
-                                 mjdN -= detCorr0(fitsd.exptime, k, aAcorr, aBcorr, bAcorr, bBcorr);
+                                 mjdN -= detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
                                  break;
                                  case 2:
                                  isCorr=0;
@@ -246,7 +251,7 @@ int main(int argc, char *argv[])
                                      }
                                      if(!isCorr)
                                      {
-                                         expCorr = detCorr0(fitsd.exptime, k, aAcorr, aBcorr, bAcorr, bBcorr);
+                                         expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
                                      }
                                      mjdN -= expCorr;
                                      break;
@@ -281,7 +286,7 @@ int main(int argc, char *argv[])
                                              realExp = (mjdEnd-mjdBeg)*86400.0;
                                              fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
 
-                                             if(k>0)
+                                             if(k>0&&(k==expNum-1))
                                              {
                                                  if(detCorr)
                                                  {
@@ -292,8 +297,8 @@ int main(int argc, char *argv[])
                                                          {
                                                              lNum = l;
                                                              expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
-                                                             expCorrList.at(l)->durat << k*dt*86400.0;
-                                                             expCorrList.at(l)->kNum << k;
+                                                             expCorrList.at(l)->durat << expNum*dt*86400.0;
+                                                             expCorrList.at(l)->kNum << expNum;
                                                              expCorrList.at(l)->dExp << realExp-fitsd.exptime;
                                                              break;
                                                          }
@@ -303,14 +308,14 @@ int main(int argc, char *argv[])
                                                          ecRec = new expCorrRec;
                                                          ecRec->expSec = fitsd.exptime;
                                                          ecRec->corrL << (mjdN - fitsd.MJD)*86400;
-                                                         ecRec->durat << k*dt*86400.0;
-                                                         ecRec->kNum << k;
+                                                         ecRec->durat << expNum*dt*86400.0;
+                                                         ecRec->kNum << expNum;
                                                          ecRec->dExp << realExp-fitsd.exptime;
                                                          expCorrList << ecRec;
                                                      }
                                                  }
 
-                                                 residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
+                                                 residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
                                                  residStm.flush();
                                              }
 
