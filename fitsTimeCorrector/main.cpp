@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     fitsdata fitsd;
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
     QFileInfo fi;
-    double mjd0, mjd1, dmjd0, dmjd1, mjdN, mjdNend, mjdEnd, mjdBeg, realExp;
+    double mjd0, mjd1, dmjd0, dmjd1, mjdN, mjdNend, mjdEnd, mjdBeg, realExp, realMJD;
     QString objName0, objName1, tstr;
     QString nTime;
     long nelements;
@@ -238,35 +238,7 @@ int main(int argc, char *argv[])
                                      mjdN -= expCorr;
                                      break;
                              }
-                             if((QString().compare(dateCode0, dateCode1)!=0))
-                             {
-                                 if(k>0)
-                                 {
-                                     if(detCorr)
-                                     {
-                                         lNum = -1;
-                                         for(l=0; l<expCorrList.size(); l++)
-                                         {
-                                             if(expCorrList.at(l)->expSec==fitsd.exptime)
-                                             {
-                                                 lNum = l;
-                                                 expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
-                                                 expCorrList.at(l)->durat << k*dt*86400.0;
-                                                 expCorrList.at(l)->kNum << k;
-                                                 break;
-                                             }
-                                         }
-                                         if(lNum==-1)
-                                         {
-                                             ecRec = new expCorrRec;
-                                             ecRec->expSec = fitsd.exptime;
-                                             ecRec->corrL << (mjdN - fitsd.MJD)*86400;
-                                             ecRec->durat << k*dt*86400.0;
-                                             ecRec->kNum << k;
-                                             expCorrList << ecRec;
-                                         }
-                                     }
-                                 }
+
 
                                  getStrTfromMJD(&tstr, mjdBeg);
                                  //qDebug() << QString("DATE-OBS: %1\n").arg(tstr);
@@ -285,7 +257,45 @@ int main(int argc, char *argv[])
 
 
                                  realExp = (mjdEnd-mjdBeg)*86400.0;
+                                 realMJD = (mjdEnd+mjdBeg)/2.0;
                                  //qDebug() << QString("realExp: %1\n").arg(realExp);
+
+
+
+                                 if((QString().compare(dateCode0, dateCode1)!=0))
+                                 {
+                                     if(k>0)
+                                     {
+                                         if(detCorr)
+                                         {
+                                             lNum = -1;
+                                             for(l=0; l<expCorrList.size(); l++)
+                                             {
+                                                 if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                                 {
+                                                     lNum = l;
+                                                     expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
+                                                     expCorrList.at(l)->durat << k*dt*86400.0;
+                                                     expCorrList.at(l)->kNum << k;
+                                                     break;
+                                                 }
+                                             }
+                                             if(lNum==-1)
+                                             {
+                                                 ecRec = new expCorrRec;
+                                                 ecRec->expSec = fitsd.exptime;
+                                                 ecRec->corrL << (mjdN - fitsd.MJD)*86400;
+                                                 ecRec->durat << k*dt*86400.0;
+                                                 ecRec->kNum << k;
+                                                 expCorrList << ecRec;
+                                             }
+                                         }
+                                     }
+
+
+
+
+
 
                                  residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(k, 3).arg(k*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
                                  residStm.flush();
