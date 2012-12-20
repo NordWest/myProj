@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
     int aplyType = sett->value("general/aplyType", 0).toInt();
     int saveCorr = sett->value("general/saveCorr", 0).toInt();
     double dTcorr = sett->value("general/dTcorr", 0.0).toDouble();
+    int saveFits = sett->value("general/saveFits", 0).toInt();
 
     double aAcorr, aBcorr, bAcorr, bBcorr;
     double aExpCorr, bExpCorr, expCorr;
@@ -155,6 +156,8 @@ int main(int argc, char *argv[])
      int serieCorr = 0;
      int dendCounter = 0;
      int fitsCounter = 0;
+
+     int fitsType;
 
 
      QFile residFile;
@@ -381,7 +384,7 @@ int main(int argc, char *argv[])
 
                                         }
 
-                                         residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
+                                         if(k>0&&k==expNum) residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
 
                                  /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
@@ -408,29 +411,30 @@ int main(int argc, char *argv[])
 /*
                              fitsd.saveFitsAs(nName);
 */
+                             if(saveFits)
+                             {
+                                 QFile().remove(nName);
 
-/*
-                             QFile().remove(nName);
+                                 fits_open_file(&fptr, fitsd.fileName.toAscii().data(), READONLY, &status);
+                                 //if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fileName).arg(status);
+                                 status = 0;
 
-                             fits_open_file(&fptr, fitsd.fileName.toAscii().data(), READONLY, &status);
-                             //if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fileName).arg(status);
-                             status = 0;
+                                 fits_create_file(&fptr_out, nName.toAscii().data(), &status);
+                                 //if(FD_LOG_LEVEL) qDebug() << QString("create %1\n").arg(status);
+                                 status = 0;
 
-                             fits_create_file(&fptr_out, nName.toAscii().data(), &status);
-                             //if(FD_LOG_LEVEL) qDebug() << QString("create %1\n").arg(status);
-                             status = 0;
+                                 fits_copy_hdu(fptr, fptr_out, 0, &status);
+                                 status = 0;
 
-                             fits_copy_hdu(fptr, fptr_out, 0, &status);
-                             status = 0;
+                                 getStrTfromMJD(&tstr, mjdBeg);
+                                 fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
+                                 status = 0;
 
-                             getStrTfromMJD(&tstr, mjdBeg);
-                             fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
-                             status = 0;
+                                 getStrTfromMJD(&tstr, mjdEnd);
+                                 fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
+                                 status = 0;
+                            }
 
-                             getStrTfromMJD(&tstr, mjdEnd);
-                             fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
-                             status = 0;
-*/
 
 ///////////////////////////////////////////////////////////////
 
