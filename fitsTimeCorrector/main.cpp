@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     QString objName0, objName1, tstr;
     QString nTime;
     long nelements;
+    long naxes[2];
     fitsfile *fptr;
     fitsfile *fptr_out;
     int status = 0;
@@ -156,6 +157,7 @@ int main(int argc, char *argv[])
      int serieCorr = 0;
      int dendCounter = 0;
      int fitsCounter = 0;
+     int brCounter = 0;
 
      int fitsType;
 
@@ -172,7 +174,7 @@ int main(int argc, char *argv[])
          qDebug() << dirList.at(i) << "\n\n";
          tDir.setPath(dirList.at(i));
          dataFiles = tDir.entryList(filters, QDir::Files, QDir::Name);// | QDir::Reversed);
-         //qDebug() << dataFiles.join("\n") << "\n\n";
+         qDebug() << QString("filesNum: %1\n\n").arg(dataFiles.size());
          szj = dataFiles.size();
          wfList.clear();
 /*
@@ -188,15 +190,17 @@ int main(int argc, char *argv[])
              objName0 = objName1;
 
 
-             fitsd.clear();
+
              tFile = QString("%1/%2").arg(dirList.at(i)).arg(dataFiles.at(j));
 
 
-             qDebug() << QString("tFile: %1\n").arg(tFile);
 
+
+             fitsd.clear();
              if(fitsd.openFile(tFile))
              {
                  qDebug() << QString("err open file: %1\n").arg(tFile);
+                 brCounter++;
                  continue;
              }
 
@@ -205,14 +209,20 @@ int main(int argc, char *argv[])
 
              fitsd.headList.getKeyName("TARGET", &tstr);
              objName1 = tstr.section("\'", 1, 1);
-             if(objName1.indexOf("target")!=-1) continue;
+             if(objName1.indexOf("target")!=-1)
+             {
+                 qDebug() << QString("skip target\n");
+                 brCounter++;
+                 continue;
+             }
 
 
              //mjdDateCode_file(&dateCode, fitsd.MJD);
              //qDebug() << QString("dcCur: %1\tdc: %2\n").arg(dateCodeCur).arg(dateCode);
 
              //if((dmjd1>(fitsd.exptime*1.5/86400.0)||j==szj-1)&&wfList.size()>0)
-             if((dmjd1>(fitsd.exptime*2.0/86400.0))||(dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
+             //if((dmjd1>(fitsd.exptime*2.5/86400.0))||(dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
+             if(((dmjd1>(fitsd.exptime*1.5/86400.0))&&(dmjd1>dmjd0*1.5))||j==szj-1||QString().compare(objName1, objName0)!=0)
              {
                  if(wfList.size()>0)
                  {
@@ -221,7 +231,12 @@ int main(int argc, char *argv[])
 
 
                      fitsd.clear();
-                     if(fitsd.openFile(wfList.at(0))) break;
+                     if(fitsd.openFile(wfList.at(0)))
+                     {
+                         qDebug() << QString("break: err open file %1\n").arg(wfList.at(0));
+                         brCounter++;
+                         break;
+                     }
                      t0 = fitsd.MJD;
                      mjdDateCode_file(&dateCode0, fitsd.MJD);
                      //dateCode = dateCodeCur;
@@ -236,21 +251,27 @@ int main(int argc, char *argv[])
                          if(!detCorrL(expCorr0, fitsd.exptime, 0, eAplyL, aAplyL, bAplyL)) expCorr0 = detCorr0(fitsd.exptime, 0, aAcorr, aBcorr, bAcorr, bBcorr);
                          break;
                      }
-                     qDebug() << QString("expCorr0: %1\n").arg(expCorr0);
+                     //qDebug() << QString("expCorr0: %1\n").arg(expCorr0);
 
 
                      dt = (fitsd.exptime-dTcorr)/86400.0;
                      wfSz = wfList.size();
+                     qDebug() << QString("wfSz: %1\n").arg(wfSz);
                      if(wfSz>1)
                      {
                         fitsd.clear();
-                        if(fitsd.openFile(wfList.at(wfSz-1))) break;
+                        if(fitsd.openFile(wfList.at(wfSz-1)))
+                        {
+                            qDebug() << QString("break: err open file %1\n").arg(wfList.at(wfSz-1));
+                            brCounter++;
+                            break;
+                        }
                         mjdDateCode_file(&dateCode1, fitsd.MJD);
 
                         //if((QString().compare(dateCode0, dateCode1)!=0))
 
 
-                         qDebug() << QString("wfSz: %1\n").arg(wfSz);
+                         //qDebug() << QString("wfSz: %1\n").arg(wfSz);
                          for(k=0; k<wfSz; k++)
                          {
 
@@ -326,7 +347,7 @@ int main(int argc, char *argv[])
                                  mjdNend = fitsd.MJD+fitsd.exptime/86400.0/2.0;
 
 
-                                 qDebug() << QString("dmjdObs: %1\tdmjdEnd: %2\tdT: %3\n").arg(mjdBeg-dobsN).arg(mjdEnd-dendN).arg((dendN+dobsN)/2.0-mjdN);
+                                 //qDebug() << QString("dmjdObs: %1\tdmjdEnd: %2\tdT: %3\n").arg(mjdBeg-dobsN).arg(mjdEnd-dendN).arg((dendN+dobsN)/2.0-mjdN);
 
                                      //qDebug() << QString("realExp: %1\n").arg(realExp);
 
@@ -341,6 +362,7 @@ int main(int argc, char *argv[])
                                              realExp = (mjdEnd-mjdBeg)*86400.0;
                                              fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
                                             dendCounter++;
+                                            fitsType = 1;
                                          }
                                          else
                                          {
@@ -378,13 +400,18 @@ int main(int argc, char *argv[])
                                                  }
 
 
-                                                 residStm.flush();
+
                                              }
+
+                                             fitsType = 0;
 
 
                                         }
 
-                                         if(k>0&&k==expNum) residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));
+                                         if(k>0&&k==expNum)
+                                         {
+                                             residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));residStm.flush();
+                                         }
 
                                  /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(goodPathName).arg(dateCodeNew);
@@ -396,9 +423,11 @@ int main(int argc, char *argv[])
                                  fitsd.MJD = mjdN;
 
                                  mjdEnd = fitsd.MJD + fitsd.exptime/86400.0/2.0;
-                                 mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                                 /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
-                                 qDebug() << QString("new file name: %1\n").arg(nName);
+                                 qDebug() << QString("new file name: %1\n").arg(nName);*/
+                                 fitsType = 2;
+
                                  //fitsd.saveFitsAs(nName);
                              }
 
@@ -408,31 +437,68 @@ int main(int argc, char *argv[])
 
 ////////////////////SAVE FITS ////////////////////////////////
 
-/*
-                             fitsd.saveFitsAs(nName);
-*/
+
+                             //fitsd.saveFitsAs(nName);
+
                              if(saveFits)
                              {
+                                 mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                                 nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
+                                 qDebug() << QString("new file name: %1\n").arg(nName);
+
                                  QFile().remove(nName);
 
                                  fits_open_file(&fptr, fitsd.fileName.toAscii().data(), READONLY, &status);
-                                 //if(FD_LOG_LEVEL) qDebug() << QString("%1\topen_old %2\n").arg(fileName).arg(status);
+                                 if(status)
+                                 {
+                                     qDebug() << QString("%1\topen_old %2\n").arg(fitsd.fileName).arg(status);
+                                     exit(1);
+                                 }
                                  status = 0;
 
                                  fits_create_file(&fptr_out, nName.toAscii().data(), &status);
-                                 //if(FD_LOG_LEVEL) qDebug() << QString("create %1\n").arg(status);
+                                 if(status)
+                                 {
+                                     qDebug() << QString("create %1\n").arg(status);
+                                     exit(1);
+                                 }
                                  status = 0;
 
                                  fits_copy_hdu(fptr, fptr_out, 0, &status);
                                  status = 0;
 
+                                 naxes[0] = fitsd.imgArr->naxes[0];
+                                 naxes[1] = fitsd.imgArr->naxes[1];
+                                 nelements = fitsd.imgArr->getNelements();
+
+                                 fits_write_img(fptr_out, TUSHORT, 1, naxes[0]*naxes[1]+1, (void*) fitsd.imgArr->ushD, &status);
+                                 if(status)
+                                 {
+                                     qDebug() << QString("write_img %1\n").arg(status);
+                                     exit(1);
+                                 }
+                                 status=0;
+
+                                 if(fitsType==2)
+                                 {
                                  getStrTfromMJD(&tstr, mjdBeg);
                                  fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
                                  status = 0;
+                                 }
 
-                                 getStrTfromMJD(&tstr, mjdEnd);
-                                 fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
-                                 status = 0;
+                                 if(fitsType>0)
+                                 {
+                                    getStrTfromMJD(&tstr, mjdEnd);
+                                    fits_update_key(fptr_out, TSTRING, "DATE-END", tstr.toAscii().data(), "UTC of end(Corrected from app)", &status);
+                                    status = 0;
+                                 }
+
+
+
+                                 fits_close_file(fptr, &status);
+                                 status=0;
+                                 fits_close_file(fptr_out, &status);
+                                 status=0;
                             }
 
 
@@ -447,13 +513,15 @@ int main(int argc, char *argv[])
                  }
                  serieTot++;
                  wfList.clear();
+                 if(j!=fitsCounter) qDebug() << QString("\n\nWARN:%1\n\n").arg(j-fitsCounter);
              }
 
              wfList << tFile;
+             qDebug() << QString("%1:tFile: %2\n").arg(j).arg(tFile);
          }
      }
 
-     qDebug() << QString("=============================\nseriesTot: %1\nseriesCorr: %2\nfitsCounter: %3\ndendCounter: %4\n========================================\n").arg(serieTot).arg(serieCorr).arg(fitsCounter).arg(dendCounter);
+     qDebug() << QString("=============================\nseriesTot: %1\nseriesCorr: %2\nfitsCounter: %3\ndendCounter: %4\nbreaks: %5\n========================================\n").arg(serieTot).arg(serieCorr).arg(fitsCounter).arg(dendCounter).arg(brCounter);
      residFile.close();
 
      if(detCorr)
