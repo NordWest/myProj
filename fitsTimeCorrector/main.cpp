@@ -233,6 +233,7 @@ int main(int argc, char *argv[])
                          if(!detCorrL(expCorr0, fitsd.exptime, 0, eAplyL, aAplyL, bAplyL)) expCorr0 = detCorr0(fitsd.exptime, 0, aAcorr, aBcorr, bAcorr, bBcorr);
                          break;
                      }
+                     qDebug() << QString("expCorr0: %1\n").arg(expCorr0);
 
 
                      dt = (fitsd.exptime-dTcorr)/86400.0;
@@ -333,7 +334,7 @@ int main(int argc, char *argv[])
 
                                          if(fabs(mjdEnd-mjdNend)>(fitsd.exptime/86400.0/2.0))
                                          {
-                                             mjdEnd = mjdNend-expCorr0;
+                                             mjdEnd = mjdNend+expCorr0;
                                              realExp = (mjdEnd-mjdBeg)*86400.0;
                                              fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
                                             dendCounter++;
