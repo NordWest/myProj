@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     fitsdata fitsd;
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
     QFileInfo fi;
-    double mjd0, mjd1, dmjd0, dmjd1, mjdN, mjdNend, mjdEnd, mjdBeg, realExp, realMJD;
+    double mjd0, mjd1, dmjd0, dmjd1, mjdN, mjdNend, mjdEnd, mjdBeg, realExp, realMJD, dobsN, dendN;
     QString objName0, objName1, tstr;
     QString nTime;
     long nelements;
@@ -233,13 +233,18 @@ int main(int argc, char *argv[])
 
                              tstr = wfList.at(k).section("_", -1, -1).section(".", 0,0);
                              expNum = tstr.toInt()-1;
-                             qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
+                             //qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
 
-                             mjdN = t0+dt*expNum;
+                             //mjdN = t0+dt*expNum;
+                             dobsN = t0 - fitsd.exptime/86400.0/2.0 + dt*expNum;
+                             dendN = t0 + fitsd.exptime/86400.0/2.0 + dt*expNum;
                              switch(aplyType)
                              {
                                  case 1:
-                                 mjdN -= detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
+                                 expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
+                                 //mjdN -= expCorr;
+                                 dobsN -= expCorr;
+                                 dendN -= expCorr;
                                  break;
                                  case 2:
                                  isCorr=0;
@@ -256,10 +261,13 @@ int main(int argc, char *argv[])
                                      {
                                          expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
                                      }
-                                     mjdN -= expCorr;
+                                     //mjdN -= expCorr;
+                                     dobsN -= expCorr;
+                                     dendN -= expCorr;
                                      break;
                              }
 
+                             mjdN = (dobsN+dendN)/2.0;
 
                                  getStrTfromMJD(&tstr, mjdBeg);
                                  //qDebug() << QString("DATE-OBS: %1\n").arg(tstr);
@@ -269,7 +277,9 @@ int main(int argc, char *argv[])
                                  mjdEnd = getMJDfromStrT(tstr.section("\'", 1, 1));
 
                                  mjdNend = fitsd.MJD+fitsd.exptime/86400.0/2.0;
-                                 //qDebug() << QString("mjdEnd: %1\tmjdNend: %2\n").arg(mjdEnd).arg(mjdNend);
+
+
+                                 qDebug() << QString("dmjdObs: %1\tdmjdEnd: %2\tdT: %3\n").arg(mjdBeg-dobsN).arg(mjdEnd-dendN).arg((dendN+dobsN)/2.0-mjdN);
 
                                      //qDebug() << QString("realExp: %1\n").arg(realExp);
 
