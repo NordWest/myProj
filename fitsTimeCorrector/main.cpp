@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     QStringList dataFiles, filters, wfList;
     QString tFile;
     QDir tDir, rDir;
-    int i, j, k, l, lNum, szi, szj, wfSz, expNum;
+    int i, j, k, l, lNum, szi, szj, wfSz, expNum, sTarg;
     double t0, t1, dt;
     fitsdata fitsd;
     QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
 
 
 
+             sTarg = 0;
              tFile = QString("%1/%2").arg(dirList.at(i)).arg(dataFiles.at(j));
 
 
@@ -204,16 +205,21 @@ int main(int argc, char *argv[])
                  continue;
              }
 
-             mjd1 = fitsd.MJD;
-             dmjd1 = fabs(mjd1-mjd0);
+
 
              fitsd.headList.getKeyName("TARGET", &tstr);
              objName1 = tstr.section("\'", 1, 1);
              if(objName1.indexOf("target")!=-1)
              {
-                 qDebug() << QString("skip target\n");
+                 qDebug() << QString("skip target: %1\n").arg(objName1);
                  brCounter++;
-                 continue;
+                 sTarg = 1;
+                 //continue;
+             }
+             else
+             {
+                 mjd1 = fitsd.MJD;
+                 dmjd1 = fabs(mjd1-mjd0);
              }
 
 
@@ -517,8 +523,18 @@ int main(int argc, char *argv[])
                  //if(j!=fitsCounter) qDebug() << QString("\n\nWARN:%1\n\n").arg(j-fitsCounter);
              }
 
-             wfList << tFile;
-             qDebug() << QString("%1:tFile: %2\n").arg(j).arg(tFile);
+             if(!sTarg)
+             {
+                 wfList << tFile;
+                 qDebug() << QString("%1:tFile: %2\n").arg(j).arg(tFile);
+
+             }
+             else
+             {
+                 qDebug() << QString("skip target: %1\n").arg(objName1);
+                 brCounter++;
+             }
+
          }
      }
 
