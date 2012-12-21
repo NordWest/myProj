@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
 
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
-    QString resPathName = QDir(sett->value("general/resPath", "./res/").toString()).absolutePath();
+    QString resDirName = QDir(sett->value("general/resDir", "./res").toString()).absolutePath();
     QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
     int detCorr = sett->value("general/detCorr", 0).toInt();
     int aplyType = sett->value("general/aplyType", 0).toInt();
@@ -177,12 +177,12 @@ int main(int argc, char *argv[])
          qDebug() << QString("filesNum: %1\n\n").arg(dataFiles.size());
          szj = dataFiles.size();
          wfList.clear();
-/*
+
          nDirName = dirList.at(i);
          nDirName.replace(workDirName, resDirName);
          qDebug() << QString("ndir: %1\n").arg(nDirName);
          QDir().mkpath(nDirName);
-*/
+
          for(j=0; j<szj; j++)
          {
              mjd0 = mjd1;
@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
                              if(saveFits)
                              {
                                  mjdDateCode_file(&dateCodeNew, fitsd.MJD);
-                                 nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
+                                 nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
                                  qDebug() << QString("new file name: %1\n").arg(nName);
 
                                  QFile().remove(nName);
