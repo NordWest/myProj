@@ -450,7 +450,7 @@ int main(int argc, char *argv[])
                              {
                                  mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
-                                 qDebug() << QString("new file name: %1\n").arg(nName);
+                                 qDebug() << QString("new file name: %1\tTIMECORR: %2").arg(nName).arg(fitsType);
 
                                  QFile().remove(nName);
 
