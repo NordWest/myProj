@@ -493,6 +493,7 @@ int main(int argc, char *argv[])
                                     status = 0;
                                  }
 
+                                 fits_write_key(fptr_out, TINT, "TIMECORR",(void*) &fitsType, "Time correction key", &status);
 
 
                                  fits_close_file(fptr, &status);
@@ -513,7 +514,7 @@ int main(int argc, char *argv[])
                  }
                  serieTot++;
                  wfList.clear();
-                 if(j!=fitsCounter) qDebug() << QString("\n\nWARN:%1\n\n").arg(j-fitsCounter);
+                 //if(j!=fitsCounter) qDebug() << QString("\n\nWARN:%1\n\n").arg(j-fitsCounter);
              }
 
              wfList << tFile;
