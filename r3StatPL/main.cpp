@@ -458,6 +458,8 @@ int main(int argc, char *argv[])    //r3StatPL
     r51data.nmin = sett->value("report51/nmin", 0).toInt();
     r51data.rMax = sett->value("report51/rMax", 0).toDouble();
 
+//
+
 
     QString diapStr = sett->value("diaps/magDiaps").toString();
 /////////////////////////////////////////////////////////////////////////////
@@ -2563,11 +2565,16 @@ int main(int argc, char *argv[])    //r3StatPL
 /////////////////////////////////////////////////////////////////////////////////
 
 //report6
-/*
+
     if(isReport6)
     {
+        confFile = sett->value("report6/confFile", "./conf/ruler3PL.ini").toDouble();
 
-        QSettings *settConf = new QSettings("./conf/conf.ini", QSettings::IniFormat);
+        QSettings *settConf = new QSettings(confFile, QSettings::IniFormat);
+
+        QString catIni = settConf->value("catalogs/catIni", "./conf/catalogs.ini");
+        int aper =  sett->value("general/aperture", 20).toInt();
+/*
         insSettings *instruments = new insSettings("./conf/telescopes.ini");
         instruments->getNumIns(instruments->curInst);
 
@@ -2579,49 +2586,13 @@ int main(int argc, char *argv[])    //r3StatPL
         int tryMpeph = sett->value("objectsFind/tryMpeph").toInt();
         double magObj0 = sett->value("objectsFind/mag0", 6.0).toDouble();
         double magObj1 = sett->value("objectsFind/mag1", 15.0).toDouble();
-
+*/
         QList <catFinder *> starCatList;
 
-        catFinder *starCat = new catFinder;
-        starCat->exeName = settConf->value("ucac2/exeName").toString();
-        starCat->exePath = settConf->value("ucac2/exePath").toString();
-        starCat->catType = settConf->value("ucac2/catType").toInt();
-        starCat->catName = settConf->value("ucac2/catName").toString();
-        starCat->catPath = settConf->value("ucac2/catPath").toString();
-        starCatList << starCat;
-        //
-        starCat = new catFinder;
-        starCat->exeName = settConf->value("usnob/exeName").toString();
-        starCat->exePath = settConf->value("usnob/exePath").toString();
-        starCat->catType = settConf->value("usnob/catType").toInt();
-        starCat->catName = settConf->value("usnob/catName").toString();
-        starCat->catPath = settConf->value("usnob/catPath").toString();
-        starCatList << starCat;
-        //
-        starCat = new catFinder;
-        starCat->exeName = settConf->value("ucac3/exeName").toString();
-        starCat->exePath = settConf->value("ucac3/exePath").toString();
-        starCat->catType = settConf->value("ucac3/catType").toInt();
-        starCat->catName = settConf->value("ucac3/catName").toString();
-        starCat->catPath = settConf->value("ucac3/catPath").toString();
-        starCatList << starCat;
-        //
-        starCat = new catFinder;
-        starCat->exeName = settConf->value("lspm/exeName").toString();
-        starCat->exePath = settConf->value("lspm/exePath").toString();
-        starCat->catType = settConf->value("lspm/catType").toInt();
-        starCat->catName = settConf->value("lspm/catName").toString();
-        starCat->catPath = settConf->value("lspm/catPath").toString();
-        starCatList << starCat;
-        //
-        starCat = new catFinder;
-        starCat->exeName = settConf->value("lspmFind/exeName").toString();
-        starCat->exePath = settConf->value("lspmFind/exePath").toString();
-        starCat->catType = settConf->value("lspmFind/catType").toInt();
-        starCat->catName = settConf->value("lspmFind/catName").toString();
-        starCat->catPath = settConf->value("lspmFind/catPath").toString();
-        starCatList << starCat;
-        //
+        catFinder *starCat;// = new catFinder;
+
+        initCatList(&starCatList, catIni);
+/*
         //qDebug() << QString("starCatList count: %1\n").arg(starCatList.count());
         QString ast_eph_prog = settConf->value("processes/ast_eph_prog", "./mpeph.exe").toString();
         QString ast_eph_prog_folder = settConf->value("processes/ast_eph_prog_folder", "./").toString();
@@ -2631,12 +2602,12 @@ int main(int argc, char *argv[])    //r3StatPL
         QString get_http_prog_folder = settConf->value("processes/get_http_prog_folder", "./").toString();
         QString ucac3find_prog = settConf->value("processes/ucac3find", "./ucac3find.exe").toString();
         QString ucac3find_prog_folder = settConf->value("processes/ucac3find_folder", "./").toString();
+*/
+        int catProgType = settConf->value("catalogs/catProgType", 0).toInt();
 
-        int currentCat = settConf->value("catalogs/currentCatalog", 0).toInt();
         QString observatoryCat = settConf->value("catalogs/observatoryCat", "./../../../data/cats/Obs.txt").toString();
-
-        QString obsCode = settConf->value("celestial/obsName", "084").toString();
-        double maxObjDisp = settConf->value("celestial/maxObjDisp", 2).toDouble();
+        QString obsCode = settConf->value("observatory/obsCode", "084").toString();
+        //double maxObjDisp = settConf->value("celestial/maxObjDisp", 2).toDouble();
 
         double mag0 = sett->value("catalogs/mag0", 6.0).toDouble();
         double mag1 = sett->value("catalogs/mag1", 15.0).toDouble();
@@ -2644,52 +2615,70 @@ int main(int argc, char *argv[])    //r3StatPL
         fitsdata *fitsd = new fitsdata;
 
       //  double mJD, ra, de;
+        double
 
         di = mesList.size();
         //QList <ucac3Rec*> u3List;
         int u3Summ, resSumm;
         u3Summ = resSumm = 0;
-/*
+        double fov, ra0, de0, ra1, de1;
+        double meanKsi, rmsMean73Ksi, rmsOneKsi, meanEta, rmsOneEta, rmsMeanEta;
+        int numKsi, numEta;
+
         for(i=0; i<di; i++)
         {
             mesRec = mesList.at(i);
 
             fitsd->clear();
 
-            fitsd->openEmptyFile();
+            //fitsd->openEmptyFile();
 
-            fitsd->setPos(mesRec->errBud->MJD, mesRec->errBud->RAoc, mesRec->errBud->DEoc);
+            //fitsd->setPos(mesRec->errBud->MJD, mesRec->errBud->RAoc, mesRec->errBud->DEoc);
+            fitsd->initErrB(mesRec->errBud);
+            fitsd->initResiduals(mesRec->resList);
+            fitsd->detIpixWorkFrame();
+            fov = fovp*fitsd->detFov();
 
-            //РІС‹СЃС‚Р°РІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
-                fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-                fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
+            //    fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
+            //    fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
             //РѕС‚РєСЂС‹С‚СЊ РјРµС‚РєРё
                 //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                 //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
             //РёР· РєР°С‚Р°Р»РѕРіР°
                 fitsd->marksG->clearMarks();
-                fitsd->getMarksGrid(starCatList.at(currentCat), instruments->fov, mag0, mag1, -1);
+                fitsd->getMarksGrid(starCatList.at(currentCat), fov, mag0, mag1, -1);
                 fitsd->detTan();
-            //РѕР±СЉРµРєС‚
-                fitsd->mpeWaitTime = mpeWaitTime;
-                fitsd->sbWaitTime = sbWaitTime;
-                if(lspmFind)
+
+                szj = mesRec->resList.size();
+                szk = fitsd->catMarks->marks.size();
+                meanKsi = 0;
+                meanEta = 0;
+                //fitsd->findCloserStars(aper);
+                for(j=0; j<szj; j++)
                 {
-                    if(!(starCatList.size()<5)) fitsd->findLspmCat(starCatList[4]->exeName, starCatList[4]->exePath, starCatList[4]->catPath, instruments->fov, magObj0, magObj1);
-                }
-                if(skybotFind)
-                {
-                    qDebug() << QString("skybotFindType\n");
-                    QStringList objNames;
-                    //tryMpeph = foDlg->ui_isUseExpNum->isChecked();
-                    if(tryMpeph)
+                    ra0 = mesRec->resList.at(j)->ra;
+                    de0 = mesRec->resList.at(j)->de;
+                    distMin = 360.0;
+                    kMin = -1;
+                    for(k=0;k<szk; k++)
                     {
-                        fitsd->findSkybotNamesList(&objNames, skybot_prog, skybot_prog_folder, instruments->fov, obsCode, magObj0, magObj1);
-                        sz = objNames.size();
-                        for(i=0; i<sz; i++)fitsd->getMpephName(objNames.at(i), ast_eph_prog, ast_eph_prog_folder, magObj0, magObj1);
+                        ra1 = fitsd->catMarks->marks.at(k)->mEkv[0];
+                        de1 = fitsd->catMarks->marks.at(k)->mEkv[1];
+                        dist = sqrt(pow((ra0-ra1)*cos(de0), 2.0) + pow(de0-de1, 2.0));
+                        if(dist<distMin)
+                        {
+                            distMin = dist;
+                            kMin = k;
+                        }
                     }
-                    else fitsd->findSkybot(skybot_prog, skybot_prog_folder, instruments->fov, obsCode, magObj0, magObj1);
-                //fitsd->findLspmCat(starCatList[4]->exeName, starCatList[4]->exePath, starCatList[4]->catPath, fovSpinBox->value());
+                    if(kMin!=-1&&distMin<(aper*fitsd->getMeanScale()))
+                    {
+                        if(QString().compare(starCatList.at(currentCat)->catName, "ucac4")==0)
+                        {
+                            valKsi = fitsd->catMarks->marks.at(kMin)->u4Rec->pm_ra_sigma +
+                        }
+                        //if(mesRec->resList.at(j)->isRefKsi) meanKsi += itsd->catMarks->marks.at(k)-
+                    }
                 }
 
                mesRec->detMarksList(fitsd->marksG->marks);
@@ -2698,16 +2687,16 @@ int main(int argc, char *argv[])    //r3StatPL
                u3Summ += szj;
                resSumm += mesRec->resList.size();
                qDebug() << QString("u3List size: %1\tresList size: %2").arg(szj).arg(mesRec->resList.size());
-/*
+
                for(j=0; j<szj; j++)
                {
                    //qDebug() << QString("ra: %1|%2|%3\n").arg(mesRec->u3MarksList[j]->u3Rec->ra).arg(mesRec->u3MarksList[j]->resRec->ra).arg(grad_to_mas(fabs(mesRec->u3MarksList[j]->u3Rec->ra - mesRec->u3MarksList[j]->resRec->ra)));
                    //qDebug() << QString("de: %1|%2|%3\n").arg(mesRec->u3MarksList[j]->u3Rec->dec).arg(mesRec->u3MarksList[j]->resRec->de).arg(grad_to_mas(fabs(mesRec->u3MarksList[j]->u3Rec->dec - mesRec->u3MarksList[j]->resRec->de)));
                    //qDebug() << QString("dist: %1\n\n").arg(sqrt(pow(mesRec->u3MarksList[j]->u3Rec->ra - mesRec->u3MarksList[j]->resRec->ra, 2.0) + pow(mesRec->u3MarksList[j]->u3Rec->dec - mesRec->u3MarksList[j]->resRec->de, 2.0)));
                }
-/
+
         }
-/
+
 
 
 

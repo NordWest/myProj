@@ -8491,6 +8491,36 @@ void fitsdata::initObsPos(obsy *obsp)
     obsp->copyTo(obsPos);
 }
 
+void fitsdata::initErrB(errBudgetRec errbRec)
+{
+    MJD = errbRec.MJD;
+    WCSdata[0] = errbRec.Xoc;
+    WCSdata[1] = errbRec.Yoc;
+    WCSdata[2] = errbRec.RAoc;
+    WCSdata[3] = errbRec.DEoc;
+    WCSdata[4] = errbRec.xParams.params.at(2);
+    WCSdata[5] = errbRec.yParams.params.at(2);
+    WCSdata[6] = errbRec.xParams.params.at(3);
+    WCSdata[7] = errbRec.yParams.params.at(3);
+    WCSdata[8] = errbRec.xParams.params.at(2);
+    WCSdata[9] = errbRec.yParams.params.at(2);
+    WCSdata[10] = errbRec.xParams.params.at(3);
+    WCSdata[11] = errbRec.yParams.params.at(3);
+    WCSdata[12] = 1;
+}
+
+void fitsdata::initResiduals(QList <residualsRec*> resList)
+{
+       ipixMarks->clearMarks();
+       int sz, i;
+       sz = resList.size();
+       for(i=0; i<sz; i++)
+       {
+            ipixMarks->addImgMark(resList.at(i)->x, resList.at(i)->y, resList.at(i)->pixmag);
+
+       }
+}
+
 int fitsdata::findHstars(int apeDiam, int targNum)
 {
     QVector <double> cmX, cmY, flux;
