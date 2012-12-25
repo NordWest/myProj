@@ -450,7 +450,7 @@ public:
 
         void initObsPos(obsy *obsp);
 
-        void initErrB(errBudgetRec errbRec);
+        void initErrB(errBudgetRec *errbRec);
         void initResiduals(QList <residualsRec*> resList);
 
         HeadList headList;

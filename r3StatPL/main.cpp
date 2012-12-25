@@ -2568,11 +2568,11 @@ int main(int argc, char *argv[])    //r3StatPL
 
     if(isReport6)
     {
-        confFile = sett->value("report6/confFile", "./conf/ruler3PL.ini").toDouble();
+        QString confFile = sett->value("report6/confFile", "./conf/ruler3PL.ini").toString();
 
         QSettings *settConf = new QSettings(confFile, QSettings::IniFormat);
 
-        QString catIni = settConf->value("catalogs/catIni", "./conf/catalogs.ini");
+        QString catIni = settConf->value("catalogs/catIni", "./conf/catalogs.ini").toString();
         int aper =  sett->value("general/aperture", 20).toInt();
 /*
         insSettings *instruments = new insSettings("./conf/telescopes.ini");
@@ -2603,6 +2603,7 @@ int main(int argc, char *argv[])    //r3StatPL
         QString ucac3find_prog = settConf->value("processes/ucac3find", "./ucac3find.exe").toString();
         QString ucac3find_prog_folder = settConf->value("processes/ucac3find_folder", "./").toString();
 */
+        double fovp = settConf->value("general/fovp", 0).toDouble();
         int catProgType = settConf->value("catalogs/catProgType", 0).toInt();
 
         QString observatoryCat = settConf->value("catalogs/observatoryCat", "./../../../data/cats/Obs.txt").toString();
@@ -2615,7 +2616,10 @@ int main(int argc, char *argv[])    //r3StatPL
         fitsdata *fitsd = new fitsdata;
 
       //  double mJD, ra, de;
-        double
+        double dist, distMin, valKsi, valEta;
+        int kMin;
+        ucac4Rec *u4Rec;
+        ucac3Rec *u3Rec;
 
         di = mesList.size();
         //QList <ucac3Rec*> u3List;
@@ -2623,7 +2627,26 @@ int main(int argc, char *argv[])    //r3StatPL
         u3Summ = resSumm = 0;
         double fov, ra0, de0, ra1, de1;
         double meanKsi, rmsMean73Ksi, rmsOneKsi, meanEta, rmsOneEta, rmsMeanEta;
+        double mjdYr, dT;
         int numKsi, numEta;
+        QVector <double> yrVect;
+        QVector <double> ksiVect;
+        QVector <double> etaVect;
+        QVector <int> numKsiVect;
+        QVector <int> numEtaVect;
+
+        QFile sgsKsiFile(reportDirName+"report6sgKsi.txt");
+        sgsKsiFile.open(QFile::WriteOnly | QFile::Truncate);
+        QTextStream sgsKsiStm(&sgsKsiFile);
+
+        QFile sgsEtaFile(reportDirName+"report6sgEta.txt");
+        sgsEtaFile.open(QFile::WriteOnly | QFile::Truncate);
+        QTextStream sgsEtaStm(&sgsEtaFile);
+
+        QFile sgFile(reportDirName+"report6.txt");
+        sgFile.open(QFile::WriteOnly | QFile::Truncate);
+        QTextStream sgStm(&sgFile);
+
 
         for(i=0; i<di; i++)
         {
@@ -2638,6 +2661,7 @@ int main(int argc, char *argv[])    //r3StatPL
             fitsd->initResiduals(mesRec->resList);
             fitsd->detIpixWorkFrame();
             fov = fovp*fitsd->detFov();
+            mjdYr = getYearFromMJD(fitsd->MJD);
 
             //    fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
             //    fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
@@ -2645,8 +2669,8 @@ int main(int argc, char *argv[])    //r3StatPL
                 //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                 //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
             //РёР· РєР°С‚Р°Р»РѕРіР°
-                fitsd->marksG->clearMarks();
-                fitsd->getMarksGrid(starCatList.at(currentCat), fov, mag0, mag1, -1);
+                fitsd->catMarks->clearMarks();
+                getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
                 fitsd->detTan();
 
                 szj = mesRec->resList.size();
@@ -2673,34 +2697,75 @@ int main(int argc, char *argv[])    //r3StatPL
                     }
                     if(kMin!=-1&&distMin<(aper*fitsd->getMeanScale()))
                     {
-                        if(QString().compare(starCatList.at(currentCat)->catName, "ucac4")==0)
+                        if(QString().compare(starCatList.at(catProgType)->catName, "ucac4", Qt::CaseInsensitive)==0)
                         {
-                            valKsi = fitsd->catMarks->marks.at(kMin)->u4Rec->pm_ra_sigma +
+                            u4Rec = fitsd->catMarks->marks.at(kMin)->u4Rec;
+                            if(mesRec->resList.at(j)->isRefKsi)
+                            {
+                                dT = fabs(mjdYr-u4Rec->epoch_ra);
+                                valKsi = sqrt(pow(u4Rec->ra_sigma, 2.0) +
+    pow(dT*u4Rec->pm_ra_sigma, 2.0));
+                                meanKsi += valKsi;
+                                numKsi++;
+                                sgsKsiStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(mjdYr).arg(dT).arg(u4Rec->ra_sigma).arg(u4Rec->pm_ra_sigma).arg(valKsi).arg(u4Rec->mag1).arg(mesRec->errBud->originName);
+                            }
+                            if(mesRec->resList.at(j)->isRefEta)
+                            {
+                                dT = fabs(mjdYr-u4Rec->epoch_dec);
+                                valEta = sqrt(pow(u4Rec->dec_sigma, 2.0) +
+    pow(dT*u4Rec->pm_dec_sigma, 2.0));
+                                meanEta += valEta;
+                                sgsEtaStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(mjdYr).arg(dT).arg(u4Rec->dec_sigma).arg(u4Rec->pm_dec_sigma).arg(valEta).arg(u4Rec->mag1).arg(mesRec->errBud->originName);
+                                numEta++;
+                            }
+                        }
+
+                        if(QString().compare(starCatList.at(catProgType)->catName, "ucac3", Qt::CaseInsensitive)==0)
+                        {
+                            if(mesRec->resList.at(j)->isRefKsi)
+                            {
+                                dT = fabs(mjdYr-fitsd->catMarks->marks.at(kMin)->u3Rec->cepra);
+                                valKsi = sqrt(pow(fitsd->catMarks->marks.at(kMin)->u3Rec->sigra, 2.0) +
+    pow(dT*fitsd->catMarks->marks.at(kMin)->u3Rec->sigpmr, 2.0));
+                                meanKsi += valKsi;
+                                numKsi++;
+                            }
+                            if(mesRec->resList.at(j)->isRefEta)
+                            {
+                                dT = fabs(mjdYr-fitsd->catMarks->marks.at(kMin)->u3Rec->cepdc);
+                                valEta = sqrt(pow(fitsd->catMarks->marks.at(kMin)->u3Rec->sigdc, 2.0) +
+    pow(dT*fitsd->catMarks->marks.at(kMin)->u3Rec->sigpmd, 2.0));
+                                meanEta += valEta;
+                                numEta++;
+                            }
                         }
                         //if(mesRec->resList.at(j)->isRefKsi) meanKsi += itsd->catMarks->marks.at(k)-
                     }
                 }
 
-               mesRec->detMarksList(fitsd->marksG->marks);
+                yrVect << mjdYr;
+                ksiVect << meanKsi/numKsi;
+                etaVect << meanEta/numEta;
+                numKsiVect << numKsi;
+                numEtaVect << numEta;
 
-               szj = mesRec->u3MarksList.size();
-               u3Summ += szj;
-               resSumm += mesRec->resList.size();
-               qDebug() << QString("u3List size: %1\tresList size: %2").arg(szj).arg(mesRec->resList.size());
-
-               for(j=0; j<szj; j++)
-               {
-                   //qDebug() << QString("ra: %1|%2|%3\n").arg(mesRec->u3MarksList[j]->u3Rec->ra).arg(mesRec->u3MarksList[j]->resRec->ra).arg(grad_to_mas(fabs(mesRec->u3MarksList[j]->u3Rec->ra - mesRec->u3MarksList[j]->resRec->ra)));
-                   //qDebug() << QString("de: %1|%2|%3\n").arg(mesRec->u3MarksList[j]->u3Rec->dec).arg(mesRec->u3MarksList[j]->resRec->de).arg(grad_to_mas(fabs(mesRec->u3MarksList[j]->u3Rec->dec - mesRec->u3MarksList[j]->resRec->de)));
-                   //qDebug() << QString("dist: %1\n\n").arg(sqrt(pow(mesRec->u3MarksList[j]->u3Rec->ra - mesRec->u3MarksList[j]->resRec->ra, 2.0) + pow(mesRec->u3MarksList[j]->u3Rec->dec - mesRec->u3MarksList[j]->resRec->de, 2.0)));
-               }
-
+                sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(mjdYr).arg(numKsi).arg(meanKsi/numKsi).arg(numEta).arg(meanEta/numEta).arg(mesRec->errBud->originName);
         }
 
 
+        sz = yrVect.size();
+        for(i=0;i<sz;i++)
+        {
+            sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(yrVect.at(i)).arg(numKsiVect[i]).arg(ksiVect[i]).arg(numEtaVect[i]).arg(etaVect[i]).arg(mesRec->errBud->originName);
+        }
 
+        sgFile.close();
+        sgsKsiFile.close();
+        sgsEtaFile.close();
 
+    }
 
+/*
         diapU3 colEq;
         QString deDiapsStr = sett->value("report6/deDiaps", "-90|90").toString();
         QString colSep6 = sett->value("report6/colSep", "|").toString();

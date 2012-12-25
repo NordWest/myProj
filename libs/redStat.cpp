@@ -592,7 +592,7 @@ void moveModelRec::rec2s(QString *str)
                 yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
-            case 1://relative positions in arcsec //� њ� •� ”� ќ� ”� •� љ� ®� њ� ќ
+            case 1://relative positions in arcsec //Р СљР вЂўР вЂќР СњР вЂќР вЂўР С™Р В®Р СљР Сњ
             {
                 xStr = mas_to_hms(xTm, " ", 5);
                 yStr = mas_to_damas(yTm, " ", 5);
