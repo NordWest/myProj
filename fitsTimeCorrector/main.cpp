@@ -58,6 +58,7 @@ double detCorr0(double expTime, int k, double aA, double aB, double bA, double b
 {
     double aExpCorr = aA*expTime + aB;
     double bExpCorr = bA*expTime + bB;
+    qDebug() << QString("a: %1\tb:%2\n").arg(aExpCorr).arg(bExpCorr);
     double expCorr = (aExpCorr*k+bExpCorr)/86400.0;
     return(expCorr);
 }
@@ -313,6 +314,7 @@ int main(int argc, char *argv[])
                                  dendN -= expCorr;
                                  break;
                              }
+                             qDebug() << QString("expCorr: %1\n").arg(expCorr*86400.0);
 /*
                              switch(aplyType)
                              {
