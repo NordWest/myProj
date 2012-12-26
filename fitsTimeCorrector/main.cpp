@@ -287,8 +287,13 @@ int main(int argc, char *argv[])
 
                              mjdBeg = fitsd.MJD - fitsd.exptime/86400.0/2.0;
 
-                             tstr = wfList.at(k).section("_", -1, -1).section(".", 0,0);
-                             expNum = tstr.toInt()-1;
+
+                             if(detCorr==2) expNum=k;
+                             else
+                             {
+                                 tstr = wfList.at(k).section("_", -1, -1).section(".", 0,0);
+                                 expNum = tstr.toInt()-1;
+                             }
                              //qDebug() << QString("k: %1\texpNum: %2\ttstr: %3\n").arg(k).arg(expNum).arg(tstr);
 
                              //mjdN = t0+dt*expNum;
@@ -362,7 +367,7 @@ int main(int argc, char *argv[])
                                      if((QString().compare(dateCode0, dateCode1)!=0))
                                      {
 
-                                         if(fabs(mjdEnd-mjdNend)>(fitsd.exptime/86400.0/2.0))
+                                         if(fabs(mjdEnd-mjdNend)>(fitsd.exptime/86400.0))
                                          {
                                              mjdEnd = mjdNend+expCorr0;
                                              realExp = (mjdEnd-mjdBeg)*86400.0;
@@ -446,11 +451,13 @@ int main(int argc, char *argv[])
 
                              //fitsd.saveFitsAs(nName);
 
+                             mjdDateCode_file(&dateCodeNew, fitsd.MJD);
+                             nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
+                             qDebug() << QString("new file name: %1\tTIMECORR: %2\n").arg(nName).arg(fitsType);
+
                              if(saveFits)
                              {
-                                 mjdDateCode_file(&dateCodeNew, fitsd.MJD);
-                                 nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
-                                 qDebug() << QString("new file name: %1\tTIMECORR: %2").arg(nName).arg(fitsType);
+
 
                                  QFile().remove(nName);
 
