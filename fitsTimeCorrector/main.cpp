@@ -56,6 +56,7 @@ struct expCorrRec
 
 double detCorr0(double expTime, int k, double aA, double aB, double bA, double bB)
 {
+    if(k<0) return 0.0;
     double aExpCorr = aA*expTime + aB;
     double bExpCorr = bA*expTime + bB;
     qDebug() << QString("a: %1\tb:%2\n").arg(aExpCorr).arg(bExpCorr);
@@ -65,6 +66,11 @@ double detCorr0(double expTime, int k, double aA, double aB, double bA, double b
 
 int detCorrL(double &expCorr, double expTime, int expNum, QStringList eAplyL, QStringList aAplyL, QStringList bAplyL)
 {
+    if(expTime<0)
+    {
+        expCorr=0.0;
+        return 0;
+    }
     for(int l=0;l<eAplyL.size();l++)
     {
         if(floor(eAplyL.at(l).toDouble())==floor(expTime))
@@ -233,7 +239,7 @@ int main(int argc, char *argv[])
              {
                  if(wfList.size()>0)
                  {
-                     //if(j==szj-1) wfList << tFile;
+                     if(QString().compare(objName1, objName0)==0&&j==szj-1) wfList << tFile;
 
 
 
@@ -304,13 +310,16 @@ int main(int argc, char *argv[])
                              switch(aplyType)
                              {
                              case 1:
+
+                                 dobsN -= detCorr0(fitsd.exptime, expNum-1, aAcorr, aBcorr, bAcorr, bBcorr);
                                  expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
-                                 dobsN -= expCorr;
+
                                  dendN -= expCorr;
                                  break;
                              case 2:
-                                 if(!detCorrL(expCorr, fitsd.exptime, expNum, eAplyL, aAplyL, bAplyL)) expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
+                                 if(!detCorrL(expCorr, fitsd.exptime, expNum-1, eAplyL, aAplyL, bAplyL)) expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
                                  dobsN -= expCorr;
+                                 if(!detCorrL(expCorr, fitsd.exptime, expNum, eAplyL, aAplyL, bAplyL)) expCorr = detCorr0(fitsd.exptime, expNum, aAcorr, aBcorr, bAcorr, bBcorr);
                                  dendN -= expCorr;
                                  break;
                              }
@@ -350,7 +359,8 @@ int main(int argc, char *argv[])
 */
                              mjdN = (dobsN+dendN)/2.0;
 
-                                 getStrTfromMJD(&tstr, mjdBeg);
+                             //fitsd.headList.getKeyName("DATE-OBS", &tstr);
+                                 //getStrTfromMJD(&tstr, mjdBeg);
                                  //qDebug() << QString("DATE-OBS: %1\n").arg(tstr);
 
                                  fitsd.headList.getKeyName("DATE-END", &tstr);
@@ -435,7 +445,10 @@ int main(int argc, char *argv[])
                              {
                                  fitsd.MJD = mjdN;
 
-                                 mjdEnd = fitsd.MJD + fitsd.exptime/86400.0/2.0;
+                                 if(k>0) mjdBeg = dobsN;
+                                 mjdEnd = dendN;
+
+                                     //fitsd.MJD + fitsd.exptime/86400.0/2.0;
                                  /*mjdDateCode_file(&dateCodeNew, fitsd.MJD);
                                  nName = QString("%1/%2.fit").arg(resPathName).arg(dateCodeNew);
                                  qDebug() << QString("new file name: %1\n").arg(nName);*/
