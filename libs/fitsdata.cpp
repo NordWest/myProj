@@ -1567,7 +1567,7 @@ int HeadList::getKeyName(QString kName, QString *kVal)
     kVal->clear();
     for(int i=0; i<sz; i++)
     {
-   //     if(FD_LOG_LEVEL) qDebug() << QString("i= %1\tsz= %2\t|%3|%4|\n").arg(i).arg(sz).arg(headList.at(i)->keyName.simplified()).arg(kName);
+        tName = headList.at(i)->keyName.simplified();
         if(headList.at(i)->keyName.simplified()==kName)
         {
      //       if(FD_LOG_LEVEL) qDebug() << "insert\n";
@@ -4639,10 +4639,11 @@ int fitsdata::initHeadList()
         else
         {
             headRec->keyName = headVals.at(i).left(pos0);
+            /*
             if(headRec->keyName.indexOf("DATE-OBS")!=-1) continue;
             if(headRec->keyName.indexOf("TIME-OBS")!=-1) continue;
-            if(headRec->keyName.indexOf("EXPTIME")!=-1) continue;
-            if(headRec->keyName.indexOf("DATE-OBS")!=-1) continue;
+            if(headRec->keyName.indexOf("EXPTIME")!=-1) continue;*/
+            //if(headRec->keyName.indexOf("DATE-OBS")!=-1) continue;
 
         //pos0 = headVals.at(i).indexOf(codec1->toUnicode("'"));
             pos1 = headVals.at(i).indexOf(codec1->toUnicode("/"), pos0+1);

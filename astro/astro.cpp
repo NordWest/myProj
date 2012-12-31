@@ -708,7 +708,7 @@ void mjdDateCode_file(QString *dateCode, double mJD)
     dateCode->append(QString("%1").arg((int)dObs.hour, 2, 10, QLatin1Char( '0' )));
     dateCode->append(QString("%1").arg((int)dObs.min, 2, 10, QLatin1Char( '0' )));
     //dateCode->append(QString("%1").arg((int)dObs.sec, 2, 10, QLatin1Char( '0' )));
-    dateCode->append(QString("%1").arg((int)floor(dObs.sec*10 + 0.5), 3, 10, QLatin1Char( '0' )));
+    dateCode->append(QString("%1").arg((int)floor(dObs.sec*1000 + 0.5), 5, 10, QLatin1Char( '0' )));
 }
 
 //My
