@@ -339,13 +339,18 @@ int main(int argc, char *argv[])
                          default:
                              expCorr = 0;
                          }
-                         dendN = mjdN+dt/2.0;
+                         dobsN = mjdN-(dt+expCorr0)/2.0;
+                         dendN = mjdN+(dt+expCorr0)/2.0;
                      }
-                     else dendN = mjdN+dt/2.0+expCorr0;
+                     else
+                     {
+                         dobsN = mjdN-dt/2.0;
+                         dendN = mjdN+dt/2.0+expCorr0;
+                     }
                      qDebug() << QString("expCorr: %1\n").arg(expCorr*86400.0);
 
                      //mjdN = (dobsN+dendN)/2.0;
-                     dobsN = mjdN-dt/2.0;
+
 
 
 
