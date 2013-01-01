@@ -235,7 +235,8 @@ int main(int argc, char *argv[])
 
              //if((dmjd1>(fitsd.exptime*1.5/86400.0)||j==szj-1)&&wfList.size()>0)
              //if((dmjd1>(fitsd.exptime*2.5/86400.0))||(dmjd1>dmjd0*1.5||j==szj-1||QString().compare(objName1, objName0)!=0))
-             if(((dmjd1>(fitsd.exptime*1.5/86400.0))&&(dmjd1>dmjd0*1.5))||j==szj-1||QString().compare(objName1, objName0)!=0)
+             //if(((dmjd1>(fitsd.exptime*1.5/86400.0))&&(dmjd1>dmjd0*1.5))||j==szj-1||QString().compare(objName1, objName0)!=0)
+             if((dmjd1>(fitsd.exptime*1.5/86400.0))||(dmjd1>dmjd0*1.5)||j==szj-1||QString().compare(objName1, objName0)!=0)
              {
                  if(wfList.size()>0)
                  {
