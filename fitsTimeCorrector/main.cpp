@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
          nDirName = dirList.at(i);
          nDirName.replace(workDirName, resDirName);
          qDebug() << QString("ndir: %1\n").arg(nDirName);
-         QDir().mkpath(nDirName);
+         if(saveFits) QDir().mkpath(nDirName);
 
          for(j=0; j<szj; j++)
          {
