@@ -2629,11 +2629,12 @@ int main(int argc, char *argv[])    //r3StatPL
         double meanKsi, rmsMean73Ksi, rmsOneKsi, meanEta, rmsOneEta, rmsMeanEta;
         double mjdYr, dT;
         int numKsi, numEta;
-        QVector <double> yrVect;
-        QVector <double> ksiVect;
-        QVector <double> etaVect;
-        QVector <int> numKsiVect;
-        QVector <int> numEtaVect;
+        QList <double> yrVect;
+        QList <double> ksiVect;
+        QList <double> etaVect;
+        QList <int> numKsiVect;
+        QList <int> numEtaVect;
+        QStringList originList;
 
         QFile sgsKsiFile(reportDirName+"report6sgKsi.txt");
         sgsKsiFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -2672,11 +2673,14 @@ int main(int argc, char *argv[])    //r3StatPL
                 fitsd->catMarks->clearMarks();
                 getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
                 fitsd->detTan();
+                fitsd->catMarks->sortMagn();
 
                 szj = mesRec->resList.size();
                 szk = fitsd->catMarks->marks.size();
                 meanKsi = 0;
                 meanEta = 0;
+                numKsi = 0;
+                numEta = 0;
                 //fitsd->findCloserStars(aper);
                 for(j=0; j<szj; j++)
                 {
@@ -2748,20 +2752,87 @@ int main(int argc, char *argv[])    //r3StatPL
                 etaVect << meanEta/numEta;
                 numKsiVect << numKsi;
                 numEtaVect << numEta;
+                originList << mesRec->errBud->originName;
 
-                sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(mjdYr).arg(numKsi).arg(meanKsi/numKsi).arg(numEta).arg(meanEta/numEta).arg(mesRec->errBud->originName);
+                //sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(mjdYr).arg(numKsi).arg(meanKsi/numKsi).arg(numEta).arg(meanEta/numEta).arg(mesRec->errBud->originName);
         }
 
 
+
+        double yrMin, yrD, yrMax;
+        yrD = 2.0;
+        int posMin, szDiap;
+
         sz = yrVect.size();
-        for(i=0;i<sz;i++)
+        for(i=0;i<sz-1;i++)
         {
-            sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(yrVect.at(i)).arg(numKsiVect[i]).arg(ksiVect[i]).arg(numEtaVect[i]).arg(etaVect[i]).arg(mesRec->errBud->originName);
+            yrMin = yrVect[i];
+            posMin = i;
+            for(j=i+1; j<sz; j++)
+            {
+                if(yrVect[j]<yrMin)
+                {
+                    yrMin = yrVect[j];
+                    posMin = j;
+                }
+            }
+            if(posMin!=i)
+            {
+
+                yrVect.swap(i, posMin);
+                ksiVect.swap(i, posMin);
+                etaVect.swap(i, posMin);
+                numKsiVect.swap(i, posMin);
+                numEtaVect.swap(i, posMin);
+                originList.swap(i, posMin);
+            }
+        }
+
+        yrMin = yrVect[0];
+        yrMax = yrVect[sz-1];
+        szDiap = floor((yrMax-yrMin)/yrD) + 1;
+        qDebug() << QString("yrMin: %1\tyrMax: %2\tszDiap: %3\n").arg(yrMin).arg(yrMax).arg(szDiap);
+        double *yrArr = new double[szDiap];
+        double *ksiArr = new double[szDiap];
+        double *etaArr = new double[szDiap];
+        int *numArr = new int[szDiap];
+        for(i=0; i<szDiap; i++)
+        {
+            yrArr[i] = 0.0;
+            ksiArr[i] = 0.0;
+            etaArr[i] = 0.0;
+            numArr[i] = 0;
+        }
+
+        for(i=0; i<sz; i++)
+        {
+            sgStm << QString("%1|%2|%3|%4|%5|%6\n").arg(yrVect.at(i)).arg(numKsiVect[i]).arg(ksiVect[i]).arg(numEtaVect[i]).arg(etaVect[i]).arg(originList[i]);
+
+            j = floor((yrVect[i]-yrMin)/yrD);
+
+            yrArr[j] += yrVect[i];
+            ksiArr[j] += ksiVect[i];
+            etaArr[j] += etaVect[i];
+            numArr[j] ++;
         }
 
         sgFile.close();
         sgsKsiFile.close();
         sgsEtaFile.close();
+
+        sgFile.setFileName(reportDirName+"report6mean.txt");
+        sgFile.open(QFile::WriteOnly | QFile::Truncate);
+        sgStm.setDevice(&sgFile);
+
+        for(i=0; i< szDiap; i++)
+        {
+            if(numArr[i]<1) continue;
+            sgStm << QString("%1|%2|%3|%4\n").arg(yrArr[i]/(numArr[i]*1.0)).arg(numArr[i]).arg(ksiArr[i]/(numArr[i]*1.0)).arg(etaArr[i]/(numArr[i]*1.0));
+        }
+
+        sgFile.close();
+
+        //
 
     }
 

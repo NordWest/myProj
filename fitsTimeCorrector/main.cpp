@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
                          realExp = (mjdEnd-mjdBeg)*86400.0;
                          fitsd.MJD = (mjdEnd+mjdBeg)/2.0;
                          fitsType = 0;
-                     }
+
                          if(k>0&&k==expNum)
                          {
                              if(detCorr)
@@ -415,14 +415,15 @@ int main(int argc, char *argv[])
                              residStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(expNum, 3).arg(expNum*dt*86400.0, 6).arg((mjdN - fitsd.MJD)*86400, 12, 'f', 4).arg(fitsd.MJD, 12, 'f', 6).arg(mjdN, 12, 'f', 6).arg(t0, 12, 'f', 6).arg(fitsd.exptime).arg(realExp, 8, 'f', 3, QLatin1Char(' ')).arg(realExp-fitsd.exptime, 8, 'f', 3).arg(wfList.at(k));residStm.flush();
                          }
                      }
-                     else
-                     {
-                         mjdBeg = dobsN;//mjdN - fitsd.exptime/86400.0/2.0;
-                         mjdEnd = dendN;// fitsd.MJD - fitsd.exptime/86400.0/2.0;
-                         fitsType = 2;
-                     }
+                 }
+                 else
+                 {
+                     mjdBeg = dobsN;//mjdN - fitsd.exptime/86400.0/2.0;
+                     mjdEnd = dendN;// fitsd.MJD - fitsd.exptime/86400.0/2.0;
+                     fitsType = 2;
+                 }
 
-                     fitsCounter++;
+                 fitsCounter++;
 
 ////////////////////SAVE FITS ////////////////////////////////
 
