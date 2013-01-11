@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     int isCorr;
 
 
-    QSettings *sett = new QSettings("./fitsTimeCorrector.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings("./ftc.ini", QSettings::IniFormat);
 
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
     QString resDirName = QDir(sett->value("general/resDir", "./res").toString()).absolutePath();
@@ -427,68 +427,68 @@ int main(int argc, char *argv[])
 
 ////////////////////SAVE FITS ////////////////////////////////
 
-                             fitsd.MJD = (mjdBeg+mjdEnd)/2.0;
-                             mjdDateCode_file(&dateCodeNew, mjdBeg);
-                             nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
-                             qDebug() << QString("new file name: %1\tTIMECORR: %2\n").arg(nName).arg(fitsType);
+                 fitsd.MJD = (mjdBeg+mjdEnd)/2.0;
+                 mjdDateCode_file(&dateCodeNew, mjdBeg);
+                 nName = QString("%1/%2.fit").arg(nDirName).arg(dateCodeNew);
+                 qDebug() << QString("new file name: %1\tTIMECORR: %2\n").arg(nName).arg(fitsType);
 
-                             if(saveFits)
-                             {
-                                 QFile().remove(nName);
+                 if(saveFits)
+                 {
+                     QFile().remove(nName);
 
-                                 fits_open_file(&fptr, fitsd.fileName.toAscii().data(), READONLY, &status);
-                                 if(status)
-                                 {
-                                     qDebug() << QString("%1\topen_old %2\n").arg(fitsd.fileName).arg(status);
-                                     exit(1);
-                                 }
-                                 status = 0;
+                     fits_open_file(&fptr, fitsd.fileName.toAscii().data(), READONLY, &status);
+                     if(status)
+                     {
+                         qDebug() << QString("%1\topen_old %2\n").arg(fitsd.fileName).arg(status);
+                         exit(1);
+                     }
+                     status = 0;
 
-                                 fits_create_file(&fptr_out, nName.toAscii().data(), &status);
-                                 if(status)
-                                 {
-                                     qDebug() << QString("create %1\n").arg(status);
-                                     exit(1);
-                                 }
-                                 status = 0;
+                     fits_create_file(&fptr_out, nName.toAscii().data(), &status);
+                     if(status)
+                     {
+                         qDebug() << QString("create %1\n").arg(status);
+                         exit(1);
+                     }
+                     status = 0;
 
-                                 fits_copy_hdu(fptr, fptr_out, 0, &status);
-                                 status = 0;
+                     fits_copy_hdu(fptr, fptr_out, 0, &status);
+                     status = 0;
 
-                                 naxes[0] = fitsd.imgArr->naxes[0];
-                                 naxes[1] = fitsd.imgArr->naxes[1];
-                                 nelements = fitsd.imgArr->getNelements();
+                     naxes[0] = fitsd.imgArr->naxes[0];
+                     naxes[1] = fitsd.imgArr->naxes[1];
+                     nelements = fitsd.imgArr->getNelements();
 
-                                 fits_write_img(fptr_out, TUSHORT, 1, naxes[0]*naxes[1]+1, (void*) fitsd.imgArr->ushD, &status);
-                                 if(status)
-                                 {
-                                     qDebug() << QString("write_img %1\n").arg(status);
-                                     exit(1);
-                                 }
-                                 status=0;
+                     fits_write_img(fptr_out, TUSHORT, 1, naxes[0]*naxes[1]+1, (void*) fitsd.imgArr->ushD, &status);
+                     if(status)
+                     {
+                         qDebug() << QString("write_img %1\n").arg(status);
+                         exit(1);
+                     }
+                     status=0;
 
-                                 if(fitsType==2)
-                                 {
-                                     getStrTfromMJD(&tstr, mjdBeg);
-                                     fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
-                                     status = 0;
-                                 }
+                     if(fitsType==2)
+                     {
+                         getStrTfromMJD(&tstr, mjdBeg);
+                         fits_update_key(fptr_out, TSTRING, "DATE-OBS", tstr.toAscii().data(), "UTC of start(Corrected from app)", &status);
+                         status = 0;
+                     }
 
-                                 if(fitsType>0)
-                                 {
-                                    getStrTfromMJD(&tstr, mjdEnd);
-                                    fits_update_key(fptr_out, TSTRING, "DATE-END", tstr.toAscii().data(), "UTC of end(Corrected from app)", &status);
-                                    status = 0;
-                                 }
+                     if(fitsType>0)
+                     {
+                        getStrTfromMJD(&tstr, mjdEnd);
+                        fits_update_key(fptr_out, TSTRING, "DATE-END", tstr.toAscii().data(), "UTC of end(Corrected from app)", &status);
+                        status = 0;
+                     }
 
-                                 fits_write_key(fptr_out, TINT, "TIMECORR",(void*) &fitsType, "Time correction key", &status);
+                     fits_write_key(fptr_out, TINT, "TIMECORR",(void*) &fitsType, "Time correction key", &status);
 
 
-                                 fits_close_file(fptr, &status);
-                                 status=0;
-                                 fits_close_file(fptr_out, &status);
-                                 status=0;
-                            }
+                     fits_close_file(fptr, &status);
+                     status=0;
+                     fits_close_file(fptr_out, &status);
+                     status=0;
+                }
 
 
 ///////////////////////////////////////////////////////////////
