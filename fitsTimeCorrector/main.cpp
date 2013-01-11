@@ -387,7 +387,7 @@ int main(int argc, char *argv[])
                                  lNum = -1;
                                  for(l=0; l<expCorrList.size(); l++)
                                  {
-                                     if(expCorrList.at(l)->expSec==fitsd.exptime)
+                                     if(expCorrList.at(l)->expSec==(int)fitsd.exptime)
                                      {
                                          lNum = l;
                                          expCorrList.at(l)->corrL << (mjdN - fitsd.MJD)*86400;
@@ -530,8 +530,10 @@ int main(int argc, char *argv[])
          QStringList expResList, aResList, bResList;
          lNum = expCorrList.size();
          QVector <double> expVal, aVal, bVal;
-         double aA, aB, bA, bB;
-         double *L, *Z, *C;
+         double aA, aB, bA, bB, uwe;
+         double *L, *Z, *C, *D;
+         int *excI;
+         int rn;
          L = NULL;
          Z = NULL;
          C = NULL;
@@ -552,10 +554,14 @@ int main(int argc, char *argv[])
                  delete [] L;
                  delete [] Z;
                  delete [] C;
+                 delete [] D;
+                 delete [] excI;
              }
              L = new double[szi];
              Z = new double[2];
+             D = new double[4];
              C = new double[szi*2];
+             excI = new int[szi];
 
              for(i=0; i<szi; i++)
              {
@@ -565,9 +571,11 @@ int main(int argc, char *argv[])
                  C[i*2+1] = 1;
              }
 
-             slsm(2, szi, Z, C, L);
+             //slsm(2, szi, Z, C, L);
+             iLSM(2, szi, 10, excI, Z, C, L, uwe, D, 3.0, rn);
 
              qDebug() << QString("%1: %2\t%3\n").arg(expCorrList.at(l)->expSec).arg(Z[0]).arg(Z[1]);
+             qDebug() << QString("uwe: %1\trn: %2\n").arg(uwe).arg(rn);
              expResList << QString("%1").arg(expCorrList.at(l)->expSec);
              aResList << QString("%1").arg(Z[0]);
              bResList << QString("%1").arg(Z[1]);
