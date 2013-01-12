@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
                          if(detCorrL(expCorr0, fitsd.exptime, 0, eAplyL, aAplyL, bAplyL)) expCorr0 = detCorr0(fitsd.exptime, 0, aAcorr, aBcorr, bAcorr, bBcorr);
                          break;
                      default:
-                         expCorr0 = 0;
+                         expCorr0 = dTcorr/86400.0;
                      }
                      qDebug() << QString("expCorr0: %1\n").arg(expCorr0*86400.0);
 
