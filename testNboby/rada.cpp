@@ -2,7 +2,7 @@
 /*			RADA.CPP				*/
 /*	(c) V.B.Titov		 		28.04.94	*/
 /*==============================================================*/
-#include "stdafx.h"
+//#include "stdafx.h"
 
 
 #include <stdio.h>

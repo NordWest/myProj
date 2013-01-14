@@ -1,3 +1,12 @@
+struct ever_params
+{
+    int NV, NCLASS, NOR, NI, LL;
+    double XL, col, vout;
+    char jkeys[10];
+};
+
+//ever_params *eparam;
+
 class Everhardt
 {
  public:
@@ -14,7 +23,7 @@ class Everhardt
 //	contra(double);
 	void force(double *, double *, double, double *);
 
-/*protected:*/
+protected:
 	int N_CLASS;
 	int NI;
 	int NW[14];
