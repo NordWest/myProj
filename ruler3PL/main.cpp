@@ -342,6 +342,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
 
 //get header
 
+        qDebug() << QString("useHeaderFile: %1\n").arg(useHeaderFile);
         if(useHeaderFile)   //0-http; 1-file
         {
             if(fitsd->loadHeaderFile(headerFileName))
@@ -356,6 +357,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 qInstallMsgHandler(0);
                 return 1;
             }
+            qDebug() << "\nloadHeaderFile: success\n";
         }
         else
         {
@@ -383,6 +385,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
                 qInstallMsgHandler(0);
                 return 1;
             }
+            qDebug() << "\nreadHttpHeader: success\n";
         }
 
         if(saveHeaderFile)
@@ -390,6 +393,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             qDebug() << QString("saveHeaderFile: %1\n").arg(headerFileName);
             qDebug() << QString("headList.size: %1\n").arg(fitsd->headList.size());
             if(fitsd->saveHeaderFile(headerFileName)) qDebug() << "saveHeaderFile error\n";
+            qDebug() << "saveHeaderFile: success\n";
         }
 
 /////////////////////////////
@@ -406,6 +410,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
             qInstallMsgHandler(0);
             return 1;
         }
+        qDebug() << "loadWCSFile: success\n";
 /////////////////////////////
 
         ExposureList *expList = new ExposureList;
@@ -416,7 +421,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         fitsd->setMJD(expRec->expTime);
 
 //  utcorr
-
+        qDebug() << QString("useUtCorr: %1\n").arg(useUtCorr);
         uTime = QString("0.0");
         int exStat = 0;
 

@@ -3768,6 +3768,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
 
 
                                             mkTemp = new marksP(OBJ_TYPE_UCAC3);
+                                            if(FD_LOG_LEVEL) qDebug() << catLine << "\n";
                                             mkTemp->u3Rec->s2rec(catLine);
 
                                                 break;
@@ -9543,6 +9544,7 @@ marksP::marksP(int oType)
     ocObj = NULL;
     resRec = NULL;
     u3Rec = NULL;
+    u4Rec = NULL;
     usnobRec = NULL;
     P = NULL;
     mpcObj = NULL;
