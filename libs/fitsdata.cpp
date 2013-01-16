@@ -10548,7 +10548,7 @@ int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *re
                 {
                     if(FD_LOG_LEVEL) qDebug() << QString("remSigma: %1\n").arg(outLim.resSigma);
                     resFile.remSigma(outLim.resSigma);
-                    if(FD_LOG_LEVEL) qDebug() << QString("refMarks after sigma= %1\n").arg(resNum);
+                    if(FD_LOG_LEVEL) qDebug() << QString("refMarks after sigma= %1\n").arg(resFile.resList.size());
                 }
                 resFile.saveAs(resFolder+"/residuals"+suff+".txt");
 
