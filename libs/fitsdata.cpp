@@ -9543,6 +9543,7 @@ marksP::marksP(int oType)
     ocObj = NULL;
     resRec = NULL;
     u3Rec = NULL;
+    u4Rec = NULL;
     usnobRec = NULL;
     P = NULL;
     mpcObj = NULL;
