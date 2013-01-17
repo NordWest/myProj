@@ -177,6 +177,10 @@ int main(int argc, char *argv[])
     X = new double[3];
     V = new double[3];
 
+    double *X0, *V0;
+    X0 = new double[3];
+    V0 = new double[3];
+
     QFile xyFile("xyData.txt");
     xyFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream xyStm(&xyFile);
@@ -284,12 +288,32 @@ int main(int argc, char *argv[])
         }
         else
         {
+            if(useEPM)
+            {
+                status = calc_EPM(EARTH, centr_num, jday, pday, X0, V0);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
+            }
+            else
+            {
+
+                //nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
+                //nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
+                nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time0, GEOCENTR_NUM, CENTER, SK);
+            }
+
+            qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
+
+
             TDB2UTC(time0, &jdUTC);
             outerArguments << QString("-name=\"%1\"").arg(name.simplified());
             sJD = QString("%1").arg(jdUTC, 11, 'f',7);
             outerArguments << QString("-ep=%1").arg(sJD);
-            outerArguments << "-tcoor=2";
-            outerArguments << "-rplane=1";
+            //outerArguments << "-tcoor=2";
+            //outerArguments << "-rplane=1";
 
             outerProcess.setWorkingDirectory(miriadeProcData.folder);
             outerProcess.setProcessChannelMode(QProcess::MergedChannels);
@@ -306,20 +330,30 @@ int main(int argc, char *argv[])
             QTextStream objStream(outerProcess.readAllStandardOutput());
             QString objDataStr;
 
+
+
             while (!objStream.atEnd())
             {
                 objDataStr = objStream.readLine();
                 qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                if(objDataStr.size()<1) continue;
                 if(objDataStr.at(0)=='#') continue;
 
                 resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                if(resSL.size()<8) continue;
+                if(resSL.size()<10) continue;
                 X[0] = resSL.at(1).toDouble();
                 X[1] = resSL.at(2).toDouble();
                 X[2] = resSL.at(3).toDouble();
-                V[0] = resSL.at(5).toDouble();
-                V[1] = resSL.at(6).toDouble();
-                V[2] = resSL.at(7).toDouble();
+                V[0] = resSL.at(8).toDouble();
+                V[1] = resSL.at(9).toDouble();
+                V[2] = resSL.at(10).toDouble();
+
+                X[0] += X0[0];
+                X[1] += X0[1];
+                X[2] += X0[2];
+                V[0] += V0[0];
+                V[1] += V0[1];
+                V[2] += V0[2];
 
                 xVect << X;
                 vVect << V;

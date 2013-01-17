@@ -401,6 +401,14 @@ int main(int argc, char *argv[])
 
     solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
+
+    char *astr = new char[256];
+    QFile mpcFile("./mpc.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+
+
+
     if(useMoody)
     {
 
@@ -472,6 +480,37 @@ int main(int argc, char *argv[])
             }
 
             //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+        }
+        else
+        {
+            if(useEPM)
+            {
+                status = calc_EPM(EARTH, centr_num, (int)t0, t0 - (int)t0, XE0, VE0);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
+            }
+            else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], t0, GEOCENTR_NUM, CENTER, SK);
+
+            qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
+
+            detRDnumGC(&ra, &de, X[p], X[p+1], X[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+            //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
+
+            TDB2UTC(t0, &jdUTC);
+            //ra = ra - ra0;
+            //de = de - de0;
+            mrec.r = ra;
+            mrec.d = de;
+            mrec.eJD = jdUTC;
+            mrec.num = 1;
+            strcpy(mrec.head->Snum, "00001");
+            mrec.tail->set_numOfObs("500");
+            mrec.toString(astr);
+
+            mpcStm << astr << "\n";
         }
 /*        else
         {
@@ -545,10 +584,7 @@ int main(int argc, char *argv[])
     LF_int(&LF0, X0, V0);
     qDebug() << QString("LF0: %1\n").arg(LF0);
 
-    char *astr = new char[256];
-    QFile mpcFile("./mpc.txt");
-    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
-    QTextStream mpcStm(&mpcFile);
+
 
 //    for(ti=t0; ti<t1; ti+=dt)
     double *P = new double[9];
@@ -745,7 +781,17 @@ int main(int argc, char *argv[])
                 {
                     saveResults(TF-t0, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
 
-                    nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    if(useEPM)
+                    {
+                        status = calc_EPM(EARTH, centr_num, (int)TF, TF - (int)TF, XE0, VE0);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    //nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
                     qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
 
                     detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
