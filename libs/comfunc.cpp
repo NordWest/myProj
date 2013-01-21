@@ -4009,3 +4009,25 @@ int detDcorr(int corrModel, double x, double y, double *dx, double *dy, QVector 
 
     return 0;
 }
+
+int epm_planet_num(QString name)
+{
+    if(QString().compare(name, "MERCURY", Qt::CaseInsensitive)==0) return 1;
+    if(QString().compare(name, "VENUS", Qt::CaseInsensitive)==0) return 2;
+    if(QString().compare(name, "EARTH", Qt::CaseInsensitive)==0) return 3;
+    if(QString().compare(name, "GEOCENTR", Qt::CaseInsensitive)==0) return 3;
+    if(QString().compare(name, "MARS", Qt::CaseInsensitive)==0) return 4;
+    if(QString().compare(name, "JUPITER", Qt::CaseInsensitive)==0) return 5;
+    if(QString().compare(name, "SATURN", Qt::CaseInsensitive)==0) return 6;
+    if(QString().compare(name, "URANUS", Qt::CaseInsensitive)==0) return 7;
+    if(QString().compare(name, "NEPTUNE", Qt::CaseInsensitive)==0) return 8;
+    if(QString().compare(name, "PLUTO", Qt::CaseInsensitive)==0) return 9;
+    if(QString().compare(name, "MOON", Qt::CaseInsensitive)==0) return 10;
+    if(QString().compare(name, "SUN", Qt::CaseInsensitive)==0) return 11;
+    if(QString().compare(name, "SOL", Qt::CaseInsensitive)==0) return 11;
+    if(QString().compare(name, "SSB", Qt::CaseInsensitive)==0) return 12;
+    if(QString().compare(name, "SOLAR-SYSTEM BARYCENTER", Qt::CaseInsensitive)==0) return 12;
+    if(QString().compare(name, "EMB", Qt::CaseInsensitive)==0) return 13;
+    if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
+    return -1;
+}

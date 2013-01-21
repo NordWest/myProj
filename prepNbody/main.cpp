@@ -70,27 +70,6 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
-int epm_planet_num(QString name)
-{
-    if(QString().compare(name, "MERCURY", Qt::CaseInsensitive)==0) return 1;
-    if(QString().compare(name, "VENUS", Qt::CaseInsensitive)==0) return 2;
-    if(QString().compare(name, "EARTH", Qt::CaseInsensitive)==0) return 3;
-    if(QString().compare(name, "GEOCENTR", Qt::CaseInsensitive)==0) return 3;
-    if(QString().compare(name, "MARS", Qt::CaseInsensitive)==0) return 4;
-    if(QString().compare(name, "JUPITER", Qt::CaseInsensitive)==0) return 5;
-    if(QString().compare(name, "SATURN", Qt::CaseInsensitive)==0) return 6;
-    if(QString().compare(name, "URANUS", Qt::CaseInsensitive)==0) return 7;
-    if(QString().compare(name, "NEPTUNE", Qt::CaseInsensitive)==0) return 8;
-    if(QString().compare(name, "PLUTO", Qt::CaseInsensitive)==0) return 9;
-    if(QString().compare(name, "MOON", Qt::CaseInsensitive)==0) return 10;
-    if(QString().compare(name, "SUN", Qt::CaseInsensitive)==0) return 11;
-    if(QString().compare(name, "SOL", Qt::CaseInsensitive)==0) return 11;
-    if(QString().compare(name, "SSB", Qt::CaseInsensitive)==0) return 12;
-    if(QString().compare(name, "SOLAR-SYSTEM BARYCENTER", Qt::CaseInsensitive)==0) return 12;
-    if(QString().compare(name, "EMB", Qt::CaseInsensitive)==0) return 13;
-    if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
-    return -1;
-}
 
 int nofzbody;
 dele *nbody;
@@ -118,7 +97,8 @@ int main(int argc, char *argv[])
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     double time0 = sett->value("general/time0", 2455201.0).toDouble();
-    int si = sett->value("general/si", 0).toInt();
+    int saveMoody = sett->value("general/saveMoody", 0).toInt();
+    int trMass = sett->value("general/trMass", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
 
     SK = sett->value("general/sk", 0).toInt();
@@ -153,6 +133,7 @@ int main(int argc, char *argv[])
     }
 
     QList <ParticleStruct*> pList;
+    //QList <ParticleStruct*> pmList;
 
     if(readCFG(confFile, pList))
     {
@@ -161,10 +142,15 @@ int main(int argc, char *argv[])
     }
 
 
+
+
     int i, sz;
     sz = pList.size();
     qDebug() << QString("pList: %1\n").arg(sz);
-
+    if(trMass)
+    {
+        for(i=0;i<sz;i++) pList.at(i)->mass = SUN_MASS_KG/pList.at(i)->mass;
+    }
     //Capsule *experiment = new Capsule;
 
 
@@ -218,12 +204,12 @@ int main(int argc, char *argv[])
 */
     double coefX, coefXD;
     coefX = coefXD = 1.0;
-    if(si)
+    /*if(si)
     {
         coefX = AUKM*1000;
         coefXD = 1000*AUKM/SECINDAY;
     }
-
+*/
 
     for(i=0; i<sz; i++)
     {
@@ -265,7 +251,7 @@ int main(int argc, char *argv[])
             pList[i]->xd = coefXD*V[0];
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
-            if(si) pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+            //if(si) pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
 
             xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(dist, 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20).arg(vel, 26, 'e', 20);
 
@@ -384,6 +370,28 @@ int main(int argc, char *argv[])
     xyFile.close();
 
     saveCFG("test.xml", pList);
+
+    if(saveMoody)
+    {
+        coefX = AUKM*1000;
+        coefXD = 1000*AUKM/SECINDAY;
+
+        for(i=0;i<pList.size();i++)
+        {
+            pList.at(i)->x *= coefX;
+            pList.at(i)->y *= coefX;
+            pList.at(i)->z *= coefX;
+
+            pList.at(i)->xd *= coefXD;
+            pList.at(i)->yd *= coefXD;
+            pList.at(i)->zd *= coefXD;
+
+            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+        }
+
+        saveCFG("particles.xml", pList);
+    }
+
     //experiment->exportParticlesToXMLFile("test.xml");
     return 0;//a.exec();
 }

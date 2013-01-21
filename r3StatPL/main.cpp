@@ -3274,7 +3274,7 @@ void diapResiduals::initMesList(QList <measurementRec*> mesList)
         {
             for(k=0; k<diapsNum-1; k++)
             {
-                if(mesRec->resList.at(j)->mag>diaps[k]&&mesRec->resList.at(j)->mag<diaps[k+1])
+                if((mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)>diaps[k]&&(mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)<diaps[k+1])
                 {
                     resListDiap.at(k)->resList << mesRec->resList.at(j);
                 }

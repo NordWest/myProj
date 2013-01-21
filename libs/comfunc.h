@@ -289,6 +289,8 @@ int packString(QString upStr, QString *pStr, int targLen);
 int unpackString(QString *upStr, QString pStr);
 
 
+int epm_planet_num(QString name);
+
 //int planet_num(char *pname);
 
 //class bufStrRec;
