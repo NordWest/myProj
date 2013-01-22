@@ -456,6 +456,9 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.mks [options] [config=cf
         qDebug() << QString("uTimeCorr: %1\n").arg(uTime.trimmed().toDouble());
         fitsd->MJD += uTime.trimmed().toDouble()/86400.0;
 
+        fitsd->headList.getKeyName("U", &uTime);
+        qDebug() << QString("U: %1\n").arg(uTime);
+
 /////////
 
         //refractionParam *refParam;

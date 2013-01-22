@@ -6,8 +6,9 @@
 #include "rada.h"
 //#include "mymatrix.h"
 #include "./../libs/dele.h"
+#include "./../libs/calc_epm.h"
 //#include "DynArr.h"
-//#include "moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
 
 
 //  #define k2 6.672590000e-8
@@ -15,16 +16,18 @@
 
   extern double a, CC, omega, Ltilde, A;
   extern int nofzbody;
-  extern int SK, CENTER;
+  extern int SK, CENTER, centr_num;
+  extern int useEPM;
 
 //  extern myvector *mass; // [telo]
 //  extern int error;
-  extern double col, vout;
+  //extern double col, vout;
   extern ever_params *eparam;
-  extern double *mass;
+  //extern double *mass;
   int iterNum;
 
-  //extern QList <ParticleStruct*> pList;
+  extern QList <ParticleStruct*> iList;
+  extern QList <ParticleStruct*> jList;
 
  extern dele *nbody;
  // extern int nofzbody;
@@ -43,34 +46,63 @@
         int i, j , komp;
         int teloi, teloj;
         double Ri, Dij;
-        double res0,  res1;
+        double res0,  resi, resj;
+        double muj, mu0;
+        QString name;
+        int plaNum, status;
 
-        int iNum = nofzbody;
-        int Ni = nofzbody*3;
+        int iNum = iList.size();
+        int Ni = iNum*3;
 
-        int jNum = 9;
+        int jNum = jList.size();
         int Nj = jNum*3;
         double Xj[jNum], Vj[jNum];
 
-        double mass[10] = {
+        /*double mass[10] = {
                     1.0, 6.023600000000e+06, 4.085237100000e+05, 328900.5614, 3.098708000000e+06, 1.047348600000e+03, 3.497898000000e+03, 2.290298000000e+04, 1.941224000026e+04, 1.352000000000e+08
         };
         int pla[10] = {
                 SUN_NUM, MERCURY_NUM, VENUS_NUM, EARTH_NUM, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM
-        };
+        };*/
+
+        mu0 = 1.0;
+
 
         for(j=0, teloj=0; j<Nj; j+=3, teloj++)
         {
+            name = QString(jList[teloj]->name.data());
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
+
+
+            if(plaNum!=-1)
+            {
+
+                if(useEPM)
+                {
+                    status = calc_EPM(plaNum, centr_num, int(TS), TS - int(TS), &Xj[j], &Vj[j]);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         //return 1;
+                     }
+                }
+                else
+                {
+                    nbody->detState(&Xj[j+0], &Xj[j+1], &Xj[j+2], &Vj[j+0], &Vj[j+1], &Vj[j+2], TS, plaNum, CENTER, SK);
+                }
                 //nbody->detR(&Xj[j], &Xj[j+1], &Xj[j+2], TS, pla[teloj], 0, CENTER_BARY, SK_ECLIPTIC);
-                nbody->detState(&Xj[j], &Xj[j+1], &Xj[j+2], &Vj[j], &Vj[j+1], &Vj[j+2], TS, pla[teloj+1], CENTER, SK);
+                //nbody->detState(&Xj[j], &Xj[j+1], &Xj[j+2], &Vj[j], &Vj[j+1], &Vj[j+2], TS, pla[teloj+1], CENTER, SK);
 
 
+            }
                 //printf("plaNum= %d\tY:\t%f\t%f\t%f\n", pla[teloj], Y[j], Y[j+1], Y[j+2]);
 
         }
 
         for(i=0, teloi=0; i<Ni; i+=3, teloi++)
         {
+            //mui = pow(jList.at(teloi)->mass, -1.0);
             Ri = sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
             if(Ri>(eparam->vout))
             {
@@ -81,7 +113,27 @@
 
             for(komp=0; komp<3; komp++)
             {
-                res0 = 0.0;
+                resi = 0;
+
+                for(j=0, teloj=0; teloj<iNum; j+=3, teloj++)
+                {
+                     if(teloi==teloj||iList.at(teloj)->interactionPermission==Advisor::interactNONE) continue;
+                     Dij = sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
+
+                     if(Dij<eparam->col)
+                     {
+    //				cout << "WARN!!!! CRASH!!!!" << endl;
+                         printf("WARN!!!! CRASH!!!!\n");
+                         exit(1);
+                     }
+
+                     muj = pow(iList.at(teloj)->mass, -1.0);
+
+                     resi += muj*((X[j+komp] - X[i+komp])/(pow(Dij,3)));
+
+                 }
+
+                resj = 0.0;
 
                 for(j=0, teloj=0; teloj<jNum; j+=3, teloj++)
                 {
@@ -94,14 +146,15 @@
                          exit(1);
                      }
 
+                     muj = pow(jList.at(teloj)->mass, -1.0);
 
-                     res0 += pow(mass[teloj+1], -1.0)*((Xj[j+komp] - X[i+komp])/(pow(Dij,3)));
+                     resj += muj*((Xj[j+komp] - X[i+komp])/(pow(Dij,3)));
 
                  }
 
-                res1 = -((pow(mass[0], -1.0))*X[i+komp])/(pow(Ri, 3));
+                res0 = -(mu0*X[i+komp])/(pow(Ri, 3));
 
-                F[i+komp] = ka*ka*(res0+res1);
+                F[i+komp] = ka*ka*(res0+resi+resj);
             }
         }
 

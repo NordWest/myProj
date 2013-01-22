@@ -195,6 +195,16 @@ void detTimeCode(QString &timeCode)
     timeCode = cDT.toString("yyyyMMddhhmmsszzz");
 }
 
+void detTimeCodeHash(QString &hashCode)
+{
+    QDateTime cDT;
+    QString timeCode;
+
+    cDT = QDateTime::currentDateTime();
+    timeCode = cDT.toString("yyyyMMddhhmmsszzz");
+    hashCode = QString(QCryptographicHash::hash(timeCode.toAscii().data(), QCryptographicHash::Sha1).toHex());
+}
+
 int doSigmaMul(QList <double> valueList, double sigmaMul, double proofP, double *mean, double *rmsOne, double *rmsMean, int *numEnd)
 {
     double maxVal;
