@@ -32,7 +32,7 @@ unix:LIBS += ./../libs/unix/libcfitsio.a \
             ./../libs/unix/libastro.a
 
 unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
-win32:TARGET = ./../../lab/ruler3PL.win32/ruler3PL
+win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
 #TARGET = ruler3PL
 
 CONFIG += console \

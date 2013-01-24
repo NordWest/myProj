@@ -4,10 +4,10 @@
 
 #TARGET = r3StatPL
 unix:TARGET = ./../../lab/r3StatPL.unix/r3StatPL
-win32:TARGET = ./../../../lab/r3StatPL.win32/r3StatPL
+win32:TARGET = r3StatPL
 #unix:TARGET = ./../../lab/r3StatPL/r3StatPL
 #win32:TARGET = ./../../../lab/r3StatPL/r3StatPL
-CONFIG += qt
+CONFIG += qt exceptions
 CONFIG += console warn_off
 CONFIG -= app_bundle
 TEMPLATE = app
@@ -67,7 +67,7 @@ HEADERS += ../astro/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/vectGrid3D.h \
-#    ../libs/ialglib.h \
+    ../libs/ialglib.h \
     ../libs/mpccat.h \
     ../libs/orbcat.h \
     ../libs/sysCorr.h \
