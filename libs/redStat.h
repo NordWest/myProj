@@ -863,6 +863,7 @@ public:
 	QString fName;
 
         double meanKsi, meanEta, rmsOneKsi, rmsOneEta, rmsMeanKsi, rmsMeanEta;
+        int numKsi, numEta;
 
 	residualFile();
 	~residualFile();
@@ -872,8 +873,8 @@ public:
 	void save();
 	void saveAs(QString fName);
 
-        void detStat();
-        void remSigma(double sg, double proofP=0.0);
+        void detStat(int isRef = 0);
+        void remSigma(double sg, double proofP=0.0, int isRef=0);
 
         void removeMes(QString mesureTimeCode);
 

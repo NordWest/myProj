@@ -66,10 +66,13 @@ struct diapResiduals
 {
     int diapsNum;
     double *diaps;
-    QList <residualFile*> resListDiap;
-    void initMesList(QList <measurementRec*> mesList);
+    //QList <residualFile*> resListDiap;
+    //void initMesList(QList <measurementRec*> mesList);
 //    vectGrid3D *vectF;
 };
+
+void initMagEqList(QList <measurementRec*> mesList, QList <residualFile*> resListDiap, diapResiduals magEq);
+
 
 struct diapU3
 {
@@ -167,6 +170,8 @@ int main(int argc, char *argv[])    //r3StatPL
     //QTextCodec *codec2 = QTextCodec::codecForName("Windows-1251");
 
     diapResiduals magEq;
+    QList <residualFile*> resListDiap;
+    QList <residualFile*> resListDiapRef;
     reductionStat rStat;
     platesStat plStat;
     QList <measurementRec*> mesList;
@@ -337,7 +342,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
     double mgEqSigma = sett->value("general/mgEqSigma", 3.0).toDouble();
     QString colSep = sett->value("general/colSep").toString();
-
+    int isRef = sett->value("general/isRef", 0).toInt();
 
 
 
@@ -518,7 +523,9 @@ int main(int argc, char *argv[])    //r3StatPL
     {
         magEq.diaps[i] = mdList.at(i).toDouble();
         resFile = new residualFile;
-        magEq.resListDiap << resFile;
+        resListDiap << resFile;
+        resFile = new residualFile;
+        resListDiapRef << resFile;
     }
 
     magEq.diaps[magEq.diapsNum-1] = mdList.at(magEq.diapsNum-1).toInt();
@@ -574,7 +581,8 @@ int main(int argc, char *argv[])    //r3StatPL
 
     rStat.getMeasurementsList(mesList, &rStatSel);
 
-    magEq.initMesList(mesList);
+    initMagEqList(mesList, resListDiap, magEq);
+    //initMagEqListRef(mesList, resListDiapRef, magEq);
 
     //if(isReport0) rFile.close();
     //r1File.close();
@@ -687,21 +695,28 @@ int main(int argc, char *argv[])    //r3StatPL
 
     for(k=0; k<magEq.diapsNum-1; k++)
     {
-        if(mgEqSigma>1e-2) magEq.resListDiap.at(k)->remSigma(mgEqSigma);
-        //magEq.resListDiap.at(k)->detStat();
-        magEq.resListDiap.at(k)->detStat();
+
+
+        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma, 0.0, isRef);
+        //resListDiap.at(k)->detStat();
+
+       resListDiap.at(k)->detStat(isRef);
 
        dataStrL.clear();
 
        dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->meanKsi);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->rmsMeanKsi);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->meanEta);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->rmsMeanEta);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->resList.size());
+       dataStrL << QString("%1").arg(resListDiap.at(k)->numKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->meanKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->numEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->meanEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->resList.size());
   //     dataStrL << QString("%1")
        dataStream << dataStrL.join(colSep) << "\n";
     }
+
+    rFile.close();
 
     r1File.setFileName(reportDirName+"ocMagDisp.txt");
     r1File.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
@@ -1154,22 +1169,22 @@ int main(int argc, char *argv[])    //r3StatPL
     for(k=0; k<magEq.diapsNum-1; k++)
     {
 
-//       if(mgEqSigma>1e-2) magEq.resListDiap.at(k)->remSigma(mgEqSigma);
-//       else magEq.resListDiap.at(k)->detStat();
+//       if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma);
+//       else resListDiap.at(k)->detStat();
 
        dataStrL.clear();
 
 /*
 
        dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->meanKsi);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->rmsMeanKsi);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->meanEta);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->rmsMeanEta);
-       dataStrL << QString("%1").arg(magEq.resListDiap.at(k)->resList.size());
+       dataStrL << QString("%1").arg(resListDiap.at(k)->meanKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->meanEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->resList.size());
   //     dataStrL << QString("%1")
        dataStream << dataStrL.join(r3data.colSep) << "\n";*/
-       //dataStream << QString("%1%7%2%7%3%7%4%7%5%7%6\n").arg(magEq.diaps[k+1]).arg(magEq.resListDiap.at(k)->meanKsi).arg(magEq.resListDiap.at(k)->rmsMeanKsi).arg(magEq.resListDiap.at(k)->meanEta).arg(magEq.resListDiap.at(k)->rmsMeanEta).arg(magEq.resListDiap.at(k)->resList.size()).arg(r3data.colSep);
+       //dataStream << QString("%1%7%2%7%3%7%4%7%5%7%6\n").arg(magEq.diaps[k+1]).arg(resListDiap.at(k)->meanKsi).arg(resListDiap.at(k)->rmsMeanKsi).arg(resListDiap.at(k)->meanEta).arg(resListDiap.at(k)->rmsMeanEta).arg(resListDiap.at(k)->resList.size()).arg(r3data.colSep);
 
 
 
@@ -1185,7 +1200,7 @@ int main(int argc, char *argv[])    //r3StatPL
        r2FileY.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
        dataStream2Y.setDevice(&r2FileY);
 
-       szi =  magEq.resListDiap.at(k)->resList.size();
+       szi =  resListDiap.at(k)->resList.size();
        dotNum = (szi/r3data.aveNum);
 
        //sort
@@ -1203,15 +1218,15 @@ int main(int argc, char *argv[])    //r3StatPL
        //k=0;
        for(i=0; i<szi; i++)
        {
-           x[i] = magEq.resListDiap.at(k)->resList.at(i)->x;
-           y[i] = magEq.resListDiap.at(k)->resList.at(i)->y;
-           dx[i] = magEq.resListDiap.at(k)->resList.at(i)->Dx;
-           dy[i] = magEq.resListDiap.at(k)->resList.at(i)->Dy;
+           x[i] = resListDiap.at(k)->resList.at(i)->x;
+           y[i] = resListDiap.at(k)->resList.at(i)->y;
+           dx[i] = resListDiap.at(k)->resList.at(i)->Dx;
+           dy[i] = resListDiap.at(k)->resList.at(i)->Dy;
 
-           mX[i] = magEq.resListDiap.at(k)->resList.at(i)->mag;
-           dmX[i] = magEq.resListDiap.at(k)->resList.at(i)->ksiOC;//*cos(grad2rad(magEq.resListDiap.at(k)->resList.at(i)->de));
-           mY[i] = magEq.resListDiap.at(k)->resList.at(i)->mag;
-           dmY[i] = magEq.resListDiap.at(k)->resList.at(i)->etaOC;
+           mX[i] = resListDiap.at(k)->resList.at(i)->mag;
+           dmX[i] = resListDiap.at(k)->resList.at(i)->ksiOC;//*cos(grad2rad(resListDiap.at(k)->resList.at(i)->de));
+           mY[i] = resListDiap.at(k)->resList.at(i)->mag;
+           dmY[i] = resListDiap.at(k)->resList.at(i)->etaOC;
        }
 
        sortX(x, dx, szi);
@@ -1322,10 +1337,10 @@ int main(int argc, char *argv[])    //r3StatPL
 /*
        for(i=0; i<szi; i++)
        {
-           dataStream1 << QString("%1|%2|%3\n").arg(magEq.resListDiap.at(k)->resList.at(i)->mag, 5, 'f', 2).arg(magEq.resListDiap.at(k)->resList.at(i)->ksiOC*cos(grad2rad(magEq.resListDiap.at(k)->resList.at(i)->de)), 8, 'f', 2).arg(magEq.resListDiap.at(k)->resList.at(i)->etaOC, 8, 'f', 2);
-           dataStream2X << QString("%1|%2\n").arg(magEq.resListDiap.at(k)->resList.at(i)->x).arg(magEq.resListDiap.at(k)->resList.at(i)->Dx, 6, 'f', 3);
-           dataStream2Y << QString("%1|%2\n").arg(magEq.resListDiap.at(k)->resList.at(i)->y).arg(magEq.resListDiap.at(k)->resList.at(i)->Dy, 6, 'f', 3);
-           dataStream3 << QString("%1|%2\n").arg(magEq.resListDiap.at(k)->resList.at(i)->mag-magEq.resListDiap.at(k)->resList.at(i)->magOC).arg(magEq.resListDiap.at(k)->resList.at(i)->magOC, 6, 'f', 3);
+           dataStream1 << QString("%1|%2|%3\n").arg(resListDiap.at(k)->resList.at(i)->mag, 5, 'f', 2).arg(resListDiap.at(k)->resList.at(i)->ksiOC*cos(grad2rad(resListDiap.at(k)->resList.at(i)->de)), 8, 'f', 2).arg(resListDiap.at(k)->resList.at(i)->etaOC, 8, 'f', 2);
+           dataStream2X << QString("%1|%2\n").arg(resListDiap.at(k)->resList.at(i)->x).arg(resListDiap.at(k)->resList.at(i)->Dx, 6, 'f', 3);
+           dataStream2Y << QString("%1|%2\n").arg(resListDiap.at(k)->resList.at(i)->y).arg(resListDiap.at(k)->resList.at(i)->Dy, 6, 'f', 3);
+           dataStream3 << QString("%1|%2\n").arg(resListDiap.at(k)->resList.at(i)->mag-resListDiap.at(k)->resList.at(i)->magOC).arg(resListDiap.at(k)->resList.at(i)->magOC, 6, 'f', 3);
        }
 */
        for(i=0; i<dotNum; i++)
@@ -1783,7 +1798,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
 
 
-        diapNum = magEq.resListDiap.size();
+        diapNum = resListDiap.size();
 
         qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r4data.xLevNum).arg(r4data.yLevNum);
 
@@ -2002,7 +2017,7 @@ int main(int argc, char *argv[])    //r3StatPL
         qDebug() << "naxeX= " << naxeX[0] << " - " << naxeX[1] << "\n";
         qDebug() << "naxeY= " << naxeY[0] << " - " << naxeY[1] << "\n";
 
-        diapNum = magEq.resListDiap.size();
+        diapNum = resListDiap.size();
 
         qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r5data.xLevNum).arg(r5data.yLevNum);
 
@@ -2251,7 +2266,7 @@ int main(int argc, char *argv[])    //r3StatPL
         qDebug() << "naxeX= " << naxeX[0] << " - " << naxeX[1] << "\n";
         qDebug() << "naxeY= " << naxeY[0] << " - " << naxeY[1] << "\n";
 
-        diapNum = magEq.resListDiap.size();
+        diapNum = resListDiap.size();
 
         qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r50data.xLevNum).arg(r50data.yLevNum);
 
@@ -2472,7 +2487,7 @@ int main(int argc, char *argv[])    //r3StatPL
                         qDebug() << "naxeX= " << naxeX[0] << " - " << naxeX[1] << "\n";
                         qDebug() << "naxeY= " << naxeY[0] << " - " << naxeY[1] << "\n";
 
-                        diapNum = magEq.resListDiap.size();
+                        diapNum = resListDiap.size();
 
                         qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r51data.xLevNum).arg(r51data.yLevNum);
 
@@ -3259,7 +3274,7 @@ int detCurf3(double *Zi, double *x, double *y, int num, int deg)
 */
 
 
-void diapResiduals::initMesList(QList <measurementRec*> mesList)
+void initMagEqList(QList <measurementRec*> mesList, QList <residualFile*> resListDiap, diapResiduals magEq)
 {
     int szRes, i, j, k, szi;
     measurementRec* mesRec;
@@ -3272,9 +3287,9 @@ void diapResiduals::initMesList(QList <measurementRec*> mesList)
         szRes = mesRec->resList.size();
         for(j=0; j<szRes; j++)
         {
-            for(k=0; k<diapsNum-1; k++)
+            for(k=0; k<magEq.diapsNum-1; k++)
             {
-                if((mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)>diaps[k]&&(mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)<diaps[k+1])
+                if((mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)>magEq.diaps[k]&&(mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)<magEq.diaps[k+1])
                 {
                     resListDiap.at(k)->resList << mesRec->resList.at(j);
                 }
@@ -3885,7 +3900,7 @@ void report4(report4data r4data, QDir reportDir)
 
 
 
-    diapNum = magEq.resListDiap.size();
+    diapNum = resListDiap.size();
 
     qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r4data.xLevNum).arg(r4data.yLevNum);
 
