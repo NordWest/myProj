@@ -161,7 +161,7 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
     v[1] = V[pos+1]-V0[pos+1];
     v[2] = V[pos+2]-V0[pos+2];
 
-    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
+    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 7).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
 
     dxStm.flush();
 
@@ -247,8 +247,11 @@ int main(int argc, char *argv[])
     QString name;
     int plaNum, resMiri;
     mpephRec mpcObj;
-    QString objType;
-    procData miriProcData;
+    QString objDataStr, sJD;
+    QStringList outerArguments, resSL;
+    QProcess outerProcess;
+    procData miriadeProcData;
+
 
     Everhardt *solSys;
 
@@ -285,10 +288,10 @@ int main(int argc, char *argv[])
     SK = sett->value("general/sk", 0).toInt();
     useEPM = sett->value("general/useEPM", 0).toInt();
 
-    miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
-    miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
-    miriProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
-    if(miriProcData.waitTime>0) miriProcData.waitTime *= 1000;
+    miriadeProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
+    miriadeProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
+    miriadeProcData.waitTime = sett->value("processes/miriade_wait_time", -1).toInt();
+    if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
     QString epmDir = sett->value("general/epmDir", "./").toString();
 
@@ -490,7 +493,7 @@ int main(int argc, char *argv[])
             {
                 //nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
                 //nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
-                nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], t0, plaNum, CENTER, SK);
+                nbody->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
             }
 
             saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
@@ -504,6 +507,7 @@ int main(int argc, char *argv[])
             if(initMpc) break;
             mCat.GetRecName(name.simplified().toAscii().data());
 
+            TDB2UTC(t0, &jdUTC);
 
             if(useEPM)
             {
@@ -518,10 +522,59 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
 
+            if(useMiriade)
+            {
+                outerArguments << QString("-name=\"%1\"").arg(name.simplified());
+                sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+                outerArguments << QString("-ep=%1").arg(sJD);
+
+                outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                outerProcess.start(miriadeProcData.name, outerArguments);
+
+                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                {
+                    qDebug() << "\nmiriadeProc finish error\n";
+                    break;
+                }
+
+                QTextStream objStream(outerProcess.readAllStandardOutput());
+
+                while (!objStream.atEnd())
+                {
+                    objDataStr = objStream.readLine();
+                    qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                    if(objDataStr.size()<1) continue;
+                    if(objDataStr.at(0)=='#') continue;
+
+                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                    if(resSL.size()<10) continue;
+                    X0[p+0] = resSL.at(1).toDouble();
+                    X0[p+1] = resSL.at(2).toDouble();
+                    X0[p+2] = resSL.at(3).toDouble();
+                    V0[p+0] = resSL.at(8).toDouble();
+                    V0[p+1] = resSL.at(9).toDouble();
+                    V0[p+2] = resSL.at(10).toDouble();
+
+                    X0[p+0] += XE0[0];
+                    X0[p+1] += XE0[1];
+                    X0[p+2] += XE0[2];
+                    V0[p+0] += VE0[0];
+                    V0[p+1] += VE0[1];
+                    V0[p+2] += VE0[2];
+
+
+                }
+                saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+            }
+            else saveResults(t0, X, V, NULL, NULL, p, name, resStm, dxStm, deStm);
+
             detRDnumGC(&ra, &de, X[p], X[p+1], X[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
             //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
 
-            TDB2UTC(t0, &jdUTC);
+
             //ra = ra - ra0;
             //de = de - de0;
             mrec.r = ra;
@@ -818,12 +871,12 @@ int main(int argc, char *argv[])
                         X[i+2] = zt;
                     }
 */
-                    /*
-                    if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-                    {
-                        saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
-                    }
-                    else
+
+                    //if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+                    //{
+                        saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                    //}
+                    /*else
                     {
 
                         X[i]=X0[i];
@@ -837,12 +890,14 @@ int main(int argc, char *argv[])
                     }
                     */
                 }
-                else if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+                else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                 {
-                    saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
+
 
                     if(initMpc) break;
-                    mCat.GetRecName(name.simplified().toAscii().data());
+                    if(mCat.GetRecName(name.simplified().toAscii().data())) break;
+
+                    TDB2UTC(TF, &jdUTC);
 
                     if(useEPM)
                     {
@@ -857,10 +912,59 @@ int main(int argc, char *argv[])
                     //nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
                     qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
 
+                    if(useMiriade)
+                    {
+                        outerArguments << QString("-name=\"%1\"").arg(name.simplified());
+                        sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+                        outerArguments << QString("-ep=%1").arg(sJD);
+
+                        outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                        outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                        outerProcess.start(miriadeProcData.name, outerArguments);
+
+                        if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                        {
+                            qDebug() << "\nmiriadeProc finish error\n";
+                            break;
+                        }
+
+                        QTextStream objStream(outerProcess.readAllStandardOutput());
+
+                        while (!objStream.atEnd())
+                        {
+                            objDataStr = objStream.readLine();
+                            qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                            if(objDataStr.size()<1) continue;
+                            if(objDataStr.at(0)=='#') continue;
+
+                            resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                            if(resSL.size()<10) continue;
+                            X0[i+0] = resSL.at(1).toDouble();
+                            X0[i+1] = resSL.at(2).toDouble();
+                            X0[i+2] = resSL.at(3).toDouble();
+                            V0[i+0] = resSL.at(8).toDouble();
+                            V0[i+1] = resSL.at(9).toDouble();
+                            V0[i+2] = resSL.at(10).toDouble();
+
+                            X0[i+0] += XE0[0];
+                            X0[i+1] += XE0[1];
+                            X0[i+2] += XE0[2];
+                            V0[i+0] += VE0[0];
+                            V0[i+1] += VE0[1];
+                            V0[i+2] += VE0[2];
+
+
+                        }
+                        saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                    }
+                    else saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
+
                     detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
                     //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
 
-                    TDB2UTC(TF, &jdUTC);
+
                     //ra = ra - ra0;
                     //de = de - de0;
                     mrec.r = ra;
@@ -893,6 +997,8 @@ int main(int argc, char *argv[])
 
                         mpcStmM << astr << "\n";
                     }
+
+                    saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
                     //qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
                 }
 

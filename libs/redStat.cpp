@@ -3454,34 +3454,35 @@ void residualFile::save()
 	}
 };
 
-void residualFile::detStat()
+void residualFile::detStat(int isRef)
 {
     int i, recNum;
     recNum = resList.size();
+    numKsi = numEta = 0;
     meanKsi = meanEta = rmsOneKsi = rmsOneEta = rmsMeanKsi = rmsMeanEta = 0.0;
 
     for(i=0; i<recNum; i++)
     {
-        meanKsi += resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de));
-        meanEta += resList.at(i)->etaOC;
+        if(isRef==0||resList.at(i)->isRefKsi){meanKsi += resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)); numKsi++;}
+        if(isRef==0||resList.at(i)->isRefEta){meanEta += resList.at(i)->etaOC;numEta++;}
     }
-    meanKsi /= recNum;
-    meanEta /= recNum;
+    meanKsi /= numKsi;
+    meanEta /= numEta;
     for(i=0; i<recNum; i++)
     {
         //rmsOneKsi += pow(resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)) - meanKsi, 2.0);
-        rmsOneKsi += pow(resList.at(i)->ksiOC - meanKsi, 2.0);
-        rmsOneEta += pow(resList.at(i)->etaOC - meanEta, 2.0);
+        if(isRef==0||resList.at(i)->isRefKsi) rmsOneKsi += pow(resList.at(i)->ksiOC - meanKsi, 2.0);
+        if(isRef==0||resList.at(i)->isRefEta) rmsOneEta += pow(resList.at(i)->etaOC - meanEta, 2.0);
     }
 
-    rmsOneKsi  = sqrt(rmsOneKsi/(recNum - 1.0));
-    rmsOneEta  = sqrt(rmsOneEta/(recNum - 1.0));
-    rmsMeanKsi = rmsOneKsi/sqrt(recNum);
-    rmsMeanEta = rmsOneEta/sqrt(recNum);
+    rmsOneKsi  = sqrt(rmsOneKsi/(numKsi - 1.0));
+    rmsOneEta  = sqrt(rmsOneEta/(numEta - 1.0));
+    rmsMeanKsi = rmsOneKsi/sqrt(numKsi);
+    rmsMeanEta = rmsOneEta/sqrt(numEta);
 
 }
 
-void residualFile::remSigma(double sg, double proofP)
+void residualFile::remSigma(double sg, double proofP, int isRef)
 {
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigma: %1\n").arg(sg);
     int i, recNum, recNum0;
@@ -3492,7 +3493,7 @@ void residualFile::remSigma(double sg, double proofP)
     do
     {
         recNum = resList.size();
-        detStat();
+        detStat(isRef);
 
         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Ksi: %1\t%2\t%3\n").arg(meanKsi).arg(rmsOneKsi).arg(rmsMeanKsi);
         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Eta: %1\t%2\t%3\n").arg(meanEta).arg(rmsOneEta).arg(rmsMeanEta);

@@ -13,6 +13,7 @@
 #include "./../libs/mpcs.h"
 #include "./../libs/ephem_util.h"
 #include "./../libs/calc_epm.h"
+#include "./../libs/mpccat.h"
 
 #include <QDebug>
 #include <QSettings>
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     QString epmDir = sett->value("general/epmDir", "./").toString();
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
+    QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     double time0 = sett->value("general/time0", 2455201.0).toDouble();
     int saveMoody = sett->value("general/saveMoody", 0).toInt();
@@ -204,6 +206,7 @@ int main(int argc, char *argv[])
 */
     double coefX, coefXD;
     coefX = coefXD = 1.0;
+    int isObj;
     /*if(si)
     {
         coefX = AUKM*1000;
@@ -316,6 +319,7 @@ int main(int argc, char *argv[])
             QTextStream objStream(outerProcess.readAllStandardOutput());
             QString objDataStr;
 
+            isObj = 0;
 
 
             while (!objStream.atEnd())
@@ -327,6 +331,7 @@ int main(int argc, char *argv[])
 
                 resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
                 if(resSL.size()<10) continue;
+                isObj = 1;
                 X[0] = resSL.at(1).toDouble();
                 X[1] = resSL.at(2).toDouble();
                 X[2] = resSL.at(3).toDouble();
@@ -353,6 +358,11 @@ int main(int argc, char *argv[])
                 pList[i]->zd = coefXD*V[2];
 
                 xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(dist, 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20).arg(vel, 26, 'e', 20);
+            }
+            if(!isObj)
+            {
+                pList.removeAt(i);
+                i--;
             }
         }
 
