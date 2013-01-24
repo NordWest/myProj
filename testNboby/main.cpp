@@ -12,6 +12,7 @@
 #include "./rada.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcs.h"
+#include "./../libs/mpccat.h"
 
 #include "./../libs/calc_epm.h"
 
@@ -86,8 +87,12 @@ int nofzbody;
 dele *nbody;
 ever_params *eparam;
 int SK, CENTER;
+int centr_num;
+int useEPM;
 //double *mass;
 QList <ParticleStruct*> pList;
+QList <ParticleStruct*> iList;
+QList <ParticleStruct*> jList;
 
 void CM_int(double *CM, double X[], double V[])
 {
@@ -207,27 +212,7 @@ int getMopName(MopState *mState, MopItem &mItem, QString name)
 
 }
 
-int epm_planet_num(QString name)
-{
-    if(QString().compare(name, "MERCURY", Qt::CaseInsensitive)==0) return 1;
-    if(QString().compare(name, "VENUS", Qt::CaseInsensitive)==0) return 2;
-    if(QString().compare(name, "EARTH", Qt::CaseInsensitive)==0) return 3;
-    if(QString().compare(name, "GEOCENTR", Qt::CaseInsensitive)==0) return 3;
-    if(QString().compare(name, "MARS", Qt::CaseInsensitive)==0) return 4;
-    if(QString().compare(name, "JUPITER", Qt::CaseInsensitive)==0) return 5;
-    if(QString().compare(name, "SATURN", Qt::CaseInsensitive)==0) return 6;
-    if(QString().compare(name, "URANUS", Qt::CaseInsensitive)==0) return 7;
-    if(QString().compare(name, "NEPTUNE", Qt::CaseInsensitive)==0) return 8;
-    if(QString().compare(name, "PLUTO", Qt::CaseInsensitive)==0) return 9;
-    if(QString().compare(name, "MOON", Qt::CaseInsensitive)==0) return 10;
-    if(QString().compare(name, "SUN", Qt::CaseInsensitive)==0) return 11;
-    if(QString().compare(name, "SOL", Qt::CaseInsensitive)==0) return 11;
-    if(QString().compare(name, "SSB", Qt::CaseInsensitive)==0) return 12;
-    if(QString().compare(name, "SOLAR-SYSTEM BARYCENTER", Qt::CaseInsensitive)==0) return 12;
-    if(QString().compare(name, "EMB", Qt::CaseInsensitive)==0) return 13;
-    if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
-    return -1;
-}
+
 
 
 int main(int argc, char *argv[])
@@ -285,7 +270,7 @@ int main(int argc, char *argv[])
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
-    QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
+    QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     //int useConfMasses = sett->value("general/useConfMasses", 0).toInt();
     int useMoody = sett->value("general/useMoody", 0).toInt();
     t0 = sett->value("general/time0", 0).toDouble();
@@ -294,9 +279,11 @@ int main(int argc, char *argv[])
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
     int obrat = !sett->value("general/obrat", 1).toInt();
 
+    QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
+
     CENTER = sett->value("general/center", 0).toInt();
     SK = sett->value("general/sk", 0).toInt();
-    int useEPM = sett->value("general/useEPM", 0).toInt();
+    useEPM = sett->value("general/useEPM", 0).toInt();
 
     miriProcData.name = sett->value("processes/miriade_prog", "./miriadeEph").toString();
     miriProcData.folder = sett->value("processes/miriade_prog_folder", "./").toString();
@@ -324,11 +311,13 @@ int main(int argc, char *argv[])
 
 
 
-    int centr_num;
+
     double *emb = new double[3];
     double *embv = new double[3];
 
 
+    mpccat mCat;
+    int initMpc = mCat.init(mpcCatFile.toAscii().data());
 
     if(readCFG(confFile, pList))
     {
@@ -352,13 +341,19 @@ int main(int argc, char *argv[])
 
     if(status) return 1;
 
-    nofzbody = pList.size();
-    /*nofzbody=0;
+    //nofzbody = pList.size();
+    //int iNum, jNum;
+    //nofzbody=0;
+    //nofjbody=0;
     for(i=0; i<pList.size(); i++)
     {
-        if(pList.at(i)->interactionPermission!=Advisor::interactNONE) nofzbody++;
+        if(pList.at(i)->identity==Advisor::collapsorFixed) continue;
+        if(pList.at(i)->identity==Advisor::ordinary) iList << pList.at(i);
+        if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }
-*/
+
+    nofzbody=iList.size();
+
     //mass = new double[nofzbody];
     //if(CENTER) nofzbody-=1;
 
@@ -401,6 +396,18 @@ int main(int argc, char *argv[])
 
     solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
+
+    char *astr = new char[256];
+    QFile mpcFile("./mpc.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+
+    QFile mpcFileM("./mpc_moody.txt");
+    mpcFileM.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStmM(&mpcFileM);
+
+
+
     if(useMoody)
     {
 
@@ -431,28 +438,43 @@ int main(int argc, char *argv[])
 
 
    // p = 0;
-    for(i=0; i<pList.size(); i++)
+    for(i=0; i<nofzbody; i++)
     {
         //mass[i] = pList[i]->mass;
 //        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
 
-        name = QString(pList[i]->name.data());
+        name = QString(iList[i]->name.data());
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
         //if(plaNum==10) continue;
         p = i*3;
 
-        X[p] = pList[i]->x;
-        X[p+1] = pList[i]->y;
-        X[p+2] = pList[i]->z;
-        V[p] = pList[i]->xd;
-        V[p+1] = pList[i]->yd;
-        V[p+2] = pList[i]->zd;
+        X[p] = iList[i]->x;
+        X[p+1] = iList[i]->y;
+        X[p+2] = iList[i]->z;
+        V[p] = iList[i]->xd;
+        V[p+1] = iList[i]->yd;
+        V[p+2] = iList[i]->zd;
 
 
+/*
+        if(useMoody)
+        {
+            if(getMopName(mState, mItem, name)!=-1)
+            {
+                //mItem = mState->getMopItem(i);
+                Xm[i*3] = mItem.x/AUKM/1000;
+                Xm[i*3+1] = mItem.y/AUKM/1000;
+                Xm[i*3+2] = mItem.z/AUKM/1000;
+                Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
+                Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
+                Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-
+                //saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+            }
+        }
+*/
         if(plaNum!=-1)
         {
             if(useEPM)
@@ -471,8 +493,73 @@ int main(int argc, char *argv[])
                 nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], t0, plaNum, CENTER, SK);
             }
 
-            //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+            saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+
+            //if(useMoody) saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
+
+
         }
+        else
+        {
+            if(initMpc) break;
+            mCat.GetRecName(name.simplified().toAscii().data());
+
+
+            if(useEPM)
+            {
+                status = calc_EPM(EARTH, centr_num, (int)t0, t0 - (int)t0, XE0, VE0);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
+            }
+            else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], t0, GEOCENTR_NUM, CENTER, SK);
+
+            qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
+
+            detRDnumGC(&ra, &de, X[p], X[p+1], X[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+            //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
+
+            TDB2UTC(t0, &jdUTC);
+            //ra = ra - ra0;
+            //de = de - de0;
+            mrec.r = ra;
+            mrec.d = de;
+            mrec.eJD = jdUTC;
+            mrec.num = 1;
+            mCat.record->getNumStr(mrec.head->Snum);
+            //strcpy(mrec.head->Snum, mCat.record->number);
+            mrec.tail->set_numOfObs("500");
+            mrec.toString(astr);
+
+            mpcStm << astr << "\n";
+
+
+/*
+            if(useMoody)
+            {
+                detRDnumGC(&ra, &de, Xm[p], Xm[p+1], Xm[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+                //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
+
+                //TDB2UTC(t0, &jdUTC);
+                //ra = ra - ra0;
+                //de = de - de0;
+                mrec.r = ra;
+                mrec.d = de;
+                mrec.eJD = jdUTC;
+                mrec.num = 1;
+                mCat.record->getNumStr(mrec.head->Snum);
+                //strcpy(mrec.head->Snum, mCat.record->number);
+                mrec.tail->set_numOfObs("500");
+                mrec.toString(astr);
+
+                mpcStmM << astr << "\n";
+            }*/
+        }
+
+
+
 /*        else
         {
             if(useMiriade)
@@ -488,21 +575,7 @@ int main(int argc, char *argv[])
 
 /*
 
-        if(useMoody)
-        {
-            if(getMopName(mState, mItem, name)!=-1)
-            {
-                //mItem = mState->getMopItem(i);
-                Xm[i*3] = mItem.x/AUKM/1000;
-                Xm[i*3+1] = mItem.y/AUKM/1000;
-                Xm[i*3+2] = mItem.z/AUKM/1000;
-                Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
-                Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
-                Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                saveResultsM(t0-t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
-            }
-        }
 */
 
 
@@ -531,6 +604,8 @@ int main(int argc, char *argv[])
         */
     }
 
+    //if(useMoody) mState = mFile->readState();
+/*
     CM_int(CM, X, V);
     qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
     S_int(S, X, V);
@@ -544,11 +619,8 @@ int main(int argc, char *argv[])
     qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
     LF_int(&LF0, X0, V0);
     qDebug() << QString("LF0: %1\n").arg(LF0);
+*/
 
-    char *astr = new char[256];
-    QFile mpcFile("./mpc.txt");
-    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
-    QTextStream mpcStm(&mpcFile);
 
 //    for(ti=t0; ti<t1; ti+=dt)
     double *P = new double[9];
@@ -586,6 +658,7 @@ int main(int argc, char *argv[])
 
             solSys->rada27(X, V, 0, fabs(dt));
 
+            /*
             ssb[0] = 0;
             ssb[1] = 0;
             ssb[2] = 0;
@@ -596,6 +669,7 @@ int main(int argc, char *argv[])
             qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
             LF_int(&LF, X, V);
             qDebug() << QString("LF: %1\n").arg(LF);
+            */
 /*
             if(useEPM)
             {
@@ -637,10 +711,10 @@ int main(int argc, char *argv[])
             ssb[2] /= muis;
 */
             //i=0;
-            for(teloi=0; teloi<pList.size(); teloi++)
+            for(teloi=0; teloi<iList.size(); teloi++)
             {
                 //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
-                name = QString(pList[teloi]->name.data());
+                name = QString(iList[teloi]->name.data());
                 if(useEPM) plaNum = epm_planet_num(name);
                 else plaNum = planet_num(name.toAscii().data());
     /*
@@ -649,6 +723,26 @@ int main(int argc, char *argv[])
                 X[i+2]+=ssb[2];
     */
                 i = teloi*3;
+                if(useMoody)
+                {
+                    if(getMopName(mState, mItem, name)!=-1)
+                    {
+                        //mItem = mState->getMopItem(teloi);
+
+                        Xm[i] = mItem.x/AUKM/1000;
+                        Xm[i+1] = mItem.y/AUKM/1000;
+                        Xm[i+2] = mItem.z/AUKM/1000;
+                        Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                        Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                        Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+
+                        //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
+
+
+                    }
+                }
+
+
                 if(plaNum!=-1)
                 {
 
@@ -724,6 +818,7 @@ int main(int argc, char *argv[])
                         X[i+2] = zt;
                     }
 */
+                    /*
                     if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {
                         saveResults(TF-t0, X, V, X0, V0, i, name, resStm, dxStm, deStm);
@@ -740,12 +835,26 @@ int main(int argc, char *argv[])
                         V[i+2]=V0[i+2];
 
                     }
+                    */
                 }
                 else if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                 {
-                    saveResults(TF-t0, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
+                    saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
 
-                    nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    if(initMpc) break;
+                    mCat.GetRecName(name.simplified().toAscii().data());
+
+                    if(useEPM)
+                    {
+                        status = calc_EPM(EARTH, centr_num, (int)TF, TF - (int)TF, XE0, VE0);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    //nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
                     qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
 
                     detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
@@ -758,32 +867,37 @@ int main(int argc, char *argv[])
                     mrec.d = de;
                     mrec.eJD = jdUTC;
                     mrec.num = 1;
-                    strcpy(mrec.head->Snum, "00001");
+                    mCat.record->getNumStr(mrec.head->Snum);
+                    //strcpy(, mCat.record->getNumStr(>number);
                     mrec.tail->set_numOfObs("500");
                     mrec.toString(astr);
 
                     mpcStm << astr << "\n";
+
+                    if(useMoody)
+                    {
+                        detRDnumGC(&ra, &de, Xm[i], Xm[i+1], Xm[i+2], Xm[6], Xm[7], Xm[8], 0, 0, 0);
+                        //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
+
+                        //TDB2UTC(t0, &jdUTC);
+                        //ra = ra - ra0;
+                        //de = de - de0;
+                        mrec.r = ra;
+                        mrec.d = de;
+                        mrec.eJD = jdUTC;
+                        mrec.num = 1;
+                        mCat.record->getNumStr(mrec.head->Snum);
+                        //strcpy(mrec.head->Snum, mCat.record->number);
+                        mrec.tail->set_numOfObs("500");
+                        mrec.toString(astr);
+
+                        mpcStmM << astr << "\n";
+                    }
                     //qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
                 }
 
-                if(useMoody)
-                {
-                    if(getMopName(mState, mItem, name)!=-1)
-                    {
-                        //mItem = mState->getMopItem(teloi);
+                if(useMoody) saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
 
-                        Xm[i] = mItem.x/AUKM/1000;
-                        Xm[i+1] = mItem.y/AUKM/1000;
-                        Xm[i+2] = mItem.z/AUKM/1000;
-                        Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
-                        Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
-                        Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
-
-                        //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
-                        saveResultsM(TF-t0, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
-
-                    }
-                }
 
 
                 //i+=3;
@@ -869,7 +983,7 @@ int main(int argc, char *argv[])
 
             if(useMoody) mState = mFile->readState();
 
-            qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+            //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
         }
         if(obrat) break;
         dt = -dt;
@@ -892,6 +1006,7 @@ int main(int argc, char *argv[])
     deFile.close();
 
     mpcFile.close();
+    mpcFileM.close();
 
     if(useMoody)
     {

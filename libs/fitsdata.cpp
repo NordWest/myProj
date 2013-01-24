@@ -3694,7 +3694,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                             catLine = catStream.readLine();
 
 
-                            if(FD_LOG_LEVEL) qDebug() << QString("mGr->ctype: %1\n").arg(mGr->ctype);
+                            if(FD_LOG_LEVEL>1) qDebug() << QString("mGr->ctype: %1\n").arg(mGr->ctype);
 
                             switch(mGr->ctype)
                             {
@@ -3905,7 +3905,7 @@ int getMarksGrid(marksGrid *catMarks, catFinder *sCat, int catProgType, double m
                                         if(FD_LOG_LEVEL) qDebug() << QString("fromString err\n");
                                         continue;
                                     }
-                                    if(FD_LOG_LEVEL) qDebug() << QString("fromString ok\n");
+                                    if(FD_LOG_LEVEL>1) qDebug() << QString("fromString ok\n");
 /*
                                         break;
                                     case 0:
@@ -10484,8 +10484,9 @@ int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *re
                 outstr.clear();
 
                 resFile.resList.clear();
-                if(FD_LOG_LEVEL) qDebug() << QString("rsindex.count= %1\n").arg(rsindex.count());
+
                 resNum = refMarks->marks.size();
+                if(FD_LOG_LEVEL) qDebug() << QString("refMarks.count= %1\n").arg(resNum);
                 for (i=0;i<resNum;i++)
                 {
                     outstr.clear();
@@ -10544,7 +10545,12 @@ int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *re
                         }
                 }
 
-                if(outLim.resSigma>0.0) resFile.remSigma(outLim.resSigma);
+                if(outLim.resSigma>0.0)
+                {
+                    if(FD_LOG_LEVEL) qDebug() << QString("remSigma: %1\n").arg(outLim.resSigma);
+                    resFile.remSigma(outLim.resSigma);
+                    if(FD_LOG_LEVEL) qDebug() << QString("refMarks after sigma= %1\n").arg(resFile.resList.size());
+                }
                 resFile.saveAs(resFolder+"/residuals"+suff+".txt");
 
             }
