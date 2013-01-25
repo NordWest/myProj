@@ -110,8 +110,8 @@ struct report12data
 
 struct report4data
 {
-    double x0, x1, y0, y1;  //РґРёР°РїР°Р·РѕРЅС‹
-    int xLevNum, yLevNum;             //РєРѕР»-РІРѕ РєР»РµС‚РѕРє РїРѕ РѕСЃСЏРј
+    double x0, x1, y0, y1;  //� ґ� ё� °� ї� °� ·� ѕ� ЅС‹
+    int xLevNum, yLevNum;             //� є� ѕ� »-� І� ѕ � є� »� µС‚� ѕ� є � ї� ѕ � ѕСЃСЏ� ј
     int isFindDiap;
 //    QString labelX, labelY, plotParam;
 //    int isDetCurv, curvDeg;
@@ -124,8 +124,8 @@ struct report4data
 
 struct report50data
 {
-    double x0, x1, y0, y1;  //РґРёР°РїР°Р·РѕРЅС‹
-    int xLevNum, yLevNum;             //РєРѕР»-РІРѕ РєР»РµС‚РѕРє РїРѕ РѕСЃСЏРј
+    double x0, x1, y0, y1;  //� ґ� ё� °� ї� °� ·� ѕ� ЅС‹
+    int xLevNum, yLevNum;             //� є� ѕ� »-� І� ѕ � є� »� µС‚� ѕ� є � ї� ѕ � ѕСЃСЏ� ј
     int isFindDiap;
     QString mdCorrX, mdCorrY;
 //    QString labelX, labelY, plotParam;
@@ -582,7 +582,7 @@ int main(int argc, char *argv[])    //r3StatPL
     rStat.getMeasurementsList(mesList, &rStatSel);
 
     initMagEqList(mesList, resListDiap, magEq);
-    //initMagEqListRef(mesList, resListDiapRef, magEq);
+    initMagEqList(mesList, resListDiapRef, magEq);
 
     //if(isReport0) rFile.close();
     //r1File.close();
@@ -693,22 +693,24 @@ int main(int argc, char *argv[])    //r3StatPL
     rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
     dataStream.setDevice(&rFile);
 
+    dataStrL << QString("\#Magnitude interval center|meanKsi|rmsMeanKsi|meanEta|rmsMeanEta|Total stars num\n");
+
     for(k=0; k<magEq.diapsNum-1; k++)
     {
 
 
-        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma, 0.0, isRef);
+        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma);
         //resListDiap.at(k)->detStat();
 
-       resListDiap.at(k)->detStat(isRef);
+       resListDiap.at(k)->detStat();
 
        dataStrL.clear();
 
        dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
-       dataStrL << QString("%1").arg(resListDiap.at(k)->numKsi);
+       //dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsinumKsi);
        dataStrL << QString("%1").arg(resListDiap.at(k)->meanKsi);
        dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsi);
-       dataStrL << QString("%1").arg(resListDiap.at(k)->numEta);
+       //dataStrL << QString("%1").arg(resListDiap.at(k)->numEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->meanEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->resList.size());
@@ -717,6 +719,39 @@ int main(int argc, char *argv[])    //r3StatPL
     }
 
     rFile.close();
+
+    if(isRef)
+    {
+        rFile.setFileName(reportDirName+"mgEq_ref.txt");
+        rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
+        dataStream.setDevice(&rFile);
+
+        dataStrL << QString("\#Magnitude interval center|numKsi|meanKsi|rmsMeanKsi|numEta|meanEta|rmsMeanEta|Total stars num\n");
+
+        for(k=0; k<magEq.diapsNum-1; k++)
+        {
+
+
+            if(mgEqSigma>1e-2) resListDiapRef.at(k)->remSigma(mgEqSigma, 0.0, 1);
+
+           resListDiapRef.at(k)->detStat(1);
+
+           dataStrL.clear();
+
+           dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->numKsi);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->meanKsi);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->rmsMeanKsi);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->numEta);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->meanEta);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->rmsMeanEta);
+           dataStrL << QString("%1").arg(resListDiapRef.at(k)->resList.size());
+      //     dataStrL << QString("%1")
+           dataStream << dataStrL.join(colSep) << "\n";
+        }
+
+        rFile.close();
+    }
 
     r1File.setFileName(reportDirName+"ocMagDisp.txt");
     r1File.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
@@ -2681,10 +2716,10 @@ int main(int argc, char *argv[])    //r3StatPL
 
             //    fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
             //    fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-            //РѕС‚РєСЂС‹С‚СЊ РјРµС‚РєРё
+            //� ѕС‚� єСЂС‹С‚СЊ � ј� µС‚� є� ё
                 //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                 //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-            //РёР· РєР°С‚Р°Р»РѕРіР°
+            //� ё� · � є� °С‚� °� »� ѕ� і� °
                 fitsd->catMarks->clearMarks();
                 getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
                 fitsd->detTan();
@@ -2916,17 +2951,17 @@ int main(int argc, char *argv[])    //r3StatPL
 
                 fitsd->setPos(mesRec->errBud->MJD, mesRec->errBud->RAoc, mesRec->errBud->DEoc);
 
-                //РІС‹СЃС‚Р°РІРёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
+                //� ІС‹СЃС‚� °� І� ёС‚СЊ � ї� °СЂ� °� ј� µС‚СЂС‹ � ё� ЅСЃС‚СЂСѓ� ј� µ� ЅС‚� °
                     fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
                     fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-                //РѕС‚РєСЂС‹С‚СЊ РјРµС‚РєРё
+                //� ѕС‚� єСЂС‹С‚СЊ � ј� µС‚� є� ё
                     //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                     //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-                //РёР· РєР°С‚Р°Р»РѕРіР°
+                //� ё� · � є� °С‚� °� »� ѕ� і� °
                     fitsd->marksG->clearMarks();
                     fitsd->getMarksGrid(starCatList.at(currentCat), instruments->fov, mag0, mag1, -1);
                     fitsd->detTan();
-                //РѕР±СЉРµРєС‚
+                //� ѕ� ±СЉ� µ� єС‚
                     fitsd->mpeWaitTime = mpeWaitTime;
                     fitsd->sbWaitTime = sbWaitTime;
                     if(lspmFind)
