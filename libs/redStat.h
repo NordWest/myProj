@@ -228,6 +228,7 @@ public:
         void copy(const residualsRec &source);
 
         void setMesParams(double *P, int pSize);
+        double catMag();
 };
 
 

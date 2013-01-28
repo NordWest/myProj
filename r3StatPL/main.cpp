@@ -82,6 +82,8 @@ struct diapU3
 //    vectGrid3D *vectF;
 };
 
+
+
 //int detCurf3(double *Zi, double *x, double *y, int num, int deg);
 //int detCurf3(QString *resFunc, double *Zi, double *x, double *y, int num, int deg);
 
@@ -110,8 +112,8 @@ struct report12data
 
 struct report4data
 {
-    double x0, x1, y0, y1;  //� ґ� ё� °� ї� °� ·� ѕ� ЅС‹
-    int xLevNum, yLevNum;             //� є� ѕ� »-� І� ѕ � є� »� µС‚� ѕ� є � ї� ѕ � ѕСЃСЏ� ј
+    double x0, x1, y0, y1;  //п р▒п я▒п б╟п я≈п б╟п б╥п я∙п п┘п║Б─╧
+    int xLevNum, yLevNum;             //п я■п я∙п б╩-п п├п я∙ п я■п б╩п б╣п║Б─ п я∙п я■ п я≈п я∙ п я∙п║п┐п║п▐п я≤
     int isFindDiap;
 //    QString labelX, labelY, plotParam;
 //    int isDetCurv, curvDeg;
@@ -124,12 +126,10 @@ struct report4data
 
 struct report50data
 {
-    double x0, x1, y0, y1;  //� ґ� ё� °� ї� °� ·� ѕ� ЅС‹
-    int xLevNum, yLevNum;             //� є� ѕ� »-� І� ѕ � є� »� µС‚� ѕ� є � ї� ѕ � ѕСЃСЏ� ј
+    double x0, x1, y0, y1;
+    int xLevNum, yLevNum;
     int isFindDiap;
     QString mdCorrX, mdCorrY;
-//    QString labelX, labelY, plotParam;
-//    int isDetCurv, curvDeg;
     int isSysCorr;
     QString colSep;
     int corrModel;
@@ -159,19 +159,16 @@ int main(int argc, char *argv[])    //r3StatPL
 
 
     QTextStream dataStream, dataStream1;
-    //QFile rFile(argv[1]);
-    //rFile.open(QIODevice::ReadOnly| QIODevice::Text);
-    //dataStream.setDevice(&rFile);
 
     QFile* logFile = new QFile("messages.log");
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog1 = new QDataStream(logFile);
 
-    //QTextCodec *codec2 = QTextCodec::codecForName("Windows-1251");
 
     diapResiduals magEq;
     QList <residualFile*> resListDiap;
-    QList <residualFile*> resListDiapRef;
+    residualFile* resList;
+    //QList <residualFile*> resListDiapRef;
     reductionStat rStat;
     platesStat plStat;
     QList <measurementRec*> mesList;
@@ -524,8 +521,8 @@ int main(int argc, char *argv[])    //r3StatPL
         magEq.diaps[i] = mdList.at(i).toDouble();
         resFile = new residualFile;
         resListDiap << resFile;
-        resFile = new residualFile;
-        resListDiapRef << resFile;
+        //resFile = new residualFile;
+        //resListDiapRef << resFile;
     }
 
     magEq.diaps[magEq.diapsNum-1] = mdList.at(magEq.diapsNum-1).toInt();
@@ -582,7 +579,7 @@ int main(int argc, char *argv[])    //r3StatPL
     rStat.getMeasurementsList(mesList, &rStatSel);
 
     initMagEqList(mesList, resListDiap, magEq);
-    initMagEqList(mesList, resListDiapRef, magEq);
+    //initMagEqList(mesList, resListDiapRef, magEq);
 
     //if(isReport0) rFile.close();
     //r1File.close();
@@ -693,24 +690,24 @@ int main(int argc, char *argv[])    //r3StatPL
     rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
     dataStream.setDevice(&rFile);
 
-    dataStrL << QString("\#Magnitude interval center|meanKsi|rmsMeanKsi|meanEta|rmsMeanEta|Total stars num\n");
+    dataStream << QString("\#Magnitude interval center|meanKsi|rmsMeanKsi|meanEta|rmsMeanEta|Total stars num\n");
 
     for(k=0; k<magEq.diapsNum-1; k++)
     {
 
 
-        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma);
+        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma, 0.0, isRef);
         //resListDiap.at(k)->detStat();
 
-       resListDiap.at(k)->detStat();
+       resListDiap.at(k)->detStat(isRef);
 
        dataStrL.clear();
 
        dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
-       //dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsinumKsi);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->numKsi);
        dataStrL << QString("%1").arg(resListDiap.at(k)->meanKsi);
        dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanKsi);
-       //dataStrL << QString("%1").arg(resListDiap.at(k)->numEta);
+       dataStrL << QString("%1").arg(resListDiap.at(k)->numEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->meanEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->rmsMeanEta);
        dataStrL << QString("%1").arg(resListDiap.at(k)->resList.size());
@@ -720,38 +717,6 @@ int main(int argc, char *argv[])    //r3StatPL
 
     rFile.close();
 
-    if(isRef)
-    {
-        rFile.setFileName(reportDirName+"mgEq_ref.txt");
-        rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
-        dataStream.setDevice(&rFile);
-
-        dataStrL << QString("\#Magnitude interval center|numKsi|meanKsi|rmsMeanKsi|numEta|meanEta|rmsMeanEta|Total stars num\n");
-
-        for(k=0; k<magEq.diapsNum-1; k++)
-        {
-
-
-            if(mgEqSigma>1e-2) resListDiapRef.at(k)->remSigma(mgEqSigma, 0.0, 1);
-
-           resListDiapRef.at(k)->detStat(1);
-
-           dataStrL.clear();
-
-           dataStrL << QString("%1").arg((magEq.diaps[k+1]+magEq.diaps[k])/2.0);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->numKsi);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->meanKsi);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->rmsMeanKsi);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->numEta);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->meanEta);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->rmsMeanEta);
-           dataStrL << QString("%1").arg(resListDiapRef.at(k)->resList.size());
-      //     dataStrL << QString("%1")
-           dataStream << dataStrL.join(colSep) << "\n";
-        }
-
-        rFile.close();
-    }
 
     r1File.setFileName(reportDirName+"ocMagDisp.txt");
     r1File.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
@@ -1988,26 +1953,26 @@ int main(int argc, char *argv[])    //r3StatPL
 
 
 
+        diapNum = resListDiap.size();
 
         qDebug() << QString("isFindDiap = %1\n").arg(r5data.isFindDiap);
 
         if(r5data.isFindDiap)
         {
             diniKey = 1;
-            di = mesList.size();
+            //di = mesList.size();
             //qDebug() << QString("mesList size= %1\n").arg(di);
-                for(i=0; i<di; i++)
+                for(i=0; i<diapNum; i++)
                 {
                         //printf("\nfindDiap: %f\%\n", (double)i*100.0/(double)di);
 
-                        mesRec = mesList.at(i);
-
-                        rNum = mesRec->resList.size();
+                        rNum = resListDiap.at(i)->resList.size();
+//                        rNum = resRec->resList.size();
                         //qDebug() << QString("rNum= %1\n").arg(rNum);
                         for(j=0; j<rNum; j++)
                         {
 
-                                resRec = mesList.at(i)->resList.at(j);
+                                resRec = resListDiap.at(i)->resList.at(j);
 
                                // if(mesRec->errBud->exptime<expMin) continue;
 
@@ -2052,9 +2017,11 @@ int main(int argc, char *argv[])    //r3StatPL
         qDebug() << "naxeX= " << naxeX[0] << " - " << naxeX[1] << "\n";
         qDebug() << "naxeY= " << naxeY[0] << " - " << naxeY[1] << "\n";
 
-        diapNum = resListDiap.size();
+
 
         qDebug() << QString("\nmLevNum= %1\nxLevNum= %2\nyLevNum= %3\n").arg(mLevNum).arg(r5data.xLevNum).arg(r5data.yLevNum);
+
+
 
         mLevels = new double[mLevNum];
         xLevels = new double[r5data.xLevNum];
@@ -2104,27 +2071,28 @@ int main(int argc, char *argv[])    //r3StatPL
 
         qDebug() << QString("di= %1\n").arg(di);
 
-        for(i=0; i<di; i++)
+        for(i=0; i<diapNum; i++)
         {
                 printf("\nsetPoint: %f\%\n", (double)i*100.0/(double)di);
 
                 mesRec = mesList.at(i);
 
-                rNum = mesRec->resList.size();
+                //rNum = mesRec->resList.size();
+                rNum = resListDiap.at(i)->resList.size();
                 for(j=0; j<rNum; j++)
                 {
 
-                    resRec = mesList.at(i)->resList.at(j);
+                    resRec = resListDiap.at(i)->resList.at(j);
 
                     dKsi = 0.0;
                     dEta = 0.0;
 
                     //if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
-                    if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, r5data.rMax, r5data.nmin);
+                    if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->catMag(), &dKsi, &dEta, r5data.rMax, r5data.nmin);
 
                     vect[0] = resRec->x - dKsi;
                     vect[1] = resRec->y - dEta;
-                    vect[2] = resRec->mag;
+                    vect[2] = resRec->catMag();
                     vectF5data->addPoint(vect, resRec->Dx - dKsi, resRec->Dy - dEta);
                 }
         }
@@ -2716,10 +2684,10 @@ int main(int argc, char *argv[])    //r3StatPL
 
             //    fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
             //    fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-            //� ѕС‚� єСЂС‹С‚СЊ � ј� µС‚� є� ё
+            //п я∙п║Б─ п я■п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я■п я▒
                 //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                 //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-            //� ё� · � є� °С‚� °� »� ѕ� і� °
+            //п я▒п б╥ п я■п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
                 fitsd->catMarks->clearMarks();
                 getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
                 fitsd->detTan();
@@ -2951,17 +2919,17 @@ int main(int argc, char *argv[])    //r3StatPL
 
                 fitsd->setPos(mesRec->errBud->MJD, mesRec->errBud->RAoc, mesRec->errBud->DEoc);
 
-                //� ІС‹СЃС‚� °� І� ёС‚СЊ � ї� °СЂ� °� ј� µС‚СЂС‹ � ё� ЅСЃС‚СЂСѓ� ј� µ� ЅС‚� °
+                //п п├п║Б─╧п║п┐п║Б─ п б╟п п├п я▒п║Б─ п║п┼ п я≈п б╟п║п┌п б╟п я≤п б╣п║Б─ п║п┌п║Б─╧ п я▒п п┘п║п┐п║Б─ п║п┌п║я⌠п я≤п б╣п п┘п║Б─ п б╟
                     fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
                     fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-                //� ѕС‚� єСЂС‹С‚СЊ � ј� µС‚� є� ё
+                //п я∙п║Б─ п я■п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я■п я▒
                     //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                     //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-                //� ё� · � є� °С‚� °� »� ѕ� і� °
+                //п я▒п б╥ п я■п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
                     fitsd->marksG->clearMarks();
                     fitsd->getMarksGrid(starCatList.at(currentCat), instruments->fov, mag0, mag1, -1);
                     fitsd->detTan();
-                //� ѕ� ±СЉ� µ� єС‚
+                //п я∙п б╠п║п┴п б╣п я■п║Б─ 
                     fitsd->mpeWaitTime = mpeWaitTime;
                     fitsd->sbWaitTime = sbWaitTime;
                     if(lspmFind)
@@ -3324,7 +3292,8 @@ void initMagEqList(QList <measurementRec*> mesList, QList <residualFile*> resLis
         {
             for(k=0; k<magEq.diapsNum-1; k++)
             {
-                if((mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)>magEq.diaps[k]&&(mesRec->resList.at(j)->mag-mesRec->resList.at(j)->magOC)<magEq.diaps[k+1])
+                if((mesRec->resList.at(j)->catMag())>magEq.diaps[k]&&(mesRec->resList.at(j)->catMag())<magEq.diaps[k+1])
+                //if((mesRec->resList.at(j)->mag)>magEq.diaps[k]&&(mesRec->resList.at(j)->mag)<magEq.diaps[k+1])
                 {
                     resListDiap.at(k)->resList << mesRec->resList.at(j);
                 }
