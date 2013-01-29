@@ -12,6 +12,7 @@
 #include "./../libs/fitsdata.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/mpccat.h"
+#include "./../libs/residualsgrid.h"
 
 
 //#include <mgl/mgl_eps.h>
@@ -2064,6 +2065,9 @@ int main(int argc, char *argv[])    //r3StatPL
 
         vectF5data->setLevels(xLevels, r5data.xLevNum, yLevels, r5data.yLevNum, mLevels, mLevNum);
 
+        residualsGrid resGrid;
+
+        resGrid.initLevels(xLevels, r5data.xLevNum, yLevels, r5data.yLevNum, mLevels, mLevNum);
 
 
         //double *vect = new double[3];
@@ -2075,7 +2079,7 @@ int main(int argc, char *argv[])    //r3StatPL
         {
                 printf("\nsetPoint: %f\%\n", (double)i*100.0/(double)di);
 
-                mesRec = mesList.at(i);
+                //mesRec = mesList.at(i);
 
                 //rNum = mesRec->resList.size();
                 rNum = resListDiap.at(i)->resList.size();
@@ -2088,18 +2092,43 @@ int main(int argc, char *argv[])    //r3StatPL
                     dEta = 0.0;
 
                     //if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
-                    if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->catMag(), &dKsi, &dEta, r5data.rMax, r5data.nmin);
+                    //if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->catMag(), &dKsi, &dEta, r5data.rMax, r5data.nmin);
 
+                    resGrid.addPointXY(resRec);
+/*
                     vect[0] = resRec->x - dKsi;
                     vect[1] = resRec->y - dEta;
                     vect[2] = resRec->catMag();
-                    vectF5data->addPoint(vect, resRec->Dx - dKsi, resRec->Dy - dEta);
+                    vectF5data->addPoint(vect, resRec->Dx - dKsi, resRec->Dy - dEta);*/
                 }
         }
-        qDebug() << QString("numTot= %1\n").arg(vectF5data->numTot);
-        vectF5data->detMean();
-        if(r5data.doWeght) vectF5data->doWeght();
-        vectF5data->initVF();
+        //qDebug() << QString("numTot= %1\n").arg(vectF5data->numTot);
+        //vectF5data->detMean();
+        //if(r5data.doWeght) vectF5data->doWeght();
+        //vectF5data->initVF();
+        int numGrid = 0;
+        for(i=0; i<resGrid.nums; i++) numGrid += resGrid.rfList.at(i)->resList.size();
+        qDebug() << QString("numGrid: %1\n").arg(numGrid);
+
+        if(mgEqSigma>0) resGrid.remSigmaXY(mgEqSigma, 0.0, isRef);
+        else resGrid.detStatXY(isRef);
+
+        double x, y, m;
+
+        for(i=0; i<resGrid.nums; i++)
+        {
+            resFile = resGrid.rfList.at(i);
+            sz = resFile->resList.size();
+
+            if(!sz) continue;
+            if(resGrid.detCenters(x, y, m, i))continue;
+
+            vect[0] = x;
+            vect[1] = y;
+            vect[2] = m;
+            vectF5data->setPoint(vect, resFile->meanKsi, resFile->meanEta, resFile->resList.size());
+
+        }
 
         vectF5data->printCoefs();
 

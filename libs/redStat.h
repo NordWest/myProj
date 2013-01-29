@@ -229,6 +229,8 @@ public:
 
         void setMesParams(double *P, int pSize);
         double catMag();
+        double catX();
+        double catY();
 };
 
 
@@ -855,6 +857,12 @@ public:
     void removeMes(QString mesureTimeCode);
 };
 
+struct statResults2
+{
+    double meanX, meanY, rmsOneX, rmsOneY, rmsMeanX, rmsMeanY;
+    int numX, numY;
+};
+
 class residualFile
 {
 public:
@@ -877,8 +885,10 @@ public:
         void detStat(int isRef = 0);
         void remSigma(double sg, double proofP=0.0, int isRef=0);
 
-        void removeMes(QString mesureTimeCode);
+        void detStatXY(int isRef = 0);
+        void remSigmaXY(double sg, double proofP=0.0, int isRef=0);
 
+        void removeMes(QString mesureTimeCode);
 
 };
 

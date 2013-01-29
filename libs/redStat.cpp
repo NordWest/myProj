@@ -765,6 +765,16 @@ double residualsRec::catMag()
     return(mag-magOC);
 }
 
+double residualsRec::catX()
+{
+    return(x-Dx);
+}
+
+double residualsRec::catY()
+{
+    return(y-Dy);
+}
+
 /////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////
@@ -3468,7 +3478,8 @@ void residualFile::detStat(int isRef)
 
     for(i=0; i<recNum; i++)
     {
-        if(isRef==0||resList.at(i)->isRefKsi){meanKsi += resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)); numKsi++;}
+        //if(isRef==0||resList.at(i)->isRefKsi){meanKsi += resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)); numKsi++;}
+        if(isRef==0||resList.at(i)->isRefKsi){meanKsi += resList.at(i)->ksiOC; numKsi++;}
         if(isRef==0||resList.at(i)->isRefEta){meanEta += resList.at(i)->etaOC;numEta++;}
     }
     meanKsi /= numKsi;
@@ -3478,6 +3489,34 @@ void residualFile::detStat(int isRef)
         //rmsOneKsi += pow(resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)) - meanKsi, 2.0);
         if(isRef==0||resList.at(i)->isRefKsi) rmsOneKsi += pow(resList.at(i)->ksiOC - meanKsi, 2.0);
         if(isRef==0||resList.at(i)->isRefEta) rmsOneEta += pow(resList.at(i)->etaOC - meanEta, 2.0);
+    }
+
+    rmsOneKsi  = sqrt(rmsOneKsi/(numKsi - 1.0));
+    rmsOneEta  = sqrt(rmsOneEta/(numEta - 1.0));
+    rmsMeanKsi = rmsOneKsi/sqrt(numKsi);
+    rmsMeanEta = rmsOneEta/sqrt(numEta);
+
+}
+
+void residualFile::detStatXY(int isRef)
+{
+    int i, recNum;
+    recNum = resList.size();
+    numKsi = numEta = 0;
+    meanKsi = meanEta = rmsOneKsi = rmsOneEta = rmsMeanKsi = rmsMeanEta = 0.0;
+
+    for(i=0; i<recNum; i++)
+    {
+        if(isRef==0||resList.at(i)->isRefKsi){meanKsi += resList.at(i)->Dx; numKsi++;}
+        if(isRef==0||resList.at(i)->isRefEta){meanEta += resList.at(i)->Dy;numEta++;}
+    }
+    meanKsi /= numKsi;
+    meanEta /= numEta;
+    for(i=0; i<recNum; i++)
+    {
+        //rmsOneKsi += pow(resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)) - meanKsi, 2.0);
+        if(isRef==0||resList.at(i)->isRefKsi) rmsOneKsi += pow(resList.at(i)->Dx - meanKsi, 2.0);
+        if(isRef==0||resList.at(i)->isRefEta) rmsOneEta += pow(resList.at(i)->Dy - meanEta, 2.0);
     }
 
     rmsOneKsi  = sqrt(rmsOneKsi/(numKsi - 1.0));
@@ -3511,6 +3550,44 @@ void residualFile::remSigma(double sg, double proofP, int isRef)
             //resKsi = fabs(meanKsi - resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)));
             resKsi = fabs(meanKsi - resList.at(i)->ksiOC);
             resEta = fabs(meanEta - resList.at(i)->etaOC);
+
+            if(resKsi>maxResKsi||resEta>maxResEta)
+            {
+                if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remove oc: %1\t%2\n").arg(resKsi).arg(resEta);
+                resList.removeAt(i);
+            }
+        }
+
+        recNum0 = resList.size();
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("num: %1\tnum0: %2\n").arg(recNum).arg(recNum0);
+    }while(recNum0>10&&(abs(recNum-recNum0)>(proofP*recNum)));
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars remain %1\n").arg(resList.size());
+}
+
+void residualFile::remSigmaXY(double sg, double proofP, int isRef)
+{
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigma: %1\n").arg(sg);
+    int i, recNum, recNum0;
+    if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars before %1\n").arg(resList.size());
+    if(resList.size()<4) return;
+
+    double maxResKsi, maxResEta, resKsi, resEta;
+    do
+    {
+        recNum = resList.size();
+        detStatXY(isRef);
+
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Ksi: %1\t%2\t%3\n").arg(meanKsi).arg(rmsOneKsi).arg(rmsMeanKsi);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("Eta: %1\t%2\t%3\n").arg(meanEta).arg(rmsOneEta).arg(rmsMeanEta);
+        maxResKsi = sg*rmsOneKsi;
+        maxResEta = sg*rmsOneEta;
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("maxKsi: %1\n").arg(maxResKsi);
+        if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("maxEta: %1\n").arg(maxResEta);
+        for(i=recNum-1; i>0; i--)
+        {
+            //resKsi = fabs(meanKsi - resList.at(i)->ksiOC*cos(grad2rad(resList.at(i)->de)));
+            resKsi = fabs(meanKsi - resList.at(i)->Dx);
+            resEta = fabs(meanEta - resList.at(i)->Dy);
 
             if(resKsi>maxResKsi||resEta>maxResEta)
             {

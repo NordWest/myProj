@@ -39,7 +39,8 @@ SOURCES += main.cpp \
     ../libs/mpccat.cpp \
     ../libs/orbcat.cpp \
     ../libs/sysCorr.cpp \
-    ../libs/uneven.cpp
+    ../libs/uneven.cpp \
+    ../libs/residualsgrid.cpp
 
 HEADERS += ../astro/astro.h \
     ../mb/mb.h \
@@ -71,7 +72,8 @@ HEADERS += ../astro/astro.h \
     ../libs/mpccat.h \
     ../libs/orbcat.h \
     ../libs/sysCorr.h \
-    ../libs/uneven.h
+    ../libs/uneven.h \
+    ../libs/residualsgrid.h
 
 win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
