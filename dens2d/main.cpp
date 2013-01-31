@@ -19,20 +19,27 @@ int main(int argc, char *argv[])
     //QCoreApplication a(argc, argv);
     QTextStream stream(stdout);
     QString fname(argv[1]);
-    QString epsfname(argv[8]);
+    QString epsfname(argv[9]);
+    int i;
     QStringList sl;
     loadDataFile(fname,sl);
-    int npix = QString(argv[2]).toInt();//number of pixels along vertical side
-    int cl = QString(argv[3]).toInt();//longitude
-    int cb = QString(argv[4]).toInt();//latitude
-    int cm = QString(argv[5]).toInt();//mag
-    int fl = QString(argv[6]).toInt();//flag for separator of columns
-    QString clims(argv[9]);
+    int npixX = QString(argv[2]).toInt();//number of pixels along vertical side
+    int npixY = QString(argv[3]).toInt();//number of pixels along vertical side
+    int cl = QString(argv[4]).toInt();//longitude
+    int cb = QString(argv[5]).toInt();//latitude
+    int cm = QString(argv[6]).toInt();//mag
+    int fl = QString(argv[7]).toInt();//flag for separator of columns
+    QString clims(argv[10]);
     /////////////////////////////
     QVector<double>X,Y,M;
     double L,B,MAG;
     QString line;
-    for(int i=0;i<sl.count();i++)
+    if((npixX*npixY)!=sl.count())
+    {
+        qDebug() << QString("Wrong dim\n");
+        return 1;
+    }
+    for(i=0;i<sl.count();i++)
     {
         line = sl[i].simplified();
         /*if(fl==0)
@@ -50,19 +57,19 @@ int main(int argc, char *argv[])
 
         if(fl==0)
         {
-            L = line.section('|',cl,cl).toDouble()-M_PI;
-            B = -line.section('|',cb,cb).toDouble();
-            MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
+            L = line.section('|',cl,cl).toDouble();
+            B = line.section('|',cb,cb).toDouble();
+            MAG = line.section('|',cm,cm).toDouble();
         }
         else
         {
-            L = line.section(' ',cl,cl).toDouble()-M_PI;
-            B = -line.section(' ',cb,cb).toDouble();
+            L = line.section(' ',cl,cl).toDouble();
+            B = line.section(' ',cb,cb).toDouble();
             MAG = line.section(' ',cm,cm).toDouble();
         }
 
-        X<<-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
-        Y<< -sin(B)/sqrt(1+cos(B)*cos(L/2));
+        X<<L;
+        Y<< B;
         M<<MAG;
     }
     //////////////////////////////
@@ -80,8 +87,9 @@ int main(int argc, char *argv[])
     }
     //////////////////////////////
     double cx,cy,psi,d,ed;
-    mglData Z(4*npix+1,2*npix+1);
-    int minIndex=0;
+    mglData Z(npixX,npixY);
+    for(i=0; i<M.size(); i++) Z.a[i] = M.at(i);
+    /*int minIndex=0;
     double mu,nu;
     for(int y=-npix;y<=npix;y++)
     {
@@ -103,7 +111,7 @@ int main(int argc, char *argv[])
                     << QString("%1").arg(psi*180/M_PI,10,'f',5,QLatin1Char( ' ' )) <<'|'
                     << QString("%1").arg(2*cos(psi),10,'f',5,QLatin1Char( ' ' )) <<'|'
                     << QString("%1").arg(sin(psi),10,'f',5,QLatin1Char( ' ' )) <<'|'
-                    << endl;*/
+                    << endl;/
             if(d<ed)
             {
                 ed = sqrt((cx-X[0])*(cx-X[0])+(cy-Y[0])*(cy-Y[0]));
@@ -129,7 +137,7 @@ int main(int argc, char *argv[])
         }
         //stream << endl;
     }
-    //////////////////////////////
+    //////////////////////////////*/
     mglData xs(2),ys(2),zs(2),cs(2);
     xs.a[0]=-2;
     xs.a[1]=2;
@@ -158,7 +166,7 @@ int main(int argc, char *argv[])
     //gr->CRange(zs);
     //gr->Box();
     //gr->Axis("xyz");
-    gr->Dens(Z,argv[7]);
+    gr->Dens(Z,argv[8]);
     //gr->Surf(z,"wk");
     mglData ksi(101),eta(101);
     psi=0;
@@ -169,7 +177,7 @@ int main(int argc, char *argv[])
     //gr->Colorbar("_wk");
     gr->Plot(ksi,eta,"k.");
     ///////////////
-    double lon=-M_PI;
+    /*double lon=-M_PI;
     double lat =0;
     QVector<double> p,q;
     for(int i=0;i<=500;i++)
@@ -203,7 +211,7 @@ int main(int argc, char *argv[])
     mglData P,Q;
     P.Set(p.data(),p.count());
     Q.Set(q.data(),q.count());
-    gr->Plot(P,Q," h.");
+    gr->Plot(P,Q," h.");*/
     //////////////
     double Ksi, Eta;
     ///////////////

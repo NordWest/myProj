@@ -7,7 +7,7 @@
 QT       -= gui
 
 TARGET = dens2d
-CONFIG   += console
+CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
 TEMPLATE = app
