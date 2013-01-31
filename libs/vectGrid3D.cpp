@@ -4,7 +4,10 @@ vectGrid3D::vectGrid3D()
 {
 	xVectField = NULL;
 	yVectField = NULL;
-	vectNumField = NULL;
+    vectNumField = NULL;
+    //xNumField = NULL;
+    //yNumField = NULL;
+
 	
 	axnum = -1;
 	ax = NULL;

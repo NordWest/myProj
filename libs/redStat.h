@@ -873,6 +873,7 @@ public:
 
         double meanKsi, meanEta, rmsOneKsi, rmsOneEta, rmsMeanKsi, rmsMeanEta;
         int numKsi, numEta;
+        double maxResKsi, maxResEta;
 
 	residualFile();
 	~residualFile();
@@ -883,9 +884,13 @@ public:
 	void saveAs(QString fName);
 
         void detStat(int isRef = 0);
+        void detStatKsi(int isRef = 0);
+        void detStatEta(int isRef = 0);
         void remSigma(double sg, double proofP=0.0, int isRef=0);
 
         void detStatXY(int isRef = 0);
+        void detStatX(int isRef = 0);
+        void detStatY(int isRef = 0);
         void remSigmaXY(double sg, double proofP=0.0, int isRef=0);
 
         void removeMes(QString mesureTimeCode);

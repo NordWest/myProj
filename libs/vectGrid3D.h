@@ -40,6 +40,8 @@ public:
 
 
         void setPoint(double *vect, double x, double y, long num);    //vect = {x|y|m}
+        //void setPointX(double *vect, double x, long num);    //vect = {x|y|m}
+        //void setPointY(double *vect, double y, long num);    //vect = {x|y|m}
         void addPoint(double *vect, double x, double y);    //vect = {x|y|m}
         void detMean();
         void doWeght();
@@ -61,6 +63,8 @@ public:
         multidim *xVectField;
         multidim *yVectField;
         multidim *vectNumField;
+        //multidim *xNumField;
+        //multidim *yNumField;
 
         int axnum;					//Число осей
         int *ax;					//Размерности осей
