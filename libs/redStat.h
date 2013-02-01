@@ -886,7 +886,9 @@ public:
         void detStat(int isRef = 0);
         void detStatKsi(int isRef = 0);
         void detStatEta(int isRef = 0);
-        void remSigma(double sg, double proofP=0.0, int isRef=0);
+
+        void detSigma(double sg, double proofP=0.0, int isRef=0);
+        void remSigma();
 
         void detStatXY(int isRef = 0);
         void detStatX(int isRef = 0);

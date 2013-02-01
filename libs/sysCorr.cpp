@@ -263,10 +263,10 @@ double comaCorrParam::dEta(double eta, double mag)
     return(cEta*eta*(mag-cMag0));
 }
 
-int vfCorrParam::detCorr(double *dx, double *dy, long *ni, double x, double y, double magn)
+int vfCorrParam::detCorr(double *dx, double *dy, long *niX, long *niY, double x, double y, double magn)
 {
     double dX, dY;
-    long nI;
+    long nIx, nIy;
     int res;
 
     qDebug() << QString("corrType: %1\n").arg(corrType);
@@ -276,24 +276,29 @@ int vfCorrParam::detCorr(double *dx, double *dy, long *ni, double x, double y, d
     switch(corrType)
     {
     case 0:
-        res = vectFcorr->int2D(x, y, magn, &dX, &dY, &nI);
-        *ni = nI;
+        res = vectFcorr->int2D(x, y, magn, &dX, &dY, &nIx, &nIy);
+        *niX = nIx;
+        *niY = nIy;
         break;
     case 1:
         res = vectFcorr->int2Drad(x, y,magn, &dX, &dY, rMax, nMin);
-        *ni = 20;
+        *niX = 20;
+        *niY = 20;
         break;
     case 2:
         res = vectFcorr->intIDW(x, y, magn, &dX, &dY);
-        *ni = 20;
+        *niX = 20;
+        *niY = 20;
         break;
     case 3:
         res = vectFcorr->int2DradM(x, y,magn, &dX, &dY, rMax, nMin, mDeg, isW);
-        *ni = 20;
+        *niX = 20;
+        *niY = 20;
         break;
     case 4:
         res = vectFcorr->intIDWM(x, y,magn, &dX, &dY, mDeg, isW);
-        *ni = 20;
+        *niX = 20;
+        *niY = 20;
         break;
 
     }

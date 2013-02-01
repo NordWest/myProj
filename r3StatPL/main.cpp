@@ -341,6 +341,7 @@ int main(int argc, char *argv[])    //r3StatPL
     double mgEqSigma = sett->value("general/mgEqSigma", 3.0).toDouble();
     QString colSep = sett->value("general/colSep").toString();
     int isRef = sett->value("general/isRef", 0).toInt();
+    double scale = sett->value("general/scale", 1.0).toDouble();
 
 
 
@@ -697,7 +698,7 @@ int main(int argc, char *argv[])    //r3StatPL
     {
 
 
-        if(mgEqSigma>1e-2) resListDiap.at(k)->remSigma(mgEqSigma, 0.0, isRef);
+        if(mgEqSigma>1e-2) resListDiap.at(k)->detSigma(mgEqSigma, 0.0, isRef);
         //resListDiap.at(k)->detStat();
 
        resListDiap.at(k)->detStat(isRef);
@@ -2088,11 +2089,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
                     resRec = resListDiap.at(i)->resList.at(j);
 
-                    dKsi = 0.0;
-                    dEta = 0.0;
 
-                    //if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
-                    //if(r5data.isSysCorr) vectF5->int2Drad(resRec->x, resRec->y, resRec->catMag(), &dKsi, &dEta, r5data.rMax, r5data.nmin);
 
                     resGrid.addPointXY(resRec);
 /*
@@ -2123,10 +2120,16 @@ int main(int argc, char *argv[])    //r3StatPL
             if(!sz) continue;
             if(resGrid.detCenters(x, y, m, i))continue;
 
+            dKsi = 0.0;
+            dEta = 0.0;
+
+            //if(r5data.isSysCorr) vectF5->int2D(resRec->x, resRec->y, resRec->mag, &dKsi, &dEta, &nint);
+            if(r5data.isSysCorr) vectF5->int2Drad(x, y, m, &dKsi, &dEta, r5data.rMax, r5data.nmin);
+
             vect[0] = x;
             vect[1] = y;
             vect[2] = m;
-            vectF5data->setPoint(vect, resFile->meanKsi, resFile->meanEta, resFile->resList.size());
+            vectF5data->setPoint(vect, resFile->meanKsi - dKsi, resFile->meanEta - dEta, resFile->numKsi, resFile->numEta);
 
         }
 
@@ -2134,7 +2137,7 @@ int main(int argc, char *argv[])    //r3StatPL
 
         vectF5data->saveVF(report5Dir+"/res.vf");
 
-        vectF5data->saveDotList(report5Dir, "|", "", 2000, 20);
+        vectF5data->saveDotList(report5Dir, "|", "", scale, 20);
 
 
         qDebug() << "\nreport5 end\n";

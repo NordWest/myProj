@@ -4,9 +4,9 @@ vectGrid3D::vectGrid3D()
 {
 	xVectField = NULL;
 	yVectField = NULL;
-    vectNumField = NULL;
-    //xNumField = NULL;
-    //yNumField = NULL;
+    //vectNumField = NULL;
+    xNumField = NULL;
+    yNumField = NULL;
 
 	
 	axnum = -1;
@@ -23,7 +23,9 @@ vectGrid3D::~vectGrid3D()
 {
 	xVectField = NULL;
 	yVectField = NULL;
-	vectNumField = NULL;
+    //vectNumField = NULL;
+    xNumField = NULL;
+    yNumField = NULL;
 	
 	axnum = -1;
 	ax = NULL;
@@ -35,7 +37,9 @@ vectGrid3D::vectGrid3D(char* fname)
 {
 	xVectField = NULL;
 	yVectField = NULL;
-	vectNumField = NULL;
+    //vectNumField = NULL;
+    xNumField = NULL;
+    yNumField = NULL;
 	
 	axnum = -1;
 	ax = NULL;
@@ -69,7 +73,7 @@ int vectGrid3D::init(char* fname)
 	QStringList operands;
 	int ikey;
 	int i, j, k, sz, cpos;
-	long nums;
+    long numsX, numsY;
 	double ocX, ocY;
 	
 	ikey=0;
@@ -110,10 +114,14 @@ int vectGrid3D::init(char* fname)
 				}
 				xVectField = new multidim(DOUBLE_TYPE, ax, axnum);
 				yVectField = new multidim(DOUBLE_TYPE, ax, axnum);
-				vectNumField = new multidim(LONG_TYPE, ax, axnum);
+                //vectNumField = new multidim(LONG_TYPE, ax, axnum);
+                xNumField = new multidim(LONG_TYPE, ax, axnum);
+                yNumField = new multidim(LONG_TYPE, ax, axnum);
 				xVectField->clear();
 				yVectField->clear();
-				vectNumField->clear();
+                //vectNumField->clear();
+                xNumField->clear();
+                yNumField->clear();
 				ikey=1;
 			}
 			
@@ -126,10 +134,13 @@ int vectGrid3D::init(char* fname)
 			}
 			ocX = operands[axnum].toDouble();
 			ocY = operands[axnum+1].toDouble();
-			nums = operands[axnum+2].toLong();
+            numsX = operands[axnum+2].toLong();
+            numsY = operands[axnum+3].toLong();
 			xVectField->set(ocX, pos);
 			yVectField->set(ocY, pos);
-			vectNumField->set((long)nums, pos);
+            //vectNumField->set((long)nums, pos);
+            xNumField->set((long)numsX, pos);
+            yNumField->set((long)numsY, pos);
 		}
 	}
 	
@@ -143,7 +154,9 @@ int vectGrid3D::init(char* fname)
 	
         fX.setlength(ax[0], ax[1]);
         fY.setlength(ax[0], ax[1]);
-        fN.setlength(ax[0], ax[1]);
+        //fN.setlength(ax[0], ax[1]);
+        fNx.setlength(ax[0], ax[1]);
+        fNy.setlength(ax[0], ax[1]);
 /*	
 	ap::real_1d_array coefXT;
 	ap::real_1d_array coefYT;
@@ -163,8 +176,12 @@ int vectGrid3D::init(char* fname)
 				fX(i, j) = xVectField->getD(cpos);
 				cpos = yVectField->detPos(pos);
 				fY(i, j) = yVectField->getD(cpos);
-				cpos = vectNumField->detPos(pos);
-				fN(i, j) = vectNumField->getL(cpos);
+                //cpos = vectNumField->detPos(pos);
+                //fN(i, j) = vectNumField->getL(cpos);
+                cpos = xNumField->detPos(pos);
+                fNx(i, j) = xNumField->getL(cpos);
+                cpos = yNumField->detPos(pos);
+                fNy(i, j) = yNumField->getL(cpos);
 //				outStream << fX(i, j) << "\t";
 			}
 //			outStream << "\n";
@@ -192,11 +209,14 @@ int vectGrid3D::init(char* fname)
 		
                 spline2dinterpolant coefXT(coefX);
                 spline2dinterpolant coefYT(coefY);
-                spline2dinterpolant coefNT(coefN);
+                //spline2dinterpolant coefNT(coefN);
+                spline2dinterpolant coefNTx(coefNx);
+                spline2dinterpolant coefNTy(coefNy);
 		
 		coefXM << coefXT;
 		coefYM << coefYT;
-		coefNM << coefNT;
+        coefNMx << coefNTx;
+        coefNMy << coefNTy;
 	}
 
         return 0;
@@ -210,10 +230,14 @@ int vectGrid3D::initAxes(int *axes, int axesNum)
 
     xVectField = new multidim(DOUBLE_TYPE, ax, axnum);
     yVectField = new multidim(DOUBLE_TYPE, ax, axnum);
-    vectNumField = new multidim(LONG_TYPE, ax, axnum);
+    //vectNumField = new multidim(LONG_TYPE, ax, axnum);
+    xNumField = new multidim(LONG_TYPE, ax, axnum);
+    yNumField = new multidim(LONG_TYPE, ax, axnum);
     xVectField->clear();
     yVectField->clear();
-    vectNumField->clear();
+    //vectNumField->clear();
+    xNumField->clear();
+    yNumField->clear();
 
     return 0;
 }
@@ -291,10 +315,14 @@ int vectGrid3D::initLevels(QList <double*> dims0, QList <int> dNums0)
     }
     xVectField = new multidim(DOUBLE_TYPE, ax, axnum);
     yVectField = new multidim(DOUBLE_TYPE, ax, axnum);
-    vectNumField = new multidim(LONG_TYPE, ax, axnum);
+    //vectNumField = new multidim(LONG_TYPE, ax, axnum);
+    xNumField = new multidim(LONG_TYPE, ax, axnum);
+    yNumField = new multidim(LONG_TYPE, ax, axnum);
     xVectField->clear();
     yVectField->clear();
-    vectNumField->clear();
+    //vectNumField->clear();
+    xNumField->clear();
+    yNumField->clear();
 //    ikey=1;
 
     return 0;
@@ -356,8 +384,12 @@ void vectGrid3D::addPoint(double *vect, double x, double y)
                 xVectField->dD[cpos] += x;
                 cpos = yVectField->detPos(pos);
                 yVectField->dD[cpos] += y;
-                cpos = vectNumField->detPos(pos);
-                vectNumField->lD[cpos] = vectNumField->lD[cpos] + 1;
+                //cpos = vectNumField->detPos(pos);
+                //vectNumField->lD[cpos] = vectNumField->lD[cpos] + 1;
+                cpos = xNumField->detPos(pos);
+                xNumField->lD[cpos] = xNumField->lD[cpos] + 1;
+                cpos = yNumField->detPos(pos);
+                yNumField->lD[cpos] = yNumField->lD[cpos] + 1;
     /*						xVectField->set(resRec->etaOC, pos);
                 yVectField->set(resRec->ksiOC, pos);
                 vectNumField->get(&nums, pos);
@@ -366,7 +398,7 @@ void vectGrid3D::addPoint(double *vect, double x, double y)
 
 }
 
-void vectGrid3D::setPoint(double *vect, double x, double y, long num)
+void vectGrid3D::setPoint(double *vect, double x, double y, long numX, long numY)
 {
     int i, j;
     long cpos;
@@ -421,9 +453,16 @@ void vectGrid3D::setPoint(double *vect, double x, double y, long num)
                 cpos = yVectField->detPos(pos);
            //     qDebug() << QString("y cpos: %1\n").arg(cpos);
                 yVectField->dD[cpos] = y;
-                cpos = vectNumField->detPos(pos);
+                /*cpos = vectNumField->detPos(pos);
            //     qDebug() << QString("m cpos: %1\n").arg(cpos);
-                vectNumField->lD[cpos] = num;
+                vectNumField->lD[cpos] = num;*/
+                cpos = xNumField->detPos(pos);
+           //     qDebug() << QString("m cpos: %1\n").arg(cpos);
+                xNumField->lD[cpos] = numX;
+                cpos = yNumField->detPos(pos);
+           //     qDebug() << QString("m cpos: %1\n").arg(cpos);
+                yNumField->lD[cpos] = numY;
+
     /*						xVectField->set(resRec->etaOC, pos);
                 yVectField->set(resRec->ksiOC, pos);
                 vectNumField->get(&nums, pos);
@@ -441,7 +480,7 @@ void vectGrid3D::detMean()
     for(i=0; i<cpos; i++)
     {
         //qDebug() << QString("%1: %2\t%3\t%4\n").arg(i).arg(xVectField->dD[i]).arg(yVectField->dD[i]).arg(vectNumField->lD[i]);
-        if(vectNumField->lD[i]!=0)
+        /*if(vectNumField->lD[i]!=0)
         {
             xVectField->dD[i] /= 1.0*vectNumField->lD[i];
             yVectField->dD[i] /= 1.0*vectNumField->lD[i];
@@ -450,9 +489,15 @@ void vectGrid3D::detMean()
         {
             xVectField->dD[i] = 0;
             yVectField->dD[i] = 0;
-        }
+        }*/
 
-        //qDebug() << QString("%1: %2\t%3\t%4\n").arg(i).arg(xVectField->dD[i]).arg(yVectField->dD[i]).arg(vectNumField->lD[i]);
+        if(xNumField->lD[i]!=0) xVectField->dD[i] /= 1.0*xNumField->lD[i];
+        else xVectField->dD[i] = 0;
+
+        if(yNumField->lD[i]!=0) yVectField->dD[i] /= 1.0*yNumField->lD[i];
+        else yVectField->dD[i] = 0;
+
+
     }
 }
 
@@ -478,29 +523,36 @@ void vectGrid3D::doWeght()
 
         //qDebug() << QString("%1: %2\t%3\t%4\n").arg(i).arg(xVectField->dD[i]).arg(yVectField->dD[i]).arg(vectNumField->lD[i]);
     }*/
-    long summK, Ni;
+    long summKx, summKy, Ni;
     double mult;
     for(k=0; k<ax[2]; k++)
     {
             pos[2] = k;
             qDebug() << k << "\n";
 
-            summK = 0;
+            summKx = summKy = 0;
             for(j=0; j<ax[1]; j++)
             {
                     pos[1] = j;
                     for(i=0; i<ax[0]; i++)
                     {
                             pos[0] = i;
-                            cpos = vectNumField->detPos(pos);
+                            /*cpos = vectNumField->detPos(pos);
                             qDebug() << QString("%1:%2:%3\n").arg(i).arg(j).arg(cpos);
-                            summK += vectNumField->getL(cpos);
+                            summK += vectNumField->getL(cpos);*/
+                            cpos = xNumField->detPos(pos);
+                            qDebug() << QString("%1:%2:%3\n").arg(i).arg(j).arg(cpos);
+                            summKx += xNumField->getL(cpos);
+                            cpos = yNumField->detPos(pos);
+                            qDebug() << QString("%1:%2:%3\n").arg(i).arg(j).arg(cpos);
+                            summKy += yNumField->getL(cpos);
 //				outStream << fX(i, j) << "\t";
                     }
 //			outStream << "\n";
             }
 
-            qDebug() << QString("summK= %1\n").arg(summK);
+            qDebug() << QString("summKx= %1\n").arg(summKx);
+            qDebug() << QString("summKy= %1\n").arg(summKy);
 
             for(j=0; j<ax[1]; j++)
             {
@@ -509,19 +561,27 @@ void vectGrid3D::doWeght()
                     {
                             pos[0] = i;
 
-                            cpos = vectNumField->detPos(pos);
+                            cpos = xNumField->detPos(pos);
                             qDebug() << QString("%1:%2:%3\n").arg(i).arg(j).arg(cpos);
-                            Ni = vectNumField->getL(cpos);
-                            qDebug() << QString("Ni= %1\n").arg(Ni);
-                            mult = Ni*1.0/(1.0*summK);
-                            qDebug() << QString("mult= %1\n").arg(mult);
+                            Ni = xNumField->getL(cpos);
+                            qDebug() << QString("Nix= %1\n").arg(Ni);
+                            mult = Ni*1.0/(1.0*summKx);
+                            qDebug() << QString("multx= %1\n").arg(mult);
                             cpos = xVectField->detPos(pos);
                             xVectField->dD[cpos] *= mult;
+                            xNumField->lD[cpos] = summKx/(1.0*ax[0]*ax[1]);
+                            qDebug() << QString("lD_x[cpos]= %1\n").arg(xNumField->lD[cpos]);
+
+                            cpos = yNumField->detPos(pos);
+                            Ni = yNumField->getL(cpos);
+                            qDebug() << QString("Ni= %1\n").arg(Ni);
+                            mult = Ni*1.0/(1.0*summKy);
+                            qDebug() << QString("mult= %1\n").arg(mult);
                             cpos = yVectField->detPos(pos);
                             yVectField->dD[cpos] *= mult;
-                            cpos = vectNumField->detPos(pos);
-                            vectNumField->lD[cpos] = summK/(1.0*ax[0]*ax[1]);
-                            qDebug() << QString("lD[cpos]= %1\n").arg(vectNumField->lD[cpos]);
+                            cpos = xNumField->detPos(pos);
+                            yNumField->lD[cpos] = summKy/(1.0*ax[0]*ax[1]);
+                            qDebug() << QString("lD_y[cpos]= %1\n").arg(yNumField->lD[cpos]);
 //				outStream << fX(i, j) << "\t";
                     }
 //			outStream << "\n";
@@ -533,7 +593,9 @@ void vectGrid3D::clearDims()
 {
     xVectField->clear();
     yVectField->clear();
-    vectNumField->clear();
+    //vectNumField->clear();
+    xNumField->clear();
+    yNumField->clear();
 }
 
 void vectGrid3D::initVF(double rMax)
@@ -550,7 +612,8 @@ void vectGrid3D::initVF(double rMax)
 
     fX.setlength(ax[0], ax[1]);
     fY.setlength(ax[0], ax[1]);
-    fN.setlength(ax[0], ax[1]);
+    fNx.setlength(ax[0], ax[1]);
+    fNy.setlength(ax[0], ax[1]);
 /*
     ap::real_1d_array coefXT;
     ap::real_1d_array coefYT;
@@ -566,7 +629,8 @@ void vectGrid3D::initVF(double rMax)
    // qDebug() << "ax[2]= " << ax[2] << "\n";
     coefXM.clear();
     coefYM.clear();
-    coefNM.clear();
+    coefNMx.clear();
+    coefNMy.clear();
     coefIDWXM.clear();
     coefIDWYM.clear();
     for(k=0; k<ax[2]; k++)
@@ -590,14 +654,20 @@ void vectGrid3D::initVF(double rMax)
                             cpos = yVectField->detPos(pos);
                             y = yVectField->getD(cpos);
                             fY(i, j) = y;
-                            cpos = vectNumField->detPos(pos);
-                            m =  vectNumField->getL(cpos);
-                            fN(i, j) = m;
-                            if(fN(i, j)>20)
+                            cpos = xNumField->detPos(pos);
+                            m =  xNumField->getL(cpos);
+                            fNx(i, j) = m;
+                            if(fNx(i, j)>20)
                             {
                                 xArr << xarr[i];
-                                yArr << yarr[j];
                                 dxArr << x;
+                            }
+                            cpos = yNumField->detPos(pos);
+                            m =  yNumField->getL(cpos);
+                            fNy(i, j) = m;
+                            if(fNy(i, j)>20)
+                            {
+                                yArr << yarr[j];
                                 dyArr << y;
                             }
 //				outStream << fX(i, j) << "\t";
@@ -613,7 +683,8 @@ void vectGrid3D::initVF(double rMax)
 
             spline2dbuildbicubic(xarr, yarr, fX, ax[0], ax[1], coefX);
             spline2dbuildbicubic(xarr, yarr, fY, ax[0], ax[1], coefY);
-            spline2dbuildbicubic(xarr, yarr, fN, ax[0], ax[1], coefN);
+            spline2dbuildbicubic(xarr, yarr, fNx, ax[0], ax[1], coefNx);
+            spline2dbuildbicubic(xarr, yarr, fNy, ax[0], ax[1], coefNy);
           /*
             spline2dbuildbilinear(xarr, yarr, fX, ax[0], ax[1], coefX);
             spline2dbuildbilinear(xarr, yarr, fY, ax[0], ax[1], coefY);
@@ -671,11 +742,13 @@ void vectGrid3D::initVF(double rMax)
 
             spline2dinterpolant coefXT(coefX);
             spline2dinterpolant coefYT(coefY);
-            spline2dinterpolant coefNT(coefN);
+            spline2dinterpolant coefNTx(coefNx);
+            spline2dinterpolant coefNTy(coefNy);
 
             coefXM << coefXT;
             coefYM << coefYT;
-            coefNM << coefNT;
+            coefNMx << coefNTx;
+            coefNMy << coefNTy;
 
 
     }
@@ -728,7 +801,7 @@ int vectGrid3D::printCoefs()
 	}
 }
 
-int vectGrid3D::int2D(double x, double y, double m, double *xint, double *yint, long *nint)
+int vectGrid3D::int2D(double x, double y, double m, double *xint, double *yint, long *nintx, long *ninty)
 {
     qDebug() << "vectGrid3D::int2D\n";
 	int i, j, k;
@@ -743,24 +816,26 @@ int vectGrid3D::int2D(double x, double y, double m, double *xint, double *yint, 
 		if((m<dims[2][i+1])&&(m>=dims[2][i])){k=i; break;} 
         }*/
 //	qDebug() << "k=" << k  << "\tx= " << x << "\ty= " << y << "\tm= " << m << "\n";
-        qDebug() << QString("k= %1\tszX= %2\tszY= %3\tszN= %4\n").arg(k).arg(coefXM.size()).arg(coefYM.size()).arg(coefNM.size());
+        qDebug() << QString("k= %1\tszX= %2\tszY= %3\tszNx= %4\tszNy= %5\n").arg(k).arg(coefXM.size()).arg(coefYM.size()).arg(coefNMx.size()).arg(coefNMy.size());
 	if(k==-1) return 1;
         spline2dinterpolant coefTempX(coefXM.at(k));
         *xint = spline2dcalc(coefTempX, x, y);
         spline2dinterpolant coefTempY(coefYM.at(k));
         *yint = spline2dcalc(coefTempY, x, y);
-        spline2dinterpolant coefTempN(coefNM.at(k));
-        *nint = (long)spline2dcalc(coefTempN, x, y);
+        spline2dinterpolant coefTempNx(coefNMx.at(k));
+        *nintx = (long)spline2dcalc(coefTempNx, x, y);
+        spline2dinterpolant coefTempNy(coefNMy.at(k));
+        *ninty = (long)spline2dcalc(coefTempNy, x, y);
 	
         return 0;
 }
 
-int vectGrid3D::int2Drad(double x, double y, double m, double *xint, double *yint, double rMax, double nmin)
+int vectGrid3D::int2Drad(double x, double y, double m, double *xint, double *yint, double rMax, int nmin)
 {
     qDebug() << "\nint2Drad\n";
         int i, j, k;
         double px, py, pm, ocX, ocY, r;
-        long nums;
+        long numsX, numsY;
 
         k=-1;
         for(i=0; i<ax[2]; i++)
@@ -773,8 +848,8 @@ int vectGrid3D::int2Drad(double x, double y, double m, double *xint, double *yin
         qDebug() << QString("rMax= %1\tnmin= %2\n").arg(rMax).arg(nmin);
 
         double dx, dy;
-        int nTot;
-        nTot = 0;
+        long nTotX, nTotY;
+        nTotX = nTotY = 0;
         dx = dy = 0;
         double nC;
         double adx, ady;
@@ -786,58 +861,52 @@ int vectGrid3D::int2Drad(double x, double y, double m, double *xint, double *yin
                 pos[0] = i;
                 pos[1] = j;
                 pos[2] = k;
-                getVect(i, j, k, &px, &py, &pm, &ocX, &ocY, &nums);
+                getVect(i, j, k, &px, &py, &pm, &ocX, &ocY, &numsX, &numsY);
                 r = sqrt(pow(px-x, 2.0) + pow(py-y, 2.0));
                 //qDebug() << QString("r= %1\tnums= %2\n").arg(r).arg(nums);
                 nC = 1.0;
 
-                if(r<rMax&&(nums>=nmin))
+                if(r<rMax&&(numsX>=nmin))
                 {
-                    //qDebug() << QString("r= %1\tnums= %2: %3\t%4\n").arg(r).arg(nums).arg(ocX).arg(ocY);
-                    //if(nums<nmin) nC = (1 + log(nums/(1.0*nmin)));
                     adx = ocX*(1.0-(r/rMax))*nC;
-                    ady = ocY*(1.0-(r/rMax))*nC;
-                    //qDebug() << QString("ad: %1\t%2\n").arg(adx).arg(ady);
                     dx += adx;
+                    nTotX++;
+                }
+
+                if(r<rMax&&(numsY>=nmin))
+                {
+                    ady = ocY*(1.0-(r/rMax))*nC;
                     dy += ady;
-                    nTot++;
+                    nTotY++;
                 }
             }
         }
 
-        qDebug() << QString("nTot= %1\n").arg(nTot);
-        if(nTot==0)
-        {
-            *xint = 0.0;
-            *yint = 0.0;
-            return 1;
-        }
-        *xint = dx/(nTot*1.0);
-        *yint = dy/(nTot*1.0);
-
-        //qDebug() << QString("dx= %1\tdy= %2\n").arg(dx).arg(dy);
-        //qDebug() << QString("x= %1\txint= %2\n").arg(x).arg(*xint);
-        //qDebug() << QString("y= %1\tyint= %2\n").arg(y).arg(*yint);
-
+        qDebug() << QString("nTotX= %1\n").arg(nTotX);
+        qDebug() << QString("nTotY= %1\n").arg(nTotY);
+        if(nTotX==0)*xint = 0.0;
+        else *xint = dx/(nTotX*1.0);
+        if(nTotY==0)*yint = 0.0;
+        else *yint = dy/(nTotY*1.0);
 
         return 0;
 }
 
-int vectGrid3D::getMagLevNums(double magn)
+int vectGrid3D::getMagLevNums(double magn, long *nSumX, long *nSumY)
 {
     //qDebug() << "\ngetMagLevNums\n";
-    int i, j, nSum;
-    long nums;
+    int i, j;
+    long numsX, numsY;
 
     int k = detMagLevNum(magn);
-    if(k==-1) return 0;
+    if(k==-1) return 1;
 
     //qDebug() << QString("magn: %1\tk: %2\n").arg(magn).arg(k);
 
     int pos[3];
     double px, py, pm, ocX, ocY;
 
-    nSum = 0;
+    *nSumX = *nSumY = 0;
     for(i=0; i<ax[0]; i++)
     {
         for(j=0; j<ax[1]; j++)
@@ -845,12 +914,13 @@ int vectGrid3D::getMagLevNums(double magn)
             pos[0] = i;
             pos[1] = j;
             pos[2] = k;
-            getVect(i, j, k, &px, &py, &pm, &ocX, &ocY, &nums);
-            if(nums>=20) nSum += nums;
+            getVect(i, j, k, &px, &py, &pm, &ocX, &ocY, &numsX, &numsY);
+            if(numsX>=20) *nSumX += numsX;
+            if(numsY>=20) *nSumY += numsY;
         }
     }
 
-    return nSum;
+    return 0;
 }
 
 int vectGrid3D::detMagLevNum(double magn)
@@ -883,19 +953,21 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
         QVector <double> xVect;
         QVector <double> yVect;
         QVector <double> mVect;
-        QVector <double> wVect;
+        QVector <double> wVectX;
+        QVector <double> wVectY;
 
         xVect.clear();
         yVect.clear();
         mVect.clear();
-        wVect.clear();
+        wVectX.clear();
+        wVectY.clear();
 
 /*
         xVect = new double[mnum];
         yVect = new double[mnum];
         mVect = new double[mnum];
 */
-        int wt;
+        long wtx, wty;
 
         qDebug() << "weghts: " << isW << "\n";
 
@@ -914,7 +986,7 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
 
                 pm = (dims[2][k+1]+dims[2][k])/2.0;
 
-                if(isW)wt = 0;
+                if(isW) wtx = wty = 0;
 
 /*
                 for(i=0; i<ax[0]; i++)
@@ -949,9 +1021,10 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
 
                     if(isW)
                     {
-                        wt = getMagLevNums(pm);
-                        qDebug() << QString("wt: %1\n").arg(wt);
-                        wVect << wt;
+                        getMagLevNums(pm, &wtx, &wty);
+                        qDebug() << QString("wt: %1\t%2\n").arg(wtx).arg(wty);
+                        wVectX << wtx;
+                        wVectY << wty;
                     }
                 }
 
@@ -998,7 +1071,7 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
 
         QStringList tstr0, tstr1;
 
-        wt = 0;
+        wtx = wty = 0;
 
         for(i=0; i<mnum; i++)
         {
@@ -1025,9 +1098,10 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
 
             if(isW)
             {
-                Wx[i] = wVect[i];
-                Wy[i] = wVect[i];
-                wt += wVect[i];
+                Wx[i] = wVectX[i];
+                Wy[i] = wVectY[i];
+                wtx += wVectX[i];
+                wty += wVectY[i];
             }
 
 
@@ -1039,8 +1113,8 @@ int vectGrid3D::int2DradM(double x, double y, double m, double *xint, double *yi
         {
             for(i=0; i<mnum; i++)
             {
-                Wx[i] /= wt*1.0;
-                Wy[i] /= wt*1.0;
+                Wx[i] /= wtx*1.0;
+                Wy[i] /= wty*1.0;
                 qDebug() << QString("Wi: %1\t%2\n").arg(Wx[i]).arg(Wy[i]);
             }
         }
@@ -1106,18 +1180,20 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
         QVector <double> xVect;
         QVector <double> yVect;
         QVector <double> mVect;
-        QVector <double> wVect;
+        QVector <double> wVectX;
+        QVector <double> wVectY;
 
         xVect.clear();
         yVect.clear();
         mVect.clear();
-        wVect.clear();
+        wVectX.clear();
+        wVectY.clear();
 /*
         xVect = new double[mnum];
         yVect = new double[mnum];
         mVect = new double[mnum];
 */
-        int wt;
+        long wtx, wty;
 
         for(k=0; k<mnum; k++)
         {
@@ -1134,7 +1210,7 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
 
                 pm = (dims[2][k+1]+dims[2][k])/2.0;
 
-                if(isW)wt = 0;
+                if(isW) wtx = wty = 0;
 
 /*
                 for(i=0; i<ax[0]; i++)
@@ -1169,9 +1245,10 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
 
                     if(isW)
                     {
-                        wt = getMagLevNums(pm);
+                        getMagLevNums(pm, &wtx, &wty);
                         //qDebug() << QString("wt: %1\n").arg(wt);
-                        wVect << wt;
+                        wVectX << wtx;
+                        wVectY << wty;
                     }
                 }
 
@@ -1218,7 +1295,7 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
 
         QStringList tstr0, tstr1;
 
-        wt = 0;
+        wtx = wty = 0;
 
         for(i=0; i<mnum; i++)
         {
@@ -1245,9 +1322,10 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
 
             if(isW)
             {
-                Wx[i] = wVect[i];
-                Wy[i] = wVect[i];
-                wt += wVect[i];
+                Wx[i] = wVectX[i];
+                Wy[i] = wVectY[i];
+                wtx += wVectX[i];
+                wty += wVectY[i];
             }
 
             //qDebug() << QString("x: %1 = %2\n").arg(Vx[i]).arg(tstr0.join(" + "));
@@ -1258,8 +1336,8 @@ int vectGrid3D::intIDWM(double x, double y, double m, double *xint, double *yint
         {
             for(i=0; i<mnum; i++)
             {
-                Wx[i] /= wt*1.0;
-                Wy[i] /= wt*1.0;
+                Wx[i] /= wtx*1.0;
+                Wy[i] /= wty*1.0;
                 //qDebug() << QString("Wi: %1\t%2\n").arg(Wx[i]).arg(Wy[i]);
             }
         }
@@ -1315,7 +1393,7 @@ int vectGrid3D::saveVF(QString fName)
     QFile resFile;
     QTextStream resStream;
     double ocX, ocY;
-    long nums;
+    long numsX, numsY;
 
     resFile.setFileName(fName);
     resFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
@@ -1366,8 +1444,9 @@ int vectGrid3D::saveVF(QString fName)
                             ocY = yVectField->getD(yVectField->detPos(pos));
 //						yVectField->get(&ocY, pos);
 //						vectNumField->get(&nums, pos);
-                            nums = vectNumField->getL(vectNumField->detPos(pos));
-                            resStream << QString("%1").arg(k, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(j, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(i, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(ocX, 12, 'g', 6, QLatin1Char(' ')) << "|" << QString("%1").arg(ocY, 12, 'g', 6, QLatin1Char(' ')) << "|" << QString("%1").arg(nums, 8, 10, QLatin1Char(' ')) << "\n";
+                            numsX = xNumField->getL(xNumField->detPos(pos));
+                            numsY = yNumField->getL(yNumField->detPos(pos));
+                            resStream << QString("%1").arg(k, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(j, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(i, 5, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(ocX, 12, 'g', 6, QLatin1Char(' ')) << "|" << QString("%1").arg(ocY, 12, 'g', 6, QLatin1Char(' ')) << "|" << QString("%1").arg(numsX, 8, 10, QLatin1Char(' ')) << "|" << QString("%1").arg(numsY, 8, 10, QLatin1Char(' ')) << "\n";
                     }
             }
     }
@@ -1383,7 +1462,7 @@ int vectGrid3D::saveDotList(QString resDir, QString colSep, QString prefStr, dou
     QTextStream resStream;
     double ocX, ocY, m;
     double px, py, pm;
-    long nums;
+    long numsX, numsY;
     QString fName;
 
 
@@ -1404,16 +1483,17 @@ int vectGrid3D::saveDotList(QString resDir, QString colSep, QString prefStr, dou
                             pos[0] = k;
                             pos[1] = j;
                             pos[2] = i;
-                            getVect(k, j, i, &px, &py, &pm, &ocX, &ocY, &nums);
-                            if(nums<nmin) continue;
+                            getVect(k, j, i, &px, &py, &pm, &ocX, &ocY, &numsX, &numsY);
+                            //if(nums<nmin) continue;
                             resList.clear();
                             resList << QString("%1").arg(px);
                             resList << QString("%1").arg(py);
-                            resList << QString("%1").arg(ocX, 12, 'g');
-                            resList << QString("%1").arg(ocY, 12, 'g');
+                            resList << QString("%1").arg(ocX*mult, 12, 'g');
+                            resList << QString("%1").arg(ocY*mult, 12, 'g');
                             resList << QString("%1").arg(px+ocX*mult);
                             resList << QString("%1").arg(py+ocY*mult);
-                            resList << QString("%1").arg(nums);
+                            resList << QString("%1").arg(numsX);
+                            resList << QString("%1").arg(numsY);
                             resStream << QString("%1\n").arg(resList.join(colSep));
                     }
             }
@@ -1422,12 +1502,12 @@ int vectGrid3D::saveDotList(QString resDir, QString colSep, QString prefStr, dou
 
 }
 
-long vectGrid3D::getNumMax()
+long vectGrid3D::getNumMaxX()
 {
     int i, j, k;
     double ocX, ocY, m;
     double px, py, pm;
-    long nums, numMax;
+    long numsX, numsY, numMax;
     numMax = 0;
     for(i=0;i<ax[2]; i++)
     {
@@ -1435,15 +1515,36 @@ long vectGrid3D::getNumMax()
         {
                 for(k=0;k<ax[0];k++)
                 {
-                    getVect(k, j, i, &px, &py, &pm, &ocX, &ocY, &nums);
-                    if(nums>numMax) numMax = nums;
+                    getVect(k, j, i, &px, &py, &pm, &ocX, &ocY, &numsX, &numsY);
+                    if(numsX>numMax) numMax = numsX;
                 }
         }
     }
     return numMax;
 }
 
-void vectGrid3D::getVect(int i, int j, int k, double *px, double *py, double *pm, double *x, double *y, long *num)
+long vectGrid3D::getNumMaxY()
+{
+    int i, j, k;
+    double ocX, ocY, m;
+    double px, py, pm;
+    long numsX, numsY, numMax;
+    numMax = 0;
+    for(i=0;i<ax[2]; i++)
+    {
+        for(j=0;j<ax[1];j++)
+        {
+                for(k=0;k<ax[0];k++)
+                {
+                    getVect(k, j, i, &px, &py, &pm, &ocX, &ocY, &numsX, &numsY);
+                    if(numsY>numMax) numMax = numsY;
+                }
+        }
+    }
+    return numMax;
+}
+
+void vectGrid3D::getVect(int i, int j, int k, double *px, double *py, double *pm, double *x, double *y, long *numX, long *numY)
 {
     //if((i>dNums[0]-1)||(j>dNums[1]-1)||(k>dNums[2]-1)||(i<0)||(j<0)||(k<0)) return;
     *px = (dims[0][i+1]+dims[0][i])/2.0;
@@ -1456,7 +1557,8 @@ void vectGrid3D::getVect(int i, int j, int k, double *px, double *py, double *pm
 
     *x = xVectField->getD(xVectField->detPos(pos));
     *y = yVectField->getD(yVectField->detPos(pos));
-    *num = vectNumField->getL(vectNumField->detPos(pos));
+    *numX = xNumField->getL(xNumField->detPos(pos));
+    *numY = yNumField->getL(yNumField->detPos(pos));
 
   //  qDebug() << QString("p: %1|%2|%3|%4|%5|%6\n").arg(*px).arg(*py).arg(*pm).arg(*x).arg(*y).arg(*num);
 }

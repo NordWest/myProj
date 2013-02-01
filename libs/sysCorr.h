@@ -36,7 +36,7 @@ struct vfCorrParam
     int corrType;   //0-int2D, 1-intRad, 2-intIDW, 3-intRadM, 4-intIdwM
     int nMin, mDeg, isW;
     int init(QString vfFileName, double rmax, int nmin, int corrType, int ndeg = 2, int isW = 0);
-    int detCorr(double *dx, double *dy, long *ni, double x, double y, double magn);
+    int detCorr(double *dx, double *dy, long *niX, long *niY, double x, double y, double magn);
 };
 
 struct mdCorrParam

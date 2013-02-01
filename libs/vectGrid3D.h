@@ -30,8 +30,8 @@ public:
 	
 	int printCoefs();
 	
-	int int2D(double x, double y, double m, double *xint, double *yint, long *nint);
-        int int2Drad(double x, double y, double m, double *xint, double *yint, double rMax, double nmin);
+    int int2D(double x, double y, double m, double *xint, double *yint, long *nintx, long *ninty);
+        int int2Drad(double x, double y, double m, double *xint, double *yint, double rMax, int nmin);
         //int int2Drad1(double x, double y, double m, double *xint, double *yint, double rMax, double nmin);
         //int int2DradM(double x, double y, double *xVect, double *yVect, double rMax, double nmin);
         int int2DradM(double x, double y, double m, double *xint, double *yint, double rMax, double nmin, int mdeg = 2, int isW = 0);
@@ -39,7 +39,7 @@ public:
         int intIDWM(double x, double y, double m, double *xint, double *yint, int mdeg = 2, int isW = 0);
 
 
-        void setPoint(double *vect, double x, double y, long num);    //vect = {x|y|m}
+        void setPoint(double *vect, double x, double y, long numX, long numY);    //vect = {x|y|m}
         //void setPointX(double *vect, double x, long num);    //vect = {x|y|m}
         //void setPointY(double *vect, double y, long num);    //vect = {x|y|m}
         void addPoint(double *vect, double x, double y);    //vect = {x|y|m}
@@ -47,9 +47,9 @@ public:
         void doWeght();
         void initVF(double rMax=2000);
         //void initIDW();
-        int getMagLevNums(double magn);
+        int getMagLevNums(double magn, long *nSumX, long *nSumY);
 
-        void getVect(int i, int j, int k, double *px, double *py, double *pm, double *x, double *y, long *num);
+        void getVect(int i, int j, int k, double *px, double *py, double *pm, double *x, double *y, long *numX, long *numY);
 
         void clearDims();
 
@@ -58,13 +58,14 @@ public:
         int saveVF(QString fName);
         int saveDotList(QString resDir, QString colSep, QString prefStr = "", double mult = 1, double nmin = 1);
 
-        long getNumMax();
+        long getNumMaxX();
+        long getNumMaxY();
 
         multidim *xVectField;
         multidim *yVectField;
-        multidim *vectNumField;
-        //multidim *xNumField;
-        //multidim *yNumField;
+        //multidim *vectNumField;
+        multidim *xNumField;
+        multidim *yNumField;
 
         int axnum;					//Число осей
         int *ax;					//Размерности осей
@@ -84,7 +85,9 @@ public:
         QList <real_2d_array> fXM;
         real_2d_array fX;		//Массивы значений
         real_2d_array fY;
-        real_2d_array fN;
+        //real_2d_array fN;
+        real_2d_array fNx;
+        real_2d_array fNy;
 	
        /* real_1d_array coefX;	//Массивы коеффициентов бикубической интерполяции
         real_1d_array coefY;
@@ -92,7 +95,9 @@ public:
 
         spline2dinterpolant coefX;
         spline2dinterpolant coefY;
-        spline2dinterpolant coefN;
+        //spline2dinterpolant coefN;
+        spline2dinterpolant coefNx;
+        spline2dinterpolant coefNy;
 
         /*
         QList <real_1d_array> coefXM;
@@ -101,7 +106,9 @@ public:
 
         QList <spline2dinterpolant> coefXM;
         QList <spline2dinterpolant> coefYM;
-        QList <spline2dinterpolant> coefNM;
+        //QList <spline2dinterpolant> coefNM;
+        QList <spline2dinterpolant> coefNMx;
+        QList <spline2dinterpolant> coefNMy;
         QList <idwinterpolant> coefIDWXM;
         QList <idwinterpolant> coefIDWYM;
 };

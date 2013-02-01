@@ -3679,7 +3679,22 @@ void residualFile::detStatY(int isRef)
     rmsMeanEta = rmsOneEta/sqrt(numEta);
 }
 
-void residualFile::remSigma(double sg, double proofP, int isRef)
+void residualFile::remSigma()
+{
+    int recNum;
+    double ksiOC, etaOC;
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars before %1\n").arg(resList.size());
+    recNum = resList.size();
+    for(int i=recNum-1; i>=0; i--)
+    {
+        ksiOC = fabs(meanKsi - resList.at(i)->ksiOC);
+        etaOC = fabs(meanEta - resList.at(i)->etaOC);
+        if((ksiOC>maxResKsi)&&(etaOC>maxResEta)) resList.removeAt(i);
+    }
+
+}
+
+void residualFile::detSigma(double sg, double proofP, int isRef)
 {
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigma: %1\n").arg(sg);
     int recNum, recNum0;

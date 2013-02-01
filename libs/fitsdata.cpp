@@ -10461,99 +10461,100 @@ int makeErrReports(marksGrid *refMarks, QVector<int> rsindex, reductionMaker *re
     double xc,yc,pmag, mag;
     QStringList outsl;
     if(FD_LOG_LEVEL) qDebug() << QString("errorreport: %1\n").arg(whatOut.errorreport);
-            if(whatOut.errorreport)
-            {
-                outstr.clear();
-                refMarks->ebRec->rec2s(&outstr);
+    if(whatOut.errorreport)
+    {
+        outstr.clear();
+        refMarks->ebRec->rec2s(&outstr);
 
-                QFile errFile(resFolder+"/err_budget"+suff+".txt");
-                errFile.open(QIODevice::Append| QIODevice::Text);
-                QTextStream errStream;
-                errStream.setDevice(&errFile);
-                errStream << outstr << "\n";
-                //errStream << "\n";
-                errFile.close();
-            }
+        QFile errFile(resFolder+"/err_budget"+suff+".txt");
+        errFile.open(QIODevice::Append| QIODevice::Text);
+        QTextStream errStream;
+        errStream.setDevice(&errFile);
+        errStream << outstr << "\n";
+        //errStream << "\n";
+        errFile.close();
+    }
 
-            if(FD_LOG_LEVEL) qDebug() << QString("residuals: %1\n").arg(whatOut.residuals);
-            if(whatOut.residuals)
-            {
-                outsl.clear();
-                //residualFile resData;
-                residualsRec* resRec;
-                outstr.clear();
+    if(FD_LOG_LEVEL) qDebug() << QString("residuals: %1\n").arg(whatOut.residuals);
+    if(whatOut.residuals)
+    {
+        outsl.clear();
+        //residualFile resData;
+        residualsRec* resRec;
+        outstr.clear();
 
-                resFile.resList.clear();
+        resFile.resList.clear();
 
-                resNum = refMarks->marks.size();
-                if(FD_LOG_LEVEL) qDebug() << QString("refMarks.count= %1\n").arg(resNum);
-                for (i=0;i<resNum;i++)
+        resNum = refMarks->marks.size();
+        if(FD_LOG_LEVEL) qDebug() << QString("refMarks.count= %1\n").arg(resNum);
+        for (i=0;i<resNum;i++)
+        {
+            outstr.clear();
+            //j = rsindex.at(i);
+            data = refMarks->marks.at(i)->data;
+            refMarks->marks.at(i)->resRec = new residualsRec;
+            resRec = refMarks->marks.at(i)->resRec;
+                //sdata = refstars.at(i);
+                x = data[5];
+                y = data[6];
+                pixmag = data[7];
+                redMake->detTan(&ksi, &eta, x, y);
+
+                redMake->detMagn(&mag, pixmag);
+                if((fabs(mag - data[2])<=outLim.maxOCMAGrc)&&(grad_to_mas(fabs(ksi - data[3]))<=outLim.maxOCRArc)&&(grad_to_mas(fabs(eta - data[4]))<=outLim.maxOCDErc))
                 {
-                    outstr.clear();
-                    //j = rsindex.at(i);
-                    data = refMarks->marks.at(i)->data;
-                    refMarks->marks.at(i)->resRec = new residualsRec;
-                    resRec = refMarks->marks.at(i)->resRec;
-                        //sdata = refstars.at(i);
-                        x = data[5];
-                        y = data[6];
-                        pixmag = data[7];
-                        redMake->detTan(&ksi, &eta, x, y);
+                        redMake->detXcYc(&xc, &yc, data[3], data[4]);
+                        //pmag = (sdata[8]-bm)/am;
+                        resRec->mJD = ebRec->MJD;
+                        resRec->ra = data[0];
+                        resRec->de = data[1];
+                        resRec->ksi = ksi;
+                        resRec->eta = eta;
+                        resRec->mag = mag;
+                        resRec->ksiOC = grad_to_mas(ksi - data[3]);
+                        resRec->etaOC = grad_to_mas(eta - data[4]);
+                        resRec->magOC = mag - data[2];
+                        resRec->x = x;
+                        resRec->y = y;
+                        resRec->pixmag = pixmag;
+                        resRec->Dx = (x - xc);
+                        resRec->Dy = (y - yc);
+                        redMake->detPmag(&pmag, data[2]);
+                        resRec->Dpixmag = pixmag - pmag;
 
-                        redMake->detMagn(&mag, pixmag);
-                        if((fabs(mag - data[2])<=outLim.maxOCMAGrc)&&(grad_to_mas(fabs(ksi - data[3]))<=outLim.maxOCRArc)&&(grad_to_mas(fabs(eta - data[4]))<=outLim.maxOCDErc))
+                        resRec->isRefKsi = 0;
+                        resRec->isRefEta = 0;
+                        resRec->isRefMag = 0;
+                        for(j=0;j<rsindex.count();j++)
                         {
-                                redMake->detXcYc(&xc, &yc, data[3], data[4]);
-                                //pmag = (sdata[8]-bm)/am;
-                                resRec->mJD = ebRec->MJD;
-                                resRec->ra = data[0];
-                                resRec->de = data[1];
-                                resRec->ksi = ksi;
-                                resRec->eta = eta;
-                                resRec->mag = mag;
-                                resRec->ksiOC = grad_to_mas(ksi - data[3]);
-                                resRec->etaOC = grad_to_mas(eta - data[4]);
-                                resRec->magOC = mag - data[2];
-                                resRec->x = x;
-                                resRec->y = y;
-                                resRec->pixmag = pixmag;
-                                resRec->Dx = (x - xc);
-                                resRec->Dy = (y - yc);
-                                redMake->detPmag(&pmag, data[2]);
-                                resRec->Dpixmag = pixmag - pmag;
-
-                                resRec->isRefKsi = 0;
-                                resRec->isRefEta = 0;
-                                resRec->isRefMag = 0;
-                                for(j=0;j<rsindex.count();j++)
-                                {
-                                    if(i==rsindex[j])
-                                    {
-                                        resRec->isRefKsi = (int)(redMake->EXCLINDKSI[j]>=0);
-                                        resRec->isRefEta = (int)(redMake->EXCLINDETA[j]>=0);
-                                        resRec->isRefMag = (int)(redMake->EXCLINDMAG[j]>=0);
-                                    }
-                                }
-
-                                resRec->mesureTimeCode = ebRec->mesureTimeCode;
-                                resRec->catName = refMarks->marks.at(i)->catName;
-                                resRec->catMagName = refMarks->marks.at(i)->catMagName;
-                                resRec->setMesParams(refMarks->marks.at(i)->P, 21);
-                                resRec->rec2s(&outstr);
-
-                                resFile.resList << resRec;
+                            if(i==rsindex[j])
+                            {
+                                resRec->isRefKsi = (int)(redMake->EXCLINDKSI[j]>=0);
+                                resRec->isRefEta = (int)(redMake->EXCLINDETA[j]>=0);
+                                resRec->isRefMag = (int)(redMake->EXCLINDMAG[j]>=0);
+                            }
                         }
-                }
 
-                if(outLim.resSigma>0.0)
-                {
-                    if(FD_LOG_LEVEL) qDebug() << QString("remSigma: %1\n").arg(outLim.resSigma);
-                    resFile.remSigma(outLim.resSigma);
-                    if(FD_LOG_LEVEL) qDebug() << QString("refMarks after sigma= %1\n").arg(resFile.resList.size());
-                }
-                resFile.saveAs(resFolder+"/residuals"+suff+".txt");
+                        resRec->mesureTimeCode = ebRec->mesureTimeCode;
+                        resRec->catName = refMarks->marks.at(i)->catName;
+                        resRec->catMagName = refMarks->marks.at(i)->catMagName;
+                        resRec->setMesParams(refMarks->marks.at(i)->P, 21);
+                        resRec->rec2s(&outstr);
 
-            }
+                        resFile.resList << resRec;
+                }
+        }
+
+        if(outLim.resSigma>0.0)
+        {
+            if(FD_LOG_LEVEL) qDebug() << QString("remSigma: %1\n").arg(outLim.resSigma);
+            resFile.detSigma(outLim.resSigma);
+            resFile.remSigma();
+            if(FD_LOG_LEVEL) qDebug() << QString("refMarks after sigma= %1\n").arg(resFile.resList.size());
+        }
+        resFile.saveAs(resFolder+"/residuals"+suff+".txt");
+
+    }
 }
 
 int makeIpixReports(marksGrid *ipixMarks, reductionMaker *redMake, errBudgetRec* ebRec, QString resFolder, QString suff)
@@ -10703,7 +10704,7 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
     double ra, de;
     //double OC0, OC1;
     double dX, dY;
-    long ni;
+    long niX, niY;
     double *data;
 
 
@@ -10757,7 +10758,7 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
             //if(FD_LOG_LEVEL) qDebug() << "sysCorr->isVfCorr0: " << sysCorr->isVfCorr0 << "\n";
             if(sysCorr->isVfCorr0)
             {
-                if(!sysCorr->vfCorr0->detCorr(&dX, &dY, &ni, data[5], data[6], data[2]))
+                if(!sysCorr->vfCorr0->detCorr(&dX, &dY, &niX, &niY, data[5], data[6], data[2]))
                 {
                     data[5]-= dX;
                     data[6]-= dY;
@@ -10776,7 +10777,7 @@ void prerDataVect(marksGrid *mGr, double oc0, double oc1, refractionMaker *refMa
 
             if(sysCorr->isVfCorr1)
             {
-                if(!sysCorr->vfCorr1->detCorr(&dX, &dY, &ni, data[5], data[6], data[2]))
+                if(!sysCorr->vfCorr1->detCorr(&dX, &dY, &niX, &niY, data[5], data[6], data[2]))
                 {
                     data[5]-= dX;
                     data[6]-= dY;

@@ -31,15 +31,20 @@ int main(int argc, char *argv[])
     int fl = QString(argv[7]).toInt();//flag for separator of columns
     QString clims(argv[10]);
     /////////////////////////////
+
+    qDebug() << QString("%1 -> %2\n").arg(fname).arg(epsfname);
+
     QVector<double>X,Y,M;
     double L,B,MAG;
     QString line;
-    if((npixX*npixY)!=sl.count())
+    int lNum = sl.count();
+    //qDebug() << QString("line num: %1\n").arg(lNum);
+    if((npixX*npixY)!=lNum)
     {
         qDebug() << QString("Wrong dim\n");
         return 1;
     }
-    for(i=0;i<sl.count();i++)
+    for(i=0;i<lNum;i++)
     {
         line = sl[i].simplified();
         /*if(fl==0)
@@ -75,20 +80,33 @@ int main(int argc, char *argv[])
     //////////////////////////////
     double maxMag = M[0];
     double minMag = M[0];
-    for(int i=0;i<M.count();i++)
-    {
-        if(M[i]>maxMag)maxMag=M[i];
-        if(M[i]<minMag)minMag=M[i];
-    }
+    qDebug() << QString("M.num: %1\n").arg(M.count());
+
     if(clims.contains("yes"))
     {
         minMag=clims.section('|',1,1).toDouble();
         maxMag=clims.section('|',2,2).toDouble();
     }
+    else
+    {
+        for(int i=0;i<M.count();i++)
+        {
+            if(M[i]>maxMag)maxMag=M[i];
+            if(M[i]<minMag)minMag=M[i];
+        }
+    }
     //////////////////////////////
     double cx,cy,psi,d,ed;
-    mglData Z(npixX,npixY);
-    for(i=0; i<M.size(); i++) Z.a[i] = M.at(i);
+    int x, y;
+    mglData Z(npixX+1,npixY+1);
+    //Z.SetVal(M.at(i), f(i/npixX);
+    //Z.Set(M.toStdVector());
+    for(i=0; i<M.size(); i++)
+    {
+        y = floor(i/npixX);
+        x = i-y*npixX;
+        Z.SetVal(M.at(i), x, y);
+    }
     /*int minIndex=0;
     double mu,nu;
     for(int y=-npix;y<=npix;y++)
@@ -144,6 +162,8 @@ int main(int argc, char *argv[])
     ys.a[0]=-1;
     ys.a[1]=1;
     //
+    //qDebug() << QString("Range: %1 : %2\n").arg(minMag).arg(maxMag);
+
     if(clims.contains("yes"))
     {
         zs.a[0]=clims.section('|',1,1).toDouble();
@@ -167,15 +187,15 @@ int main(int argc, char *argv[])
     //gr->Box();
     //gr->Axis("xyz");
     gr->Dens(Z,argv[8]);
-    //gr->Surf(z,"wk");
+    //gr->Surf(Z,"wk");
     mglData ksi(101),eta(101);
     psi=0;
-    for(int i=0;i<=100;i++){ksi.a[i]=2*cos(psi);eta.a[i]=sin(psi);psi+=2*M_PI/100;}
-    //CB.Fill(minMag,maxMag);
-   // gr->Colorbar(CB,argv[7],3);
-    gr->Colorbar(argv[7]);
+    //for(int i=0;i<=100;i++){ksi.a[i]=2*cos(psi);eta.a[i]=sin(psi);psi+=2*M_PI/100;}
+
+    qDebug() << QString("colorBar: %1\n").arg(QString(argv[8]));
+    gr->Colorbar(argv[8]);
     //gr->Colorbar("_wk");
-    gr->Plot(ksi,eta,"k.");
+    //gr->Plot(ksi,eta,"k.");
     ///////////////
     /*double lon=-M_PI;
     double lat =0;
@@ -247,6 +267,7 @@ int main(int argc, char *argv[])
     gr->Plot(Mu,Nu," k.");*/
     ///////////////
     gr->WriteEPS(qPrintable(epsfname),qPrintable(epsfname));
+    //gr->WriteJPEG(qPrintable(epsfname+".jpg"),qPrintable(epsfname));
     delete gr;
     //////////////////////////////
     return 0;//a.exec();
