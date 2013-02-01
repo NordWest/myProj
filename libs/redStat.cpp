@@ -3689,7 +3689,7 @@ void residualFile::remSigma()
     {
         ksiOC = fabs(meanKsi - resList.at(i)->ksiOC);
         etaOC = fabs(meanEta - resList.at(i)->etaOC);
-        if((ksiOC>maxResKsi)&&(etaOC>maxResEta)) resList.removeAt(i);
+        if((ksiOC>maxResKsi)||(etaOC>maxResEta)) resList.removeAt(i);
     }
 
 }
@@ -3745,7 +3745,7 @@ void residualFile::remSigmaXY()
     {
         ksiOC = fabs(meanKsi - resList.at(i)->Dx);
         etaOC = fabs(meanEta - resList.at(i)->Dy);
-        if((ksiOC>maxResKsi)&&(etaOC>maxResEta)) resList.removeAt(i);
+        if((ksiOC>maxResKsi)||(etaOC>maxResEta)) resList.removeAt(i);
     }
 
 }
