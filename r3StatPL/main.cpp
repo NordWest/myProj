@@ -113,8 +113,8 @@ struct report12data
 
 struct report4data
 {
-    double x0, x1, y0, y1;  //п р▒п я▒п б╟п я≈п б╟п б╥п я∙п п┘п║Б─╧
-    int xLevNum, yLevNum;             //п я■п я∙п б╩-п п├п я∙ п я■п б╩п б╣п║Б─ п я∙п я■ п я≈п я∙ п я∙п║п┐п║п▐п я≤
+    double x0, x1, y0, y1;  //п р▒п я▒п б╟п я≈п б╟п б╥п я∙п п�?п║Б─╧
+    int xLevNum, yLevNum;             //п я� п я∙п б╩-п п├п я∙ п я� п б╩п б╣п║Б─ п я∙п я�  п я≈п я∙ п я∙п║п┐п║п▐п я≤
     int isFindDiap;
 //    QString labelX, labelY, plotParam;
 //    int isDetCurv, curvDeg;
@@ -692,7 +692,7 @@ int main(int argc, char *argv[])    //r3StatPL
     rFile.open(QIODevice::WriteOnly| QIODevice::Text | QIODevice::Truncate);
     dataStream.setDevice(&rFile);
 
-    dataStream << QString("\#Magnitude interval center|meanKsi|rmsMeanKsi|meanEta|rmsMeanEta|Total stars num\n");
+    dataStream << QString("\#Magnitude interval center|numKsi|meanKsi|rmsMeanKsi|numEta|meanEta|rmsMeanEta|Total stars num\n");
 
     for(k=0; k<magEq.diapsNum-1; k++)
     {
@@ -2107,7 +2107,7 @@ int main(int argc, char *argv[])    //r3StatPL
         for(i=0; i<resGrid.nums; i++) numGrid += resGrid.rfList.at(i)->resList.size();
         qDebug() << QString("numGrid: %1\n").arg(numGrid);
 
-        if(mgEqSigma>0) resGrid.remSigmaXY(mgEqSigma, 0.0, isRef);
+        if(mgEqSigma>0) resGrid.detSigmaXY(mgEqSigma, 0.0, isRef);
         else resGrid.detStatXY(isRef);
 
         double x, y, m;
@@ -2716,10 +2716,10 @@ int main(int argc, char *argv[])    //r3StatPL
 
             //    fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
             //    fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-            //п я∙п║Б─ п я■п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я■п я▒
+            //п я∙п║Б─ п я� п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я� п я▒
                 //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                 //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-            //п я▒п б╥ п я■п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
+            //п я▒п б╥ п я� п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
                 fitsd->catMarks->clearMarks();
                 getMarksGrid(fitsd->catMarks, starCatList.at(catProgType), catProgType, fitsd->MJD, fitsd->WCSdata[2], fitsd->WCSdata[3], fov, mag0, mag1, -1);
                 fitsd->detTan();
@@ -2951,17 +2951,17 @@ int main(int argc, char *argv[])    //r3StatPL
 
                 fitsd->setPos(mesRec->errBud->MJD, mesRec->errBud->RAoc, mesRec->errBud->DEoc);
 
-                //п п├п║Б─╧п║п┐п║Б─ п б╟п п├п я▒п║Б─ п║п┼ п я≈п б╟п║п┌п б╟п я≤п б╣п║Б─ п║п┌п║Б─╧ п я▒п п┘п║п┐п║Б─ п║п┌п║я⌠п я≤п б╣п п┘п║Б─ п б╟
+                //п п├п║Б─╧п║п┐п║Б─ п б╟п п├п я▒п║Б─ п║п┼ п я≈п б╟п║п┌п б╟п я≤п б╣п║Б─ п║п┌п║Б─╧ п я▒п п�?п║п┐п║Б─ п║п┌п║я� п я≤п б╣п п�?п║Б─ п б╟
                     fitsd->marksG->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
                     fitsd->marksGIpix->setInstrProp(instruments->scx, instruments->scy, instruments->rang);
-                //п я∙п║Б─ п я■п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я■п я▒
+                //п я∙п║Б─ п я� п║п┌п║Б─╧п║Б─ п║п┼ п я≤п б╣п║Б─ п я� п я▒
                     //fitsd->marksGIpix->loadTanImg(fileName, mSep, mColumn);
                     //if(isMove2corner) fitsd->marksGIpix->moveToCorner();
-                //п я▒п б╥ п я■п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
+                //п я▒п б╥ п я� п б╟п║Б─ п б╟п б╩п я∙п я√п б╟
                     fitsd->marksG->clearMarks();
                     fitsd->getMarksGrid(starCatList.at(currentCat), instruments->fov, mag0, mag1, -1);
                     fitsd->detTan();
-                //п я∙п б╠п║п┴п б╣п я■п║Б─ 
+                //п я∙п б� п║п┴п б╣п я� п║Б─ 
                     fitsd->mpeWaitTime = mpeWaitTime;
                     fitsd->sbWaitTime = sbWaitTime;
                     if(lspmFind)

@@ -602,7 +602,7 @@ void moveModelRec::rec2s(QString *str)
                 yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
-            case 1://relative positions in arcsec //Р СљР вЂўР вЂќР СњР вЂќР вЂўР С™Р В®Р СљР Сњ
+            case 1://relative positions in arcsec //�  Сљ�  вЂў�  вЂќ�  Сњ�  вЂќ�  вЂў�  С™�  В®�  Сљ�  Сњ
             {
                 xStr = mas_to_hms(xTm, " ", 5);
                 yStr = mas_to_damas(yTm, " ", 5);
@@ -3735,7 +3735,23 @@ void residualFile::detSigma(double sg, double proofP, int isRef)
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars remain X:%1\tY:%2\n").arg(numKsi).arg(numEta);
 }
 
-void residualFile::remSigmaXY(double sg, double proofP, int isRef)
+void residualFile::remSigmaXY()
+{
+    int recNum;
+    double ksiOC, etaOC;
+    //if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("stars before %1\n").arg(resList.size());
+    recNum = resList.size();
+    for(int i=recNum-1; i>=0; i--)
+    {
+        ksiOC = fabs(meanKsi - resList.at(i)->Dx);
+        etaOC = fabs(meanEta - resList.at(i)->Dy);
+        if((ksiOC>maxResKsi)&&(etaOC>maxResEta)) resList.removeAt(i);
+    }
+
+}
+
+
+void residualFile::detSigmaXY(double sg, double proofP, int isRef)
 {
     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("remSigmaXY: %1\n").arg(sg);
     int i, recNum, recNum0;

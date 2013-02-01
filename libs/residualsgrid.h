@@ -18,7 +18,7 @@ public:
     int detCenters(double &x, double &y, double &m, int pos);
     int initLevels(double *xLev, int xLevNum, double *yLev, int yLevNum, double *mLev, int mLevNum);
     int addPointXY(residualsRec *resRec);
-    void remSigmaXY(double sg, double proofP=0.0, int isRef=0);
+    void detSigmaXY(double sg, double proofP=0.0, int isRef=0);
     void detStatXY(int isRef = 0);
 
     int getResFile(residualFile *resFileRec, int x, int y, int m);

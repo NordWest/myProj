@@ -109,9 +109,9 @@ int residualsGrid::addPointXY(residualsRec *resRec)
     return 0;
 }
 
-void residualsGrid::remSigmaXY(double sg, double proofP, int isRef)
+void residualsGrid::detSigmaXY(double sg, double proofP, int isRef)
 {
-    for(int i=0; i<nums; i++) rfList.at(i)->remSigmaXY(sg, proofP, isRef);
+    for(int i=0; i<nums; i++) rfList.at(i)->detSigmaXY(sg, proofP, isRef);
 }
 
 void residualsGrid::detStatXY(int isRef)
