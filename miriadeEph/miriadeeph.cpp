@@ -73,63 +73,8 @@ miriadeEph::miriadeEph(QCoreApplication *app)//конструктор
 	//
         if (msgout==1) stream << "arguments...\n";
 
-
-/*
-
-	ntype = cdsfapp->arguments().at(1);// это первый аргумент (тип ввода информации об астероиде: номер или имя)
-
-        for(i=2; i<argSz-1; i++)
-        {
-            argL << cdsfapp->arguments().at(i);
-        }
-
-        if(ntype=="-num")astNumber = argL.join(" "); else astDes = argL.join(" ");//или номер, или имя
-*/
-        //if(ntype=="-num")astNumber = cdsfapp->arguments().at(2); else astDes = cdsfapp->arguments().at(2);//или номер, или имя
-
-	//BEGIN find mjd
-/*	QString sMJD;
-	double mjd;
-	if(simplemode==0)
-	{
-                mjdfname = cdsfapp->arguments().at(argSz-1);// имя файла с моментом mjd
-		QFile mjdFile(mjdfname);
-		mjdFile.open(QIODevice::ReadOnly | QIODevice::Text);
-		QTextStream mjdStream;
-		mjdStream.setDevice(&mjdFile);
-		QString mjdLine = mjdStream.readLine();
-		mjdFile.close();
-		sMJD = mjdLine.section('|',3,3);// читаем mjd
-		mjd = sMJD.toDouble();//конвертируем в число
-	}
-	if(simplemode==1)
-	{
-		sMJD = cdsfapp->arguments().at(3);
-		mjd = mjd = sMJD.toDouble();
-	}
-	if(simplemode==2)
-	{
-		sMJD = cdsfapp->arguments().at(3);
-		mjd = getMJDfromStrFTN(sMJD, 0);
-	}
-*/
-  //      uploadfile_dat
-//	if(timescale==1) mjd = mjd - 14/86400;//если использовалась шкала GPS, переходим в UTC (в таком виде это справедливо с 2006 г)
-        //END find mjd
         QStringList reqList;
         QString requestStr = "/webservices/miriade/ephemcc_query.php?";// создаем http запрос (теория DE405, шкала времени UTC)
-
-        settings->beginGroup("params");
-        QStringList parKeys;
-
-        parKeys << settings->allKeys();
-        int szPar = parKeys.size();
-        //if (msgout==1) stream << QString("szPar: \n").arg(i).arg(parKeys.at(i));
-        for(i=0; i<szPar; i++)
-        {
-            //parKeys.at(i)if (msgout==1) stream << QString("par[%1]: %2\n").arg(i).arg(parKeys.at(i));
-            reqList << QString("-%1=%2").arg(parKeys.at(i)).arg(settings->value(parKeys.at(i)).toString());
-        }
 
         int argSz = cdsfapp->arguments().size();
 
@@ -138,31 +83,30 @@ miriadeEph::miriadeEph(QCoreApplication *app)//конструктор
             reqList << cdsfapp->arguments().at(i);
         }
 
+        settings->beginGroup("params");
+        QStringList parKeys;
 
-        //getDATEOBSfromMJD(&dObs, mjd);// конвертируем mjd в "нормальную" дату
-        //reqList << QString("-ep=%1").arg(mjd2jd(mjd),13,'f',5);
-        /*requestStr = requestStr +
-        "an="+ QString( "%1" ).arg( dObs.year,4,10,QLatin1Char( '0' ))+
-        "&mois="+QString( "%1" ).arg( dObs.month,4,10,QLatin1Char( '0' ))+
-        "&jour="+QString( "%1" ).arg( dObs.day,4,10,QLatin1Char( '0' ))+
-        "&heure="+QString( "%1" ).arg( dObs.hour,4,10,QLatin1Char( '0' ))+
-        "&minute="+QString( "%1" ).arg( dObs.min,4,10,QLatin1Char( '0' ))+
-        "&seconde="+QString( "%1" ).arg( dObs.sec,6,'f',3,QLatin1Char( '0' ));*/
+        parKeys << settings->allKeys();
+        int szPar = parKeys.size();
+        int isExist, j;
+        //if (msgout==1) stream << QString("szPar: \n").arg(i).arg(parKeys.at(i));
+        for(i=0; i<szPar; i++)
+        {
+            //parKeys.at(i)if (msgout==1) stream << QString("par[%1]: %2\n").arg(i).arg(parKeys.at(i));
+            isExist = 0;
+            for(j=0;j<reqList.size(); j++) if(reqList.at(j).contains(parKeys.at(i))) isExist = 1;
+
+            if(!isExist)
+            {
+                reqList << QString("-%1=%2").arg(parKeys.at(i)).arg(settings->value(parKeys.at(i)).toString());
+            }
+        }
 
 
-        //reqList << QString("-mime=text");
 
-        //QString ast_Des = astDes.replace(QString("_"), QString(" "));//все пробелы в имени астероида должны в командной строке заменяться символами подчеркивания, для запроса они заменяются обратно на пробел
-        //if(ntype=="-num")requestStr = requestStr + "&numaster="+astNumber; else requestStr = requestStr +"&nomaster="+ast_Des;
-        //reqList << QString("-name=%1").arg(astDes);
-
-        //reqList << QString("-observer=%1").arg(obsCode);
-        //reqList << QString("-observer=%1").arg(obsCode);
-        //reqList << QString("-theory=DE405");//.arg(obsCode);
 
         requestStr += reqList.join("&");
-        //requestStr = requestStr + "&labeldatejj=0&UAI_code="+obsCode+"&planete=Aster&nbdates=1&centre="+centre+"&keph="+keph+"&scale="+sScale;
-    //                if(simplemode==3) requestStr = requestStr + "&uploadfile_dat="+mjdfname;
+
         if (msgout==1) stream << requestStr<<"\n";//печатать запрос в консоли
 	http->get(requestStr);// посылаем запрос методом get
 	
@@ -187,89 +131,7 @@ void miriadeEph::slotProcessingData(bool error)// обработка ответ�
 	        QString str(httpData);// переделываем данные в строку
 			//
                         stream <<str.mid(str.indexOf("#!")) << "\n";
-                        //stream << str << "\n";
-                        /*
-                int si, k, ex;
-                QStringList sl;
-                QStringList nList;
-                QString respStr;
-                        respStr.clear();
-                        si = str.indexOf("Asteroide");
-                        k = 0;
-                        ex = 0;
-                        int se = str.indexOf("<", si);
-                        respStr = str.mid(si, se-si);
 
-                        QString astNum = respStr.section(" ", 1, 1, QString::SectionSkipEmpty);
-                        QString astName = respStr.section(" ", 2, -1, QString::SectionSkipEmpty);
-
-                        sl.clear();
-                        respStr.clear();
-                        si = str.indexOf("km");
-                        if (msgout==1) stream << QString("si= %1\n").arg(si);
-
-                        k = 0;
-                        ex = 0;
-			while(ex==0)
-			{
-				if(str[si]=='>')k++;
-				if(k==13) 
-				{
-					if(str[si]!='<')respStr = respStr + str[si];
-					else ex=1;
-				}
-				si++;
-			}
-			//
-                        //qDebug() << QString("respStr: %1\n").arg(respStr);
-			for(int i=1;i<respStr.length();i++)
-			{
-				if((respStr[i-1]==' ')&&(respStr[i]!=' ')) respStr[i-1]='|';
-			}
-			//stream << respStr << "\n";
-			/////////////////////
-			//дальше идет нудное выколачивание из html-кода ответа нужной строчки
-			if (msgout==1) stream << str <<"\n";
-			///////////////////////
-                        sl = respStr.split("|");
-			////////////////////////
-			QString spos = sl[sl.count()-13]+":"+sl[sl.count()-12]+":"+sl[sl.count()-11];
-			double ra = hms_to_mas(spos, ":");
-			spos = sl[sl.count()-10]+":"+sl[sl.count()-9]+":"+sl[sl.count()-8];
-			double de = damas_to_mas(spos, ":");
-			str = sl[sl.count()-3];
-			double ra_dot = 60000*str.toDouble();
-			str = sl[sl.count()-2];
-			double de_dot = 60000*str.toDouble();
-			spos = mas_to_hms(ra, ":", 5)+"|"+
-				   mas_to_damas(de, ":", 4)+"|"+
-				   sl[sl.count()-7].trimmed()+"|"+//distance (a.e)
-				   sl[sl.count()-6].trimmed()+"|"+//vis. mag
-				   sl[sl.count()-5].trimmed()+"|"+//phase(deg)
-				   sl[sl.count()-4].trimmed()+"|"+//elongation(deg)
-				   QString( "%1" ).arg( ra_dot,9,'f',2,QLatin1Char( ' ' ))+"|"+//mu_ra*cos(dec) (mas/min)
-				   QString( "%1" ).arg( de_dot,9,'f',2,QLatin1Char( ' ' ))+"|"+//mu_de  (mas/min)
-				   sl[sl.count()-1]+"|";//radial velocity (km/s)
-                        spos += astNum + "|" + astName;
-
-                        //if(ntype=="-num")spos = spos + astNumber; else spos = spos + astDes;
-			///////////////////////выдаем результат в файл
-			if(simplemode==0)
-			{
-				QString fname = cdsfapp->arguments().at(4);
-				QFile httpFile(replyDir+"/"+fname);
-				httpFile.open(QIODevice::WriteOnly | QIODevice::Text);
-				QTextStream httpStream;
-				httpStream.setDevice(&httpFile);
-				httpStream << spos;
-				httpFile.close();
-			}
-			if(simplemode>0)
-			{
-				stream << spos << "\n";
-			}
-			if (msgout==1) stream << "miriadeEph has finished...\n";
-                        */
 
                         cdsfapp->quit();//выходим из проги
                 }

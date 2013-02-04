@@ -156,6 +156,7 @@ int main(int argc, char *argv[])
     //Capsule *experiment = new Capsule;
 
 
+    QString objDataStr;
     QString name;
     int plaNum;
 
@@ -169,9 +170,13 @@ int main(int argc, char *argv[])
     X0 = new double[3];
     V0 = new double[3];
 
-    QFile xyFile("xyData.txt");
-    xyFile.open(QFile::Truncate | QFile::WriteOnly);
-    QTextStream xyStm(&xyFile);
+    QFile bigFile("big.in");
+    bigFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream bigStm(&bigFile);
+
+    QFile smlFile("small.in");
+    smlFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream smlStm(&smlFile);
 
     QStringList outerArguments, resSL;
     QProcess outerProcess;
@@ -214,20 +219,29 @@ int main(int argc, char *argv[])
     }
 */
 
+    bigStm << ")O+_06 Big-body initial data  (WARNING: Do not delete this line!!)\n";
+    bigStm << ") Lines beginning with `)' are ignored.\n";
+    bigStm << ")---------------------------------------------------------------------\n";
+    bigStm << " style (Cartesian, Asteroidal, Cometary) = Cartesian\n";
+    bigStm << QString(" epoch (in days) = %1\n").arg(time0, 15, 'f', 8);
+    bigStm << ")---------------------------------------------------------------------\n";
+
+    smlStm << ")O+_06 Big-body initial data  (WARNING: Do not delete this line!!)\n";
+    smlStm << ") Lines beginning with `)' are ignored.\n";
+    smlStm << ")---------------------------------------------------------------------\n";
+    smlStm << " style (Cartesian, Asteroidal, Cometary) = Cartesian\n";
+    //smlStm << QString(" epoch (in days) = %1\n").arg(time0, 15, 'f', 8);
+    smlStm << ")---------------------------------------------------------------------\n";
+
     for(i=0; i<sz; i++)
     {
-
-
         name = QString(pList[i]->name.data());
-//        if(QString().compare(name, "Sol")==0) plaNum = 10;
-        //else
+
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
 
         if(plaNum!=-1)
         {
-
-
             if(useEPM)
             {
                 status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
@@ -239,9 +253,6 @@ int main(int argc, char *argv[])
             }
             else
             {
-
-                //nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
-                //nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
                 nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], time0, plaNum, CENTER, SK);
             }
             xVect << X;
@@ -256,27 +267,16 @@ int main(int argc, char *argv[])
             pList[i]->zd = coefXD*V[2];
             //if(si) pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
 
-            xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(dist, 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20).arg(vel, 26, 'e', 20);
-
-//            if(plaNum==10) pList[i]->mass = mass[9];
-//            else pList[i]->mass = mass[plaNum];
-
-//            pList[i]->mass = mass[plaNum];
-
-        /*
-
-            switch(plaNum)
+            if(plaNum!=SUN_NUM)
             {
-            case 0:
-                pList[i]->mass = gms/nbody->headParam("GM0");
-                break;
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(1.0/pList[i]->mass);
+                bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
             }
-
-*/
 
         }
         else
         {
+            /*
             if(useEPM)
             {
                 status = calc_EPM(EARTH, centr_num, jday, pday, X0, V0);
@@ -292,15 +292,64 @@ int main(int argc, char *argv[])
                 //nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
                 //nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
                 nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time0, GEOCENTR_NUM, CENTER, SK);
+            }/
+            outerArguments.clear();
+
+
+            outerArguments << QString("-name=earth");
+            outerArguments << QString("-type=planet");
+            outerArguments << QString("-observer=@sun");
+            outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+
+            qDebug() << outerArguments.join(" ") << "\n";
+
+            outerProcess.setWorkingDirectory(miriadeProcData.folder);
+            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+            outerProcess.setReadChannel(QProcess::StandardOutput);
+
+            outerProcess.start(miriadeProcData.name, outerArguments);
+
+            if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+            {
+                qDebug() << "\nmiriadeProc finish error\n";
+                break;
             }
+
+            QTextStream ethStream(outerProcess.readAllStandardOutput());
+
+
+            isObj = 0;
+
+
+            while (!ethStream.atEnd())
+            {
+                objDataStr = ethStream.readLine();
+                //qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                if(objDataStr.size()<1) continue;
+                if(objDataStr.at(0)=='#') continue;
+
+                resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                if(resSL.size()<8) continue;
+                //isObj = 1;
+                X0[0] = resSL.at(1).toDouble();
+                X0[1] = resSL.at(2).toDouble();
+                X0[2] = resSL.at(3).toDouble();
+                V0[0] = resSL.at(5).toDouble();
+                V0[1] = resSL.at(6).toDouble();
+                V0[2] = resSL.at(7).toDouble();
+                break;
+            }
+
 
             qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
 
-
+*/
             TDB2UTC(time0, &jdUTC);
-            outerArguments << QString("-name=\"%1\"").arg(name.simplified());
+            outerArguments << QString("-name=%1").arg(name.simplified());
             sJD = QString("%1").arg(jdUTC, 11, 'f',7);
             outerArguments << QString("-ep=%1").arg(sJD);
+            outerArguments << "-type=aster";
+            outerArguments << QString("-observer=@sun");
             //outerArguments << "-tcoor=2";
             //outerArguments << "-rplane=1";
 
@@ -317,7 +366,7 @@ int main(int argc, char *argv[])
             }
 
             QTextStream objStream(outerProcess.readAllStandardOutput());
-            QString objDataStr;
+
 
             isObj = 0;
 
@@ -330,22 +379,22 @@ int main(int argc, char *argv[])
                 if(objDataStr.at(0)=='#') continue;
 
                 resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                if(resSL.size()<10) continue;
+                if(resSL.size()<8) continue;
                 isObj = 1;
                 X[0] = resSL.at(1).toDouble();
                 X[1] = resSL.at(2).toDouble();
                 X[2] = resSL.at(3).toDouble();
-                V[0] = resSL.at(8).toDouble();
-                V[1] = resSL.at(9).toDouble();
-                V[2] = resSL.at(10).toDouble();
-
+                V[0] = resSL.at(5).toDouble();
+                V[1] = resSL.at(6).toDouble();
+                V[2] = resSL.at(7).toDouble();
+/*
                 X[0] += X0[0];
                 X[1] += X0[1];
                 X[2] += X0[2];
                 V[0] += V0[0];
                 V[1] += V0[1];
                 V[2] += V0[2];
-
+*/
                 xVect << X;
                 vVect << V;
                 dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
@@ -357,7 +406,10 @@ int main(int argc, char *argv[])
                 pList[i]->yd = coefXD*V[1];
                 pList[i]->zd = coefXD*V[2];
 
-                xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(name).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(dist, 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20).arg(vel, 26, 'e', 20);
+                smlStm << QString(" %1\n").arg(name).arg(1.0/pList[i]->mass);
+                smlStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+
+
             }
             if(!isObj)
             {
@@ -377,7 +429,8 @@ int main(int argc, char *argv[])
         //experiment->addToPopulationSet(*p);
     }
 
-    xyFile.close();
+    bigFile.close();
+    smlFile.close();
 
     saveCFG("test.xml", pList);
 
