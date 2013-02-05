@@ -136,7 +136,8 @@ void LF_int(double *LF, double X[], double V[])
 //#define CENTER CENTER_BARY
 //#define SK SK_EKVATOR
 
-void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
+//void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
+void saveResults(double t0, double *X, double *V, int pos, QString name, QTextStream &resStm)
 {
     double* r = new double[3];
     double* v = new double[3];
@@ -147,7 +148,7 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
     resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(Ri, 22, 'e', 15).arg(V[pos], 22, 'e', 15).arg(V[pos+1], 22, 'e', 15).arg(V[pos+2], 22, 'e', 15).arg(name);
 
     resStm.flush();
-
+/*
     if(X0==NULL||V0==NULL) return;
 
 
@@ -169,10 +170,11 @@ void saveResults(double t0, double *X, double *V, double *X0, double *V0, int po
 
     deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[pos], 18, 'g', 9).arg(X0[pos+1], 18, 'g', 9).arg(X0[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V0[pos], 18, 'g', 9).arg(V0[pos+1], 18, 'g', 9).arg(V0[pos+2], 18, 'g', 9).arg(name);
 
-    deStm.flush();
+    deStm.flush();*/
 }
 
-void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm)
+//void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm)
+void saveResultsM(double t0, double *X, double *V, int pos, QString name, QTextStream &resStm)
 {
     double* r = new double[3];
     double* v = new double[3];
@@ -182,7 +184,7 @@ void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int p
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
     resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
 
-
+/*
 
     r[0] = X[pos]-X0[pos];
     r[1] = X[pos+1]-X0[pos+1];
@@ -194,7 +196,7 @@ void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int p
     v[1] = V[pos+1]-V0[pos+1];
     v[2] = V[pos+2]-V0[pos+2];
 
-    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
+    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);*/
 }
 
 int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData);
@@ -375,31 +377,41 @@ int main(int argc, char *argv[])
 
     QFile dxmFile;
     QTextStream dxmStm;
-    QFile resmFile;
-    QTextStream resmStm;
+    QFile resmFileBig, resmFileSmall;
+    QTextStream resmStmBig, resmStmSmall;
     double ra, de, ra0, de0;
     double ksi, zet, teta, T, t;
 
+//res_big
+    QFile resFileBig("res_big.txt");
+    resFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream resStmBig(&resFileBig);
+/*
+    QFile dxFileBig("dxdy_big.txt");
+    dxFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream dxStmBig(&dxFileBig);
 
-    QFile resFile("res.txt");
-    resFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    QTextStream resStm(&resFile);
+    QFile deFileBig("de_big.txt");
+    deFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream deStmBig(&deFileBig);*/
 
-    QFile dxFile("dxdy.txt");
-    dxFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    QTextStream dxStm(&dxFile);
+//res_small
+    QFile resFileSmall("res_small.txt");
+    resFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream resStmSmall(&resFileSmall);
+/*
+    QFile dxFileSmall("dxdy_small.txt");
+    dxFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream dxStmSmall(&dxFileSmall);
 
-    QFile deFile("de.txt");
-    deFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    QTextStream deStm(&deFile);
-
-
-
-
+    QFile deFileSmall("de_small.txt");
+    deFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
+    QTextStream deStmSmall(&deFileSmall);
+*/
 
     solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
-
+/*
     char *astr = new char[256];
     QFile mpcFile("./mpc.txt");
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -408,7 +420,7 @@ int main(int argc, char *argv[])
     QFile mpcFileM("./mpc_moody.txt");
     mpcFileM.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStmM(&mpcFileM);
-
+*/
 
 
     if(useMoody)
@@ -428,14 +440,20 @@ int main(int argc, char *argv[])
         {*/
             Xm = new double[N];
             Vm = new double[N];
-
+/*
             dxmFile.setFileName("dxdy_moody.txt");
             dxmFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
             dxmStm.setDevice(&dxmFile);
+*/
 
-            resmFile.setFileName("res_moody.txt");
-            resmFile.open(QIODevice::Truncate | QIODevice::WriteOnly);
-            resmStm.setDevice(&resmFile);
+            resmFileBig.setFileName("res_moody_big.txt");
+            resmFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            resmStmBig.setDevice(&resmFileBig);
+
+            resmFileSmall.setFileName("res_moody_small.txt");
+            resmFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            resmStmSmall.setDevice(&resmFileSmall);
+
         //}
     }
 
@@ -480,6 +498,7 @@ int main(int argc, char *argv[])
 */
         if(plaNum!=-1)
         {
+            /*
             if(useEPM)
             {
                 status = calc_EPM(plaNum, centr_num, (int)t0, t0 - (int)t0, &X0[p], &V0[p]);
@@ -494,9 +513,9 @@ int main(int argc, char *argv[])
                 //nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
                 //nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
                 nbody->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
-            }
+            }*/
 
-            saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
+            saveResults(t0, X, V, p, name, resStmBig);
 
             //if(useMoody) saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
 
@@ -504,6 +523,8 @@ int main(int argc, char *argv[])
         }
         else
         {
+            saveResults(t0, X, V, p, name, resStmSmall);
+    /*
             if(initMpc) break;
             mCat.GetRecName(name.simplified().toAscii().data());
 
@@ -587,8 +608,7 @@ int main(int argc, char *argv[])
             mrec.toString(astr);
 
             mpcStm << astr << "\n";
-
-
+*/
 /*
             if(useMoody)
             {
@@ -798,7 +818,9 @@ int main(int argc, char *argv[])
 
                 if(plaNum!=-1)
                 {
-
+                    saveResults(TF, X, V, i, name, resStmBig);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig);
+/*
                     if(useEPM)
                     {
                         status = calc_EPM(plaNum, centr_num, jday, pday, &X0[i], &V0[i]);
@@ -818,7 +840,7 @@ int main(int argc, char *argv[])
                                  V0[i+1] -= embv[1];
                                  V0[i+2] -= embv[2];
                              }
-                         }*/
+                         }/
                     }
                     else
                     {
@@ -874,7 +896,7 @@ int main(int argc, char *argv[])
 
                     //if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     //{
-                        saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
+                        //saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
                     //}
                     /*else
                     {
@@ -893,7 +915,9 @@ int main(int argc, char *argv[])
                 else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                 {
 
-
+                    saveResults(TF, X, V, i, name, resStmSmall);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall);
+/*
                     if(initMpc) break;
                     if(mCat.GetRecName(name.simplified().toAscii().data())) break;
 
@@ -1000,9 +1024,10 @@ int main(int argc, char *argv[])
 
                     saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
                     //qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
+                    */
                 }
 
-                if(useMoody) saveResultsM(TF, Xm, Vm, X0, V0, i, name, resmStm, dxmStm);
+                //if(useMoody) saveResults(TF, Xm, Vm, name, resmStm);
 
 
 
@@ -1078,7 +1103,7 @@ int main(int argc, char *argv[])
                 //p+=3;
             }
 
-*/
+/
 
             CM_int(CM0, X0, V0);
             qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
@@ -1086,7 +1111,7 @@ int main(int argc, char *argv[])
             qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
             LF_int(&LF0, X0, V0);
             qDebug() << QString("LF0: %1\n").arg(LF0);
-
+*/
             if(useMoody) mState = mFile->readState();
 
             //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
@@ -1106,18 +1131,20 @@ int main(int argc, char *argv[])
 
 
 
-    resFile.close();
+    resFileBig.close();
+    resFileSmall.close();
 
-    dxFile.close();
+/*    dxFile.close();
     deFile.close();
 
     mpcFile.close();
     mpcFileM.close();
-
+*/
     if(useMoody)
     {
-        resmFile.close();
-        dxmFile.close();
+        resmFileBig.close();
+        resmFileSmall.close();
+  //      dxmFile.close();
     }
 
 }
