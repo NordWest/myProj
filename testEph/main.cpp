@@ -70,7 +70,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 #endif
     }
 }
-
+/*
 int epm_planet_num(QString name)
 {
     if(QString().compare(name, "MERCURY", Qt::CaseInsensitive)==0) return 1;
@@ -92,7 +92,7 @@ int epm_planet_num(QString name)
     if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
     return -1;
 }
-
+*/
 void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
 {
     double* r = new double[3];
@@ -135,12 +135,19 @@ int main(int argc, char *argv[])
     QTextStream logstr(logFile);
 
 
+    procData miriadeProcData;
+    QProcess outerProcess;
+    QString objDataStr;
+    QStringList resSL, outerArguments;
+
     dele *nbody;
 
 
     nbody = new dele();
     double t0, nstep, ti, dt;
-    int centerNum, skNum;
+    //int centerNum, skNum;
+    int centr_num, plaNum;
+    int CENTER, SK;
     int i, j, plaNumEPM, plaNumDE;
 
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
@@ -151,20 +158,36 @@ int main(int argc, char *argv[])
     nstep = sett->value("general/nstep", 1).toDouble();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     QString epmDir = sett->value("general/epmDir", "./").toString();
+    int useEPM = sett->value("general/useEPM", 0).toInt();
 
-    centerNum = sett->value("general/center", 0).toInt();
-    skNum = sett->value("general/sk", 0).toInt();
+    SK = sett->value("general/sk", 0).toInt();
+    CENTER = sett->value("general/center", 0).toInt();
+
+    miriadeProcData.name = sett->value("miriadeProcData/name", "./mpeph.exe").toString();
+    miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
+    miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
+    if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
+
+
+    double x, y, z, vx, vy, vz;
+    double dx, dy, dz, dvx, dvy, dvz;
+    double dist, dvel;
+    double *X, *V;
+    double *X0, *V0;
+    double *dX, *dV;
+
+    X = new double[3];
+    V = new double[3];
+
+    X0 = new double[3];
+    V0 = new double[3];
+
+    dX = new double[3];
+    dV = new double[3];
 
     QString resDirName("./resEph");
     QDir resDir(resDirName);
 
-    QFile resFileDE;
-    QTextStream resStmDE;
-    QString resFileNameDE;
-
-    QFile resFileEPM;
-    QTextStream resStmEPM;
-    QString resFileNameEPM;
 
     QFile resFile;
     QTextStream resStm;
@@ -175,11 +198,24 @@ int main(int argc, char *argv[])
     int jday;
     double pday, t;
 
-    status = !InitTxt(epmDir.toAscii().data());
-    int centr_num = 11+!centerNum;
+    if(useEPM)
+    {
+        status = !InitTxt(epmDir.toAscii().data());
+        centr_num = 11+!CENTER;
+    }
+    else
+    {
+        status = nbody->init(jplFile.toAscii().data());
+    }
+
+    if(status)
+    {
+        qDebug() << QString("init ephemeride error\n");
+        return 1;
+    }
 
 
-    qDebug() << QString("sk: %1\ncenter de: %2\ncenter EPM: %3\n").arg(skNum).arg(centerNum).arg(centr_num);
+    //qDebug() << QString("sk: %1\ncenter de: %2\ncenter EPM: %3\n").arg(skNum).arg(centerNum).arg(centr_num);
 
 
 
@@ -189,12 +225,7 @@ int main(int argc, char *argv[])
     if(iniJplRes) return 1;
 
 //    double X[3], V[3];
-    double x, y, z, vx, vy, vz;
-    double dx, dy, dz, dvx, dvy, dvz;
-    double dR, dV;
-    double *X, *V;
-    X = new double[3];
-    V = new double[3];
+
 
 
     if(readCFG(confFile, pList))
@@ -213,58 +244,124 @@ int main(int argc, char *argv[])
             plaNumEPM = epm_planet_num(name);
             plaNumDE = planet_num(name.toAscii().data());
 
-            resFileName = QString("%1/rel_%2.txt").arg(resDir.absolutePath()).arg(name);
-            qDebug() << QString("res file name: %1\n").arg(resFileName);
-            resFile.setFileName(resFileName);
-            resFile.open(QFile::WriteOnly | QFile::Truncate);
-            resStm.setDevice(&resFile);
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
 
-            resFileNameDE = QString("%1/de_%2.txt").arg(resDir.absolutePath()).arg(name);
-            qDebug() << QString("de file name: %1\n").arg(resFileNameDE);
-            resFileDE.setFileName(resFileNameDE);
-            resFileDE.open(QFile::WriteOnly | QFile::Truncate);
-            resStmDE.setDevice(&resFileDE);
-
-            resFileNameEPM = QString("%1/epm_%2.txt").arg(resDir.absolutePath()).arg(name);
-            qDebug() << QString("epm file name: %1\n").arg(resFileNameEPM);
-            resFileEPM.setFileName(resFileNameEPM);
-            resFileEPM.open(QFile::WriteOnly | QFile::Truncate);
-            resStmEPM.setDevice(&resFileEPM);
-
-            for(j=0; j<nstep; j++)
-            {
-                ti = t0+dt*j;
-                jday = int(ti);
-                pday = ti - jday;// + 60.0/86400.0;
-
-                qDebug() << QString("ti: %1\tjday: %2\tpday: %3\n").arg(ti, 12, 'f').arg(jday).arg(pday);
-
-                //nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
-                //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
-                nbody->detState(&x, &y, &z, &vx, &vy, &vz, ti, plaNumDE, centerNum, skNum);
-
-                resStmDE << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti-t0, 12, 'f', 4).arg(x, 20, 'e', 12).arg(y, 20, 'e', 12).arg(z, 20, 'e', 12).arg(vx, 20, 'e', 12).arg(vy, 20, 'e', 12).arg(vz, 20, 'e', 12);
-
-                status = calc_EPM(plaNumEPM, centr_num, jday, pday, X, V);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-
-                 resStmEPM << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ti-t0, 12, 'f', 4).arg(X[0], 20, 'e', 12).arg(X[1], 20, 'e', 12).arg(X[2], 20, 'e', 12).arg(V[0], 20, 'e', 12).arg(V[1], 20, 'e', 12).arg(V[2], 20, 'e', 12);
-
-                 dR = sqrt(pow(x-X[0], 2.0) + pow(y-X[1], 2.0) + pow(z-X[2], 2.0));
-                 dV = sqrt(pow(vx-V[0], 2.0) + pow(vy-V[1], 2.0) + pow(vz-V[2], 2.0));
-
-                 resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(ti-t0, 12, 'f', 4).arg(x-X[0], 20, 'e', 12).arg(y-X[1], 20, 'e', 12).arg(z-X[2], 20, 'e', 12).arg(dR, 20, 'e', 12).arg(vx-V[0], 20, 'e', 12).arg(vy-V[1], 20, 'e', 12).arg(vz-V[2], 20, 'e', 12).arg(dV, 20, 'e', 12);
+            if(plaNum==SUN_NUM||plaNum==-1) continue;
 
 
-            }
+                resFileName = QString("%1/rel_%2.txt").arg(resDir.absolutePath()).arg(name);
+                qDebug() << QString("res file name: %1\n").arg(resFileName);
+                resFile.setFileName(resFileName);
+                resFile.open(QFile::WriteOnly | QFile::Truncate);
+                resStm.setDevice(&resFile);
+    /*
+                resFileNameDE = QString("%1/de_%2.txt").arg(resDir.absolutePath()).arg(name);
+                qDebug() << QString("de file name: %1\n").arg(resFileNameDE);
+                resFileDE.setFileName(resFileNameDE);
+                resFileDE.open(QFile::WriteOnly | QFile::Truncate);
+                resStmDE.setDevice(&resFileDE);
 
-            resFile.close();
-            resFileDE.close();
-            resFileEPM.close();
+                resFileNameEPM = QString("%1/epm_%2.txt").arg(resDir.absolutePath()).arg(name);
+                qDebug() << QString("epm file name: %1\n").arg(resFileNameEPM);
+                resFileEPM.setFileName(resFileNameEPM);
+                resFileEPM.open(QFile::WriteOnly | QFile::Truncate);
+                resStmEPM.setDevice(&resFileEPM);
+    */
+                for(j=0; j<nstep; j++)
+                {
+                    ti = t0+dt*j;
+                    jday = int(ti);
+                    pday = ti - jday;// + 60.0/86400.0;
+
+                    qDebug() << QString("ti: %1\tjday: %2\tpday: %3\n").arg(ti, 12, 'f').arg(jday).arg(pday);
+
+                    //nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
+                    //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
+                    //nbody->detState(&x, &y, &z, &vx, &vy, &vz, ti, plaNumDE, centerNum, skNum);
+
+                    if(useEPM)
+                    {
+                        status = calc_EPM(plaNum, centr_num, (int)ti, ti-(int)ti, X, V);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], ti, plaNum, CENTER, SK);
+
+
+                    outerArguments.clear();
+
+                    outerArguments << QString("-name=%1").arg(name.simplified());
+                    outerArguments << QString("-type=planet");
+                    outerArguments << QString("-observer=@sun");
+                    outerArguments << QString("-ep=%1").arg(ti, 15, 'f',7);
+                    //outerArguments << QString("-ep=%1").arg(sJD);
+                    //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+
+                    qDebug() << outerArguments.join(" ") << "\n";
+
+                    outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                    outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                    outerProcess.start(miriadeProcData.name, outerArguments);
+
+                    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                    {
+                        qDebug() << "\nmiriadeProc finish error\n";
+                        break;
+                    }
+
+                    QTextStream ethStream(outerProcess.readAllStandardOutput());
+
+                    while (!ethStream.atEnd())
+                    {
+                        objDataStr = ethStream.readLine();
+                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                        if(objDataStr.size()<1) continue;
+                        if(objDataStr.at(0)=='#') continue;
+
+                        resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                        if(resSL.size()<8) continue;
+                        //isObj = 1;
+                        X0[0] = resSL.at(1).toDouble();
+                        X0[1] = resSL.at(2).toDouble();
+                        X0[2] = resSL.at(3).toDouble();
+                        V0[0] = resSL.at(5).toDouble();
+                        V0[1] = resSL.at(6).toDouble();
+                        V0[2] = resSL.at(7).toDouble();
+                        break;
+                    }
+
+
+
+
+                    dX[0] = X[0] - X0[0];
+                    dX[1] = X[1] - X0[1];
+                    dX[2] = X[2] - X0[2];
+
+                    dist = sqrt(dX[0]*dX[0] + dX[1]*dX[1] + dX[2]*dX[2]);
+
+                    dV[0] = V[0] - V0[0];
+                    dV[1] = V[1] - V0[1];
+                    dV[2] = V[2] - V0[2];
+
+                    dvel = sqrt(dV[0]*dV[0] + dV[1]*dV[1] + dV[2]*dV[2]);
+
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+                    qDebug() << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+
+
+                }
+
+                resFile.close();
+            //resFileDE.close();
+            //resFileEPM.close();
+
+
 
         }
 
