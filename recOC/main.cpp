@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
         {
             TDB2UTC(time, &jdUTC);
             sJD = QString("%1").arg(jdUTC, 15, 'f',7);
-/*
+
             outerArguments.clear();
 
             outerArguments << QString("-name=earth");
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
                 VE0[2] = resSL.at(7).toDouble();
                 break;
             }
-*/
+/*
             if(useEPM)
             {
                 status = calc_EPM(GEOCENTR_NUM, centr_num, (int)time, time-(int)time, XE0, VE0);
@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
                  }
             }
             else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER, SK);
-
+*/
 
 
             outerArguments.clear();
