@@ -210,8 +210,8 @@ int main(int argc, char *argv[])
             outerArguments << "-type=aster";
 
 
-            outerArguments << QString("-observer=@sun");
-            //outerArguments << "-tcoor=2";
+            outerArguments << QString("-observer=500");
+            //outerArguments << "-tcoor=1";
             //outerArguments << "-rplane=1";
 
             qDebug() << outerArguments.join(" ") << "\n";
@@ -243,11 +243,11 @@ int main(int argc, char *argv[])
                 X0[0] = resSL.at(1).toDouble();
                 X0[1] = resSL.at(2).toDouble();
                 X0[2] = resSL.at(3).toDouble();
-
+/*
                 V0[0] = resSL.at(5).toDouble();
                 V0[1] = resSL.at(6).toDouble();
                 V0[2] = resSL.at(7).toDouble();
-                /*
+*/
                 V0[0] = resSL.at(8).toDouble();
                 V0[1] = resSL.at(9).toDouble();
                 V0[2] = resSL.at(10).toDouble();
@@ -258,7 +258,8 @@ int main(int argc, char *argv[])
                 V0[0] += VE0[0];
                 V0[1] += VE0[1];
                 V0[2] += VE0[2];
-                */
+                //
+
 
                 qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
 
@@ -269,7 +270,7 @@ int main(int argc, char *argv[])
                 m = mas_to_grad((4612.4362*dT)*1000);
                 n = mas_to_grad((2004.3109*dT)*1000);
 */
-                detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+                detRDnumGC(&ra, &de, X[0], X[1], X[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
                 mrec.r = ra;
                 mrec.d = de;
                 mrec.eJD = jdUTC;

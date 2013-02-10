@@ -191,12 +191,12 @@ int main(int argc, char *argv[])
 
     QFile resFile;
     QTextStream resStm;
-    QString resFileName;
+    QString resFileName, sJD;
 
     QString name;
     int status;
     int jday;
-    double pday, t;
+    double pday, t, jdUTC;
 
     if(useEPM)
     {
@@ -236,6 +236,11 @@ int main(int argc, char *argv[])
 
     nofzbody = pList.size();
 
+    resFileName = QString("./rel.txt");
+    //qDebug() << QString("res file name: %1\n").arg(resFileName);
+    resFile.setFileName(resFileName);
+    resFile.open(QFile::WriteOnly | QFile::Truncate);
+    resStm.setDevice(&resFile);
 
 
         for(i=0; i<nofzbody; i++)
@@ -249,7 +254,7 @@ int main(int argc, char *argv[])
 
             if(plaNum==SUN_NUM||plaNum==-1) continue;
 
-
+/*
                 resFileName = QString("%1/rel_%2.txt").arg(resDir.absolutePath()).arg(name);
                 qDebug() << QString("res file name: %1\n").arg(resFileName);
                 resFile.setFileName(resFileName);
@@ -268,6 +273,7 @@ int main(int argc, char *argv[])
                 resFileEPM.open(QFile::WriteOnly | QFile::Truncate);
                 resStmEPM.setDevice(&resFileEPM);
     */
+                /*
                 for(j=0; j<nstep; j++)
                 {
                     ti = t0+dt*j;
@@ -279,25 +285,27 @@ int main(int argc, char *argv[])
                     //nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
                     //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
                     //nbody->detState(&x, &y, &z, &vx, &vy, &vz, ti, plaNumDE, centerNum, skNum);
-
+*/
                     if(useEPM)
                     {
-                        status = calc_EPM(plaNum, centr_num, (int)ti, ti-(int)ti, X, V);
+                        status = calc_EPM(plaNum, centr_num, (int)t0, t0-(int)t0, X, V);
                          if(!status)
                          {
                              qDebug() << QString("error EPM\n");
                              return 1;
                          }
                     }
-                    else nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], ti, plaNum, CENTER, SK);
+                    else nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], t0, plaNum, CENTER, SK);
 
+                    TDB2UTC(t0, &jdUTC);
+                    sJD = QString("%1").arg(jdUTC, 15, 'f',7);
 
                     outerArguments.clear();
 
                     outerArguments << QString("-name=%1").arg(name.simplified());
                     outerArguments << QString("-type=planet");
                     outerArguments << QString("-observer=@sun");
-                    outerArguments << QString("-ep=%1").arg(ti, 15, 'f',7);
+                    outerArguments << QString("-ep=%1").arg(t0, 15, 'f',7);
                     //outerArguments << QString("-ep=%1").arg(sJD);
                     //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
 
@@ -355,9 +363,9 @@ int main(int argc, char *argv[])
                     qDebug() << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
 
 
-                }
+                //}
 
-                resFile.close();
+                //resFile.close();
             //resFileDE.close();
             //resFileEPM.close();
 
@@ -366,7 +374,7 @@ int main(int argc, char *argv[])
         }
 
 
-
+resFile.close();
     
     return 0;//a.exec();
 }
