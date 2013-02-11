@@ -373,17 +373,17 @@ int main(int argc, char *argv[])
                 nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time0, GEOCENTR_NUM, CENTER, SK);
             }*/
 
-            //TDB2UTC(time0, &jdUTC);
-            //sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-/*
+            TDB2UTC(time0, &jdUTC);
+            sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+
             outerArguments.clear();
 
 
             outerArguments << QString("-name=earth");
             outerArguments << QString("-type=planet");
             outerArguments << QString("-observer=@sun");
-            //outerArguments << QString("-ep=%1").arg(sJD);
-            outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+            outerArguments << QString("-ep=%1").arg(sJD);
+            //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
 
             qDebug() << outerArguments.join(" ") << "\n";
 
@@ -427,7 +427,7 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
 
-*/
+
                 isObj = 0;
             switch(smlType)
             {
@@ -437,12 +437,13 @@ int main(int argc, char *argv[])
 
                     outerArguments << QString("-name=%1").arg(name.simplified());
 
-                    //outerArguments << QString("-ep=%1").arg(sJD);
-                    outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+                    outerArguments << QString("-ep=%1").arg(sJD);
+                    //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
                     outerArguments << "-type=aster";
-                    outerArguments << QString("-observer=@sun");
-                    //outerArguments << "-tcoor=2";
-                    //outerArguments << "-rplane=1";
+                    //outerArguments << QString("-observer=@sun");
+                    outerArguments << QString("-observer=500");
+                    outerArguments << "-tcoor=2";
+                    outerArguments << "-rplane=1";
 
                     outerProcess.setWorkingDirectory(miriadeProcData.folder);
                     outerProcess.setProcessChannelMode(QProcess::MergedChannels);
@@ -475,12 +476,12 @@ int main(int argc, char *argv[])
                         X[0] = resSL.at(1).toDouble();
                         X[1] = resSL.at(2).toDouble();
                         X[2] = resSL.at(3).toDouble();
-
+/*
                         V[0] = resSL.at(5).toDouble();
                         V[1] = resSL.at(6).toDouble();
                         V[2] = resSL.at(7).toDouble();
-
-                        /*V[0] = resSL.at(8).toDouble();
+*/
+                        V[0] = resSL.at(8).toDouble();
                         V[1] = resSL.at(9).toDouble();
                         V[2] = resSL.at(10).toDouble();
 
@@ -491,7 +492,7 @@ int main(int argc, char *argv[])
                         V[1] += V0[1];
                         V[2] += V0[2];
 
-                        */
+
 
 
 
@@ -511,8 +512,8 @@ int main(int argc, char *argv[])
                     qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
                     orbRec.get(&mCat);
 
-                    orbRec.detRecEcl(&X[0], &X[1], &X[2], time0);
-                    orbRec.detRecEclVel(&V[0], &V[1], &V[2], time0);
+                    orbRec.detRecEkv(&X[0], &X[1], &X[2], time0);
+                    orbRec.detRecEkvVel(&V[0], &V[1], &V[2], time0);
 
                     isObj = 1;
                     break;

@@ -27,6 +27,16 @@ int main(int argc, char *argv[])
     QString objDataStr;
     mpc mrec;
     double dT, m, n;
+    double dRa, dDec, normR;
+    double *s, *sA, *R, *sV;
+    myvector v0(3), v1(3), v2(3);
+    /*v0 = new myvector(3);
+    v1 = new myvector(3);
+    v2 = new myvector(3);*/
+    s = new double[3];
+    sA = new double[3];
+    sV = new double[3];
+    R = new double[3];
 
     procData miriadeProcData;
 
@@ -82,6 +92,11 @@ int main(int argc, char *argv[])
     inFile.open(QFile::ReadOnly);
     QTextStream inStm(&inFile);
 
+    QString bigFileName("big.log");
+    QFile bigFile(bigFileName);
+    bigFile.open(QFile::ReadOnly);
+    QTextStream bigStm(&bigFile);
+
     //QString dxFileName("small_dr.txt");
     QFile dxFile(dxFileName);
     dxFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -108,9 +123,11 @@ int main(int argc, char *argv[])
         V[1] = dataSL.at(6).toDouble();
         V[2] = dataSL.at(7).toDouble();
 
-
-
         qDebug() << QString("X: %1\t%2\t%3\nV: %4\t%5\t%6\n").arg(X[0]).arg(X[1]).arg(X[2]).arg(V[0]).arg(V[1]).arg(V[2]);
+
+
+        TDB2UTC(time, &jdUTC);
+        sJD = QString("%1").arg(jdUTC, 15, 'f',7);
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
@@ -136,8 +153,29 @@ int main(int argc, char *argv[])
         }
         else
         {
-            TDB2UTC(time, &jdUTC);
-            sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+
+            while(!bigStm.atEnd())
+            {
+                tStr = bigStm.readLine();
+                dataSL = tStr.split(colSep, QString::SkipEmptyParts);
+                if(dataSL.size()<8) continue;
+
+                //name = dataSL.at(0).simplified();
+                if(QString().compare(dataSL.at(0).simplified(), "Earth")!=0) continue;
+                //time = dataSL.at(1).toDouble();
+
+                XE0[0] = dataSL.at(2).toDouble();
+                XE0[1] = dataSL.at(3).toDouble();
+                XE0[2] = dataSL.at(4).toDouble();
+                VE0[0] = dataSL.at(5).toDouble();
+                VE0[1] = dataSL.at(6).toDouble();
+                VE0[2] = dataSL.at(7).toDouble();
+                qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
+                break;
+            }
+/*
+
+
 
             outerArguments.clear();
 
@@ -145,8 +183,10 @@ int main(int argc, char *argv[])
             outerArguments << QString("-type=planet");
             outerArguments << QString("-teph=1");
             outerArguments << QString("-observer=@sun");
-            //outerArguments << QString("-ep=%1").arg(sJD);
-            outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
+            outerArguments << QString("-ep=%1").arg(sJD);
+            //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
+            outerArguments << "-tcoor=2";
+            outerArguments << "-rplane=1";
 
             qDebug() << outerArguments.join(" ") << "\n";
 
@@ -167,7 +207,7 @@ int main(int argc, char *argv[])
             while (!ethStream.atEnd())
             {
                 objDataStr = ethStream.readLine();
-                //qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                qDebug() << QString("objDataStr: %1").arg(objDataStr);
                 if(objDataStr.size()<1) continue;
                 if(objDataStr.at(0)=='#') continue;
 
@@ -195,13 +235,47 @@ int main(int argc, char *argv[])
             else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER, SK);
 */
 
+            qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
+
+
+            R[0] = X[0] - XE0[0];
+            R[0] = X[1] - XE0[1];
+            R[0] = X[2] - XE0[2];
+            normR = norm(R);
+            s[0] = R[0]/normR;
+            s[1] = R[1]/normR;
+            s[2] = R[2]/normR;
+
+            sV[0] = V[0] - VE0[0];
+            sV[1] = V[1] - VE0[1];
+            sV[2] = V[2] - VE0[2];
+
+
+
+            v0.set(0, sV[0]);
+            v0.set(1, sV[1]);
+            v0.set(2, sV[2]);
+
+            v1.set(0, s[0]);
+            v1.set(1, s[1]);
+            v1.set(2, s[2]);
+
+            v2 = Vmul(&v1, &Vmul(&v1, &v0));
+            //v2 = v2*(1.0/CAU);
+            qDebug() << QString("v2: %1 %2 %3").arg(v2.get(0)).arg(v2.get(1)).arg(v2.get(2));
+
+            sA[0] = v2.get(0)*(1.0/CAU) + s[0];
+            sA[1] = v2.get(1)*(1.0/CAU) + s[1];
+            sA[2] = v2.get(2)*(1.0/CAU) + s[2];
+
+
 
             outerArguments.clear();
 
             outerArguments << QString("-name=%1").arg(name.simplified().toLower());
 
-            //outerArguments << QString("-ep=%1").arg(sJD);
-            outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
+            outerArguments << QString("-ep=%1").arg(sJD);
+            //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
 
     /*        if(useEPM) plaNum = epm_planet_num(name);
             else plaNum = planet_num(name.toAscii().data());
@@ -211,8 +285,9 @@ int main(int argc, char *argv[])
 
 
             outerArguments << QString("-observer=500");
-            //outerArguments << "-tcoor=1";
-            //outerArguments << "-rplane=1";
+            //outerArguments << QString("-observer=@sun");
+            outerArguments << "-tcoor=2";
+            outerArguments << "-rplane=1";
 
             qDebug() << outerArguments.join(" ") << "\n";
 
@@ -233,7 +308,7 @@ int main(int argc, char *argv[])
             while (!objStream.atEnd())
             {
                 objDataStr = objStream.readLine();
-                qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                //qDebug() << QString("objDataStr: %1").arg(objDataStr);
                 if(objDataStr.size()<1) continue;
                 if(objDataStr.at(0)=='#') continue;
 
@@ -270,9 +345,15 @@ int main(int argc, char *argv[])
                 m = mas_to_grad((4612.4362*dT)*1000);
                 n = mas_to_grad((2004.3109*dT)*1000);
 */
-                detRDnumGC(&ra, &de, X[0], X[1], X[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                mrec.r = ra;
-                mrec.d = de;
+                //detRDnumGC(&ra, &de, X[0], X[1], X[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+                rdsys(&ra, &de, sA[0], sA[1], sA[2]);
+
+                dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
+                dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
+
+                mrec.r = ra;// + dRa;
+                mrec.d = de;// + dDec;
+
                 mrec.eJD = jdUTC;
                 mrec.num = 1;
                 mCat.record->getNumStr(mrec.head->Snum);
@@ -304,6 +385,7 @@ int main(int argc, char *argv[])
 
 
     inFile.close();
+    bigFile.close();
     dxFile.close();
     mpcFile.close();
 
