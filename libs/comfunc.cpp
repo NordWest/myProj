@@ -2629,6 +2629,13 @@ void RotX(double *vect, double angr)
     delete [] v;
 }
 
+void Vmul3(double *vectRes, double *vect0, double *vect1)
+{
+    vectRes[0] = vect0[1]*vect1[2] - vect0[2]*vect1[1];
+    vectRes[1] = vect0[2]*vect1[0] - vect0[0]*vect1[2];
+    vectRes[2] = vect0[0]*vect1[2] - vect0[1]*vect1[0];
+}
+
 void sortX(double *x, double *dx, int num)
 {
     int i, j;

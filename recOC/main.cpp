@@ -27,9 +27,10 @@ int main(int argc, char *argv[])
     QString objDataStr;
     mpc mrec;
     double dT, m, n;
-    double dRa, dDec, normR;
+    double dRa, dDec, normR, norm_sA;
+    double T, mPrec, nPrec;
     double *s, *sA, *R, *sV;
-    myvector v0(3), v1(3), v2(3);
+    double *v0, *v1, *v2;
     /*v0 = new myvector(3);
     v1 = new myvector(3);
     v2 = new myvector(3);*/
@@ -37,6 +38,9 @@ int main(int argc, char *argv[])
     sA = new double[3];
     sV = new double[3];
     R = new double[3];
+    v0 = new double[3];
+    v1 = new double[3];
+    v2 = new double[3];
 
     procData miriadeProcData;
 
@@ -222,7 +226,7 @@ int main(int argc, char *argv[])
                 VE0[2] = resSL.at(7).toDouble();
                 break;
             }
-/*
+/
             if(useEPM)
             {
                 status = calc_EPM(GEOCENTR_NUM, centr_num, (int)time, time-(int)time, XE0, VE0);
@@ -235,12 +239,20 @@ int main(int argc, char *argv[])
             else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER, SK);
 */
 
+            T = (time - 2451545)/36525.0;
+            mPrec = 4612.4362*T;
+            nPrec = 2004.3109*T;
+
+            qDebug() << QString("T: %3\nm: %1\tn:%2\n").arg(mPrec).arg(nPrec).arg(T);
+
+
+
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 
 
             R[0] = X[0] - XE0[0];
-            R[0] = X[1] - XE0[1];
-            R[0] = X[2] - XE0[2];
+            R[1] = X[1] - XE0[1];
+            R[2] = X[2] - XE0[2];
             normR = norm(R);
             s[0] = R[0]/normR;
             s[1] = R[1]/normR;
@@ -250,25 +262,20 @@ int main(int argc, char *argv[])
             sV[1] = V[1] - VE0[1];
             sV[2] = V[2] - VE0[2];
 
+            Vmul3(v0, s, sV);
+            Vmul3(v1, s, v0);
 
 
-            v0.set(0, sV[0]);
-            v0.set(1, sV[1]);
-            v0.set(2, sV[2]);
+            sA[0] = s[0] + v1[0]*(1.0/CAU);
+            sA[1] = s[1] + v1[1]*(1.0/CAU);
+            sA[2] = s[2] + v1[2]*(1.0/CAU);
 
-            v1.set(0, s[0]);
-            v1.set(1, s[1]);
-            v1.set(2, s[2]);
-
-            v2 = Vmul(&v1, &Vmul(&v1, &v0));
-            //v2 = v2*(1.0/CAU);
-            qDebug() << QString("v2: %1 %2 %3").arg(v2.get(0)).arg(v2.get(1)).arg(v2.get(2));
-
-            sA[0] = v2.get(0)*(1.0/CAU) + s[0];
-            sA[1] = v2.get(1)*(1.0/CAU) + s[1];
-            sA[2] = v2.get(2)*(1.0/CAU) + s[2];
-
-
+            norm_sA = norm(sA);
+/*
+            sA[0] = sA[0]/norm_sA;
+            sA[1] = sA[1]/norm_sA;
+            sA[2] = sA[2]/norm_sA;
+*/
 
             outerArguments.clear();
 
@@ -348,8 +355,8 @@ int main(int argc, char *argv[])
                 //detRDnumGC(&ra, &de, X[0], X[1], X[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
                 rdsys(&ra, &de, sA[0], sA[1], sA[2]);
 
-                dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
-                dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
+                //dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
+                //dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
 
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;

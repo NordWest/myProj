@@ -590,44 +590,6 @@ int orbit::detRecOrb(double *ksi, double *eta, double t)
 
 int orbit::detRecEcl(double *x, double *y, double *z, double t)
 {
-//1-j sposob
-/*
-	double ksi, eta;
-        if(this->elem->isElips())
-	{
-		this->detRecOrb(&ksi, &eta, t);
-//		return 1;
-	}
-
-        if(this->elem->isPorabola())
-	{
-		this->detRecOrb(&ksi, &eta, t);
-
-//		return 2;
-	}
-
-	double px, py, pz, qx, qy, qz, rx, ry, rz;
-	
-	px = cos(this->elem->w)*cos(this->elem->Node) - sin(this->elem->w)*sin(this->elem->Node)*cos(this->elem->inc);
-	py = cos(this->elem->w)*sin(this->elem->Node) + sin(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc);
-	pz = sin(this->elem->w)*sin(this->elem->inc);
-
-	qx = -sin(this->elem->w)*cos(this->elem->Node) - cos(this->elem->w)*sin(this->elem->Node)*cos(this->elem->inc);
-	qy = -sin(this->elem->w)*sin(this->elem->Node) + cos(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc);
-	qz = cos(this->elem->w)*sin(this->elem->inc);
-
-	rx = sin(this->elem->inc)*sin(this->elem->Node);
-	ry = -sin(this->elem->inc)*cos(this->elem->Node);
-	rz= cos(this->elem->inc);
-
-	if((fabs(sqrt(px*px + py*py + pz*pz) - 1.0)>EPS)||(fabs(sqrt(qx*qx + qy*qy + qz*qz) - 1.0)>EPS)||(sqrt(px*qx + py*qy + pz*qz)>EPS)) return 1;
-
-	*x = px*ksi + qx*eta;
-	*y = py*ksi + qy*eta;
-	*z = pz*ksi + qz*eta;
-*/
-//2-j sposob
-
 	double r, v;
 	this->detPolarOrb(&r, &v, t);
 
@@ -642,7 +604,7 @@ int orbit::detRecEcl(double *x, double *y, double *z, double t)
 
 int orbit::detRecEkv(double *x, double *y, double *z, double t)
 {
-	double ksi, eta;
+/*	double ksi, eta;
 
 	if(this->detRecOrb(&ksi, &eta, t)) return 1;
 
@@ -665,6 +627,17 @@ int orbit::detRecEkv(double *x, double *y, double *z, double t)
 	*x = px*ksi + qx*eta;
 	*y = py*ksi + qy*eta;
 	*z = pz*ksi + qz*eta;
+*/
+    double *vect;
+    vect = new double[3];
+
+    detRecEcl(&vect[0], &vect[1], &vect[2], t);
+
+    RotX(vect, EKV);
+
+    *x = vect[0];
+    *y = vect[1];
+    *z = vect[2];
 
 	return 0;
 }

@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     QProcess outerProcess;
     QString sJD;
 
-    double dist, vel, jdUTC;
+    double dist, vel, jdUTC, jdTDB;
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
@@ -375,6 +375,7 @@ int main(int argc, char *argv[])
 
             TDB2UTC(time0, &jdUTC);
             sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+            UTC2TDB(time0, &jdTDB);
 
             outerArguments.clear();
 

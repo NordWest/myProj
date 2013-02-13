@@ -50,14 +50,15 @@
 #define SUN_MASS_KG 1.9891e+30
 #define SUN_MASS 1.0
 #define VE 2979256.9529966
-#define PI 3.141592653589
+#define PI 3.141592653589793238462
 #define ka 0.017202098955
 #define kaGRAD 0.98560767
 #define kaGRAD1 0.071014884
 #define kaSEC 3548.1876
 #define Xi ka*sqrt((double)MS)
-#define EKV 0.409092614174
+//#define EKV 0.409092614174
 //#define EKV 0.409092572
+#define EKV 0.409092804
 #define EPS 1.0e-8
 
 #define SUN_MAGNITUDE -26.8
@@ -185,9 +186,6 @@ int fakt(int n);
 int str2int(char *str);
 int int2str(char *str, int i);
 
-void RotX(double *targ, double *sour, double angr);
-void RotX(double *vect, double angr);
-
 int detRiseSet(double *tr, double *ts, double de, double fi);
 
 //Rotation against hour hand [XYZ]
@@ -253,6 +251,10 @@ double detRfromM(double M, double A, double Sdist);
 double VectAng(double *v1, double *v2);
 double Smul3(double *V1, double *V2);
 double norm(double *v);
+void RotX(double *targ, double *sour, double angr);
+void RotX(double *vect, double angr);
+void Vmul3(double *vectRes, double *vect0, double *vect1);
+
 
 void detABC(double *A, double *B, double *C, double R);
 
