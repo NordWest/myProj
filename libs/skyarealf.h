@@ -294,6 +294,8 @@ public:
     int init_time(double jDay);
     int set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max);
 
+    void det_res_list(resRecord *resRec, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype);
+
     int grade(resList &rList);
 /*
     int addIniList(iniList *iniadd, QString taskName);

@@ -249,11 +249,12 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 
-
             R[0] = X[0] - XE0[0];
             R[1] = X[1] - XE0[1];
             R[2] = X[2] - XE0[2];
+
             normR = norm(R);
+
             s[0] = R[0]/normR;
             s[1] = R[1]/normR;
             s[2] = R[2]/normR;
@@ -264,7 +265,6 @@ int main(int argc, char *argv[])
 
             Vmul3(v0, s, sV);
             Vmul3(v1, s, v0);
-
 
             sA[0] = s[0] + v1[0]*(1.0/CAU);
             sA[1] = s[1] + v1[1]*(1.0/CAU);
@@ -288,8 +288,8 @@ int main(int argc, char *argv[])
             else plaNum = planet_num(name.toAscii().data());
             if(plaNum!=-1) outerArguments << "-type=planet";
             else */
-            outerArguments << "-type=aster";
 
+            outerArguments << "-type=aster";
 
             outerArguments << QString("-observer=500");
             //outerArguments << QString("-observer=@sun");

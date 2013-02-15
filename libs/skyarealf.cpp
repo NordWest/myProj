@@ -700,25 +700,74 @@ int skyAreaLF::grade(resList &rList)
             switch(catR->catType)
             {
                 case 0:
-                if(this->obs_pos->place->detR(&x, &y, &z, this->obs_pos->otime, iR->name.toAscii().data(), 0, CENTER_SUN, SK_EKVATOR))
+
+                if(this->obs_pos->place->detState(&x, &y, &z, &vx, &vy, &vz, this->obs_pos->otime, iR->name.toAscii().data(), 0, CENTER_SUN, SK_EKVATOR))
                 {
     //				AfxMessageBox("c0");
                     continue;
                 }
 
-                                if(this->obs_pos->place->detR(&vx, &vy, &vz, this->obs_pos->otime, iR->name.toAscii().data(), 1, CENTER_SUN, SK_EKVATOR))
-                                {
-        //				AfxMessageBox("c0");
-                                        continue;
-                                }
 
-                                resRec->name = iR->name;
+                resRec->name = iR->name;
+                resRec->
                                 //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
                                 //resRec->num = planet_num(iR->name);
 
                                 //det_res_list(resRec, x, y, z, vx, vy, vz, &Sdist, &Edist, this->cat_list->record->cat_type);
                 break;
+                                case
             }
         }
     }
+}
+
+void skyAreaLF::det_res_list(resRecord *resRec, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype)
+{
+        double *s, *sA, *R, *sV;
+        double *v0, *v1, *v2;
+        s = new double[3];
+        sA = new double[3];
+        sV = new double[3];
+        R = new double[3];
+        v0 = new double[3];
+        v1 = new double[3];
+        v2 = new double[3];
+
+        R[0] = x - this->obs_pos->ox;
+        R[1] = y - this->obs_pos->oy;
+        R[2] = z - this->obs_pos->oz;
+
+        normR = norm(R);
+
+        s[0] = R[0]/normR;
+        s[1] = R[1]/normR;
+        s[2] = R[2]/normR;
+
+        sV[0] = V[0] - VE0[0];
+        sV[1] = V[1] - VE0[1];
+        sV[2] = V[2] - VE0[2];
+
+        Vmul3(v0, s, sV);
+        Vmul3(v1, s, v0);
+
+        sA[0] = s[0] + v1[0]*(1.0/CAU);
+        sA[1] = s[1] + v1[1]*(1.0/CAU);
+        sA[2] = s[2] + v1[2]*(1.0/CAU);
+
+        detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
+
+        resRec->ra = rad2grad(resRec->ra);
+        resRec->dec = rad2grad(resRec->dec);
+
+        detRDnumGC(&resRec->muRa, &resRec->muDe, vx, vy, vz, this->obs_pos->ovx, this->obs_pos->ovy, this->obs_pos->ovz, 0.0, 0.0, 0.0);
+
+        resRec->muRa = grad_to_mas(rad2grad(resRec->muRa))/1000.0/86400.0/cos(grad2rad(resRec->dec));
+        resRec->muDe = grad_to_mas(rad2grad(resRec->muDe))/1000.0/86400.0;
+
+        *Sdist = sqrt(x*x + y*y + z*z);
+        *Edist = sqrt((this->obs_pos->ox - x)*(this->obs_pos->ox - x) + (this->obs_pos->oy - y)*(this->obs_pos->oy - y) + (this->obs_pos->oz - z)*(this->obs_pos->oz - z));
+
+        if(ctype==1) resRec->magn = det_m(this->orb_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==3) resRec->magn = det_m(this->mpc_catalog->record->H, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
+        if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->num)-5.5, *Sdist, *Edist, 5.8, detPhase(this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, x, y, z));
 }

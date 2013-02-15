@@ -30,7 +30,7 @@ MainWindow::~MainWindow()
 void MainWindow::slotUpdateTable()
 {
     //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
-    double jDay, lam;
+    double jDay, lam, s;
     int yr, mth, day, hr, min, sec;
     lam = sa.obs_pos->obs->record->Long;
 
