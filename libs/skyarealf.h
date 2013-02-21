@@ -99,7 +99,8 @@ class resRecord : tRecord
 {
 public:
         //int noftask;
-        QString name, taskName, desc;
+        QString name;
+        QStringList tasks;
 
         double ra, dec, mu_ra, mu_dec, magn, exp;
 
@@ -132,7 +133,7 @@ class tlRecord : tRecord	//Task List record
 public:
 //	int noftask;	//number of task
 
-        double exp;			//experience of task
+        int exp;			//experience of task
         int Ntot;			//Total number of observation for one object
         double texc;		//exclusion of a object after successful observations
         double dRA;			//maximum distance from celestial meridian
@@ -293,8 +294,6 @@ public:
     int initVisualProp(double jDay);
     int init_time(double jDay);
     int set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max);
-
-    void det_res_list(resRecord *resRec, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype);
 
     int grade(resList &rList);
 /*
