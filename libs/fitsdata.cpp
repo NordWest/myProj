@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 1
+#define FD_LOG_LEVEL 0
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -8960,7 +8960,6 @@ int marksGrid::loadTanImg(QString fName, QString mSep, QString mCol)
                                 //if(FD_LOG_LEVEL) qDebug() << mVal.toDouble() << "\n";
 
                                 if(j==2) mks->mTanImg[j] = log(mVal.toDouble());
-                                //if(j==2) mks->mTanImg[j] = mVal.toDouble();
                                 else mks->mTanImg[j] = mVal.toDouble();
 
 			}
