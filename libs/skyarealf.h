@@ -51,6 +51,11 @@
 #include "orbcat.h"
 #endif
 
+#define DELE_CAT_TYPE 0
+#define ORB_CAT_TYPE 1
+#define LSPM_CAT_TYPE 2
+#define MPC_CAT_TYPE 3
+
 class tlRecord;
 class taskList;
 //class logRecord;
@@ -61,15 +66,17 @@ class catList;
 class resRecord;
 class resList;
 
+void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype, double H = 0.0);
+
 class iniRecord : tRecord
 {
 public:
         //int noftask;
         QString name;
         double exp;
-        int flagEvent;					//0 - DE/LE; 1 - numbered; 2 - rapid stars
-        double t0, t1;
-        QString desc;
+//        int flagEvent;					//0 - DE/LE; 1 - numbered; 2 - rapid stars
+//        double t0, t1;
+//        QString desc;
 
         iniRecord();
 
@@ -99,6 +106,7 @@ class resRecord : tRecord
 {
 public:
         //int noftask;
+        int number;
         QString name;
         QStringList tasks;
 
@@ -121,6 +129,8 @@ class resList : public listFile <resRecord>
 public:
     int addRec(resRecord &nRec);
     int addRec(resRecord* nRec);
+
+    int addTaskName(QString name, QString taskName);
 /*    void addIniList(resList newIniList);
     void updateIniList(iniList newIniList);
     int getRecName(resRecord* nRec, QString name);

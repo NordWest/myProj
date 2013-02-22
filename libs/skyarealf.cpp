@@ -200,23 +200,23 @@ iniRecord::iniRecord()
 {
     name = "";
     exp = 0.0;
-    flagEvent = 0;
-    t0 = 0;
-    t1 = 0;
-    desc = "";
+    //flagEvent = 0;
+    //t0 = 0;
+    //t1 = 0;
+    //desc = "";
 }
 
 int iniRecord::fromString(QString tStr)
 {
     QStringList strL;
     strL = tStr.split("|");
-    if(strL.size()!=3) return 1;
+    if(strL.size()!=2) return 1;
     name = strL.at(0).simplified();
     exp = strL.at(1).toDouble();
     //flagEvent = strL.at(2).toInt();
     //t0 = strL.at(3).toDouble();
     //t1 = strL.at(4).toDouble();
-    desc = strL.at(2);
+    //desc = strL.at(2);
 
     return 0;
 }
@@ -225,7 +225,7 @@ void iniRecord::toString(QString &tStr)
 {
     tStr.clear();
     //tStr.append(QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(exp, 12, 'e').arg(flagEvent).arg(t0, 14, 'f', 6).arg(t1, 14, 'f', 6).arg(desc));
-    tStr.append(QString("%1|%2|%3").arg(name, -16).arg(exp, 12, 'e').arg(desc));
+    tStr.append(QString("%1|%2|%3").arg(name, -16).arg(exp, 12, 'e'));
 }
 
 bool operator== ( const iniRecord& lhs, const iniRecord& rhs )
@@ -247,7 +247,7 @@ iniRecord& iniRecord::operator=(const iniRecord &rhs) {
       return *this;        // Yes, so skip assignment, and just return *this.
 
     //... // Deallocate, allocate new space, copy values...
-    this->desc = rhs.desc;
+    //this->desc = rhs.desc;
     this->exp = rhs.exp;
     this->name = rhs.name;
 //    this->t0 = rhs.t0;
@@ -345,17 +345,16 @@ int resRecord::fromString(QString tStr)
     QString tStr0;
     strL = tStr.split("|");
     if(strL.size()!=9) return 1;
-    name = strL.at(0);
-    tStr0 = strL.at(1);
-    tasks = tStr0.split(",");
+    number = strL.at(0).toInt();
+    name = strL.at(1);
     ra = strL.at(2).toDouble();
     dec = strL.at(3).toDouble();
     magn = strL.at(4).toDouble();
     mu_ra = strL.at(5).toDouble();
     mu_dec = strL.at(6).toDouble();
-    exp = strL.at(7).toDouble();
-
-
+    tStr0 = strL.at(7);
+    tasks = tStr0.split(",");
+    exp = strL.at(8).toDouble();
 
     return 0;
 }
@@ -363,7 +362,7 @@ int resRecord::fromString(QString tStr)
 void resRecord::toString(QString &tStr)
 {
     tStr.clear();
-    tStr.append(QString("%1|%2|%3|%4|%5").arg(name, 16).arg(tasks.join(",")).arg(ra, 14, 'f', 6).arg(dec, 14, 'f', 6).arg(magn, 5, 'f', 2).arg(mu_ra, 14, 'f', 6).arg(mu_dec, 14, 'f', 6).arg(exp, 10));
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(number, 8).arg(name, 16).arg(ra, 14, 'f', 6).arg(dec, 14, 'f', 6).arg(magn, 5, 'f', 2).arg(mu_ra, 14, 'f', 6).arg(mu_dec, 14, 'f', 6).arg(tasks.join(",")).arg(exp, 10));
 }
 
 
@@ -417,6 +416,22 @@ int resList::addRec(resRecord* nRec)
         if(*nRec==recList.at(i)) return 1;
     }
     append(*nRec);
+    return 0;
+}
+
+int resList::addTaskName(QString name, QString taskName)
+{
+    int i, sz, j, szj;
+    sz = recList.size();
+    for(i=0; i<sz; i++)
+    {
+        if(QString().compare(name, recList.at(i)->name)==0)
+        {
+            szj = recList.at(i)->tasks.size();
+            if(!recList.at(i)->tasks.contains(taskName)) recList.at(i)->tasks << taskName;
+            return 1;
+        }
+    }
     return 0;
 }
 
@@ -682,6 +697,12 @@ int skyAreaLF::grade(resList &rList)
     iniList *iL;
     iniRecord *iR;
     resRecord *resRec;
+    mpccat *mpc_catalog;
+    sscatFB *tsscat;
+    OrbCat *orb_catalog;
+    orbit orb_elem;
+
+    rList.clear();
 
     double x, y, z, vx, vy, vz, Sdist, Edist;
     int plaNum;
@@ -693,6 +714,26 @@ int skyAreaLF::grade(resList &rList)
     {
         tl = task_list.at(tn);
         catR = cat_list.getCatByName(tl->catName);
+
+
+        switch(catR->catType)
+        {
+        case ORB_CAT_TYPE:
+            orb_catalog = new OrbCat();
+            orb_catalog->is_buff = 1;
+            orb_catalog->init(catR->catFile.toAscii().data());
+            break;
+        case LSPM_CAT_TYPE:
+            tsscat = new sscatFB;
+//			this->lspm_catalog->init(str_cat);
+            tsscat->init(catR->catFile.toAscii().data());
+            break;
+        case 3:
+            mpc_catalog = new mpccat();
+            mpc_catalog->init(catR->catFile.toAscii().data());
+            break;
+        }
+
         tl->getIniList(iL);
         sz = iL->size();
 
@@ -700,33 +741,158 @@ int skyAreaLF::grade(resList &rList)
         {
             iR = iL->at(i);
 
+            if(rList.addTaskName(iR->name, tl->name)) continue;
 
 
             resRec = new resRecord;
 
             switch(catR->catType)
             {
-                case 0:
-                plaNum = planet_num(iR->name.toAscii().data());
-                if(this->obs_pos->place->detState(&x, &y, &z, &vx, &vy, &vz, this->obs_pos->otime, plaNum, CENTER_SUN, SK_EKVATOR))
+                case DELE_CAT_TYPE:
                 {
-    //				AfxMessageBox("c0");
-                    continue;
-                }
-
-                                if(this->obs_pos->place->detR(&vx, &vy, &vz, this->obs_pos->otime, iR->name.toAscii().data(), 1, CENTER_SUN, SK_EKVATOR))
-                                {
+                    plaNum = planet_num(iR->name.toAscii().data());
+                    if(this->obs_pos->place->detState(&x, &y, &z, &vx, &vy, &vz, this->obs_pos->otime, plaNum, CENTER_SUN, SK_EKVATOR))
+                    {
         //				AfxMessageBox("c0");
-                                        continue;
-                                }
+                        continue;
+                    }
 
-                                resRec->name = iR->name;
-                                //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
-                                //resRec->num = planet_num(iR->name);
 
-                                //det_res_list(resRec, x, y, z, vx, vy, vz, &Sdist, &Edist, this->cat_list->record->cat_type);
+                    resRec->number = plaNum;
+                    resRec->name = iR->name;
+                                    //sprintf(this->res_list->record->num, "%8d", planet_num(this->ini_list->record->name));
+                                    //resRec->num = planet_num(iR->name);
+
+                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType);
+                    resRec->exp = iR->exp;
+                    rList.addRec(resRec);
+                }
+                break;
+                case ORB_CAT_TYPE:
+                {
+                    if(orb_catalog->GetRecName(iR->name.toAscii().data())==-1)
+                    {
+                        qDebug() << QString("object %1 not found\n").arg(iR->name);
+                        continue;
+                    }
+
+                    orb_elem.get(orb_catalog);
+                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->otime);
+                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
+
+                    resRec->number = orb_catalog->record->number;
+                    resRec->name = QString(orb_catalog->record->name);
+
+                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, orb_catalog->record->H);
+                    resRec->exp = iR->exp;
+                    rList.addRec(resRec);
+
+                }
+                break;
+                case LSPM_CAT_TYPE:
+                {
+                    if(tsscat->GetName(iR->name.toAscii().data())) continue;
+    //				if(tsscat->GetRecNameLSPM(this->ini_list->record->name)) continue;
+
+                    resRec->ra = tsscat->record->RAdeg + mas_to_grad(1000*tsscat->record->pmRA/cos(grad2rad(tsscat->record->DEdeg))*(getYearFromMJD(jd2mjd(this->obs_pos->otime))-2000));//taking proper motion into account
+                    resRec->dec = tsscat->record->DEdeg + mas_to_grad(1000*tsscat->record->pmDE*(getYearFromMJD(jd2mjd(this->obs_pos->otime))-2000));
+
+                    resRec->magn = tsscat->record->BJmag;
+
+                    resRec->mu_ra = 0.0;
+                    resRec->mu_dec = 0.0;
+
+                    resRec->name = QString(iR->name);
+                    resRec->number = 0;
+                    rList.addRec(resRec);
+                }
+                break;
+                case MPC_CAT_TYPE:
+                {
+                    if(mpc_catalog->GetRecName(iR->name.toAscii().data()))
+                    {
+//				AfxMessageBox("c1");
+                        continue;
+                    }
+                    orb_elem.get(mpc_catalog);
+                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->otime);
+                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
+
+                    resRec->number = orb_catalog->record->number;
+                    resRec->name = QString(orb_catalog->record->name);
+
+                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, orb_catalog->record->H);
+                    resRec->exp = iR->exp;
+                    rList.addRec(resRec);
+
+                }
                 break;
             }
         }
     }
+}
+
+
+void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype, double H)
+{
+    double normR, norm_sA;
+    double *s, *sA, *R, *sV;
+    double *v0, *v1, *v2;
+
+    s = new double[3];
+    sA = new double[3];
+    sV = new double[3];
+    R = new double[3];
+    v0 = new double[3];
+    v1 = new double[3];
+    v2 = new double[3];
+
+    R[0] = x - obs_pos->ox;
+    R[1] = y - obs_pos->oy;
+    R[2] = z - obs_pos->oz;
+
+    normR = norm(R);
+
+    s[0] = R[0]/normR;
+    s[1] = R[1]/normR;
+    s[2] = R[2]/normR;
+
+    sV[0] = vx - obs_pos->ovx;
+    sV[1] = vy - obs_pos->ovy;
+    sV[2] = vz - obs_pos->ovz;
+
+    Vmul3(v0, s, sV);
+    Vmul3(v1, s, v0);
+
+    sA[0] = s[0] + v1[0]*(1.0/CAU);
+    sA[1] = s[1] + v1[1]*(1.0/CAU);
+    sA[2] = s[2] + v1[2]*(1.0/CAU);
+
+    norm_sA = norm(sA);
+
+    rdsys(&resRec->ra, &resRec->dec, sA[0], sA[1], sA[2]);
+        //detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
+
+        resRec->ra = rad2grad(resRec->ra);
+        resRec->dec = rad2grad(resRec->dec);
+
+    detRDnumGC(&resRec->mu_ra, &resRec->mu_dec, vx, vy, vz, obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
+
+    resRec->mu_ra = grad_to_mas(rad2grad(resRec->mu_ra))/1000.0/86400.0/cos(grad2rad(resRec->dec));
+    resRec->mu_dec = grad_to_mas(rad2grad(resRec->mu_dec))/1000.0/86400.0;
+
+    *Sdist = sqrt(x*x + y*y + z*z);
+    *Edist = sqrt((obs_pos->ox - x)*(obs_pos->ox - x) + (obs_pos->oy - y)*(obs_pos->oy - y) + (obs_pos->oz - z)*(obs_pos->oz - z));
+
+    if(ctype==1) resRec->magn = det_m(H, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, x, y, z));
+    if(ctype==3) resRec->magn = det_m(H, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, x, y, z));
+    if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->number)-5.5, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, x, y, z));
+
+    delete [] s;
+    delete [] sA;
+    delete [] sV;
+    delete [] R;
+    delete [] v0;
+    delete [] v1;
+    delete [] v2;
 }

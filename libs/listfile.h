@@ -132,6 +132,11 @@ public:
         return 0;
     }
 
+    void clear()
+    {
+        recList.clear();
+    }
+
 /*
     int save();
     int saveAs(QString fname);
