@@ -6,7 +6,7 @@ tlRecord::tlRecord()
     this->exp = 1.0;
     this->name = "";
     this->catName = "";
-    this->dirPath = "";
+    //this->dirPath = "";
     this->dRA = 180.0;
     this->flag_active = 1;
     this->NinN = 0;
@@ -61,7 +61,7 @@ tlRecord& tlRecord::operator=(const tlRecord &rhs) {
     this->exp = rhs.exp;
     this->name = rhs.name;
     this->catName = rhs.catName;
-    this->dirPath = rhs.dirPath;
+    //this->dirPath = rhs.dirPath;
     this->dRA = rhs.dRA;
     this->flag_active = rhs.flag_active;
     this->NinN = rhs.NinN;
@@ -74,18 +74,21 @@ tlRecord& tlRecord::operator=(const tlRecord &rhs) {
 
 void tlRecord::getIniName(QString &iniName)
 {
+    QString dirPath = QString("./%1").arg(name);
     QDir tDir(dirPath);
     iniName = QString("%1/ini.lst").arg(tDir.absolutePath());
 }
 
 void tlRecord::getCatName(QString &catName)
 {
+    QString dirPath = QString("./%1").arg(name);
     QDir tDir(dirPath);
     catName = QString("%1ini.cat").arg(tDir.absolutePath());
 }
 
 int tlRecord::getIniList(iniList *iList)
 {
+    QString dirPath = QString("./%1").arg(name);
     QDir taskDir;
     taskDir.setPath(dirPath);
     if(!taskDir.exists()) QDir().mkpath(dirPath);
@@ -139,7 +142,8 @@ int taskList::addRec(tlRecord& nRec)
     }
     append(nRec);
 
-    QDir().mkdir(nRec.dirPath);
+    QString dirPath = QString("./%1").arg(nRec.name);
+    QDir().mkdir(dirPath);
     return 0;
 }
 
@@ -225,7 +229,7 @@ void iniRecord::toString(QString &tStr)
 {
     tStr.clear();
     //tStr.append(QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(exp, 12, 'e').arg(flagEvent).arg(t0, 14, 'f', 6).arg(t1, 14, 'f', 6).arg(desc));
-    tStr.append(QString("%1|%2|%3").arg(name, -16).arg(exp, 12, 'e'));
+    tStr.append(QString("%1|%2").arg(name, -16).arg(exp, 12, 'e'));
 }
 
 bool operator== ( const iniRecord& lhs, const iniRecord& rhs )
@@ -347,14 +351,15 @@ int resRecord::fromString(QString tStr)
     if(strL.size()!=9) return 1;
     number = strL.at(0).toInt();
     name = strL.at(1);
-    ra = strL.at(2).toDouble();
-    dec = strL.at(3).toDouble();
+    ra = mas_to_grad(hms_to_mas(strL.at(2), " "));
+    dec = mas_to_grad(damas_to_mas(strL.at(3), " "));
     magn = strL.at(4).toDouble();
     mu_ra = strL.at(5).toDouble();
     mu_dec = strL.at(6).toDouble();
-    tStr0 = strL.at(7);
+    exp = strL.at(7).toDouble();
+    tStr0 = strL.at(8);
     tasks = tStr0.split(",");
-    exp = strL.at(8).toDouble();
+
 
     return 0;
 }
@@ -362,7 +367,7 @@ int resRecord::fromString(QString tStr)
 void resRecord::toString(QString &tStr)
 {
     tStr.clear();
-    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(number, 8).arg(name, 16).arg(ra, 14, 'f', 6).arg(dec, 14, 'f', 6).arg(magn, 5, 'f', 2).arg(mu_ra, 14, 'f', 6).arg(mu_dec, 14, 'f', 6).arg(tasks.join(",")).arg(exp, 10));
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(number, 8).arg(name, 16).arg(mas_to_hms(grad_to_mas(ra), " ", 3)).arg(mas_to_damas(grad_to_mas(dec), " ", 2)).arg(magn, 5, 'f', 2).arg(mu_ra, 14, 'f', 6).arg(mu_dec, 14, 'f', 6).arg(exp, 10).arg(tasks.join(",")));
 }
 
 
@@ -382,6 +387,7 @@ resRecord& resRecord::operator=(const resRecord &rhs) {
       return *this;        // Yes, so skip assignment, and just return *this.
 
     //... // Deallocate, allocate new space, copy values...
+    number = rhs.number;
     name = rhs.name;
     this->tasks = rhs.tasks;
     //this->desc = rhs.desc;
@@ -435,6 +441,72 @@ int resList::addTaskName(QString name, QString taskName)
     return 0;
 }
 
+int resList::saveAs(QString tfName)
+{
+    fileName = tfName;
+    return(save());
+}
+
+int resList::save()
+{
+    int i, sz;
+    QString tstr;
+    sz = recList.size();
+
+    QFile resFile(fileName);
+    if(!resFile.open(QFile::WriteOnly | QFile::Truncate)) return 1;
+    QTextStream resStm(&resFile);
+
+    resStm << QString("\%%1\n").arg(jdTime, 15, 'f', 8);
+
+    for(i=0; i<sz; i++)
+    {
+        recList.at(i)->toString(tstr);
+        resStm << tstr << "\n";
+    }
+
+    resFile.close();
+}
+
+int resList::init(QString fname)
+{
+    fileName = fname;
+    QFile iniFile(fileName);
+    if(!iniFile.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "init ini.lst error\n";
+        return 1;
+    }
+    QTextStream iniStm(&iniFile);
+
+    QString tStr;
+
+    recList.clear();
+    resRecord* tRec;
+    tRec = new resRecord;
+
+    while(!iniStm.atEnd())
+    {
+        tStr = iniStm.readLine();
+
+        if(tStr.indexOf("\%")==0)
+        {
+            jdTime = tStr.mid(1, -1).toDouble();
+            continue;
+        }
+
+        if(tRec->fromString(tStr)) continue;
+        recList << tRec;
+        tRec = new resRecord;
+    }
+
+    iniFile.close();
+
+    delete tRec;
+
+    return 0;
+};
+
 ////////////////////////////////////////////////
 
 int catRecord::fromString(QString tStr)
@@ -482,8 +554,9 @@ QString catRecord::getCatTypeName()
 {
     QStringList catTypes;
     catTypes << "dele";
-    catTypes << "mpccat";
+    catTypes << "orbcat";
     catTypes << "lspm";
+    catTypes << "mpccat";
     return(catTypes[catType]);
 }
 
@@ -556,12 +629,14 @@ saParams::~saParams()
 
 skyAreaLF::skyAreaLF()
 {
+    obs_pos = new observ();
 }
 
 int skyAreaLF::init(QString obsCat, QString deleCat, QString insDir)
 {
     obs_pos->init(obsCat.toAscii().data(), deleCat.toAscii().data());
     initInstallDir(insDir);
+
 
 
 
@@ -694,7 +769,7 @@ int skyAreaLF::grade(resList &rList)
     int i, tn, sz;
     tlRecord *tl;
     catRecord *catR;
-    iniList *iL;
+    iniList *iL = new iniList;
     iniRecord *iR;
     resRecord *resRec;
     mpccat *mpc_catalog;
@@ -703,6 +778,7 @@ int skyAreaLF::grade(resList &rList)
     orbit orb_elem;
 
     rList.clear();
+    rList.jdTime = this->obs_pos->otime;
 
     double x, y, z, vx, vy, vz, Sdist, Edist;
     int plaNum;
@@ -728,7 +804,7 @@ int skyAreaLF::grade(resList &rList)
 //			this->lspm_catalog->init(str_cat);
             tsscat->init(catR->catFile.toAscii().data());
             break;
-        case 3:
+        case MPC_CAT_TYPE:
             mpc_catalog = new mpccat();
             mpc_catalog->init(catR->catFile.toAscii().data());
             break;
@@ -764,8 +840,9 @@ int skyAreaLF::grade(resList &rList)
                                     //resRec->num = planet_num(iR->name);
 
                     det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType);
-                    resRec->exp = iR->exp;
-                    rList.addRec(resRec);
+
+
+
                 }
                 break;
                 case ORB_CAT_TYPE:
@@ -784,8 +861,6 @@ int skyAreaLF::grade(resList &rList)
                     resRec->name = QString(orb_catalog->record->name);
 
                     det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, orb_catalog->record->H);
-                    resRec->exp = iR->exp;
-                    rList.addRec(resRec);
 
                 }
                 break;
@@ -804,7 +879,7 @@ int skyAreaLF::grade(resList &rList)
 
                     resRec->name = QString(iR->name);
                     resRec->number = 0;
-                    rList.addRec(resRec);
+
                 }
                 break;
                 case MPC_CAT_TYPE:
@@ -818,16 +893,17 @@ int skyAreaLF::grade(resList &rList)
                     orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->otime);
                     orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
 
-                    resRec->number = orb_catalog->record->number;
-                    resRec->name = QString(orb_catalog->record->name);
+                    resRec->number = mpc_catalog->record->getNum();
+                    resRec->name = QString(mpc_catalog->record->name).simplified();
 
-                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, orb_catalog->record->H);
-                    resRec->exp = iR->exp;
-                    rList.addRec(resRec);
+                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
 
                 }
                 break;
             }
+            resRec->exp = iR->exp;
+            resRec->tasks << tl->name;
+            rList.addRec(resRec);
         }
     }
 }

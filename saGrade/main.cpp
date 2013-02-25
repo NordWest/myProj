@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     QString deleCatName = sett.value("general/deleCatName", "dele.cat").toString();
     QString obsCatName = sett.value("general/obsCatName", "Obs.txt").toString();
     QString installDir = sett.value("general/installDir", "./").toString();
+    QString obsCode = sett.value("general/obsCode", "084").toString();
 
 
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
     //sa = new SkyArea;
 
     sa.init(obsCatName, deleCatName, installDir);
-
+    sa.obs_pos->set_obs_parpam(GEOCENTR_NUM, CENTER_BARY, SK_EKVATOR, obsCode.toAscii().data());
 
     QDateTime dtCurr;
     dtCurr = QDateTime().currentDateTime();

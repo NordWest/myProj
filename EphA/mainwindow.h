@@ -10,7 +10,7 @@
 #include <QTableWidget>
 
 
-#include "./../libs/skyarea.h"
+#include "./../libs/skyarealf.h"
 
 namespace Ui {
     class MainWindow;
@@ -33,15 +33,19 @@ public:
     QString jdTimeStr;
     QTime sysTime;
 
-    SkyArea sa;
+    skyAreaLF sa;
+    resList rFile;
 
 private slots:
     void slotUpdateTable();
     void slotStatBarUpdate();
 
+    void slotOpenResFileWindow();
     void slotViewSettWindow();
     void slotViewNextObj();
     void slotViewPrevObj();
+    void slotClearTable();
+
 
 private:
     Ui::MainWindow *ui;
@@ -55,8 +59,10 @@ private:
     QLineEdit *starTimeEdit;
     QLineEdit *jdTimeEdit;
     QTableWidget *mainTable;
+    QTreeWidget *mainTree;
 
     QMenu *fileMenu;
+    QAction *openResAct;
     QAction *viewSettAct;
     QMenu *viewMenu;
     QAction *viewNextAct;

@@ -20,11 +20,15 @@ addMpcDlg::~addMpcDlg()
 
 void addMpcDlg::on_searchBtn_clicked()
 {
-    cat->GetRecName(nameLE->text().toAscii().data());
-    mpcrec *nRec = new mpcrec;
-    cat->record->copyTo(nRec);
-    mpcList << nRec;
+    mpcList.clear();
+    if(!cat->GetRecName(nameLE->text().toAscii().data()))
+    {
+        mpcrec *nRec = new mpcrec;
+        cat->record->copyTo(nRec);
+        mpcList << nRec;
+    }
     slotUpdateObjTable();
+
 }
 
 void addMpcDlg::slotUpdateObjTable()

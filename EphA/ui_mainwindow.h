@@ -22,6 +22,7 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QTreeWidget>
 #include <QtGui/QWidget>
+#include <QtGui/QTableWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -29,7 +30,8 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralWidget;
-    QTreeWidget *treeWidget;
+    //QTreeWidget *treeWidget;
+    QTableWidget *tableWidget;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -43,6 +45,16 @@ public:
         MainWindow->resize(670, 477);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
+        tableWidget = new QTableWidget(centralWidget);
+
+        tableWidget->setObjectName(QString::fromUtf8("tableWidget"));
+        tableWidget->setGeometry(QRect(0, 0, 671, 361));
+        QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+        sizePolicy.setHorizontalStretch(2);
+        sizePolicy.setVerticalStretch(1);
+        sizePolicy.setHeightForWidth(tableWidget->sizePolicy().hasHeightForWidth());
+        tableWidget->setSizePolicy(sizePolicy);
+        /*
         treeWidget = new QTreeWidget(centralWidget);
         QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
         __qtreewidgetitem->setText(0, QString::fromUtf8("1"));
@@ -53,7 +65,7 @@ public:
         sizePolicy.setHorizontalStretch(2);
         sizePolicy.setVerticalStretch(1);
         sizePolicy.setHeightForWidth(treeWidget->sizePolicy().hasHeightForWidth());
-        treeWidget->setSizePolicy(sizePolicy);
+        treeWidget->setSizePolicy(sizePolicy);*/
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));

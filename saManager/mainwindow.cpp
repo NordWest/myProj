@@ -125,8 +125,8 @@ void MainWindow::setupWidgets()
     vhLabelsO << QString(tr("Name"));
     vhLabelsO << QString(tr("Exp"));
     vhLabelsO << QString(tr("Nobs"));
-    vhLabelsO << QString(tr("Desc"));
-    objTable->setColumnCount(4);
+//    vhLabelsO << QString(tr("Desc"));
+    objTable->setColumnCount(3);
     //objTable->setColumnWidth(0, 20);
     //taskView->setColumnWidth(2, 300);
     objTable->setHorizontalHeaderLabels(vhLabelsO);
@@ -229,7 +229,7 @@ void MainWindow::slotAddNameListObj()
             while(!inStm.atEnd())
             {
                 tStr = inStm.readLine();
-                iRec->name = tStr;
+                iRec->name = tStr.section(" ", 0, 0);
                 iRec->exp = 10;
                 iObj->addRec(iRec);
             }
@@ -359,7 +359,11 @@ void MainWindow::slotAddFromCatObj()
             {
                 addMpcDlg addMPC;
                 addMPC.cat = new mpccat;
-                addMPC.cat->init(catR->catFile.toAscii().data());
+                if(addMPC.cat->init(catR->catFile.toAscii().data()))
+                {
+                    QMessageBox::warning(0, "has no cat", "has no cat");
+                    break;
+                }
 
 
                 if(addMPC.exec()==QDialog::Accepted)
@@ -405,7 +409,7 @@ void MainWindow::slotRemSelectedObj()
     QList <QTableWidgetItem*> itemList;
     itemList = taskTable->selectedItems();
     sz = objTable->selectionModel()->selectedRows().count();
-    for(i=0;i<sz;i++)
+    for(i=sz-1;i>=0;i--)
     {
         objName = objTable->item(objTable->selectionModel()->selectedRows().at(i).row(), 0)->text().simplified();
         sArea.removeObj(taskName, objName);
@@ -452,9 +456,9 @@ void MainWindow::slotUpdateObjList()
                 newItem->setTextAlignment(Qt::AlignLeft);
                 objTable->setItem(j, 1, newItem);
 
-                newItem = new QTableWidgetItem(QString("%1").arg(taskR->iList.at(j)->desc));
-                newItem->setTextAlignment(Qt::AlignLeft);
-                objTable->setItem(j, 3, newItem);
+                //newItem = new QTableWidgetItem(QString("%1").arg(taskR->iList.at(j)->desc));
+                //newItem->setTextAlignment(Qt::AlignLeft);
+                //objTable->setItem(j, 3, newItem);
             }
         //}
 
@@ -564,7 +568,7 @@ void MainWindow::slotAddTask()
         tlRec.dRA = addtDlg.meriSlider->value();
         tlRec.texc = addtDlg.tExc->value();
         tlRec.desc = addtDlg.descText->text();
-        tlRec.dirPath = QString("%1/%2").arg(workPath).arg(tlRec.name);
+        //tlRec.dirPath = QString("%1/%2").arg(workPath).arg(tlRec.name);
         sArea.task_list.addRec(tlRec);
         slotUpdateTaskList();
     }

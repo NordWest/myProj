@@ -127,10 +127,18 @@ bool operator==( const resRecord& lhs, const resRecord* rhs );
 class resList : public listFile <resRecord>
 {
 public:
+    double jdTime;
     int addRec(resRecord &nRec);
     int addRec(resRecord* nRec);
 
     int addTaskName(QString name, QString taskName);
+
+    int saveAs(QString tfName);
+    int save();
+    int init(QString fname);
+
+
+
 /*    void addIniList(resList newIniList);
     void updateIniList(iniList newIniList);
     int getRecName(resRecord* nRec, QString name);
@@ -143,35 +151,35 @@ class tlRecord : tRecord	//Task List record
 public:
 //	int noftask;	//number of task
 
-        int exp;			//experience of task
-        int Ntot;			//Total number of observation for one object
-        double texc;		//exclusion of a object after successful observations
-        double dRA;			//maximum distance from celestial meridian
-        int NinN;			//number obsrvations during one night
-        int flag_active;	//flag for activ task
-        QString name, desc, dirPath, catName;
+    QString name, desc, catName;
 
+    double texc;		//exclusion of a object after successful observations
+    double dRA;			//maximum distance from celestial meridian
+    int NinN;			//number obsrvations during one night
+    int Ntot;			//Total number of observation for one object
+    int flag_active;	//flag for activ task
+    int exp;			//experience of task
 //	char *tail;
-        iniList iList;
+    iniList iList;
 
 
-        tlRecord();
-        int fromString(QString tStr);
-        void toString(QString &tStr);
-        tlRecord& operator=(const tlRecord &rhs);
+    tlRecord();
+    int fromString(QString tStr);
+    void toString(QString &tStr);
+    tlRecord& operator=(const tlRecord &rhs);
 //        tlRecord& operator=(const TLRecord &rhs);
-        void initIList();
+    void initIList();
 
-        void getIniName(QString &iniName);
-        void getCatName(QString &catName);
-     //   char* get_cat_name();
-     //   char* get_task_name();
+    void getIniName(QString &iniName);
+    void getCatName(QString &catName);
+ //   char* get_cat_name();
+ //   char* get_task_name();
 
-        int getIniList(iniList *iList);
+    int getIniList(iniList *iList);
 
-        int updateIniList(iniList iList);
-    //    int
-        int removeObj(QString name);
+    int updateIniList(iniList iList);
+//    int
+    int removeObj(QString name);
 };
 
 

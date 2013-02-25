@@ -13,8 +13,9 @@ addCatDlg::addCatDlg(QWidget *parent) :
     catType = qFindChild<QComboBox *>(this, "catType");
 
     catType->addItem("dele");
-    catType->addItem("mpccat");
+    catType->addItem("orbcat");
     catType->addItem("sscat");
+    catType->addItem("mpccat");
 }
 
 addCatDlg::~addCatDlg()

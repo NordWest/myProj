@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-TARGET = EphA
+TARGET = ./../../lab/saTest/EphA
 TEMPLATE = app
 
 CONFIG += console \
@@ -19,7 +19,7 @@ SOURCES += main.cpp\
     ephthread.cpp \
     ../libs/sscatFB.cpp \
     ../libs/sscat.cpp \
-    ../libs/skyarea.cpp \
+    ../libs/skyarealf.cpp \
     ../libs/rec.cpp \
     ../libs/orbit.cpp \
     ../libs/orbcat.cpp \
@@ -34,13 +34,15 @@ SOURCES += main.cpp\
     ../libs/commetorbcat.cpp \
     ../libs/comfunc.cpp \
 #    ../libs/astro.cpp
-    settwindow.cpp
+    settwindow.cpp \
+    ../libs/listfile.cpp
+
 
 HEADERS  += mainwindow.h \
     ephthread.h \
     ../libs/sscatFB.h \
     ../libs/sscat.h \
-    ../libs/skyarea.h \
+    ../libs/skyarealf.h \
     ../libs/rec.h \
     ../libs/orbit.h \
     ../libs/orbcat.h \
@@ -56,7 +58,9 @@ HEADERS  += mainwindow.h \
     ../libs/comfunc.h \
     ../libs/astro.h \
     ../libs/mb.h \
-    settwindow.h
+    settwindow.h \
+    ../libs/listfile.h
+
 
 FORMS    += mainwindow.ui \
     settwindow.ui

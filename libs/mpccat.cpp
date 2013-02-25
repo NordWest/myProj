@@ -51,28 +51,28 @@ void mpcrec::copyTo(mpcrec *nrec)
 	nrec->w = this->w;
 	nrec->Node = this->Node;
 	nrec->inc = this->inc;
-	nrec->ecc = ecc;
-	nrec->n = n;
-	nrec->a = a;
-	nrec->U = U;
+    nrec->ecc = this->ecc;
+    nrec->n = this->n;
+    nrec->a = this->a;
+    nrec->U = this->U;
 
 	strncpy(nrec->ref, this->ref, 10);
 	strcpy(&nrec->ref[10], "\0");
 
-	nrec->obsnum = obsnum;
-	nrec->oppnum = oppnum;
+    nrec->obsnum = this->obsnum;
+    nrec->oppnum = this->oppnum;
 	strncpy(nrec->flag_multi, this->flag_multi, 1);
 	strcpy(&nrec->flag_multi[1], "\0");
 	strncpy(nrec->days, this->days, 4);
 	strcpy(&nrec->days[4], "\0");
 
-	nrec->obs_fst = obs_fst;
-	nrec->obs_lst = obs_lst;
+    nrec->obs_fst = this->obs_fst;
+    nrec->obs_lst = this->obs_lst;
 
-	nrec->arclen = arclen;
+    nrec->arclen = this->arclen;
 //	nrec->days = days;
 
-	nrec->rms = rms;
+    nrec->rms = this->rms;
 
 	strncpy(nrec->indCoarse, this->indCoarse, 3);
 	strcpy(&nrec->indCoarse[3], "\0");

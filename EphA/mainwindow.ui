@@ -22,37 +22,86 @@
     <height>370</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <family>Ubuntu</family>
+    <stylestrategy>PreferAntialias</stylestrategy>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QTreeWidget" name="treeWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <widget class="QWidget" name="verticalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>0</y>
-      <width>611</width>
-      <height>300</height>
+      <width>591</width>
+      <height>321</height>
      </rect>
     </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-      <horstretch>2</horstretch>
-      <verstretch>1</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>610</width>
-      <height>300</height>
-     </size>
-    </property>
-    <column>
-     <property name="text">
-      <string notr="true">1</string>
-     </property>
-    </column>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QTableWidget" name="tableWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>RA</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>DEC</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Magn</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>mu_ra</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>mu_dec</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Tasks</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Exp</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
    </widget>
+   <zorder>verticalLayoutWidget</zorder>
+   <zorder>tableWidget</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -60,7 +109,7 @@
      <x>0</x>
      <y>0</y>
      <width>620</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
