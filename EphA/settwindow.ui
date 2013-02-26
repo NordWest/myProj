@@ -13,14 +13,12 @@
   <property name="windowTitle">
    <string>TabWidget</string>
   </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
   <widget class="QWidget" name="general">
    <attribute name="title">
     <string>Tab 1</string>
-   </attribute>
-  </widget>
-  <widget class="QWidget" name="list">
-   <attribute name="title">
-    <string>Tab 2</string>
    </attribute>
   </widget>
  </widget>

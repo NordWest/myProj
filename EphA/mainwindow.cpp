@@ -8,19 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
-    mainTable->setColumnCount(8);
-    QStringList vhLabelsT;
-    vhLabelsT << QString(tr("Name"));
-    vhLabelsT << QString(tr("RA"));
-    vhLabelsT << QString(tr("DEC"));
-    vhLabelsT << QString(tr("Magn"));
-    vhLabelsT << QString(tr("mu_ra"));
-    vhLabelsT << QString(tr("mu_dec"));
-    vhLabelsT << QString(tr("Exp"));
-    vhLabelsT << QString(tr("Tasks"));
-    mainTable->setHorizontalHeaderLabels(vhLabelsT);
-
     setWindowTitle("EphA");
     timeStr = "";
 
@@ -30,9 +17,26 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    ephthread ephTabUpdater(this);
  //   ephTabUpdater.start();
-    updater = new QTimer(this);
-    connect(updater, SIGNAL(timeout()), this, SLOT(slotUpdateTable()));
-    updater->start(1000);
+
+
+
+    timeUpd = new QTimer(this);
+    connect(timeUpd, SIGNAL(timeout()), this, SLOT(slotUpdateTime()));
+    tabUpd = new QTimer(this);
+    connect(tabUpd, SIGNAL(timeout()), this, SLOT(slotUpdateTable()));
+
+    updaterEnabled = 0;
+    expTime = 1000*10;
+    ui->expProgBar->setRange(0, 100);
+
+    timeUpd->setSingleShot(0);
+    slotUpdateTime();
+
+    tabEla = new QElapsedTimer;
+
+    rFile.init("./res.lst");
+    slotInitResTable();
+    slotUpdateTable();
 }
 
 MainWindow::~MainWindow()
@@ -77,18 +81,37 @@ void MainWindow::setWidgets()
 //    mainTree->setColumnCount();
 
 
+    mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
+    mainTable->setColumnCount(8);
+    QStringList vhLabelsT;
+    vhLabelsT << QString(tr("Name"));
+    vhLabelsT << QString(tr("RA"));
+    vhLabelsT << QString(tr("DEC"));
+    vhLabelsT << QString(tr("Magn"));
+    vhLabelsT << QString(tr("mu_ra"));
+    vhLabelsT << QString(tr("mu_dec"));
+    vhLabelsT << QString(tr("Exp"));
+    vhLabelsT << QString(tr("Tasks"));
+    mainTable->setHorizontalHeaderLabels(vhLabelsT);
+    mainTable->setColumnWidth(0, 250);
+    mainTable->setColumnWidth(1, 200);
+    mainTable->setColumnWidth(2, 200);
+
     sysTimeEdit = new QLineEdit(this);
     sysTimeEdit->setMaximumWidth(100);
+    sysTimeEdit->setReadOnly(1);
     statusBar()->addWidget(sysTimeEdit);
 
     jdTimeEdit = new QLineEdit(this);
-    jdTimeEdit->setMaximumWidth(400);
+    jdTimeEdit->setMaximumWidth(500);
+    jdTimeEdit->setReadOnly(1);
     statusBar()->addWidget(jdTimeEdit);
-
+/*
     starTimeEdit = new QLineEdit(this);
     starTimeEdit->setMaximumWidth(100);
+    starTimeEdit->setReadOnly(1);
     statusBar()->addWidget(starTimeEdit);
-
+*/
     mainToolBar = qFindChild<QToolBar*>(this, "mainToolBar");
 
     prevButton = new QPushButton(tr("prev"));
@@ -98,6 +121,14 @@ void MainWindow::setWidgets()
     nextButton = new QPushButton(tr("next"));
     mainToolBar->insertWidget(viewNextAct, nextButton);
     connect(nextButton, SIGNAL(clicked()), this, SLOT(slotViewNextObj()));
+
+    startButton = new QPushButton(tr("start"));
+    mainToolBar->insertWidget(viewStartAct, startButton);
+    connect(startButton, SIGNAL(clicked()), this, SLOT(slotStartUpdater()));
+
+    stopButton = new QPushButton(tr("stop"));
+    mainToolBar->insertWidget(viewStopAct, stopButton);
+    connect(stopButton, SIGNAL(clicked()), this, SLOT(slotStopUpdater()));
 }
 
 void MainWindow::slotOpenResFileWindow()
@@ -109,6 +140,11 @@ void MainWindow::slotOpenResFileWindow()
                                     "lst (*.lst)");
     rFile.init(resFileName);
 
+
+}
+
+void MainWindow::slotInitResTable()
+{
     int i, sz;
     QTableWidgetItem *newItem;
     sz = rFile.size();
@@ -174,10 +210,10 @@ void MainWindow::slotViewPrevObj()
 
 }
 
-void MainWindow::slotUpdateTable()
+void MainWindow::slotUpdateTime()
 {
     //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
-    double jDay, lam, s;
+    //double jDay, lam, s;
     int yr, mth, day, hr, min, sec;
     lam = sa.obs_pos->obs->record->Long;
 
@@ -197,6 +233,21 @@ void MainWindow::slotUpdateTable()
     UTC2s(jDay, lam, &s);
     starTimeStr = getStrFromS(s, ":", 0);
 
+    slotStatBarUpdate();
+
+    if(updaterEnabled)
+    {
+        qDebug() << QString("%1:%2\n").arg(tabEla->elapsed()).arg(expTime);
+        ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
+    }
+
+    timeUpd->start(1000);
+}
+
+void MainWindow::slotUpdateTable()
+{
+    //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
+//    double jDay, lam, s;
 
     int i;
     int sz = rFile.recList.size();
@@ -217,9 +268,13 @@ void MainWindow::slotUpdateTable()
     }
 
 
+    if(updaterEnabled)
+    {
+        tabUpd->start(expTime);
+        tabEla->restart();
+    }
 
-    slotStatBarUpdate();
-    updater->start(1000);
+
 }
 
 void MainWindow::slotClearTable()
@@ -233,5 +288,21 @@ void MainWindow::slotStatBarUpdate()
         //statusBar()->showMessage(timeStr);
         sysTimeEdit->setText(timeStr);
         jdTimeEdit->setText(jdTimeStr);
-        starTimeEdit->setText(starTimeStr);
+        //starTimeEdit->setText(starTimeStr);
+}
+
+void MainWindow::slotStartUpdater()
+{
+    updaterEnabled = 1;
+    if(!tabUpd->isActive())
+    {
+        tabUpd->start(expTime);
+        tabEla->start();
+    }
+}
+
+void MainWindow::slotStopUpdater()
+{
+    if(tabUpd->isActive()) tabUpd->stop();
+    updaterEnabled = 0;
 }

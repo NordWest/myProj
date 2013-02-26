@@ -32,15 +32,24 @@ public:
     QString starTimeStr;
     QString jdTimeStr;
     QTime sysTime;
+    int updaterEnabled;
 
     skyAreaLF sa;
     resList rFile;
+    double jDay, lam, s;
+    int expTime;
+
 
 private slots:
+    void slotUpdateTime();
     void slotUpdateTable();
     void slotStatBarUpdate();
 
+    void slotStartUpdater();
+    void slotStopUpdater();
+
     void slotOpenResFileWindow();
+    void slotInitResTable();
     void slotViewSettWindow();
     void slotViewNextObj();
     void slotViewPrevObj();
@@ -49,11 +58,15 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QTimer *updater;
+    QTimer *timeUpd;
+    QTimer *tabUpd;
+    QElapsedTimer *tabEla;
 
     QToolBar *mainToolBar;
     QPushButton *nextButton;
     QPushButton *prevButton;
+    QPushButton *startButton;
+    QPushButton *stopButton;
 
     QLineEdit *sysTimeEdit;
     QLineEdit *starTimeEdit;
@@ -67,6 +80,8 @@ private:
     QMenu *viewMenu;
     QAction *viewNextAct;
     QAction *viewPrevAct;
+    QAction *viewStartAct;
+    QAction *viewStopAct;
 };
 
 #endif // MAINWINDOW_H

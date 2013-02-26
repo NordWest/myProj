@@ -350,7 +350,7 @@ int resRecord::fromString(QString tStr)
     strL = tStr.split("|");
     if(strL.size()!=9) return 1;
     number = strL.at(0).toInt();
-    name = strL.at(1);
+    name = strL.at(1).simplified();
     ra = mas_to_grad(hms_to_mas(strL.at(2), " "));
     dec = mas_to_grad(damas_to_mas(strL.at(3), " "));
     magn = strL.at(4).toDouble();
