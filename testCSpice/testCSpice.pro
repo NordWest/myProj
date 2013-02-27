@@ -8,14 +8,18 @@ QT       += core
 
 QT       -= gui
 
-TARGET = testCSpice
-CONFIG   += console
+TARGET = ./../../lab/testCSpice/testCSpice
+CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../libs/comfunc.cpp \
+    ../libs/mpcs.cpp \
+    ../libs/DynArr.cpp \
+    ../libs/coord.cpp
 
 HEADERS += \
     ../libs/cspice/zzerror.h \
@@ -43,6 +47,14 @@ HEADERS += \
     ../libs/cspice/fmt.h \
     ../libs/cspice/fio.h \
     ../libs/cspice/f2cMang.h \
-    ../libs/cspice/f2c.h
+    ../libs/cspice/f2c.h \
+    ../libs/astro.h \
+    ../libs/mb.h \
+    ../libs/comfunc.h \
+    ../libs/mpcs.h \
+    ../libs/DynArr.h \
+    ../libs/coord.h
 
-unix:LIBS+=./../libs/unix/cspice.a
+unix:LIBS+= ./../libs/unix/cspice.a \
+            ./../libs/unix/libastro.a \
+            ./../libs/unix/libmb.a

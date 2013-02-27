@@ -22,6 +22,12 @@
     <height>370</height>
    </size>
   </property>
+  <property name="baseSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
   <property name="font">
    <font>
     <family>Ubuntu</family>
@@ -129,6 +135,18 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="expWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>79</width>
+     <height>60</height>
+    </size>
+   </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
    </attribute>

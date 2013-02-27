@@ -16,15 +16,17 @@ int main(int argc, char *argv[])
     QStringList dataSL, resSL, outerArguments;
     double time, jdUTC;
     double X[3], V[3];
+    double X1[3], V1[3];
     double dX[3], dV[3];
     double X0[3], V0[3];
     double XE0[3], VE0[3];
+    double XS0[3], VS0[3];
     double dist, dvel;
     double ra, de;
     int isObj, i;
     int SK, CENTER;
     QProcess outerProcess;
-    QString objDataStr;
+    QString objDataStr, strT;
     mpc mrec;
     double dT, m, n;
     double dRa, dDec, normR, norm_sA;
@@ -90,6 +92,7 @@ int main(int argc, char *argv[])
     QFileInfo fi(inFileName);
     QString dxFileName = QString("%1_dr.txt").arg(fi.absoluteFilePath());
     QString mpcFileName = QString("%1_mpc.txt").arg(fi.absoluteFilePath());
+    QString spkFileName = QString("%1_spk.txt").arg(fi.absoluteFilePath());
 
     //QString inFileName("small.log");
     QFile inFile(inFileName);
@@ -105,6 +108,10 @@ int main(int argc, char *argv[])
     QFile dxFile(dxFileName);
     dxFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream dxStm(&dxFile);
+
+    QFile spkFile(spkFileName);
+    spkFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream spkStm(&spkFile);
 
     char *astr = new char[256];
     QFile mpcFile(mpcFileName);
@@ -138,9 +145,6 @@ int main(int argc, char *argv[])
         if(plaNum!=-1)
         {
 
-
-
-
             if(useEPM)
             {
                 status = calc_EPM(plaNum, centr_num, (int)time, time-(int)time, X0, V0);
@@ -151,8 +155,6 @@ int main(int argc, char *argv[])
                  }
             }
             else nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time, plaNum, CENTER, SK);
-
-
 
         }
         else
@@ -226,18 +228,32 @@ int main(int argc, char *argv[])
                 VE0[2] = resSL.at(7).toDouble();
                 break;
             }
-/
+*/
             if(useEPM)
             {
-                status = calc_EPM(GEOCENTR_NUM, centr_num, (int)time, time-(int)time, XE0, VE0);
+                status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
                  if(!status)
                  {
                      qDebug() << QString("error EPM\n");
                      return 1;
                  }
             }
-            else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER, SK);
-*/
+            else nbody->detState(&XE0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER, SK);
+
+
+            X1[0] = X[0] + XS0[0];
+            X1[1] = X[1] + XS0[1];
+            X1[2] = X[2] + XS0[2];
+
+            V1[0] = V[0] + VS0[0];
+            V1[1] = V[1] + VS0[1];
+            V1[2] = V[2] + VS0[2];
+
+            getStrTfromMJD(&strT, jd2mjd(time));
+
+
+            spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(strT).arg(X1[0], 18, 'g', 9).arg(X1[1], 18, 'g', 9).arg(X1[2], 18, 'g', 9).arg(V1[0], 18, 'g', 9).arg(V1[1], 18, 'g', 9).arg(V1[2], 18, 'g', 9);
+
 
             T = (time - 2451545)/36525.0;
             mPrec = 4612.4362*T;
@@ -395,6 +411,7 @@ int main(int argc, char *argv[])
     bigFile.close();
     dxFile.close();
     mpcFile.close();
+    spkFile.close();
 
     return 0;//a.exec();
 }

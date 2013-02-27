@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updaterEnabled = 0;
     expTime = 1000*10;
     ui->expProgBar->setRange(0, 100);
+    ui->expProgBar->setValue(0);
 
     timeUpd->setSingleShot(0);
     slotUpdateTime();
@@ -93,9 +94,9 @@ void MainWindow::setWidgets()
     vhLabelsT << QString(tr("Exp"));
     vhLabelsT << QString(tr("Tasks"));
     mainTable->setHorizontalHeaderLabels(vhLabelsT);
-    mainTable->setColumnWidth(0, 250);
-    mainTable->setColumnWidth(1, 200);
-    mainTable->setColumnWidth(2, 200);
+    mainTable->setColumnWidth(0, 200);
+    mainTable->setColumnWidth(1, 150);
+    mainTable->setColumnWidth(2, 150);
 
     sysTimeEdit = new QLineEdit(this);
     sysTimeEdit->setMaximumWidth(100);
