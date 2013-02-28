@@ -238,7 +238,9 @@ int main(int argc, char *argv[])
                      return 1;
                  }
             }
-            else nbody->detState(&XE0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER, SK);
+            else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, SK);
+
+            qDebug() << QString("XS0: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
 
             X1[0] = X[0] + XS0[0];
@@ -252,7 +254,7 @@ int main(int argc, char *argv[])
             getStrTfromMJD(&strT, jd2mjd(time));
 
 
-            spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(strT).arg(X1[0], 18, 'g', 9).arg(X1[1], 18, 'g', 9).arg(X1[2], 18, 'g', 9).arg(V1[0], 18, 'g', 9).arg(V1[1], 18, 'g', 9).arg(V1[2], 18, 'g', 9);
+            spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(time, 15, 'f', 8).arg(X1[0], 18, 'g', 12).arg(X1[1], 18, 'g', 12).arg(X1[2], 18, 'g', 12).arg(V1[0]/SECINDAY, 18, 'g', 12).arg(V1[1]/SECINDAY, 18, 'g', 12).arg(V1[2]/SECINDAY, 18, 'g', 12);
 
 
             T = (time - 2451545)/36525.0;

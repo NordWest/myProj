@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
       #define                 FILE_SIZE 128
       #define                 WORD_SIZE  48
-      #define                 MAXPTS     10
+      #define                 MAXPTS     9
 
       /*
       Local variables
@@ -63,13 +63,13 @@ int main(int argc, char *argv[])
       puts (" ");
       puts ("                    Welcome to SIMPLE"                  );
       puts (" ");
-      puts ("This program calculates the angular separation of two"  );
+      /*puts ("This program calculates the angular separation of two"  );
       puts ("target bodies as seen from an observing body."          );
       puts (" ");
       puts ("The angular separations are calculated for each of 10"  );
       puts ("equally spaced times in a given time interval. A table" );
       puts ("of the results is presented.");
-      puts (" ");
+      puts (" ");*/
 
 
       /*
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
       aberration, satisfies the requirements for this program.
       */
       ref    = "J2000";
-      //corr   = "LT";
-      corr   = "NONE";
+      corr   = "LT";
+      //corr   = "NONE";
 
 
       /*
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
       //sprintf(spkAst,"%s", "codes_300ast_20100725.bsp");
       //furnsh_c ( "codes_300ast_20100725.bsp"  );
-      //furnsh_c ( "codes_300ast_20100725.cmt"  );
+      furnsh_c ( "codes_300ast_20100725.cmt"  );
       furnsh_c ( "small.spk"  );
 
       cont = SPICETRUE;
@@ -162,8 +162,8 @@ int main(int argc, char *argv[])
          puts ("Working ... Please wait.");
          puts (" ");
 */
-          utbeg = 2456000.5;
-          utend = 2456100.5;
+          utbeg = 2456010.5;
+          utend = 2456090.5;
          //sprintf(utcbeg,"%f JD", "2456000.5 JD");
          //sprintf(utcend,"%s", "2456100.5 JD");
 
@@ -180,15 +180,18 @@ int main(int argc, char *argv[])
          /*
          Calculate the difference between evaluation times.
          */
-         delta  = 10.0;//( etend - etbeg ) / ( (SpiceDouble) MAXPTS  - 1.);
+         delta  = ( utend - utbeg ) / ( (SpiceDouble) MAXPTS  - 1.);
 
          /*
          For each time, get the apparent states of the two target
          bodies as seen from the observer.
          */
          //et = etbeg;
-         sprintf(utctim,"%f JD", 2456000.5);
+         //sprintf(utctim,"%f JD", 2456000.5);
          ut = utbeg;
+
+         puts ("Ceres to ssb"  );
+         puts (""  );
 
          for ( i=0; i < MAXPTS; ++i )
             {
@@ -201,6 +204,7 @@ int main(int argc, char *argv[])
              sprintf(utctim,"%f JD", ut);
              str2et_c ( utctim, &et);
              spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
+             spkezr_c (  "Ceres", et, ref, "NONE", "ssb", state2, &lt2 );
              x[i] = state1[0];
              y[i] = state1[1];
              z[i] = state1[2];
@@ -209,6 +213,9 @@ int main(int argc, char *argv[])
              times[i] = et;
             //et   = et + delta;
              ut   = ut + delta;
+
+             et2utc_c ( et, "ISOC", 0, WORD_SIZE, utctim );
+             printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\n", utctim, state2[0]/AUKM,  state2[1]/AUKM, state2[2]/AUKM);
             /*
             Save the time and the separation between the target bodies
             (in degrees), as seen from the observer, for output to the
@@ -262,6 +269,7 @@ int main(int argc, char *argv[])
 
             mpcStm << astr << "\n";
             printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i]/AUKM,  y[i]/AUKM, z[i]/AUKM, range[i]/AUKM);
+            //printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i],  y[i], z[i], range[i]);
             }
 /*
          puts( " " );
