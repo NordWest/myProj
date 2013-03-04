@@ -33,6 +33,7 @@ public:
     QString jdTimeStr;
     QTime sysTime;
     int updaterEnabled;
+    QList <QTableWidgetItem *> itemList;
 
     skyAreaLF sa;
     resList rFile;
@@ -55,6 +56,12 @@ private slots:
     void slotViewPrevObj();
     void slotClearTable();
 
+    void slotHeaderClicked(int colNum);
+
+
+    void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
+
+    void on_tableWidget_itemActivated(QTableWidgetItem *item);
 
 private:
     Ui::MainWindow *ui;

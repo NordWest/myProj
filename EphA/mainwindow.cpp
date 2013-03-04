@@ -130,6 +130,10 @@ void MainWindow::setWidgets()
     stopButton = new QPushButton(tr("stop"));
     mainToolBar->insertWidget(viewStopAct, stopButton);
     connect(stopButton, SIGNAL(clicked()), this, SLOT(slotStopUpdater()));
+
+    connect(mainTable->horizontalHeader(),SIGNAL(sectionClicked(int)),
+                  this,SLOT(slotHeaderClicked(int)));
+
 }
 
 void MainWindow::slotOpenResFileWindow()
@@ -169,7 +173,7 @@ void MainWindow::slotInitResTable()
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 2, newItem);
 
-        newItem = new QTableWidgetItem(QString("%1").arg(rRec->magn));
+        newItem = new QTableWidgetItem(QString("%1").arg(rRec->magn));//, 5, 'f', 1, QLatin1Char('0')));
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 3, newItem);
 
@@ -191,6 +195,32 @@ void MainWindow::slotInitResTable()
     }
 }
 
+void MainWindow::slotHeaderClicked(int colNum)
+{
+    //QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(colNum));
+
+    mainTable->sortByColumn(colNum);
+//    mainTable->ro
+/*
+    switch(colNum)
+    {
+    case 0:
+        mainTable->sortByColumn(colNum);
+        break;
+    case 1:
+        mainTable->sortByColumn(colNum);
+        break;
+    case 1:
+        mainTable->sortByColumn(colNum);
+        break;
+    case 1:
+        mainTable->sortByColumn(colNum);
+        break;
+    }
+*/
+
+}
+
 void MainWindow::setSettings()
 {
 
@@ -203,12 +233,36 @@ void MainWindow::slotViewSettWindow()
 
 void MainWindow::slotViewNextObj()
 {
+    QList <QTableWidgetItem*> itemsSel;
+    itemsSel = mainTable->selectedItems();
+    QModelIndex curIndexItem;
+    int curRow;
+    curIndexItem = mainTable->currentIndex();
+    curRow = curIndexItem.row();
 
+    mainTable->selectRow(curRow+1);
 }
 
 void MainWindow::slotViewPrevObj()
 {
+    //int p = itemList.size();
+    //if(p<2) return;
+    QString rStr;
+    QStringList indList;
+    for(int i=0; i<itemList.size();i++) indList << QString("%1").arg(itemList.at(i)->row());
+    rStr = QString("%1\n").arg(indList.join(","));
 
+    int p = itemList.last()->row();
+    if(itemList.size()<1) return;
+    itemList.removeLast();
+    mainTable->selectRow(p);
+    itemList.removeLast();
+
+    itemList.clear();
+    for(int i=0; i<itemList.size();i++) indList << QString("%1").arg(itemList.at(i)->row());
+    rStr.append(QString("%1\n").arg(indList.join(",")));
+
+    QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(rStr));
 }
 
 void MainWindow::slotUpdateTime()
@@ -305,5 +359,17 @@ void MainWindow::slotStartUpdater()
 void MainWindow::slotStopUpdater()
 {
     if(tabUpd->isActive()) tabUpd->stop();
+    ui->expProgBar->setValue(0.0);
     updaterEnabled = 0;
+}
+
+void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
+{
+    //QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(current->row()));
+    if(previous!=NULL) itemList << previous;
+}
+
+void MainWindow::on_tableWidget_itemActivated(QTableWidgetItem *item)
+{
+    //if(item!=NULL) itemList << item;
 }
