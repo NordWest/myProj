@@ -93,6 +93,11 @@
       </column>
       <column>
        <property name="text">
+        <string>meriDist</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>mu_ra</string>
        </property>
       </column>
@@ -147,6 +152,9 @@
      <height>60</height>
     </size>
    </property>
+   <property name="accessibleName">
+    <string>progress</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>4</number>
    </attribute>
@@ -161,7 +169,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>0</y>
+       <y>10</y>
        <width>641</width>
        <height>25</height>
       </rect>

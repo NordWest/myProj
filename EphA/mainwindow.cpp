@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "ephthread.h"
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -18,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ephthread ephTabUpdater(this);
  //   ephTabUpdater.start();
 
+    minRa = 0;
+    maxRa = 24;
+    settW->ra0SpinBox->setValue(minRa);
+    settW->ra1SpinBox->setValue(maxRa);
 
 
     timeUpd = new QTimer(this);
@@ -55,11 +60,7 @@ void MainWindow::setMenu()
     fileMenu->addAction(openResAct);
     connect(openResAct, SIGNAL(triggered()), this, SLOT(slotOpenResFileWindow()));
 
-    viewSettAct = new QAction(tr("&view sett"), this);
-    viewSettAct->setShortcut(tr("Ctrl+U"));
-    viewSettAct->setStatusTip(tr("view settings"));
-    fileMenu->addAction(viewSettAct);
-    connect(viewSettAct, SIGNAL(triggered()), this, SLOT(slotViewSettWindow()));
+
 
     viewMenu = menuBar()->addMenu(tr("view"));
     viewNextAct = new QAction(tr("&view next"), this);
@@ -67,12 +68,18 @@ void MainWindow::setMenu()
     viewNextAct->setStatusTip(tr("view next"));//
     viewMenu->addAction(viewNextAct);
     connect(viewNextAct, SIGNAL(triggered()), this, SLOT(slotViewNextObj()));
+
     viewPrevAct = new QAction(tr("&view prev"), this);
     viewPrevAct->setShortcut(tr("Ctrl+p"));//
     viewPrevAct->setStatusTip(tr("view next"));//
     viewMenu->addAction(viewPrevAct);
     connect(viewPrevAct, SIGNAL(triggered()), this, SLOT(slotViewPrevObj()));
-
+/*
+    viewSettAct = new QAction(tr("&view sett"), this);
+    viewSettAct->setShortcut(tr("Ctrl+U"));
+    viewSettAct->setStatusTip(tr("view settings"));
+    viewMenu->addAction(viewSettAct);
+    connect(viewSettAct, SIGNAL(triggered()), this, SLOT(slotViewSettWindow()));*/
 }
 
 void MainWindow::setWidgets()
@@ -89,6 +96,7 @@ void MainWindow::setWidgets()
     vhLabelsT << QString(tr("RA"));
     vhLabelsT << QString(tr("DEC"));
     vhLabelsT << QString(tr("Magn"));
+    vhLabelsT << QString(tr("meriDist"));
     vhLabelsT << QString(tr("mu_ra"));
     vhLabelsT << QString(tr("mu_dec"));
     vhLabelsT << QString(tr("Exp"));
@@ -133,6 +141,18 @@ void MainWindow::setWidgets()
 
     connect(mainTable->horizontalHeader(),SIGNAL(sectionClicked(int)),
                   this,SLOT(slotHeaderClicked(int)));
+
+    settDock = new QDockWidget("Settings", this, Qt::Widget);
+    settDock->setFloating(1);
+
+    settDock->setMinimumSize(400, 300);
+    settW = new settWindow(settDock);
+    settDock->setWidget(settW);
+    addDockWidget(Qt::BottomDockWidgetArea, settDock);
+
+    //settDock->setVisible(0);
+    viewMenu->addAction(settDock->toggleViewAction());
+    settDock->hide();
 
 }
 
@@ -179,19 +199,19 @@ void MainWindow::slotInitResTable()
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->mu_ra));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 4, newItem);
+        mainTable->setItem(i, 5, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->mu_dec));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 5, newItem);
+        mainTable->setItem(i, 6, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->exp));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 6, newItem);
+        mainTable->setItem(i, 7, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->tasks.join("|")));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 7, newItem);
+        mainTable->setItem(i, 8, newItem);
     }
 }
 
@@ -223,12 +243,16 @@ void MainWindow::slotHeaderClicked(int colNum)
 
 void MainWindow::setSettings()
 {
+    //settWindow settW;
+    settW->ra0SpinBox->setValue(minRa);
+    settW->ra1SpinBox->setValue(maxRa);
+    settDock->show();
 
 }
 
 void MainWindow::slotViewSettWindow()
 {
-    QMessageBox::information(0,"debug","view sett",QMessageBox::Ok);
+    //QMessageBox::information(0,"debug","view sett",QMessageBox::Ok);
 }
 
 void MainWindow::slotViewNextObj()
@@ -247,22 +271,23 @@ void MainWindow::slotViewPrevObj()
 {
     //int p = itemList.size();
     //if(p<2) return;
-    QString rStr;
+    /*QString rStr;
     QStringList indList;
     for(int i=0; i<itemList.size();i++) indList << QString("%1").arg(itemList.at(i)->row());
     rStr = QString("%1\n").arg(indList.join(","));
-
-    int p = itemList.last()->row();
+*/
     if(itemList.size()<1) return;
-    itemList.removeLast();
+    int p = itemList.last()->row();
+
     mainTable->selectRow(p);
     itemList.removeLast();
-
+    itemList.removeLast();
+/*
     itemList.clear();
     for(int i=0; i<itemList.size();i++) indList << QString("%1").arg(itemList.at(i)->row());
     rStr.append(QString("%1\n").arg(indList.join(",")));
 
-    QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(rStr));
+    QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(rStr));*/
 }
 
 void MainWindow::slotUpdateTime()
@@ -289,6 +314,39 @@ void MainWindow::slotUpdateTime()
     starTimeStr = getStrFromS(s, ":", 0);
 
     slotStatBarUpdate();
+
+    minRa = settW->ra0SpinBox->value();
+    maxRa = settW->ra1SpinBox->value();
+    double minDec, maxDec;
+    minDec = settW->dec0SpinBox->value();
+    maxDec = settW->dec1SpinBox->value();
+    double minMagn, maxMagn;
+    minMagn = settW->magn0SpinBox->value();
+    maxMagn = settW->magn1SpinBox->value();
+
+    int i, sz, cs, res;
+    double ra, dec, magn;
+    QString raStr;
+    sz = mainTable->rowCount();
+    for(i=0;i<sz;i++)
+    {
+        res = 0;
+        cs = 0;
+        if(maxRa<=minRa) cs = 1;
+
+        raStr = mainTable->item(i, 1)->text();
+        ra = mas_to_grad(hms_to_mas(raStr, " "))/15.0;
+        raStr = mainTable->item(i, 2)->text();
+        dec = mas_to_grad(damas_to_mas(raStr, " "));
+        magn = mainTable->item(i, 3)->text().toDouble();
+
+        res = (dec<=maxDec)&&(dec>=minDec)&&(magn<=maxMagn)&&(magn>=minMagn);
+
+        if(cs) res *= (ra<maxRa)||(ra>minRa);
+        else res *= (ra<maxRa)&&(ra>minRa);
+        mainTable->setRowHidden(i, !res);
+    }
+
 
     if(updaterEnabled)
     {

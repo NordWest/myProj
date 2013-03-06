@@ -9,7 +9,7 @@
 #include <QLineEdit>
 #include <QTableWidget>
 
-
+#include "settwindow.h"
 #include "./../libs/skyarealf.h"
 
 namespace Ui {
@@ -38,7 +38,10 @@ public:
     skyAreaLF sa;
     resList rFile;
     double jDay, lam, s;
+    double minRa, maxRa;
     int expTime;
+    QDockWidget *settDock;
+    settWindow *settW;
 
 
 private slots:
@@ -89,6 +92,8 @@ private:
     QAction *viewPrevAct;
     QAction *viewStartAct;
     QAction *viewStopAct;
+    //QAction *viewSettAct;
+
 };
 
 #endif // MAINWINDOW_H
