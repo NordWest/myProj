@@ -507,6 +507,81 @@ int resList::init(QString fname)
     return 0;
 };
 
+int resList::sortT(double s)
+{
+    int i, j, sz, pMin;
+    sz = recList.size();
+    double meriI, meriJ, meriMin;
+
+    for(i=0; i<sz-1;i++)
+    {
+        meriI = recList.at(i)->ra - rad2grad(s);
+        if(meriI<-180) meriI+=360;
+        if(meriI>180) meriI-=360;
+        pMin = i;
+        meriMin = meriI;
+        for(j=i+1;j<sz;j++)
+        {
+            meriJ = recList.at(j)->ra - rad2grad(s);
+            if(meriJ<-180) meriJ+=360;
+            if(meriJ>180) meriJ-=360;
+            if(meriJ<meriMin)
+            {
+                meriMin = meriJ;
+                pMin = j;
+            }
+        }
+        if(pMin>i) recList.swap(i, pMin);
+    }
+}
+
+int resList::sortDec()
+{
+    int i, j, sz, pMin;
+    sz = recList.size();
+    double valMin;
+
+    for(i=0; i<sz-1;i++)
+    {
+        pMin = i;
+        valMin = recList.at(i)->dec;
+        for(j=i+1;j<sz;j++)
+        {
+
+            if(recList.at(j)->dec<valMin)
+            {
+                valMin = recList.at(j)->dec;
+                pMin = j;
+            }
+        }
+        if(pMin>i) recList.swap(i, pMin);
+    }
+}
+
+int resList::sortMagn()
+{
+    int i, j, sz, pMin;
+    sz = recList.size();
+    double valMin;
+
+    for(i=0; i<sz-1;i++)
+    {
+        pMin = i;
+        valMin = recList.at(i)->magn;
+        for(j=i+1;j<sz;j++)
+        {
+
+            if(recList.at(j)->magn<valMin)
+            {
+                valMin = recList.at(j)->magn;
+                pMin = j;
+            }
+        }
+        if(pMin>i) recList.swap(i, pMin);
+    }
+}
+
+
 ////////////////////////////////////////////////
 
 int catRecord::fromString(QString tStr)

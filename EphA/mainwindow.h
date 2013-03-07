@@ -26,7 +26,13 @@ public:
     void setMenu();
     void setWidgets();
     void setSettings();
+    void saveSettings();
 
+    void sortRa();
+    void sortDec();
+    void sortMagn();
+
+    QSettings *sett;
 
     QString timeStr;
     QString starTimeStr;
@@ -38,8 +44,7 @@ public:
     skyAreaLF sa;
     resList rFile;
     double jDay, lam, s;
-    double minRa, maxRa;
-    int expTime;
+
     QDockWidget *settDock;
     settWindow *settW;
 
@@ -61,10 +66,12 @@ private slots:
 
     void slotHeaderClicked(int colNum);
 
+    void slotExit();
 
     void on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous);
 
     void on_tableWidget_itemActivated(QTableWidgetItem *item);
+
 
 private:
     Ui::MainWindow *ui;
@@ -78,6 +85,8 @@ private:
     QPushButton *startButton;
     QPushButton *stopButton;
 
+    QPushButton *viewSettButton;
+
     QLineEdit *sysTimeEdit;
     QLineEdit *starTimeEdit;
     QLineEdit *jdTimeEdit;
@@ -86,14 +95,17 @@ private:
 
     QMenu *fileMenu;
     QAction *openResAct;
-    QAction *viewSettAct;
+    QAction *exitAct;
+
     QMenu *viewMenu;
     QAction *viewNextAct;
     QAction *viewPrevAct;
     QAction *viewStartAct;
     QAction *viewStopAct;
+    QAction *viewSettAct;
     //QAction *viewSettAct;
-
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // MAINWINDOW_H

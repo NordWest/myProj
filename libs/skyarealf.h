@@ -137,7 +137,9 @@ public:
     int save();
     int init(QString fname);
 
-
+    int sortT(double s);    //[s] = rad
+    int sortDec();
+    int sortMagn();
 
 /*    void addIniList(resList newIniList);
     void updateIniList(iniList newIniList);
