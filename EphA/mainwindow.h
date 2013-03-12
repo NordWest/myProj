@@ -104,6 +104,17 @@ private:
     QAction *viewStopAct;
     QAction *viewSettAct;
     //QAction *viewSettAct;
+
+    QDockWidget *infoDock;
+    QWidget *infoWidget;
+    QLabel *nameLabel;
+    QLabel *raLabel;
+    QLabel *decLabel;
+    QLabel *magnLabel;
+    QLabel *muraLabel;
+    QLabel *mudecLabel;
+    QLabel *expLabel;
+    QLabel *tasksLabel;
 protected:
     void closeEvent(QCloseEvent *event);
 };

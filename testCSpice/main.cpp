@@ -54,10 +54,12 @@ int main(int argc, char *argv[])
       SpiceChar               answer[WORD_SIZE];
       SpiceChar             * corr;
       SpiceChar             * ref;
+      SpiceChar               *namelen;
+      namelen = new SpiceChar[12];
 
-      SpiceBoolean            cont;
+      SpiceBoolean            cont, found;
 
-      SpiceInt                i;
+      SpiceInt                i, code_id;
 
       puts (" ");
       puts (" ");
@@ -108,14 +110,20 @@ int main(int argc, char *argv[])
       Load the binary SPK file containing the ephemeris data
       that we need.
       */
-      sprintf(spk,"%s", "de421.bsp");
-      furnsh_c ( spk  );
-      furnsh_c ( "./de421.cmt"  );
+      //sprintf(spk,"%s", "./de421.bsp");
+      furnsh_c ( "./codes_300ast.tf"  );
+      furnsh_c ( "./de421.bsp"  );
+      //furnsh_c ( "./../../data/cats/de405/de405.bsp"  );
+      //furnsh_c ( "./de421.cmt"  );
 
       //sprintf(spkAst,"%s", "codes_300ast_20100725.bsp");
       //furnsh_c ( "codes_300ast_20100725.bsp"  );
-      furnsh_c ( "codes_300ast_20100725.cmt"  );
-      furnsh_c ( "small.spk"  );
+      //furnsh_c ( "codes_300ast_20100725.cmt"  );
+      furnsh_c ( "Ceres.spk"  );
+
+
+      //furnsh_c ( "./pallas_1900_2100.bsp"  );
+      //furnsh_c ( "./pallas_1900_2100.cmt"  );
 
       cont = SPICETRUE;
 
@@ -148,6 +156,23 @@ int main(int argc, char *argv[])
 */
           sprintf(obs,"%s", "Earth");
           sprintf(targ1,"%s", "Ceres");
+
+/*
+          bods2c_c("Ceres", &code_id, &found);
+          qDebug() << QString("Ceres: %1\t%2\n").arg(code_id).arg(found);
+          bods2c_c("2 Pallas", &code_id, &found);
+          qDebug() << QString("Pallas: %1\t%2\n").arg(code_id).arg(found);
+          bods2c_c("Juno", &code_id, &found);
+          qDebug() << QString("Juno: %1\t%2\n").arg(code_id).arg(found);
+          bods2c_c("Vesta", &code_id, &found);
+          qDebug() << QString("Vesta: %1\t%2\n").arg(code_id).arg(found);
+/*
+          bodc2n_c(2000002, 12, namelen, &found);
+          qDebug() << QString("2000002: %1\t%2\n").arg(namelen).arg(found);
+          bodc2n_c(2000003, 12, namelen, &found);
+          qDebug() << QString("2000003: %1\t%2\n").arg(namelen).arg(found);
+*/
+          //sprintf(targ1,"%s", "Ceres");
          /*
          Get the beginning and ending UTC times for the time interval
          of interest.
@@ -203,8 +228,9 @@ int main(int argc, char *argv[])
             */
              sprintf(utctim,"%f JD", ut);
              str2et_c ( utctim, &et);
+
              spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
-             spkezr_c (  "Ceres", et, ref, "NONE", "ssb", state2, &lt2 );
+             spkezr_c (  targ1, et, ref, "NONE", "ssb", state2, &lt2 );
              x[i] = state1[0];
              y[i] = state1[1];
              z[i] = state1[2];

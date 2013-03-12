@@ -89,7 +89,7 @@ void MainWindow::setWidgets()
 
 
     mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
-    mainTable->setColumnCount(8);
+    mainTable->setColumnCount(9);
     QStringList vhLabelsT;
     vhLabelsT << QString(tr("Name"));
     vhLabelsT << QString(tr("RA"));
@@ -162,6 +162,56 @@ void MainWindow::setWidgets()
     //settDock->setVisible(0);
     viewMenu->addAction(settDock->toggleViewAction());
     settDock->hide();
+
+    infoDock = new QDockWidget("Information", this, Qt::Widget);
+    infoDock->setMinimumSize(100, 200);
+    infoDock->setFloating(1);
+    infoWidget = new QWidget(infoDock);
+
+    QGridLayout *vertLA = new QGridLayout(infoWidget);
+
+    QLabel *nLab = new QLabel("Name");
+    vertLA->addWidget(nLab, 0, 0);
+    nameLabel = new QLabel("name");
+    vertLA->addWidget(nameLabel, 0, 1);
+
+    QLabel *raLab = new QLabel("RA");
+    vertLA->addWidget(raLab, 1, 0);
+    raLabel = new QLabel("ra");
+    vertLA->addWidget(raLabel, 1, 1);
+
+    QLabel *decLab = new QLabel("DEC");
+    vertLA->addWidget(decLab, 2, 0);
+    decLabel = new QLabel("dec");
+    vertLA->addWidget(decLabel, 2, 1);
+
+    QLabel *mLab = new QLabel("Mang");
+    vertLA->addWidget(mLab, 3, 0);
+    magnLabel = new QLabel("magn");
+    vertLA->addWidget(magnLabel, 3, 1);
+
+    QLabel *mraLab = new QLabel("mu_RA");
+    vertLA->addWidget(mraLab, 4, 0);
+    muraLabel = new QLabel("mu_ra");
+    vertLA->addWidget(muraLabel, 4, 1);
+
+    QLabel *mdecLab = new QLabel("mu_DEC");
+    vertLA->addWidget(mdecLab, 5, 0);
+    mudecLabel = new QLabel("mu_dec");
+    vertLA->addWidget(mudecLabel, 5, 1);
+
+    QLabel *eLab = new QLabel("Exp");
+    vertLA->addWidget(eLab, 6, 0);
+    expLabel = new QLabel("exp");
+    vertLA->addWidget(expLabel, 6, 1);
+
+    QLabel *tsLab = new QLabel("Tasks");
+    vertLA->addWidget(tsLab, 7, 0);
+    tasksLabel = new QLabel("tasks");
+    vertLA->addWidget(tasksLabel, 7, 1);
+
+    infoDock->setWidget(infoWidget);
+    addDockWidget(Qt::RightDockWidgetArea, infoDock);
 
 }
 
@@ -566,6 +616,14 @@ void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QT
 {
     //QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(current->row()));
     if(previous!=NULL) itemList << previous;
+    nameLabel->setText(mainTable->item(current->row(), 0)->text());
+    raLabel->setText(mainTable->item(current->row(), 1)->text());
+    decLabel->setText(mainTable->item(current->row(), 2)->text());
+    magnLabel->setText(mainTable->item(current->row(), 3)->text());
+    muraLabel->setText(mainTable->item(current->row(), 5)->text());
+    mudecLabel->setText(mainTable->item(current->row(), 6)->text());
+    expLabel->setText(mainTable->item(current->row(), 7)->text());
+    tasksLabel->setText(mainTable->item(current->row(), 8)->text());
 }
 
 void MainWindow::on_tableWidget_itemActivated(QTableWidgetItem *item)

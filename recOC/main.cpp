@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     QStringList dataSL, resSL, outerArguments;
     double time, jdUTC;
     double X[3], V[3];
+    double Q[3], QV[3];
     double X1[3], V1[3];
     double dX[3], dV[3];
     double X0[3], V0[3];
@@ -43,6 +44,10 @@ int main(int argc, char *argv[])
     v0 = new double[3];
     v1 = new double[3];
     v2 = new double[3];
+
+    double muc2 = 9.8704e-9;
+    double ct0, ct1, tau;
+    double normE, normQ, normP;
 
     procData miriadeProcData;
 
@@ -109,9 +114,8 @@ int main(int argc, char *argv[])
     dxFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream dxStm(&dxFile);
 
-    QFile spkFile(spkFileName);
-    spkFile.open(QFile::WriteOnly | QFile::Truncate);
-    QTextStream spkStm(&spkFile);
+    QFile spkFile;
+    QTextStream spkStm;
 
     char *astr = new char[256];
     QFile mpcFile(mpcFileName);
@@ -242,7 +246,7 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("XS0: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
-
+//Q
             X1[0] = X[0] + XS0[0];
             X1[1] = X[1] + XS0[1];
             X1[2] = X[2] + XS0[2];
@@ -253,25 +257,58 @@ int main(int argc, char *argv[])
 
             getStrTfromMJD(&strT, jd2mjd(time));
 
+            spkFileName = QString("%1/spks/%2_spk.txt").arg(fi.absolutePath()).arg(name);
+            spkFile.setFileName(spkFileName);
+            spkFile.open(QFile::WriteOnly | QFile::Append);
+            spkStm.setDevice(&spkFile);
+            qDebug() << QString("name: %1\n").arg(spkFileName);
+
 
             spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(time, 15, 'f', 8).arg(X1[0], 18, 'g', 12).arg(X1[1], 18, 'g', 12).arg(X1[2], 18, 'g', 12).arg(V1[0]/SECINDAY, 18, 'g', 12).arg(V1[1]/SECINDAY, 18, 'g', 12).arg(V1[2]/SECINDAY, 18, 'g', 12);
 
-
+            spkFile.close();
+/*
             T = (time - 2451545)/36525.0;
             mPrec = 4612.4362*T;
             nPrec = 2004.3109*T;
 
             qDebug() << QString("T: %3\nm: %1\tn:%2\n").arg(mPrec).arg(nPrec).arg(T);
-
+*/
 
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
-
+//P
             R[0] = X[0] - XE0[0];
             R[1] = X[1] - XE0[1];
             R[2] = X[2] - XE0[2];
 
             normR = norm(R);
+
+            normE = norm(XE0);
+            normP = normR;
+            normQ = norm(X);
+
+            ct1 = 0.0;
+
+            do
+            {
+                ct0 = ct1;
+
+                ct1 = normR+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+                qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+                tau = ct1/CAU;
+                Q[0] = R[0] - V[0]*tau;
+                Q[1] = R[1] - V[1]*tau;
+                Q[2] = R[2] - V[2]*tau;
+                normQ = norm(Q);
+
+            }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
+
+            tau = ct1/CAU;
+
+
+
+            /*
 
             s[0] = R[0]/normR;
             s[1] = R[1]/normR;
@@ -370,8 +407,9 @@ int main(int argc, char *argv[])
                 m = mas_to_grad((4612.4362*dT)*1000);
                 n = mas_to_grad((2004.3109*dT)*1000);
 */
-                //detRDnumGC(&ra, &de, X[0], X[1], X[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                rdsys(&ra, &de, sA[0], sA[1], sA[2]);
+                //detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
+                detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], 0, 0, 0, 0, 0, 0);
+                //rdsys(&ra, &de, sA[0], sA[1], sA[2]);
 
                 //dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
                 //dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
@@ -388,6 +426,7 @@ int main(int argc, char *argv[])
 
                 mpcStm << astr << "\n";
 
+                break;
             }
         }
 
