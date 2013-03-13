@@ -16,12 +16,26 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
+    ../libs/orbit.cpp \
+    ../libs/orbcat.cpp \
+    ../libs/observatory.cpp \
+    ../libs/observ.cpp \
+    ../libs/mpccat.cpp \
     ../libs/comfunc.cpp \
     ../libs/mpcs.cpp \
     ../libs/DynArr.cpp \
-    ../libs/coord.cpp
+    ../libs/coord.cpp \
+    ../libs/fBuffer.cpp \
+    ../libs/fbStream.cpp \
+    ../libs/dele.cpp
 
-HEADERS += \
+HEADERS += ../libs/orbit.h \
+    ../libs/orbcat.h \
+    ../libs/observatory.h \
+    ../libs/observ.h \
+    ../libs/mpccat.h \
+    ../libs/fBuffer.h \
+    ../libs/fbStream.h \
     ../libs/cspice/zzerror.h \
     ../libs/cspice/zzalloc.h \
     ../libs/cspice/SpiceZst.h \
@@ -53,7 +67,8 @@ HEADERS += \
     ../libs/comfunc.h \
     ../libs/mpcs.h \
     ../libs/DynArr.h \
-    ../libs/coord.h
+    ../libs/coord.h \
+    ../libs/dele.h
 
 unix:LIBS+= ./../libs/unix/cspice.a \
             ./../libs/unix/libastro.a \

@@ -31,7 +31,9 @@ SOURCES += main.cpp \
     ../libs/fbStream.cpp \
     ../libs/redStat.cpp \
     ../libs/mpcfile.cpp \
-    ../libs/listfile.cpp
+    ../libs/listfile.cpp \
+    ../libs/mpcs.cpp \
+    ../libs/DynArr.cpp
 
 HEADERS += \
     ../libs/sscat.h \
@@ -51,7 +53,9 @@ HEADERS += \
     ../libs/astro.h \
     ../libs/redStat.h \
     ../libs/mpcfile.h \
-    ../libs/listfile.h
+    ../libs/listfile.h \
+    ../libs/mpcs.h \
+    ../libs/DynArr.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a

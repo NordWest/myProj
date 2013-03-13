@@ -4,6 +4,8 @@
 #include "./../libs/astro.h"
 #include "./../libs/mpcs.h"
 #include "./../libs/comfunc.h"
+#include "./../libs/mpccat.h"
+#include "./../libs/observatory.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[])
@@ -14,6 +16,7 @@ int main(int argc, char *argv[])
 
     mpc mrec;
     double jdUTC;
+    observatory obsy;
     /*
       Local constants
       */
@@ -28,8 +31,6 @@ int main(int argc, char *argv[])
 
       SpiceDouble             et;
       SpiceDouble             ut, utbeg, utend;
-      SpiceDouble             etbeg;
-      SpiceDouble             etend;
       SpiceDouble             delta;
       SpiceDouble             lt1;
       SpiceDouble             lt2;
@@ -45,276 +46,181 @@ int main(int argc, char *argv[])
 
       SpiceChar               leap  [FILE_SIZE];
       SpiceChar               obs   [WORD_SIZE];
-      SpiceChar               spk   [FILE_SIZE];
       SpiceChar               targ1 [WORD_SIZE];
-      SpiceChar               targ2 [WORD_SIZE];
       SpiceChar               utctim[WORD_SIZE];
       SpiceChar               utcbeg[WORD_SIZE];
       SpiceChar               utcend[WORD_SIZE];
-      SpiceChar               answer[WORD_SIZE];
       SpiceChar             * corr;
       SpiceChar             * ref;
       SpiceChar               *namelen;
+      SpiceChar               *stimestr, *timestr, *ampmstr;
       namelen = new SpiceChar[12];
+      stimestr = new SpiceChar[64];
+      timestr = new SpiceChar[64];
+      ampmstr = new SpiceChar[64];
+      SpiceInt                hr, mn, sc;
 
-      SpiceBoolean            cont, found;
 
-      SpiceInt                i, code_id;
+      SpiceBoolean            cont;
+
+      SpiceInt                i, p;
+
+      QString tstr;
+      QFile mpcFile;
+      QTextStream mpcStm;
+      QString mpcFileName;
+      double stime;
+
+      char *astr = new char[256];
+      ref = new SpiceChar[256];
+      corr = new SpiceChar[256];
+
+      mpccat mCat;
 
       puts (" ");
       puts (" ");
-      puts ("                    Welcome to SIMPLE"                  );
+      puts ("                    Welcome to SIMPLE test program"                  );
       puts (" ");
-      /*puts ("This program calculates the angular separation of two"  );
-      puts ("target bodies as seen from an observing body."          );
-      puts (" ");
-      puts ("The angular separations are calculated for each of 10"  );
-      puts ("equally spaced times in a given time interval. A table" );
-      puts ("of the results is presented.");
-      puts (" ");*/
 
 
-      /*
-      Set the time output format, the precision of that output
-      and the reference frame.  Note:  The angular separation has the
-      same value in all reference frames.  Let's use our favorite, J2000.
-      We need an aberration correction.  "LT+S", light time plus stellar
-      aberration, satisfies the requirements for this program.
-      */
-      ref    = "J2000";
-      corr   = "LT";
-      //corr   = "NONE";
+      QSettings *sett = new QSettings("tcs.ini", QSettings::IniFormat);
+      QString bspName = sett->value("general/bspName", "./de421.bsp").toString();
+
+      sprintf(ref,"%s", sett->value("general/ref", "J2000").toString().toAscii().data());
+      sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
+      sprintf(obs,"%s", sett->value("general/obs", "Earth").toString().toAscii().data());
+      QStringList objList = sett->value("general/objList").toString().split("|");
+      QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
+      QString obsFile = sett->value("general/obsFile", "./Obs.txt").toString();
+      QString obsCode = sett->value("general/obsCode", "084").toString();
+
+      int initMpc = mCat.init(mpcCatFile.toAscii().data());
+      if(obsy.init(obsFile.toAscii().data(), OBS_SIZE)) exit(1);
+      obsy.getobsynumO(obsCode.toAscii().data());
 
 
-      /*
-      Get the various inputs using interactive prompts:
-      */
-      //puts (" ");
-      //prompt_c ( "Enter the name of a leapseconds kernel file: ",
-  //                                                      WORD_SIZE, leap );
-      //puts (" ");
-
-      /*
-      First load the leapseconds file into the kernel pool, so
-      we can convert the UTC time strings to ephemeris seconds
-      past J2000.
-      */
       sprintf(leap,"%s", "./naif0009.tls");
-      furnsh_c ( leap );
+      furnsh_c ( leap );                        //load LSK kernel
+      furnsh_c ( bspName.toAscii().data()  );    //load SPK/BSP kernel with planets ephemerides
+      furnsh_c ( "./codes_300ast.tf"  );        //load KPL/FK kernel with asteroids names and indexes
+      furnsh_c ( "smp.spk"  );                  //load SPK kernel with asteroids aphemerides
 
-
-      //prompt_c ( "Enter the name of a binary SPK ephemeris file: ",
-//                                                        WORD_SIZE, spk  );
-
-      /*
-      Load the binary SPK file containing the ephemeris data
-      that we need.
-      */
-      //sprintf(spk,"%s", "./de421.bsp");
-      furnsh_c ( "./codes_300ast.tf"  );
-      furnsh_c ( "./de421.bsp"  );
-      //furnsh_c ( "./../../data/cats/de405/de405.bsp"  );
-      //furnsh_c ( "./de421.cmt"  );
-
-      //sprintf(spkAst,"%s", "codes_300ast_20100725.bsp");
-      //furnsh_c ( "codes_300ast_20100725.bsp"  );
-      //furnsh_c ( "codes_300ast_20100725.cmt"  );
-      furnsh_c ( "Ceres.spk"  );
-
-
-      //furnsh_c ( "./pallas_1900_2100.bsp"  );
-      //furnsh_c ( "./pallas_1900_2100.cmt"  );
+        furnsh_c ( "earth_latest_high_prec.bpc"  );
+        furnsh_c ( "earth_fixed.tf"  );
+        furnsh_c ( "pck00010.tpc"  );
 
       cont = SPICETRUE;
 
-      QFile mpcFile("./mpc.txt");
+      mpcFileName = QString("./mpc.txt");
+      mpcFile.setFileName(mpcFileName);
       mpcFile.open(QFile::WriteOnly | QFile::Truncate);
-      QTextStream mpcStm(&mpcFile);
-      QString tstr;
-      char *astr = new char[256];
-
-      /* Loop till the user quits. */
- //     do
- //        {
-
-         /*
-         Get the NAIF IDs for the two target bodies and the observing
-         body.
-         */
-/*
-         puts(" ");
-         prompt_c( "Enter the name of the observing body: ",
-                                                        WORD_SIZE, obs );
-
-         puts(" ");
-         prompt_c( "Enter the name of the first target body: ",
-                                                      WORD_SIZE, targ1 );
-
-         puts(" ");
-         prompt_c( "Enter the name of the second target body: ",
-                                                      WORD_SIZE, targ2 );
-*/
-          sprintf(obs,"%s", "Earth");
-          sprintf(targ1,"%s", "Ceres");
-
-/*
-          bods2c_c("Ceres", &code_id, &found);
-          qDebug() << QString("Ceres: %1\t%2\n").arg(code_id).arg(found);
-          bods2c_c("2 Pallas", &code_id, &found);
-          qDebug() << QString("Pallas: %1\t%2\n").arg(code_id).arg(found);
-          bods2c_c("Juno", &code_id, &found);
-          qDebug() << QString("Juno: %1\t%2\n").arg(code_id).arg(found);
-          bods2c_c("Vesta", &code_id, &found);
-          qDebug() << QString("Vesta: %1\t%2\n").arg(code_id).arg(found);
-/*
-          bodc2n_c(2000002, 12, namelen, &found);
-          qDebug() << QString("2000002: %1\t%2\n").arg(namelen).arg(found);
-          bodc2n_c(2000003, 12, namelen, &found);
-          qDebug() << QString("2000003: %1\t%2\n").arg(namelen).arg(found);
-*/
-          //sprintf(targ1,"%s", "Ceres");
-         /*
-         Get the beginning and ending UTC times for the time interval
-         of interest.
-         */
-/*         puts(" ");
-         prompt_c ( "Enter the beginning UTC time: ", WORD_SIZE, utcbeg );
-
-         puts(" ");
-         prompt_c ( "Enter the ending UTC time: ",    WORD_SIZE, utcend );
-
-         puts (" ");
-         puts ("Working ... Please wait.");
-         puts (" ");
-*/
-          utbeg = 2456010.5;
-          utend = 2456090.5;
-         //sprintf(utcbeg,"%f JD", "2456000.5 JD");
-         //sprintf(utcend,"%s", "2456100.5 JD");
-
-         /*
-         Convert the UTC times to ephemeris seconds past J2000 (ET),
-         since that is what the SPICELIB readers are expecting.
-         */
-        // str2et_c ( utcbeg, &etbeg );
-         //str2et_c ( utcend, &etend );
-         //et2utc_c ( etbeg, "C", 0, WORD_SIZE, utcbeg );
-         //et2utc_c ( etend, "C", 0, WORD_SIZE, utcend );
+      mpcStm.setDevice(&mpcFile);
 
 
-         /*
-         Calculate the difference between evaluation times.
-         */
-         delta  = ( utend - utbeg ) / ( (SpiceDouble) MAXPTS  - 1.);
+      //sprintf(obs,"%s", "Earth");
 
-         /*
-         For each time, get the apparent states of the two target
-         bodies as seen from the observer.
-         */
-         //et = etbeg;
-         //sprintf(utctim,"%f JD", 2456000.5);
+     utbeg = 2456010.5;
+     utend = 2456090.5;
+
+     delta  = ( utend - utbeg ) / ( (SpiceDouble) MAXPTS  - 1.);
+
+     for(p=0; p<objList.size(); p++)
+     {
+         sprintf(targ1,"%s", objList.at(p).toAscii().data());
+
+
+
          ut = utbeg;
 
-         puts ("Ceres to ssb"  );
+         printf( "%s rectangilar coords in %s", targ1, ref);
          puts (""  );
 
          for ( i=0; i < MAXPTS; ++i )
-            {
-            /*
-            Compute the state of targ1 and targ2 from obs at et then
-            calculate the angular separation between targ1 and targ2
-            as seen from obs. Convert that angular value from radians
-            to degrees.
-            */
-             sprintf(utctim,"%f JD", ut);
-             str2et_c ( utctim, &et);
+        {
 
-             spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
-             spkezr_c (  targ1, et, ref, "NONE", "ssb", state2, &lt2 );
-             x[i] = state1[0];
-             y[i] = state1[1];
-             z[i] = state1[2];
-            //spkezr_c (  targ2, et, ref, corr, obs, state2, &lt2 );
-             recrad_c (state1, &range[i], &ra[i], &dec[i]);
-             times[i] = et;
-            //et   = et + delta;
-             ut   = ut + delta;
+         sprintf(utctim,"%f JD", ut);
+         str2et_c ( utctim, &et);
 
-             et2utc_c ( et, "ISOC", 0, WORD_SIZE, utctim );
-             printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\n", utctim, state2[0]/AUKM,  state2[1]/AUKM, state2[2]/AUKM);
-            /*
-            Save the time and the separation between the target bodies
-            (in degrees), as seen from the observer, for output to the
-            screen.
-            */
-            /*
-            x[i] = et;
-            y[i] = vsep_c ( state1, state2) * dpr_c();
-            et   = et + delta;*/
-            }
+         tstr = QString(utctim);
+         jdUTC = mjd2jd(getMJDfromStrT(tstr));
+         et2lst_c(et, 399, obsy.record->Long, "PLANETOCENTRIC", 64, 64, &hr, &mn, &sc, timestr, ampmstr);
+         obsy.det_state(jdUTC);
 
-         /*
-         Display the time and angular separation of the desired
-         target bodies for the requested observer for each of the
-         equally spaced evaluation times in the given time interval.
+         qDebug() << QString("obsy: %1\t%2\t%3\n").arg(obsy.dcx).arg(obsy.dcy).arg(obsy.dcz);
+         qDebug() << QString("%1:%2:%3 - %4 - %5\n").arg(hr).arg(mn).arg(sc).arg(timestr).arg(ampmstr);
+         rad2hms_str(obsy.stime, stimestr);
+         qDebug() << QString("stime: %1 - %2\n").arg(24.0*obsy.stime/(2.0*PI)).arg(stimestr);
 
-         If you have a graphics package, you may wish to write the
-         time and angular separation data to a file, and then plot
-         them for added effect.
-         */
-         puts( " ");
-         printf( "The angular separation between bodies %s ,\n",
-                                                       targ1);
-         printf( "as seen from body %s.\n", obs );
+         stime = ((sc/60.0+mn)/60.0 + hr)/24.0;
+         obsy.dcx = obsy.h*obsy.record->Cos*cos(stime);
+         obsy.dcy = obsy.h*obsy.record->Cos*sin(stime);
+         obsy.dcz = obsy.h*obsy.record->Sin;
 
-         puts( " ");
-         printf( "From: %s\n", utcbeg );
-         printf( "To  : %s\n", utcend );
+         //find state vector of targ1 body relative to obs body and ssb point
+         spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
+         spkezr_c (  targ1, et, ref, "NONE", "ssb", state2, &lt2 );
 
-         puts (" ");
-         puts ("       UTC Time                 Separation" );
-         puts ("----------------------------------------------");
+         state1[0] -= obsy.dcx*AUKM;
+         state1[1] -= obsy.dcy*AUKM;
+         state1[2] -= obsy.dcz*AUKM;
 
-         for ( i = 0; i < MAXPTS; ++i )
-            {
-            et2utc_c ( times[i], "ISOC", 0, WORD_SIZE, utctim );
-            //printf ( "  %.20s:\t%s\t%s\t%15.8f\n", utctim, mas_to_hms(rad_to_mas(ra[i]), " ", 2).toAscii().data(),  mas_to_damas(rad_to_mas(dec[i]), " ", 3).toAscii().data(), range[i]/AUKM);
+         x[i] = state1[0];
+         y[i] = state1[1];
+         z[i] = state1[2];
 
-            mrec.r = ra[i];// + dRa;
-            mrec.d = dec[i];// + dDec;
+         //determine a celestial coordinates of state vector in selected reference frame
+         recrad_c (state1, &range[i], &ra[i], &dec[i]);
+         times[i] = et;
+         ut   = ut + delta;
 
-            tstr = QString(utctim);
-            jdUTC = mjd2jd(getMJDfromStrT(tstr));
-            mrec.eJD = jdUTC;
-            mrec.num = 1;
-            mrec.head->set_Snum(1);
-            //mCat.record->getNumStr(mrec.head->Snum);
-            //strcpy(, mCat.record->getNumStr(>number);
-            mrec.tail->set_numOfObs("500");
-            mrec.toString(astr);
+         et2utc_c ( et, "ISOC", 0, WORD_SIZE, utctim );
+         printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, state2[0]/AUKM,  state2[1]/AUKM, state2[2]/AUKM, sqrt(state2[0]*state2[0]+state2[1]*state2[1]+state2[2]*state2[2])/AUKM);
 
-            mpcStm << astr << "\n";
-            printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i]/AUKM,  y[i]/AUKM, z[i]/AUKM, range[i]/AUKM);
-            //printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i],  y[i], z[i], range[i]);
-            }
-/*
-         puts( " " );
-         prompt_c ( "Continue? (Enter Y or N): ", WORD_SIZE, answer );
-         puts( " " );
-         puts( " " );
+        }
 
-         /*
-         Perform a logical test to see if the user wants to
-         continue.
-         /
-         if ( eqstr_c( "N", answer) )
-            {
-            cont = SPICEFALSE;
-            }
-*/
-//         }
-//      while ( cont == SPICETRUE );
-         mpcFile.close();
-    
+             puts( " ");
+             printf( "The rec coords of %s relative to obs ,\n",
+                                                           targ1);
+             printf( "as seen from body %s.\n", obs );
+
+             puts( " ");
+             printf( "From: %f\n", utbeg );
+             printf( "To  : %f\n", utend );
+
+             puts (" ");
+             puts ("       UTC Time                 X Y Z R" );
+             puts ("----------------------------------------------");
+             if(!initMpc) mCat.GetRecName(targ1);
+
+             for ( i = 0; i < MAXPTS; ++i )
+                {
+                et2utc_c ( times[i], "ISOC", 0, WORD_SIZE, utctim );
+
+                mrec.r = ra[i];// + dRa;
+                mrec.d = dec[i];// + dDec;
+
+                tstr = QString(utctim);
+                jdUTC = mjd2jd(getMJDfromStrT(tstr));
+                mrec.eJD = jdUTC;
+                //mrec.num = 1;
+
+                if(!initMpc) mCat.record->getNumStr(mrec.head->Snum);
+                else mrec.head->set_Snum(1);
+                //strcpy(, mCat.record->getNumStr(>number);
+                mrec.tail->set_numOfObs(obsCode.toAscii().data());
+                mrec.toString(astr);
+
+                mpcStm << astr << "\n";
+                printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i]/AUKM,  y[i]/AUKM, z[i]/AUKM, range[i]/AUKM);
+                //printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, x[i],  y[i], z[i], range[i]);
+                }
+
+             puts( " ");
+             puts( "#######################################################");
+             puts( " ");
+
+
+     }
+    mpcFile.close();
     return 0;//a.exec();
 }

@@ -68,6 +68,14 @@ int main(int argc, char *argv[])
 
     rList.saveAs("res.lst");
 
+    int i, sz;
+
+    sz = rList.size();
+    for(i=0; i<sz; i++)
+    {
+
+    }
+
     //delete sa;
 
     return 0;//a.exec();

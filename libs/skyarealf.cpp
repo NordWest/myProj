@@ -1,4 +1,5 @@
 #include "skyarealf.h"
+#include "mpcs.h"
 
 tlRecord::tlRecord()
 {
@@ -858,6 +859,12 @@ int skyAreaLF::grade(resList &rList)
     double x, y, z, vx, vy, vz, Sdist, Edist;
     int plaNum;
     //mpcCat
+    QString mpcFileName = "./mpc.txt";
+    QFile mpcFile(mpcFileName);
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+    mpc mrec;
+    char *astr = new char[256];
 
     int taskNum = task_list.size();
 
@@ -973,6 +980,17 @@ int skyAreaLF::grade(resList &rList)
 
                     det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
 
+                    mrec.r = grad2rad(resRec->ra);// + dRa;
+                    mrec.d = grad2rad(resRec->dec);// + dDec;
+
+                    mrec.eJD = this->obs_pos->otime;
+                    //mrec.num = 1;
+                    mpc_catalog->record->getNumStr(mrec.head->Snum);
+                    //strcpy(, mCat.record->getNumStr(>number);
+                    mrec.tail->set_numOfObs(obs_pos->nobsy);
+                    mrec.toString(astr);
+
+                    mpcStm << astr << "\n";
                 }
                 break;
             }
@@ -981,47 +999,70 @@ int skyAreaLF::grade(resList &rList)
             rList.addRec(resRec);
         }
     }
+    mpcFile.close();
 }
 
 
 void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype, double H)
 {
-    double normR, norm_sA;
-    double *s, *sA, *R, *sV;
-    double *v0, *v1, *v2;
+    double normP, normE, normQ;
+    double *P, *E, *Q, *X;
+    double ct1, ct0, tau, muc2;
 
-    s = new double[3];
-    sA = new double[3];
-    sV = new double[3];
-    R = new double[3];
-    v0 = new double[3];
-    v1 = new double[3];
-    v2 = new double[3];
+    muc2 = 9.8704e-9;
 
-    R[0] = x - obs_pos->ox;
-    R[1] = y - obs_pos->oy;
-    R[2] = z - obs_pos->oz;
+    X = new double[3];
+    P = new double[3];
+    E = new double[3];
+    Q = new double[3];
 
-    normR = norm(R);
+    X[0] = x;
+    X[1] = y;
+    X[2] = z;
 
-    s[0] = R[0]/normR;
-    s[1] = R[1]/normR;
-    s[2] = R[2]/normR;
+    Q[0] = x;
+    Q[1] = y;
+    Q[2] = z;
 
-    sV[0] = vx - obs_pos->ovx;
-    sV[1] = vy - obs_pos->ovy;
-    sV[2] = vz - obs_pos->ovz;
+    E[0] = obs_pos->ox + obs_pos->obs->dcx;
+    E[1] = obs_pos->oy + obs_pos->obs->dcy;
+    E[2] = obs_pos->oz + obs_pos->obs->dcz;
 
-    Vmul3(v0, s, sV);
-    Vmul3(v1, s, v0);
+    P[0] = Q[0] - E[0];
+    P[1] = Q[1] - E[1];
+    P[2] = Q[2] - E[2];
 
-    sA[0] = s[0] + v1[0]*(1.0/CAU);
-    sA[1] = s[1] + v1[1]*(1.0/CAU);
-    sA[2] = s[2] + v1[2]*(1.0/CAU);
+    normP = norm(P);
+    normE = norm(E);
+    normQ = norm(Q);
 
-    norm_sA = norm(sA);
+    ct1 = 0.0;
 
-    rdsys(&resRec->ra, &resRec->dec, sA[0], sA[1], sA[2]);
+    do
+    {
+        ct0 = ct1;
+
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+        //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+        tau = ct1/CAU;
+        Q[0] = X[0] - vx*tau;
+        Q[1] = X[1] - vy*tau;
+        Q[2] = X[2] - vz*tau;
+        normQ = norm(Q);
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
+
+    tau = ct1/CAU;
+
+    P[0] = Q[0] - E[0];
+    P[1] = Q[1] - E[1];
+    P[2] = Q[2] - E[2];
+
+
+    rdsys(&resRec->ra, &resRec->dec, P[0], P[1], P[2]);
+
+    //detRDnumGC(&resRec->ra, &resRec->dec, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
+
         //detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
 
         resRec->ra = rad2grad(resRec->ra);
@@ -1039,11 +1080,9 @@ void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double
     if(ctype==3) resRec->magn = det_m(H, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, x, y, z));
     if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->number)-5.5, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, x, y, z));
 
-    delete [] s;
-    delete [] sA;
-    delete [] sV;
-    delete [] R;
-    delete [] v0;
-    delete [] v1;
-    delete [] v2;
+
+    delete [] P;
+    delete [] Q;
+    delete [] E;
+
 }
