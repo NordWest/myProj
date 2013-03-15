@@ -31,7 +31,9 @@ SOURCES += main.cpp \
     ../libs/redStat.cpp \
     ../libs/mpcfile.cpp \
     ../libs/listfile.cpp \
-    ../libs/skyarealf.cpp
+    ../libs/skyarealf.cpp \
+    ../libs/mpcs.cpp \
+    ../libs/DynArr.cpp
 
 HEADERS += ../libs/sscat.h \
     ../libs/orbit.h \
@@ -50,7 +52,9 @@ HEADERS += ../libs/sscat.h \
     ../libs/redStat.h \
     ../libs/mpcfile.h \
     ../libs/listfile.h \
-    ../libs/skyarealf.h
+    ../libs/skyarealf.h \
+    ../libs/mpcs.h \
+    ../libs/DynArr.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a

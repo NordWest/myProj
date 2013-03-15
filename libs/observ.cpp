@@ -151,6 +151,14 @@ int observ::det_observ(double tUTC)
 
 	if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, this->otime, this->nplanet, this->center, sk)) return 3;
 
+    X[0] = ox+obs->dcx;
+    X[1] = oy+obs->dcy;
+    X[2] = oz+obs->dcz;
+
+    V[0] = ovx+obs->vx;
+    V[1] = ovy+obs->vy;
+    V[2] = ovz+obs->vz;
+
 /*
 	this->ovxt = -(ka*ka*this->ox)/(fabs(pow(this->ox, 3.0)));
 	this->ovyt = -(ka*ka*this->oy)/(fabs(pow(this->oy, 3.0)));

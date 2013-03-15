@@ -53,6 +53,7 @@ public:
 	int s2rec(char *arec);
 
 	double stime, dcx, dcy, dcz, h;
+    double vx, vy, vz;
 
 	obsy *record;
 

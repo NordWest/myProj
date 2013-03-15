@@ -79,6 +79,9 @@
 #define MIU 0.002737909350795
 #define VIU 0.0027304336
 
+#define XI1RAD 0.000001559
+#define XI1GRAD 0.000088889
+
 struct valacc
 {
 	double val;
@@ -209,6 +212,7 @@ int streqv1(char *str, char *strBase);
 int chet(int val);
 
 int UTC2TDT(double jdUTC, double *jdTDT);
+double TDB2TDT(double jdTDB);
 int UTC2TDB(double jdUTC, double *jdTDB);
 double TAImUTC(double mjd);
 int TDT2UTC(double jdTDT, double *jdUTC);

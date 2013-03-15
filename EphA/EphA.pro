@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     ../libs/comfunc.cpp \
 #    ../libs/astro.cpp
     settwindow.cpp \
-    ../libs/listfile.cpp
+    ../libs/listfile.cpp \
+    ../libs/mpcs.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -59,7 +60,8 @@ HEADERS  += mainwindow.h \
     ../libs/astro.h \
     ../libs/mb.h \
     settwindow.h \
-    ../libs/listfile.h
+    ../libs/listfile.h \
+    ../libs/mpcs.h
 
 
 FORMS    += mainwindow.ui \

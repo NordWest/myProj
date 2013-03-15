@@ -214,6 +214,11 @@ int observatory::det_state(double tUTC)
 	this->dcy = this->h*this->record->Cos*sin(this->stime);
 	this->dcz = this->h*this->record->Sin;
 
+    double R = sqrt(dcx*dcx + dcy*dcy);
+    vx = 2.0*PI*dcx;
+    vx = 2.0*PI*dcy;
+    vz = 0.0;
+
 	return 0;
 }
 

@@ -40,6 +40,8 @@ public:
 	int set_obs_parpam(int nplanet, int center, int sk, char *nobsy);
 	int det_observ(double tUTC);
 
+    double X[3], V[3];
+
 	double ox, oy, oz, ovx, ovy, ovz, otime;	//R, V, T
 	double ovxt, ovyt, ovzt;					//Rtt
 	int nplanet, center, sk;
@@ -49,7 +51,7 @@ public:
 	observ();
 	~observ();
 
-        int detSunRADEC(double *raS, double *decS);
+    int detSunRADEC(double *raS, double *decS);
 
 /*
 	mpcs *lmpc;

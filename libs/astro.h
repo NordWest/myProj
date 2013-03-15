@@ -15,6 +15,7 @@
 #define AU_CONST 1
 #define AUKM 1.49597870691000015e+8
 #define AUSM 1.49597870691000015e+13
+
 typedef struct __DATEOBS__
 {
 	int year;

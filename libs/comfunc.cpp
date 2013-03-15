@@ -1690,13 +1690,18 @@ int TDT2UTC(double jdTDT, double *jdUTC)
     return 0;
 }
 
+double TDB2TDT(double jdTDB)
+{
+    double T=(jdTDB-2451545)/36525;
+    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
+    return(jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0);
+}
+
 int TDB2UTC(double jdTDB, double *jdUTC)
 {
     double jdTDT;
 
-    double T=(jdTDB-2451545)/36525;
-    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
-    jdTDT = jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0;
+    jdTDT = TDB2TDT(jdTDB);
     TDT2UTC(jdTDT, jdUTC);
 
     return 0;

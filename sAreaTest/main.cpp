@@ -7,98 +7,8 @@
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
 #include "./../libs/skyarealf.h"
+#include "./../libs/calc_epm.h"
 
-
-//#include "./../libs/listfile.h"
-/*
-class tRecord
-{
-public:
-//    tRecord(){};
-//    ~tRecord(){};
-
-    int fromString(QString tStr){};
-    int toString(QString &tStr){};
-};
-
-template <class tRecord>
-class listFile
-{
-    QList <tRecord*> recList;
-    QString fileName;
- public:
-    int init(QString fname)
-    {
-        fileName = fname;
-        QFile iniFile(fileName);
-        iniFile.open(QIODevice::ReadOnly);
-        QTextStream iniStm(&iniFile);
-
-        QString tStr;
-
-        recList.clear();
-
-        while(!iniStm.atEnd())
-        {
-            tStr = iniStm.readLine();
-            s2rec(tStr);//) continue;
-            //recList << tRec;
-            //tRec = new tRecord;
-        }
-
-        iniFile.close();
-
-        return 0;
-    };
-
-    int s2rec(QString tStr){
-        tRecord *tRec;
-        tRec = new tRecord;
-        if(tRec->toString(tStr)) return 1;
-        recList << tRec;
-        return 0;
-    };
-
-};
-
-class tlRecord : public tRecord	//Task List record
-{
-public:
-//	int noftask;	//number of task
-
-        double exp;			//experience of task
-        int Ntot;			//Total number of observation for one object
-        double texc;		//exclusion of a object after successful observations
-        double dRA;			//maximum distance from celestial meridian
-        int NinN;			//number obsrvations during one night
-        int flag_active;	//flag for activ task
-        QString name, desc, dirPath, catName;
-
-//	char *tail;
-
-        tlRecord();
-        int fromString(QString tStr);
-        void toString(QString &tStr);
-        tlRecord& operator=(const tlRecord &rhs);
-        //tlRecord& operator=(const TLRecord &rhs);
-
-        void getIniName(QString &iniName);
-};
-
-bool operator==( const tlRecord& lhs, const tlRecord& rhs );
-
-class taskList : listFile <tlRecord>
-{
-public:
-    taskList(){};
-    //int init(QString fname);
-};
-
-int taskList::init(QString fname)
-{
-    return 0;
-}
-*/
 
 //using namespace std;
 
@@ -107,8 +17,58 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+    int i, sz, status, centr_num;
+    int SK, CENTER;
+    mpccat mCat;
+    orbit orbRec;
+    QString name, sJD, objDataStr;
+    QStringList outerArguments, resSL;
+    QProcess outerProcess;
+    double timei, time1, dtime, jdUTC;
+    double X[3], V[3];
+    double X0[3], V0[3];
+    observ obsPos;
 
+    QSettings *sett = new QSettings("./satest.ini", QSettings::IniFormat);
+    QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString epmDir = sett->value("general/epmDir", "./").toString();
+    QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
+    QString obsCode = sett->value("general/obsCode", "500").toString();
+    QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
+    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+    double time0 = sett->value("general/time0", 2455201.0).toDouble();
+    int useEPM = sett->value("general/useEPM", 0).toInt();
+    QString colSep = sett->value("general/colSep", "|").toString();
 
+    SK = sett->value("general/sk", 0).toInt();
+    CENTER = sett->value("general/center", 0).toInt();
+
+    procData miriadeProcData;
+    miriadeProcData.name = sett->value("miriadeProcData/name", "./mpeph.exe").toString();
+    miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
+    miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
+    if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
+/*
+    if(useEPM)
+    {
+        status = !InitTxt(epmDir.toAscii().data());
+        centr_num = 11+!CENTER;
+    }
+    else
+    {
+        status = nbody->init(jplFile.toAscii().data());
+    }
+
+    if(status)
+    {
+        qDebug() << QString("init ephemeride error\n");
+        return 1;
+    }
+    */
+
+    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+/*
     QString eassDir = QString("/home/nuts/Work/lab/EA_NA");
     QString taskListFile = QString("%1/task.lst").arg(eassDir);
     QString catListFile = QString("%1/cat.lst").arg(eassDir);
@@ -116,7 +76,7 @@ int main(int argc, char *argv[])
     QString resDir = QString("./");
     QString tListFile = QString("%1/taskN.lst").arg(resDir);
 
-
+/*
     taskList taskL;
     taskL.init(taskListFile.toAscii().data());
 
@@ -124,30 +84,113 @@ int main(int argc, char *argv[])
     taskList tList;
     tList.init(tListFile);
     tlRecord *ntRec;
+*/
 
-    int i, sz;
 
-    sz = taskL.size();
 
-    for(i=0;i<sz;i++)
+
+    QFile logFile("./satest.log");
+    logFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream logStm(&logFile);
+
+    QFile logObsFile("./satestObs.log");
+    logObsFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream logObsStm(&logObsFile);
+
+    QFile logObsEFile("./satestObsE.log");
+    logObsEFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream logObsEStm(&logObsEFile);
+
+
+    name = "Ceres";
+
+    if(mCat.init(mpcCatFile.toAscii().data()))
     {
-        //taskL.GetRec(i);
-        ntRec = new tlRecord;
-        ntRec = taskL.at(i);
-        tList.append(*ntRec);
+        qDebug() << QString("cat\'t open mpccat %1\n").arg(mpcCatFile.toAscii().data());
+        exit(1);
     }
 
-    tList.save();
+
+    if(mCat.GetRecName(name.simplified().toAscii().data()))
+    {
+       qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+       exit(1);
+    }
+    qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
+    orbRec.get(&mCat);
+
+    time0=mCat.record->getEpoch();
+    time1 = time0+10;
+    dtime = 1.0;
+
+    for(timei=time0; timei<time1; timei+=dtime)
+    {
+        TDB2UTC(timei, &jdUTC);
+        sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+        obsPos.det_observ(timei);
+
+        logObsEStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(timei, 13, 'f', 7).arg(obsPos.X[0], 26, 'e', 20).arg(obsPos.X[1], 26, 'e', 20).arg(obsPos.X[2], 26, 'e', 20).arg(obsPos.V[0], 26, 'e', 20).arg(obsPos.V[1], 26, 'e', 20).arg(obsPos.V[2], 26, 'e', 20);
+
+        orbRec.detRecEkv(&X[0], &X[1], &X[2], timei);
+        orbRec.detRecEkvVel(&V[0], &V[1], &V[2], timei);
+
+        logStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(timei, 13, 'f', 7).arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+/*
+
+
+        X0[0] = resSL.at(1).toDouble();
+        X0[1] = resSL.at(2).toDouble();
+        X0[2] = resSL.at(3).toDouble();
+*/
+        logObsStm << QString("%1|%2|%3|%4\n").arg(timei, 13, 'f', 7).arg(X[0]-obsPos.X[0], 26, 'e', 20).arg(X[1]-obsPos.X[1], 26, 'e', 20).arg(X[2]-obsPos.X[2], 26, 'e', 20);
+    }
 
 
 
 
-
+    logFile.close();
+    logObsFile.close();
+    logObsEFile.close();
 
     return 0;
 }
 
-/*
+/*        outerArguments.clear();
+        outerArguments << QString("-name=%1").arg(name.simplified().toLower());
+        outerArguments << QString("-ep=%1").arg(sJD);
+        outerArguments << "-type=aster";
+        outerArguments << QString("-observer=@sun");
+        outerArguments << "-tcoor=2";
+        outerArguments << "-rplane=1";
+
+        //qDebug() << outerArguments.join(" ") << "\n";
+
+        outerProcess.setWorkingDirectory(miriadeProcData.folder);
+        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+        outerProcess.setReadChannel(QProcess::StandardOutput);
+
+        outerProcess.start(miriadeProcData.name, outerArguments);
+
+        if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+        {
+            qDebug() << "\nmiriadeProc finish error\n";
+            break;
+        }
+
+        QTextStream objStream(outerProcess.readAllStandardOutput());
+
+        while (!objStream.atEnd())
+        {
+            objDataStr = objStream.readLine();
+            //qDebug() << QString("objDataStr: %1").arg(objDataStr);
+            if(objDataStr.size()<1) continue;
+            if(objDataStr.at(0)=='#') continue;
+
+            resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+            if(resSL.size()<8) continue;
+
+            break;
+        }
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
