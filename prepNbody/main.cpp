@@ -432,7 +432,7 @@ int main(int argc, char *argv[])
                 isObj = 0;
             switch(smlType)
             {
-            case 0:
+            case 1:
                 {
                     outerArguments.clear();
 
@@ -501,7 +501,7 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
-            case 1:
+            case 0:
                 {
 
 

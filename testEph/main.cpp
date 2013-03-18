@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
     int CENTER, SK;
     int i, j, plaNumEPM, plaNumDE;
 
+
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
     QString name;
     int status;
     int jday;
-    double pday, t, jdUTC;
+    double pday, t, jdUTC, jdTDB;
 
     if(useEPM)
     {
@@ -285,7 +286,11 @@ int main(int argc, char *argv[])
                     //nbody->detR(&x, &y, &z, ti, plaNum, 0, centerNum, skNum);
                     //nbody->detR(&vx, &vy, &vz, ti, plaNum, 1, centerNum, skNum);
                     //nbody->detState(&x, &y, &z, &vx, &vy, &vz, ti, plaNumDE, centerNum, skNum);
+
+
 */
+            //UTC2TDB(t0, &jdTDB);
+
                     if(useEPM)
                     {
                         status = calc_EPM(plaNum, centr_num, (int)t0, t0-(int)t0, X, V);
@@ -297,16 +302,21 @@ int main(int argc, char *argv[])
                     }
                     else nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], t0, plaNum, CENTER, SK);
 
+                    dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
+                    dvel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
+                    qDebug() << QString("DE: %1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(t0, 15, 'f', 6).arg(X[0], 18, 'g', 9).arg(X[1], 18, 'g', 9).arg(X[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V[0], 18, 'g', 9).arg(V[1], 18, 'g', 9).arg(V[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+
                     TDB2UTC(t0, &jdUTC);
                     sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+                    //sJD = QString("%1").arg(t0, 15, 'f',7);
 
                     outerArguments.clear();
 
                     outerArguments << QString("-name=%1").arg(name.simplified());
                     outerArguments << QString("-type=planet");
                     outerArguments << QString("-observer=@sun");
-                    outerArguments << QString("-ep=%1").arg(t0, 15, 'f',7);
-                    //outerArguments << QString("-ep=%1").arg(sJD);
+                    //outerArguments << QString("-ep=%1").arg(t0, 15, 'f',7);
+                    outerArguments << QString("-ep=%1").arg(sJD);
                     //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
 
                     qDebug() << outerArguments.join(" ") << "\n";
@@ -328,9 +338,11 @@ int main(int argc, char *argv[])
                     while (!ethStream.atEnd())
                     {
                         objDataStr = ethStream.readLine();
-                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                        //
                         if(objDataStr.size()<1) continue;
                         if(objDataStr.at(0)=='#') continue;
+
+                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
 
                         resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
                         if(resSL.size()<8) continue;
@@ -359,7 +371,7 @@ int main(int argc, char *argv[])
 
                     dvel = sqrt(dV[0]*dV[0] + dV[1]*dV[1] + dV[2]*dV[2]);
 
-                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 15, 'f', 6).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
                     qDebug() << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
 
 

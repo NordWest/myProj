@@ -33,9 +33,10 @@ int main(int argc, char *argv[])
       SpiceDouble             ut, utbeg, utend;
       SpiceDouble             delta;
       SpiceDouble             lt1;
-      SpiceDouble             lt2;
+      SpiceDouble             lt2, lt3;
       SpiceDouble             state1 [6];
       SpiceDouble             state2 [6];
+      SpiceDouble             state3 [6];
       SpiceDouble             times[MAXPTS];
       SpiceDouble             x[MAXPTS];
       SpiceDouble             y[MAXPTS];
@@ -85,6 +86,7 @@ int main(int argc, char *argv[])
 
       QSettings *sett = new QSettings("tcs.ini", QSettings::IniFormat);
       QString bspName = sett->value("general/bspName", "./de421.bsp").toString();
+      QString spkName = sett->value("general/spkName", "./smp.spk").toString();
 
       sprintf(ref,"%s", sett->value("general/ref", "J2000").toString().toAscii().data());
       sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
@@ -103,11 +105,11 @@ int main(int argc, char *argv[])
       furnsh_c ( leap );                        //load LSK kernel
       furnsh_c ( bspName.toAscii().data()  );    //load SPK/BSP kernel with planets ephemerides
       furnsh_c ( "./codes_300ast.tf"  );        //load KPL/FK kernel with asteroids names and indexes
-      furnsh_c ( "smp.spk"  );                  //load SPK kernel with asteroids aphemerides
+      furnsh_c ( spkName.toAscii().data() );                  //load SPK kernel with asteroids aphemerides
 
-        furnsh_c ( "earth_latest_high_prec.bpc"  );
-        furnsh_c ( "earth_fixed.tf"  );
-        furnsh_c ( "pck00010.tpc"  );
+        //furnsh_c ( "earth_latest_high_prec.bpc"  );
+        //furnsh_c ( "earth_fixed.tf"  );
+        //furnsh_c ( "pck00010.tpc"  );
 
       cont = SPICETRUE;
 
@@ -140,7 +142,7 @@ int main(int argc, char *argv[])
 
          sprintf(utctim,"%f JD", ut);
          str2et_c ( utctim, &et);
-
+/*
          tstr = QString(utctim);
          jdUTC = mjd2jd(getMJDfromStrT(tstr));
          et2lst_c(et, 399, obsy.record->Long, "PLANETOCENTRIC", 64, 64, &hr, &mn, &sc, timestr, ampmstr);
@@ -155,15 +157,16 @@ int main(int argc, char *argv[])
          obsy.dcx = obsy.h*obsy.record->Cos*cos(stime);
          obsy.dcy = obsy.h*obsy.record->Cos*sin(stime);
          obsy.dcz = obsy.h*obsy.record->Sin;
-
+*/
          //find state vector of targ1 body relative to obs body and ssb point
          spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
          spkezr_c (  targ1, et, ref, "NONE", "ssb", state2, &lt2 );
-
+         spkezr_c (  obs, et, ref, "NONE", "sun", state3, &lt3 );
+/*
          state1[0] -= obsy.dcx*AUKM;
          state1[1] -= obsy.dcy*AUKM;
          state1[2] -= obsy.dcz*AUKM;
-
+*/
          x[i] = state1[0];
          y[i] = state1[1];
          z[i] = state1[2];
@@ -175,6 +178,8 @@ int main(int argc, char *argv[])
 
          et2utc_c ( et, "ISOC", 0, WORD_SIZE, utctim );
          printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, state2[0]/AUKM,  state2[1]/AUKM, state2[2]/AUKM, sqrt(state2[0]*state2[0]+state2[1]*state2[1]+state2[2]*state2[2])/AUKM);
+
+         qDebug() << QString("Earth@sun: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state3[0]/AUKM, 15, 'e', 10).arg(state3[1]/AUKM, 15, 'e', 10).arg(state3[2]/AUKM, 15, 'e', 10).arg(state3[3]/AUKM, 15, 'e', 10).arg(state3[4]/AUKM, 15, 'e', 10).arg(state3[5]/AUKM, 15, 'e', 10);
 
         }
 

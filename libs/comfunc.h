@@ -56,8 +56,6 @@
 #define kaGRAD1 0.071014884
 #define kaSEC 3548.1876
 #define Xi ka*sqrt((double)MS)
-//#define EKV 0.409092614174
-//#define EKV 0.409092572
 #define EKV 0.409092804
 #define EPS 1.0e-8
 
