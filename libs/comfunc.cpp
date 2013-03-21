@@ -1676,7 +1676,7 @@ int UTC2TDB(double jdUTC, double *jdTDB)
 {
     double jdTDT;
     UTC2TDT(jdUTC, &jdTDT);
-    double T=(jdTDT-2451545)/36525;
+    double T=(jdTDT-2451545)/36525.0;
     double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
     *jdTDB = jdTDT + 0.001658*sin(g+0.0167*sin(g))/86400.0;
 
@@ -1692,9 +1692,10 @@ int TDT2UTC(double jdTDT, double *jdUTC)
 
 double TDB2TDT(double jdTDB)
 {
-    double T=(jdTDB-2451545)/36525;
+    double T=(jdTDB-2451545)/36525.0;
     double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
-    return(jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0);
+    double res = jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0;
+    return(res);
 }
 
 int TDB2UTC(double jdTDB, double *jdUTC)

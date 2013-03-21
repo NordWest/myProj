@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     QProcess outerProcess;
     QString sJD;
 
-    double dist, vel, jdUTC, jdTDB;
+    double dist, vel, jdUTC, jdTDB, jdTDT;
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
@@ -233,6 +233,14 @@ int main(int argc, char *argv[])
         coefXD = 1000*AUKM/SECINDAY;
     }
 */
+
+    jdTDT = TDB2TDT(time0);
+    TDB2UTC(time0, &jdUTC);
+    sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+    UTC2TDB(jdUTC, &jdTDB);
+
+    qDebug() << QString("jd: %1 - %2 - %3 - %4\n").arg(time0, 11, 'f',7).arg(jdUTC, 11, 'f',7).arg(jdTDB, 11, 'f',7).arg(jdTDT, 11, 'f',7);
+
 
     bigStm << ")O+_06 Big-body initial data  (WARNING: Do not delete this line!!)\n";
     bigStm << ") Lines beginning with `)' are ignored.\n";
@@ -373,9 +381,7 @@ int main(int argc, char *argv[])
                 nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time0, GEOCENTR_NUM, CENTER, SK);
             }*/
 
-            TDB2UTC(time0, &jdUTC);
-            sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-            UTC2TDB(time0, &jdTDB);
+
 
             outerArguments.clear();
 
@@ -505,6 +511,7 @@ int main(int argc, char *argv[])
                 {
 
 
+
                     if(mCat.GetRecName(name.simplified().toAscii().data()))
                     {
                        qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
@@ -513,8 +520,8 @@ int main(int argc, char *argv[])
                     qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
                     orbRec.get(&mCat);
 
-                    orbRec.detRecEkv(&X[0], &X[1], &X[2], time0);
-                    orbRec.detRecEkvVel(&V[0], &V[1], &V[2], time0);
+                    orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
+                    orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
 
                     isObj = 1;
                     break;

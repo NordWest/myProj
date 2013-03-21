@@ -289,11 +289,11 @@ int main(int argc, char *argv[])
 
 
 */
-            //UTC2TDB(t0, &jdTDB);
+            UTC2TDB(t0, &jdTDB);
 
                     if(useEPM)
                     {
-                        status = calc_EPM(plaNum, centr_num, (int)t0, t0-(int)t0, X, V);
+                        status = calc_EPM(plaNum, centr_num, (int)jdTDB, jdTDB-(int)jdTDB, X, V);
                          if(!status)
                          {
                              qDebug() << QString("error EPM\n");
@@ -306,9 +306,9 @@ int main(int argc, char *argv[])
                     dvel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
                     qDebug() << QString("DE: %1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(t0, 15, 'f', 6).arg(X[0], 18, 'g', 9).arg(X[1], 18, 'g', 9).arg(X[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V[0], 18, 'g', 9).arg(V[1], 18, 'g', 9).arg(V[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
 
-                    TDB2UTC(t0, &jdUTC);
-                    sJD = QString("%1").arg(jdUTC, 15, 'f',7);
-                    //sJD = QString("%1").arg(t0, 15, 'f',7);
+                    //TDB2UTC(t0, &jdUTC);
+                    //sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+                    sJD = QString("%1").arg(t0, 15, 'f',7);
 
                     outerArguments.clear();
 
