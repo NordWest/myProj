@@ -14,6 +14,7 @@
 #include "./../libs/ephem_util.h"
 #include "./../libs/calc_epm.h"
 #include "./../libs/mpccat.h"
+#include "./../libs/cspice/SpiceUsr.h"
 
 #include <QDebug>
 #include <QSettings>
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
     int status;
 
     QString objDataStr;
-    QString name;
+    QString name, sName;
     int plaNum;
 
     double *X, *V;
@@ -110,6 +111,13 @@ int main(int argc, char *argv[])
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
+
+    SpiceDouble             state [6];
+    SpiceDouble             lt;
+    SpiceChar             * corr;
+    SpiceChar             * ref;
+    ref = new SpiceChar[256];
+    corr = new SpiceChar[256];
 
     QList <ParticleStruct*> pList;
 
@@ -138,6 +146,12 @@ int main(int argc, char *argv[])
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
+    //SPICE
+    QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
+    QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
+    sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
+    sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
+
     int jday = (int)time0;
     double pday = time0 - jday;
 
@@ -161,10 +175,17 @@ int main(int argc, char *argv[])
 
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
 
+
     if(smlType==1&&initMpc)
     {
         qDebug() << QString("err: mCat not found: %1\n").arg(mpcCatFile.toAscii().data());
         return 1;
+    }
+
+    if(bigType==2)
+    {
+        furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
+        furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
 
     //QList <ParticleStruct*> pmList;
@@ -339,6 +360,23 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
+            case 2:
+            {
+                if(plaNum!=SUN_NUM)
+                {
+                    sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                    qDebug() << QString("name: %1\n").arg(sName);
+                    if(CENTER) spkezr_c (  sName.toAscii().data(), time0, ref, "NONE", "sun", state, &lt );
+                    else spkezr_c (  sName.toAscii().data(), time0, ref, "NONE", "ssb", state, &lt );
+                    X[0] = state[0]/AUKM;
+                    X[1] = state[1]/AUKM;
+                    X[2] = state[2]/AUKM;
+                    V[0] = state[3]/AUKM;
+                    V[1] = state[4]/AUKM;
+                    V[2] = state[5]/AUKM;
+                }
+            }
+                break;
 
             }
 
@@ -383,56 +421,7 @@ int main(int argc, char *argv[])
 
 
 
-            outerArguments.clear();
 
-
-            outerArguments << QString("-name=earth");
-            outerArguments << QString("-type=planet");
-            outerArguments << QString("-observer=@sun");
-            outerArguments << QString("-ep=%1").arg(sJD);
-            //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
-
-            qDebug() << outerArguments.join(" ") << "\n";
-
-            outerProcess.setWorkingDirectory(miriadeProcData.folder);
-            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-            outerProcess.setReadChannel(QProcess::StandardOutput);
-
-            outerProcess.start(miriadeProcData.name, outerArguments);
-
-            if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-            {
-                qDebug() << "\nmiriadeProc finish error\n";
-                break;
-            }
-
-            QTextStream ethStream(outerProcess.readAllStandardOutput());
-
-
-            isObj = 0;
-
-
-            while (!ethStream.atEnd())
-            {
-                objDataStr = ethStream.readLine();
-                //qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                if(objDataStr.size()<1) continue;
-                if(objDataStr.at(0)=='#') continue;
-
-                resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                if(resSL.size()<8) continue;
-                //isObj = 1;
-                X0[0] = resSL.at(1).toDouble();
-                X0[1] = resSL.at(2).toDouble();
-                X0[2] = resSL.at(3).toDouble();
-                V0[0] = resSL.at(5).toDouble();
-                V0[1] = resSL.at(6).toDouble();
-                V0[2] = resSL.at(7).toDouble();
-                break;
-            }
-
-
-            qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
 
 
                 isObj = 0;
@@ -440,6 +429,59 @@ int main(int argc, char *argv[])
             {
             case 1:
                 {
+                outerArguments.clear();
+
+
+                outerArguments << QString("-name=earth");
+                outerArguments << QString("-type=planet");
+                outerArguments << QString("-observer=@sun");
+                outerArguments << QString("-ep=%1").arg(sJD);
+                //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+
+                qDebug() << outerArguments.join(" ") << "\n";
+
+                outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                outerProcess.start(miriadeProcData.name, outerArguments);
+
+                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                {
+                    qDebug() << "\nmiriadeProc finish error\n";
+                    break;
+                }
+
+                QTextStream ethStream(outerProcess.readAllStandardOutput());
+
+
+                isObj = 0;
+
+
+                while (!ethStream.atEnd())
+                {
+                    objDataStr = ethStream.readLine();
+                    //qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                    if(objDataStr.size()<1) continue;
+                    if(objDataStr.at(0)=='#') continue;
+
+                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                    if(resSL.size()<8) continue;
+                    //isObj = 1;
+                    X0[0] = resSL.at(1).toDouble();
+                    X0[1] = resSL.at(2).toDouble();
+                    X0[2] = resSL.at(3).toDouble();
+                    V0[0] = resSL.at(5).toDouble();
+                    V0[1] = resSL.at(6).toDouble();
+                    V0[2] = resSL.at(7).toDouble();
+                    break;
+                }
+
+
+                qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
+
+
+//////////////////////////
                     outerArguments.clear();
 
                     outerArguments << QString("-name=%1").arg(name.simplified());
