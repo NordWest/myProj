@@ -269,8 +269,8 @@ int main(int argc, char *argv[])
 
     for(k=0; k<nstep; k++)
     {
-        ti = t0 + dt*(k-nstep/2);
-        tii=t0;
+        ti = t0 + dt*k;//(k-nstep/2);
+        tii=ti;
         //tii = ti+0.000766;
         //tii = t0+0.000777500;
         //TDB2UTC(ti, &jdUTC);
@@ -349,51 +349,51 @@ int main(int argc, char *argv[])
                     case 1:
                     {
                         sJD = QString("%1").arg(jdUTC, 15, 'f',7);
-                            outerArguments.clear();
+                        outerArguments.clear();
 
-                            outerArguments << QString("-name=%1").arg(name.simplified());
-                            outerArguments << QString("-type=planet");
-                            outerArguments << QString("-observer=@sun");
-                            //outerArguments << QString("-ep=%1").arg(t0, 15, 'f',7);
-                            outerArguments << QString("-ep=%1").arg(sJD);
-                            //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+                        outerArguments << QString("-name=%1").arg(name.simplified());
+                        outerArguments << QString("-type=planet");
+                        outerArguments << QString("-observer=@sun");
+                        //outerArguments << QString("-ep=%1").arg(t0, 15, 'f',7);
+                        outerArguments << QString("-ep=%1").arg(sJD);
+                        //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
 
-                            qDebug() << outerArguments.join(" ") << "\n";
+                        qDebug() << outerArguments.join(" ") << "\n";
 
-                            outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                            outerProcess.setReadChannel(QProcess::StandardOutput);
+                        outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                        outerProcess.setReadChannel(QProcess::StandardOutput);
 
-                            outerProcess.start(miriadeProcData.name, outerArguments);
+                        outerProcess.start(miriadeProcData.name, outerArguments);
 
-                            if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                            {
-                                qDebug() << "\nmiriadeProc finish error\n";
-                                break;
-                            }
+                        if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                        {
+                            qDebug() << "\nmiriadeProc finish error\n";
+                            break;
+                        }
 
-                            QTextStream ethStream(outerProcess.readAllStandardOutput());
+                        QTextStream ethStream(outerProcess.readAllStandardOutput());
 
-                            while (!ethStream.atEnd())
-                            {
-                                objDataStr = ethStream.readLine();
-                                //
-                                if(objDataStr.size()<1) continue;
-                                if(objDataStr.at(0)=='#') continue;
+                        while (!ethStream.atEnd())
+                        {
+                            objDataStr = ethStream.readLine();
+                            //
+                            if(objDataStr.size()<1) continue;
+                            if(objDataStr.at(0)=='#') continue;
 
-                                qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                            qDebug() << QString("objDataStr: %1").arg(objDataStr);
 
-                                resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                                if(resSL.size()<8) continue;
-                                //isObj = 1;
-                                X0[0] = resSL.at(1).toDouble();
-                                X0[1] = resSL.at(2).toDouble();
-                                X0[2] = resSL.at(3).toDouble();
-                                V0[0] = resSL.at(5).toDouble();
-                                V0[1] = resSL.at(6).toDouble();
-                                V0[2] = resSL.at(7).toDouble();
-                                break;
-                            }
+                            resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                            if(resSL.size()<8) continue;
+                            //isObj = 1;
+                            X0[0] = resSL.at(1).toDouble();
+                            X0[1] = resSL.at(2).toDouble();
+                            X0[2] = resSL.at(3).toDouble();
+                            V0[0] = resSL.at(5).toDouble();
+                            V0[1] = resSL.at(6).toDouble();
+                            V0[2] = resSL.at(7).toDouble();
+                            break;
+                        }
                     }
                         break;
                     case 2:
@@ -402,16 +402,16 @@ int main(int argc, char *argv[])
                         //{
                         sJD = QString("%1 JD").arg(ti, 15, 'f',7);
                         str2et_c(sJD.toAscii().data(), &et);
-                            sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
-                            qDebug() << QString("name: %1\n").arg(sName);
-                            if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
-                            else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
-                            X0[0] = state[0]/AUKM;
-                            X0[1] = state[1]/AUKM;
-                            X0[2] = state[2]/AUKM;
-                            V0[0] = state[3]/AUKM;
-                            V0[1] = state[4]/AUKM;
-                            V0[2] = state[5]/AUKM;
+                        sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                        qDebug() << QString("name: %1\n").arg(sName);
+                        if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+                        else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
+                        X0[0] = state[0]/AUKM;
+                        X0[1] = state[1]/AUKM;
+                        X0[2] = state[2]/AUKM;
+                        V0[0] = state[3]/AUKM;
+                        V0[1] = state[4]/AUKM;
+                        V0[2] = state[5]/AUKM;
                         //}
                     }
                         break;
@@ -436,7 +436,7 @@ int main(int argc, char *argv[])
 
                     dvel = sqrt(dV[0]*dV[0] + dV[1]*dV[1] + dV[2]*dV[2]);
 
-                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11\n").arg(name, -10).arg(ti-tii, 18, 'f', 10).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9).arg(plaNum);
+                    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11\n").arg(name, -10).arg(ti, 18, 'f', 10).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9).arg(plaNum);
                     qDebug() << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(ti, 13, 'f', 4).arg(dX[0], 18, 'g', 9).arg(dX[1], 18, 'g', 9).arg(dX[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(dV[0], 18, 'g', 9).arg(dV[1], 18, 'g', 9).arg(dV[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
 
 

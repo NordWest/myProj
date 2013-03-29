@@ -1698,6 +1698,14 @@ double TDB2TDT(double jdTDB)
     return(res);
 }
 
+double TDT2TDB(double jdTDT)
+{
+    double T=(jdTDT-2451545)/36525.0;
+    double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
+    double res = jdTDT + 0.001658*sin(g+0.0167*sin(g))/86400.0;
+    return(res);
+}
+
 int TDB2UTC(double jdTDB, double *jdUTC)
 {
     double jdTDT;

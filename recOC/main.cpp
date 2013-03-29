@@ -7,6 +7,10 @@
 #include "./../libs/mpccat.h"
 #include "./../libs/mpcs.h"
 
+#include "./../libs/cspice/SpiceUsr.h"
+#include "./../libs/observ.h"
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -27,7 +31,7 @@ int main(int argc, char *argv[])
     int isObj, i;
     int SK, CENTER;
     QProcess outerProcess;
-    QString objDataStr, strT;
+    QString objDataStr, strT, sName;
     mpc mrec;
     double dT, m, n;
     double dRa, dDec, normR, norm_sA;
@@ -45,9 +49,18 @@ int main(int argc, char *argv[])
     v1 = new double[3];
     v2 = new double[3];
 
+    observ obsPos;
+
     double muc2 = 9.8704e-9;
-    double ct0, ct1, tau;
+    double ct0, ct1, tau, et;
     double normE, normQ, normP;
+
+    SpiceDouble             state [6];
+    SpiceDouble             lt;
+    SpiceChar             * corr;
+    SpiceChar             * ref;
+    ref = new SpiceChar[256];
+    corr = new SpiceChar[256];
 
     procData miriadeProcData;
 
@@ -61,6 +74,9 @@ int main(int argc, char *argv[])
     int useEPM = sett->value("general/useEPM", 0).toInt();
     QString colSep = sett->value("general/colSep", "|").toString();
 
+    int bigType = sett->value("general/bigType", 0).toInt();
+    int smlType = sett->value("general/smlType", 0).toInt();
+
     SK = sett->value("general/sk", 0).toInt();
     CENTER = sett->value("general/center", 0).toInt();
 
@@ -68,6 +84,12 @@ int main(int argc, char *argv[])
     miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
+
+    //SPICE
+    QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
+    QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
+    sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
+    sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
 
     dele *nbody;
     nbody = new dele();
@@ -89,6 +111,15 @@ int main(int argc, char *argv[])
         qDebug() << QString("init ephemeride error\n");
         return 1;
     }
+
+    if(bigType==2)
+    {
+        furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
+        furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+    }
+
+    obsPos.init(obsFile, bspName, leapName);
+    obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
 
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
@@ -148,41 +179,86 @@ int main(int argc, char *argv[])
         else plaNum = planet_num(name.toAscii().data());
         if(plaNum!=-1)
         {
-
-            if(useEPM)
+            switch(bigType)
             {
-                status = calc_EPM(plaNum, centr_num, (int)time, time-(int)time, X0, V0);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time, plaNum, CENTER, SK);
 
+            case 0:
+            {
+
+                if(useEPM)
+                {
+                    status = calc_EPM(plaNum, centr_num, (int)time, time-(int)time, X0, V0);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         return 1;
+                     }
+                }
+                else nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time, plaNum, CENTER, SK);
+            }
+                break;
+            case 2:
+            {
+                if(plaNum!=SUN_NUM)
+                {
+                    sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                    qDebug() << QString("name: %1\n").arg(sName);
+                    sJD = QString("%1 JD").arg(time, 15, 'f',7);
+                    str2et_c(sJD.toAscii().data(), &et);
+                    if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+                    else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
+                    X0[0] = state[0]/AUKM;
+                    X0[1] = state[1]/AUKM;
+                    X0[2] = state[2]/AUKM;
+                    V0[0] = state[3]/AUKM;
+                    V0[1] = state[4]/AUKM;
+                    V0[2] = state[5]/AUKM;
+                }
+            }
+            break;
+            }
         }
         else
         {
-
-            while(!bigStm.atEnd())
+            switch(bigType)
             {
-                tStr = bigStm.readLine();
-                dataSL = tStr.split(colSep, QString::SkipEmptyParts);
-                if(dataSL.size()<8) continue;
+            case 1:
 
-                //name = dataSL.at(0).simplified();
-                if(QString().compare(dataSL.at(0).simplified(), "Earth")!=0) continue;
-                //time = dataSL.at(1).toDouble();
+                while(!bigStm.atEnd())
+                {
+                    tStr = bigStm.readLine();
+                    dataSL = tStr.split(colSep, QString::SkipEmptyParts);
+                    if(dataSL.size()<8) continue;
 
-                XE0[0] = dataSL.at(2).toDouble();
-                XE0[1] = dataSL.at(3).toDouble();
-                XE0[2] = dataSL.at(4).toDouble();
-                VE0[0] = dataSL.at(5).toDouble();
-                VE0[1] = dataSL.at(6).toDouble();
-                VE0[2] = dataSL.at(7).toDouble();
-                qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
+                    //name = dataSL.at(0).simplified();
+                    if(QString().compare(dataSL.at(0).simplified(), "Earth")!=0) continue;
+                    //time = dataSL.at(1).toDouble();
+
+                    XE0[0] = dataSL.at(2).toDouble();
+                    XE0[1] = dataSL.at(3).toDouble();
+                    XE0[2] = dataSL.at(4).toDouble();
+                    VE0[0] = dataSL.at(5).toDouble();
+                    VE0[1] = dataSL.at(6).toDouble();
+                    VE0[2] = dataSL.at(7).toDouble();
+
+                    break;
+                }
+                break;
+            case 2:
+            {
+                obsPos.setTDB(time);
+                obsPos.det_observ();
+                XE0[0] = obsPos.X[0];
+                XE0[1] = obsPos.X[1];
+                XE0[2] = obsPos.X[2];
+                VE0[0] = obsPos.V[0];
+                VE0[1] = obsPos.V[1];
+                VE0[2] = obsPos.V[2];
+            }
                 break;
             }
+
+            qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 /*
 
 
@@ -233,16 +309,36 @@ int main(int argc, char *argv[])
                 break;
             }
 */
-            if(useEPM)
+            switch(bigType)
             {
-                status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
+            case 0:
+            {
+                if(useEPM)
+                {
+                    status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         return 1;
+                     }
+                }
+                else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, SK);
             }
-            else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, SK);
+                break;
+            case 2:
+            {
+                sJD = QString("%1 JD").arg(time, 15, 'f',7);
+                str2et_c(sJD.toAscii().data(), &et);
+                spkezr_c (  "sun", et, ref, "NONE", "ssb", state, &lt );
+                XS0[0] = state[0]/AUKM;
+                XS0[1] = state[1]/AUKM;
+                XS0[2] = state[2]/AUKM;
+                VS0[0] = state[3]/AUKM;
+                VS0[1] = state[4]/AUKM;
+                VS0[2] = state[5]/AUKM;
+            }
+                break;
+            }
 
             qDebug() << QString("XS0: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
@@ -346,7 +442,7 @@ int main(int argc, char *argv[])
 
             outerArguments << "-type=aster";
 
-            outerArguments << QString("-observer=500");
+            outerArguments << QString("-observer=%1").arg(obsCode);
             //outerArguments << QString("-observer=@sun");
             outerArguments << "-tcoor=2";
             outerArguments << "-rplane=1";
@@ -421,7 +517,7 @@ int main(int argc, char *argv[])
                 mrec.num = 1;
                 mCat.record->getNumStr(mrec.head->Snum);
                 //strcpy(, mCat.record->getNumStr(>number);
-                mrec.tail->set_numOfObs("500");
+                mrec.tail->set_numOfObs(obsCode.toAscii().data());
                 mrec.toString(astr);
 
                 mpcStm << astr << "\n";

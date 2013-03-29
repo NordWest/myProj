@@ -216,6 +216,7 @@ double TAImUTC(double mjd);
 int TDT2UTC(double jdTDT, double *jdUTC);
 int TDB2UTC(double jdTDB, double *jdUTC);
 int TDB2TT(double jdTDB, double *jdTT);
+double TDT2TDB(double jdTDT);
 
 double dUT1();	//=UT1-UTC
 

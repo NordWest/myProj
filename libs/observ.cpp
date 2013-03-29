@@ -44,6 +44,7 @@ observ::observ(char *dele_header)
 	this->place = new dele(dele_header);
 
 //	printf("ini complete\n");
+    useSpice = 0;
 
 	mass = new double[20];
 }
@@ -56,6 +57,7 @@ observ::observ()
 
 //	printf("ini complete\n");
 
+    useSpice = 0;
 	mass = new double[20];
 }
 
@@ -100,12 +102,30 @@ int observ::initDELE(char *fname_dele)
         return 0;
 }
 
+int observ::initSPICE(QString bspName, QString lskName)
+{
+    furnsh_c ( lskName.toAscii().data() );     //load LSK kernel
+    furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+    useSpice = 1;
+    return 0;
+}
+
 
 int observ::init(char *fname_obs, char *fname_dele_bin)
 {
 //	printf("init\n");
         if(this->initObservatory(fname_obs)) return 1;
         if(this->initDELE(fname_dele_bin)) return 2;
+
+//	printf("init complete\n");
+        return 0;
+}
+
+int observ::init(QString fname_obs, QString bspName, QString lskName)
+{
+//	printf("init\n");
+        if(this->initObservatory(fname_obs.toAscii().data())) return 1;
+        if(this->initSPICE(bspName, lskName)) return 2;
 
 //	printf("init complete\n");
         return 0;
@@ -136,20 +156,58 @@ int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
 //	return 0;
 }
 
-int observ::det_observ(double tUTC)
+int observ::set_spice_parpam(QString obs_name, QString obsy_code, QString center_name, QString ref_name)
 {
-	this->obs->det_state(tUTC);
-    //this->otime = tUTC;
-        //UTC2TDT(tUTC, &this->otime);
-        UTC2TDB(tUTC, &this->otime);
+//	printf("set obs param\n");
+    obsName = obs_name;
+    obsyCode =obsy_code;
+    centerName = center_name;
+    refName = ref_name;
 
-    //if(this->place->detR(&this->ox, &this->oy, &this->oz, this->otime, this->nplanet, 0, this->center, sk)) return 1;
+    return(this->obs->getobsynumO(obsyCode.toAscii().data()));
 
-    //if(this->place->detR(&this->ovx, &this->ovy, &this->ovz, this->otime, this->nplanet, 1, this->center, sk)) return 2;
+//	return 0;
+}
 
-    if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, this->otime, this->nplanet, this->center, sk)) return 1;
+void observ::setUTC(double tUTC)
+{
+    ctime.setUTC(tUTC);
+}
 
-	if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, this->otime, this->nplanet, this->center, sk)) return 3;
+void observ::setTDB(double tTDB)
+{
+    ctime.setTDB(tTDB);
+}
+
+
+int observ::det_observ()
+{
+    this->obs->det_state(ctime.UTC());
+
+    if(useSpice)
+    {
+        QString sJD;
+        double et;
+        SpiceDouble             state [6];
+        SpiceDouble             lt;
+        sJD = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+        str2et_c(sJD.toAscii().data(), &et);
+        spkezr_c (obsName.toAscii().data(), et, refName.toAscii().data(), "NONE", centerName.toAscii().data(), state, &lt );
+        ox = state[0]/AUKM;
+        oy = state[1]/AUKM;
+        oz = state[2]/AUKM;
+        ovx = state[3]/AUKM;
+        ovy = state[4]/AUKM;
+        ovz = state[5]/AUKM;
+
+    }
+    else
+    {
+
+        if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
+
+        if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
+    }
 
     X[0] = ox+obs->dcx;
     X[1] = oy+obs->dcy;
@@ -170,7 +228,7 @@ int observ::det_observ(double tUTC)
 int observ::detSunRADEC(double *raS, double *decS)
 {
     double Xs, Ys, Zs;
-    if(this->place->detR(&Xs, &Ys, &Zs, this->otime, SUN_NUM, 0, this->center, sk)) return 1;
+    if(this->place->detR(&Xs, &Ys, &Zs, ctime.TDB(), SUN_NUM, 0, this->center, sk)) return 1;
     rdsys(raS, decS, Xs-ox, Ys-oy, Zs-oz);
 	return 0;
 }

@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     QProcess outerProcess;
     QString sJD;
 
-    double dist, vel, jdUTC, jdTDB, jdTDT;
+    double dist, vel, jdUTC, jdTDB, jdTDT, et;
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
@@ -366,8 +366,10 @@ int main(int argc, char *argv[])
                 {
                     sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
                     qDebug() << QString("name: %1\n").arg(sName);
-                    if(CENTER) spkezr_c (  sName.toAscii().data(), time0, ref, "NONE", "sun", state, &lt );
-                    else spkezr_c (  sName.toAscii().data(), time0, ref, "NONE", "ssb", state, &lt );
+                    sJD = QString("%1 JD").arg(time0, 15, 'f',7);
+                    str2et_c(sJD.toAscii().data(), &et);
+                    if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+                    else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
                     X[0] = state[0]/AUKM;
                     X[1] = state[1]/AUKM;
                     X[2] = state[2]/AUKM;

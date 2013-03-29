@@ -1,5 +1,6 @@
 //#pragma once
 #include <stdio.h>
+#include <QtCore>
 
 #ifndef OBSRY_H
 #include "observatory.h"
@@ -17,6 +18,12 @@
 #include "dele.h"
 #endif
 
+#ifndef TIMEA_H
+#include "time_a.h"
+#endif
+
+#include "./cspice/SpiceUsr.h"
+
 #ifndef OBSERV_H
 
 
@@ -30,19 +37,28 @@ public:
 
 	double *mass;
 
+    QString obsName, obsyCode, centerName, refName;
+    int useSpice;
+
 	int initObservatory(char *fname_obs);
         //int initDELE(char *fname_dele_h, char *fname_dele_bin);
         //int init(char *fname_obs, char *fname_dele_h, char *fname_dele_bin);
 
-        int initDELE(char *fname_dele_bin);
-        int init(char *fname_obs, char *fname_dele_bin);
+    int initDELE(char *fname_dele_bin);
+    int init(char *fname_obs, char *fname_dele_bin);
+    int initSPICE(QString bspName, QString lskName);
+    int init(QString fname_obs, QString bspName, QString lskName);
 
 	int set_obs_parpam(int nplanet, int center, int sk, char *nobsy);
-	int det_observ(double tUTC);
+    int set_spice_parpam(QString obs_name, QString obsy_code, QString center_name, QString ref_name);
+    int det_observ();
 
     double X[3], V[3];
 
-	double ox, oy, oz, ovx, ovy, ovz, otime;	//R, V, T
+    double ox, oy, oz, ovx, ovy, ovz;
+    //double jdTDB;
+    time_a ctime;
+    double et;
 	double ovxt, ovyt, ovzt;					//Rtt
 	int nplanet, center, sk;
 	char *nobsy;
@@ -52,6 +68,10 @@ public:
 	~observ();
 
     int detSunRADEC(double *raS, double *decS);
+
+    void setUTC(double tUTC);
+    void setTDB(double tTDB);
+
 
 /*
 	mpcs *lmpc;

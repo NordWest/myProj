@@ -8,9 +8,9 @@
 
 class time_a
 {
+
+    double value;
 public:
-	double value;
-	int type;
 
 	/*
 		type = 0 - UTC - Всемирное координированное время;
@@ -24,10 +24,15 @@ public:
 	time_a();
 	~time_a();
 
-	int conv2TDB();
-	int conv2UT();
-	int conv2UTC();
-	int conv2TDT();
+    double TDB();
+    //double UT();
+    double UTC();
+    double TDT();
+
+    void setTDB(double jdTime);
+    //void setUT(double jdTime);
+    void setUTC(double jdTime);
+    void setTDT(double jdTime);
 };
 
 #define TIMEA_H

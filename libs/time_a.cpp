@@ -4,36 +4,44 @@
 
 time_a::time_a()
 {
+    value = 0.0;
 }
 
 time_a::~time_a()
 {
 }
 
-int time_a::conv2TDB()
+
+double time_a::TDB()
 {
-	return 0;
+    return(value);
 }
 
-int time_a::conv2UT()
+//double time_a::UT();
+double time_a::UTC()
 {
-	return 0;
+    double jdUTC;
+    TDB2UTC(value, &jdUTC);
+    return(jdUTC);
 }
 
-int time_a::conv2UTC()
+double time_a::TDT()
 {
-	if(this->type==1) this->value = this->value - (32.184+TAIDUTC)/86400.0;
-	else return 1;
-
-	return 0;
+    return(TDB2TDT(value));
 }
 
-int time_a::conv2TDT()
+void time_a::setTDB(double jdTime)
 {
-	if(this->type==0) this->value = this->value + (32.184+TAIDUTC)/86400.0;
-	else return 1;
+    value =jdTime;
+}
 
+//void time_a::setUT(double jdTime);
+void time_a::setUTC(double jdTime)
+{
+    UTC2TDB(jdTime, &value);
+}
 
-	this->type = 1;
-	return 0;
+void time_a::setTDT(double jdTime)
+{
+    value = TDT2TDB(jdTime);
 }
