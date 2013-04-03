@@ -44,7 +44,7 @@ observ::observ(char *dele_header)
 	this->place = new dele(dele_header);
 
 //	printf("ini complete\n");
-    useSpice = 0;
+    ephType = 0;
 
 	mass = new double[20];
 }
@@ -57,7 +57,7 @@ observ::observ()
 
 //	printf("ini complete\n");
 
-    useSpice = 0;
+    ephType = 0;
 	mass = new double[20];
 }
 
@@ -94,7 +94,7 @@ int observ::initDELE(char *fname_dele)
         for(i=8; i<19; i++)
         {
                 //this->place->g1041->getElem(&rc, i);
-                mass[i-8] = this->place->H2.data.constValue[i];//rc.value;
+                //mass[i-8] = H2.data.constValue[i];//rc.value;
         }
 
 
@@ -106,7 +106,7 @@ int observ::initSPICE(QString bspName, QString lskName)
 {
     furnsh_c ( lskName.toAscii().data() );     //load LSK kernel
     furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
-    useSpice = 1;
+    ephType = 1;
     return 0;
 }
 
@@ -184,30 +184,37 @@ int observ::det_observ()
 {
     this->obs->det_state(ctime.UTC());
 
-    if(useSpice)
+    switch(ephType)
     {
-        QString sJD;
-        double et;
-        SpiceDouble             state [6];
-        SpiceDouble             lt;
-        sJD = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
-        str2et_c(sJD.toAscii().data(), &et);
-        spkezr_c (obsName.toAscii().data(), et, refName.toAscii().data(), "NONE", centerName.toAscii().data(), state, &lt );
-        ox = state[0]/AUKM;
-        oy = state[1]/AUKM;
-        oz = state[2]/AUKM;
-        ovx = state[3]/AUKM;
-        ovy = state[4]/AUKM;
-        ovz = state[5]/AUKM;
+    case 1:
+        {
 
+            QString sJD;
+            double et;
+            SpiceDouble             state [6];
+            SpiceDouble             lt;
+            sJD = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+            str2et_c(sJD.toAscii().data(), &et);
+            spkezr_c (obsName.toAscii().data(), et, refName.toAscii().data(), "NONE", centerName.toAscii().data(), state, &lt );
+            ox = state[0]/AUKM;
+            oy = state[1]/AUKM;
+            oz = state[2]/AUKM;
+            ovx = state[3]/AUKM;
+            ovy = state[4]/AUKM;
+            ovz = state[5]/AUKM;
+
+        }
+        break;
+    case 0:
+        {
+
+            if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
+
+            if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
+        }
+        break;
     }
-    else
-    {
 
-        if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
-
-        if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
-    }
 
     X[0] = ox+obs->dcx;
     X[1] = oy+obs->dcy;

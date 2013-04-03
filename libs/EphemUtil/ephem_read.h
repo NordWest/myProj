@@ -13,10 +13,16 @@
 /**                                                                          **/
 /**==========================================================================**/
 
+#include <stdio.h>
+#include <math.h>
 #ifndef TYPES_DEFINED
 #include "ephem_types.h"
 #endif
-
+static headOneType  H1;
+static headTwoType  H2;
+static recOneType   R1;
+static FILE        *Ephemeris_File;
+static double       Coeff_Array[ARRAY_SIZE] , T_beg , T_end , T_span;
 /*----------------------------------------------------------------------------*/
 /*  Initialize_Ephemeris                                                      */
 /*----------------------------------------------------------------------------*/
@@ -47,3 +53,4 @@
 
     void Interpolate_State( double Time , int Target , stateType *Planet );
 
+#define EPHEM_READ

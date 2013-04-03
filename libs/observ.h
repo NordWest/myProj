@@ -38,7 +38,7 @@ public:
 	double *mass;
 
     QString obsName, obsyCode, centerName, refName;
-    int useSpice;
+    int ephType;    //0-dele;   1-SPICE;    2-calceph
 
 	int initObservatory(char *fname_obs);
         //int initDELE(char *fname_dele_h, char *fname_dele_bin);

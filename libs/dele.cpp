@@ -5,7 +5,7 @@ int planet_num(char *pname)
 {
 	if(strstr(pname, "Mercury")) return MERCURY_NUM;
 	if(strstr(pname, "Venus")) return VENUS_NUM;
-	if(strstr(pname, "Earth")) return EARTH_NUM;
+    if(strstr(pname, "Earth")) return GEOCENTR_NUM;
     if(strstr(pname, "EMB")) return EARTH_NUM;
 	if(strstr(pname, "Mars")) return MARS_NUM;
 	if(strstr(pname, "Jupiter")) return JUPITER_NUM;

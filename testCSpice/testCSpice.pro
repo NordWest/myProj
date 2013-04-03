@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     ../libs/coord.cpp \
     ../libs/fBuffer.cpp \
     ../libs/fbStream.cpp \
-    ../libs/dele.cpp
+    ../libs/dele.cpp \
+    ../libs/time_a.cpp
 
 HEADERS += ../libs/orbit.h \
     ../libs/orbcat.h \
@@ -68,7 +69,8 @@ HEADERS += ../libs/orbit.h \
     ../libs/mpcs.h \
     ../libs/DynArr.h \
     ../libs/coord.h \
-    ../libs/dele.h
+    ../libs/dele.h \
+    ../libs/time_a.h
 
 unix:LIBS+= ./../libs/unix/cspice.a \
             ./../libs/unix/libastro.a \

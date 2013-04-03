@@ -43,7 +43,8 @@ SOURCES += main.cpp \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
     ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
     ../libs/ephem_util.cpp \
-    ../libs/calc_epm.cpp
+    ../libs/calc_epm.cpp \
+    ../libs/time_a.cpp
 
 
 HEADERS += ../libs/orbit.h \
@@ -107,7 +108,8 @@ HEADERS += ../libs/orbit.h \
     ../libs/cspice/fmt.h \
     ../libs/cspice/fio.h \
     ../libs/cspice/f2cMang.h \
-    ../libs/cspice/f2c.h
+    ../libs/cspice/f2c.h \
+    ../libs/time_a.h
 
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a

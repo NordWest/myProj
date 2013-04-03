@@ -18,13 +18,14 @@ int main(int argc, char *argv[])
 
     QString tStr, name, sJD;
     QStringList dataSL, resSL, outerArguments;
-    double time, jdUTC;
+    double time, jdUTC, jdTDB;
     double X[3], V[3];
     double Q[3], QV[3];
     double X1[3], V1[3];
     double dX[3], dV[3];
     double X0[3], V0[3];
     double XE0[3], VE0[3];
+    double XEB0[3], VEB0[3];
     double XS0[3], VS0[3];
     double dist, dvel;
     double ra, de;
@@ -36,7 +37,7 @@ int main(int argc, char *argv[])
     double dT, m, n;
     double dRa, dDec, normR, norm_sA;
     double T, mPrec, nPrec;
-    double *s, *sA, *R, *sV;
+    double *s, *sA, *R, *P, *sV;
     double *v0, *v1, *v2;
     /*v0 = new myvector(3);
     v1 = new myvector(3);
@@ -45,9 +46,12 @@ int main(int argc, char *argv[])
     sA = new double[3];
     sV = new double[3];
     R = new double[3];
+    P = new double[3];
     v0 = new double[3];
     v1 = new double[3];
     v2 = new double[3];
+    double *Qb;
+    Qb = new double[3];
 
     observ obsPos;
 
@@ -153,6 +157,16 @@ int main(int argc, char *argv[])
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStm(&mpcFile);
 
+    QDir spkDir("./spks");
+    QStringList filters, filesE;
+    filters << "*.*";
+
+    filesE = spkDir.entryList(filters);
+    for(i=0; i<filesE.size(); i++)
+    {
+        spkDir.remove(filesE.at(i));
+    }
+
     while(!inStm.atEnd())
     {
         tStr = inStm.readLine();
@@ -174,6 +188,7 @@ int main(int argc, char *argv[])
 
         TDB2UTC(time, &jdUTC);
         sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+        jdTDB = TDB2TDT(time);
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
@@ -222,6 +237,30 @@ int main(int argc, char *argv[])
         {
             switch(bigType)
             {
+            case 0:
+            {
+                if(useEPM)
+                {
+                    status = calc_EPM(3, centr_num, (int)time, time-(int)time, XE0, VE0);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         return 1;
+                     }
+                }
+                else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER_SUN, SK);
+                if(useEPM)
+                {
+                    status = calc_EPM(3, epm_planet_num("Sun"), (int)time, time-(int)time, XEB0, VEB0);
+                     if(!status)
+                     {
+                         qDebug() << QString("error EPM\n");
+                         return 1;
+                     }
+                }
+                else nbody->detState(&XEB0[0], &XEB0[1], &XEB0[2], &VEB0[0], &VEB0[1], &VEB0[2], time, GEOCENTR_NUM, CENTER_BARY, SK);
+            }
+                break;
             case 1:
 
                 while(!bigStm.atEnd())
@@ -386,17 +425,38 @@ int main(int argc, char *argv[])
 
             ct1 = 0.0;
 
+
             do
             {
-                ct0 = ct1;
 
-                ct1 = normR+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
-                qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+                ct0 = ct1;
                 tau = ct1/CAU;
-                Q[0] = R[0] - V[0]*tau;
-                Q[1] = R[1] - V[1]*tau;
-                Q[2] = R[2] - V[2]*tau;
+
+                Qb[0] = X1[0] - V1[0]*tau;
+                Qb[1] = X1[1] - V1[1]*tau;
+                Qb[2] = X1[2] - V1[2]*tau;
+
+                P[0] = Qb[0] - XEB0[0];
+                P[1] = Qb[1] - XEB0[1];
+                P[2] = Qb[2] - XEB0[2];
+
+                normP = norm(P);
+
+                Q[0] = Qb[0] - XS0[0];
+                Q[1] = Qb[1] - XS0[1];
+                Q[2] = Qb[2] - XS0[2];
+
                 normQ = norm(Q);
+
+                qDebug() << QString("normQ: %1\n").arg(normQ);
+                qDebug() << QString("normP: %1\n").arg(normP);
+                qDebug() << QString("normE: %1\n").arg(normE);
+
+                ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+                //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+
+                qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
+                qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
 
             }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
 
@@ -504,7 +564,7 @@ int main(int argc, char *argv[])
                 n = mas_to_grad((2004.3109*dT)*1000);
 */
                 //detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], 0, 0, 0, 0, 0, 0);
+                detRDnumGC(&ra, &de, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
                 //rdsys(&ra, &de, sA[0], sA[1], sA[2]);
 
                 //dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
@@ -513,7 +573,8 @@ int main(int argc, char *argv[])
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;
 
-                mrec.eJD = jdUTC;
+                mrec.eJD = jdTDB;
+                //mrec.eJD = time;
                 mrec.num = 1;
                 mCat.record->getNumStr(mrec.head->Snum);
                 //strcpy(, mCat.record->getNumStr(>number);

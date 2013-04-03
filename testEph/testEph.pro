@@ -42,7 +42,10 @@ SOURCES += main.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.cpp \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
     ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
-    ../libs/calc_epm.cpp
+    ../libs/calc_epm.cpp \
+    ../libs/time_a.cpp \
+    ../libs/EphemUtil/ephem_util.c \
+    ../libs/EphemUtil/ephem_read.cpp
 
 HEADERS += ../libs/orbit.h \
     ../libs/orbcat.h \
@@ -104,10 +107,15 @@ HEADERS += ../libs/orbit.h \
     ../libs/cspice/fmt.h \
     ../libs/cspice/fio.h \
     ../libs/cspice/f2cMang.h \
-    ../libs/cspice/f2c.h
+    ../libs/cspice/f2c.h \
+    ../libs/time_a.h \
+    ../libs/EphemUtil/ephem_util.h \
+    ../libs/EphemUtil/ephem_types.h \
+    ../libs/EphemUtil/ephem_read.h
 
 unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a
 unix:LIBS+=./../libs/unix/libastro.a
 win32:LIBS+=./../libs/win32/libastro.a
 unix:LIBS+=./../libs/unix/cspice.a
+unix:LIBS+=-lcalceph

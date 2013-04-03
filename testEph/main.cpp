@@ -30,6 +30,8 @@
 
 #include "./../libs/cspice/SpiceUsr.h"
 
+#include "./../libs/calceph/calceph.h"
+
 
 int nofzbody;
 ever_params *eparam;
@@ -164,6 +166,7 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString cephFile = sett->value("general/cephFile", "./../../data/cats/INPOP/inpop10a_m100_p100_littleendian.dat").toString();
     t0 = sett->value("general/time0", 0).toDouble();
     dt = sett->value("general/dt", 1).toDouble();
     nstep = sett->value("general/nstep", 1).toDouble();
@@ -204,6 +207,8 @@ int main(int argc, char *argv[])
 
     dX = new double[3];
     dV = new double[3];
+    //double *stateV;
+    //stateV = new double[6];
 
     QString resDirName("./resEph");
     QDir resDir(resDirName);
@@ -227,6 +232,16 @@ int main(int argc, char *argv[])
     {
         status = nbody->init(jplFile.toAscii().data());
     }
+
+    if(status)
+    {
+        qDebug() << QString("init ephemeride error\n");
+        return 1;
+    }
+
+    status = !calceph_sopen(cephFile.toAscii().data());
+    centr_num = 11+!CENTER;
+    //calceph_seterrorhandler (1,NULL);
 
     if(status)
     {
@@ -335,6 +350,17 @@ int main(int argc, char *argv[])
                     }
                     else nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], tii, plaNum, CENTER, SK);
 
+                    //calceph_scompute((int)tii, tii-(int)tii, 16, 0, state);
+                    //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+                    //tii+=state[0];
+                    /*calceph_scompute((int)tii, tii-(int)tii, plaNumEPM, centr_num, state);
+                    X[0] = state[0];
+                    X[1] = state[1];
+                    X[2] = state[2];
+                    V[0] = state[3];
+                    V[1] = state[4];
+                    V[2] = state[5];*/
+
                     dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
                     dvel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
                     qDebug() << QString("DE: %1|%2|%3|%4|%5|%6|%7|%8|%9|%10\n").arg(name, -10).arg(tii, 15, 'f', 6).arg(X[0], 18, 'g', 9).arg(X[1], 18, 'g', 9).arg(X[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V[0], 18, 'g', 9).arg(V[1], 18, 'g', 9).arg(V[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
@@ -400,9 +426,12 @@ int main(int argc, char *argv[])
                     {
                         //if(plaNum!=SUN_NUM&&plaNumEPM!=11)
                         //{
-                        sJD = QString("%1 JD").arg(ti, 15, 'f',7);
+                        sJD = QString("%1 JD TDB").arg(ti, 15, 'f',7);
                         str2et_c(sJD.toAscii().data(), &et);
-                        sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+
+                        if((QString().compare(name.simplified().toAscii().data(), "EMB")==0)||(QString().compare(name.simplified().toAscii().data(), "Geocentr")==0))sName = name.simplified().toAscii().data();
+                        else sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+
                         qDebug() << QString("name: %1\n").arg(sName);
                         if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
                         else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
@@ -453,6 +482,49 @@ int main(int argc, char *argv[])
 
 
 resFile.close();
-    
+
+name = "Moon";
+//dele
+nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], t0, planet_num(name.toAscii().data()), CENTER, SK);
+dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
+dvel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
+qDebug() << QString("DELE: %1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 6).arg(X[0], 18, 'g', 9).arg(X[1], 18, 'g', 9).arg(X[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V[0], 18, 'g', 9).arg(V[1], 18, 'g', 9).arg(V[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+
+//SPICE
+sJD = QString("%1 JD TDB").arg(t0, 15, 'f',7);
+str2et_c(sJD.toAscii().data(), &et);
+
+sName = "Moon";
+qDebug() << QString("name: %1\n").arg(sName);
+spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+X0[0] = state[0]/AUKM;
+X0[1] = state[1]/AUKM;
+X0[2] = state[2]/AUKM;
+V0[0] = state[3]/AUKM;
+V0[1] = state[4]/AUKM;
+V0[2] = state[5]/AUKM;
+
+dist = sqrt(X0[0]*X0[0] + X0[1]*X0[1] + X0[2]*X0[2]);
+dvel = sqrt(V0[0]*V0[0] + V0[1]*V0[1] + V0[2]*V0[2]);
+
+qDebug() << QString("SPICE: %1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 6).arg(X0[0], 18, 'g', 9).arg(X0[1], 18, 'g', 9).arg(X0[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V0[0], 18, 'g', 9).arg(V0[1], 18, 'g', 9).arg(V0[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+
+
+//calceph_scompute((int)t0, t0-(int)t0, 16, 0, state);
+//qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+//tii+=state[0];
+calceph_scompute((int)t0, t0-(int)t0, epm_planet_num(name), centr_num, state);
+X0[0] = state[0];
+X0[1] = state[1];
+X0[2] = state[2];
+V0[0] = state[3];
+V0[1] = state[4];
+V0[2] = state[5];
+
+dist = sqrt(X0[0]*X0[0] + X0[1]*X0[1] + X0[2]*X0[2]);
+dvel = sqrt(V0[0]*V0[0] + V0[1]*V0[1] + V0[2]*V0[2]);
+
+qDebug() << QString("calceph: %1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 6).arg(X0[0], 18, 'g', 9).arg(X0[1], 18, 'g', 9).arg(X0[2], 18, 'g', 9).arg(dist, 18, 'g', 9).arg(V0[0], 18, 'g', 9).arg(V0[1], 18, 'g', 9).arg(V0[2], 18, 'g', 9).arg(dvel, 18, 'g', 9);
+
     return 0;//a.exec();
 }

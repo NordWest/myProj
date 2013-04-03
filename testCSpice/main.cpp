@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
 */
          //find state vector of targ1 body relative to obs body and ssb point
          spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
+         qDebug() << QString("lt: %1\n").arg(lt1);
          spkezr_c (  targ1, et, ref, "NONE", "ssb", state2, &lt2 );
          spkezr_c (  obs, et, ref, "NONE", "sun", state3, &lt3 );
 /*
