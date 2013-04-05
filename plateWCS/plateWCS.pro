@@ -3,12 +3,13 @@
 # -------------------------------------------------
 # QT -= gui
 
-TARGET = plateWCS
+TARGET = ./../../../lab/ruler3PL.win32/plateWCS
 #win32:TARGET = ./../../bin/plateWCS
 
 CONFIG += console \
     qt \
-    warn_off
+    warn_off \
+    exceptions
 
 TEMPLATE = app
 SOURCES += main.cpp \
