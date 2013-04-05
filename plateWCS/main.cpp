@@ -358,7 +358,7 @@ int main(int argc, char *argv[])// plateWCS marks.txt [options]
 
             uTime = catStream.readAll().section("\n", -2, -2);
 
-            exStat = (QString().compare(uTime, "err")==0);
+            exStat = (uTime.indexOf("err")!=-1);
             qDebug() << QString("Crash Exit: %1\n").arg(exStat);
         }
         if(!useUtCorr||exStat)
