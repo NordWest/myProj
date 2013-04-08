@@ -5,10 +5,10 @@
 //#include "..\DAster\DAster.h"
 
 #include <QtCore>
-#include "mb.h"
+#include <mb.h>
 
 #ifndef ASTRO_H
-#include "astro.h"
+#include <astro.h>
 #endif
 
 //#include "..\DAster\MainFrm.h"
@@ -306,6 +306,10 @@ void FFT(const double& dIn, const double *dOut, int dSz, int nn, int beginData);
 
 void sortX(double *x, double *dx, int num);
 
+void desc2NumName(QString desc, int *num, QString *name);
+
+
+
 struct procData
 {
     QString name, folder;
@@ -459,6 +463,28 @@ void mCoefFunc(QString coefFileName, QString mCoefFileName, QString dataSep, int
 int initMdCoef(QString mdCorr, QList<double*> *mdCoef, int *mdCoefsz, QString colSep);
 void detCoefM(QVector <double> *dCoef, QList <double*> mdCoef, int mdCoefsz, double mag);
 int detDcorr(int corrModel, double x, double y, double *dx, double *dy, QVector <double> dCoefX, QVector <double> dCoefY);
+
+
+
+
+
+struct refractionParam
+{
+    double utc;                     //MJD
+    double ra0, de0;
+    double Fi;                      //rad
+    double Long;                    //rad
+
+    double temp;                   //temperature
+    double press;                   //pressure
+    double lam;
+    double vi;
+
+
+//    impRedec(double *ra, double *dec);
+};
+
+void redRefraction(double *ra, double *dec, refractionParam refParam);
 
 
 /////////////////////////////////////////////////////////////////////

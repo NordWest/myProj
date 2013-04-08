@@ -669,7 +669,7 @@ int dat2day(double *day, int y, int m, double d, int epo)
 	*day = cday + (d - 1.0);
 	return 0;
 }
-
+/*
 int isVes(int year)
 {
 	int k1, k2;
@@ -719,7 +719,7 @@ double dinm(int mounth, int isves)
 	if(mounth!=2) return(m[mounth-1]);
 	else return(m[mounth-1] + isves);
 }
-
+*/
 int upackDigStr(char *pstr, char *upstr)
 {
     if(streqv(pstr, "-")) strcpy(upstr, "-\0");
@@ -2408,20 +2408,7 @@ int IntAlongCurv1(myvector *V, myvector *R, myvector *M, double vm, double rm)
 	return 0;
 }
 */
-double grad2rad(double grad)
-{
-	return(grad*PI/180.0);
-}
 
-double rad2grad(double rad)
-{
-	return(rad*180.0/PI);
-}
-
-double rad_to_mas(double angle)
-{
-        return angle*(180*3600000)/PI;
-};
 
 double det_L(double R, double ro, double r, double F)
 {
@@ -2440,15 +2427,6 @@ double detRfromM(double M, double A, double Sdist)
 	return(Sdist*sqrt(2.0*pow(2.512, SUN_MAGNITUDE-M)/A));
 }
 
-double rad2mas(double rad)
-{
-	return(rad*SECINRAD*1000.0);
-}
-
-double mas2rad(double mas)
-{
-	return(mas/1000.0/SECINRAD);
-}
 
 void detABC(double *A, double *B, double *C, double R)
 {
@@ -2669,6 +2647,51 @@ void sortX(double *x, double *dx, int num)
             }
         }
     }
+}
+
+void desc2NumName(QString desc, int *num, QString *name)
+{
+    int i;
+    name->clear();
+    qDebug() << QString("desc: %1\n").arg(desc);
+    int p0, p1;
+    p0 = desc.lastIndexOf('[');
+    p1 = desc.lastIndexOf(']');
+    QString tName = desc.mid(p0+1, p1-p0-1).toLower();
+    qDebug() << QString("tName: %1\n").arg(tName);
+    if(tName.lastIndexOf("pluto")==0)
+    {
+        name->append("pluto");
+        *num = 134340;
+        return;
+    }
+
+    QStringList words = desc.split(" ", QString::SkipEmptyParts);
+  //  qDebug() << words.join("|");
+    int sz0 = words.size();
+    if(sz0<4)
+    {
+        qDebug() << "\nToo small words\n";
+        return;
+    }
+
+    name->append(words.at(2).toLower());
+    //name->toLower();
+    //qDebug() << QString("astName: %1\n").arg(*name);
+    QString mpName = words.at(3);
+    mpName.chop(1);
+    sz0 = mpName.size();
+    bool isOk;
+    QString numStr;
+    for(i=3; i<sz0; i++)
+    {
+        numStr = mpName.right(sz0-i);
+        *num = numStr.toInt(&isOk);
+        qDebug() << QString("numStr: %1\t%2\n").arg(numStr).arg(*num);
+        if(isOk) break;
+    }
+    if(i==sz0) *num = -1;
+    //return 0;
 }
 
 
@@ -4052,3 +4075,46 @@ int epm_planet_num(QString name)
     if(QString().compare(name, "EARTH-MOON BARYCENTER", Qt::CaseInsensitive)==0) return 13;
     return -1;
 }
+
+void redRefraction(double *ra, double *dec, refractionParam refParam)
+{
+    double ra0 = grad_to_rad(*ra);
+    double dec0 = grad_to_rad(*dec);
+
+    qDebug() << QString("ra= %1\tdec = %2\n").arg(*ra).arg(*dec);
+    qDebug() << QString("ra0= %1\tdec0= %2\n").arg(ra0).arg(dec0);
+
+    double a, b;
+    double s;
+
+    a = 2.871e-04;
+    b = 0.00567;
+
+    double k0 = a*(1.0 + (b/pow(refParam.lam, 2.0)));
+    qDebug() << QString("k0= %1\n").arg(k0);
+    double n1 = k0*(refParam.press/760.0)*(273.0/(refParam.temp + 273.0));
+    qDebug() << QString("n1= %1\n").arg(n1);
+    double gm1;
+    jdUT1_to_GMST1(&gm1, mjd2jd(refParam.utc));
+    //UTC2s(mjd2jd(refParam.utc), refParam.Long, &s);
+    s = gm1 + refParam.Long;
+    //s /= 2.0*PI;
+
+    double t = s - ra0;
+
+    qDebug() << QString("s= %1\tt= %2\n").arg(s).arg(t);
+
+    double dRa, dDec;
+    double cosd = cos(dec0);
+
+    dDec = n1*(cos(dec0)*sin(refParam.Fi) - sin(dec0)*cos(refParam.Fi)*cos(t))/(sin(dec0)*sin(refParam.Fi) + cos(dec0)*cos(refParam.Fi)*cos(t));
+    dRa = n1*(cos(refParam.Fi)*sin(t))/(sin(dec0) + cos(dec0)*cos(refParam.Fi)*cos(t));
+
+    qDebug() << QString("dRa= %1\tdDec = %2\n").arg(dRa).arg(dDec);
+    qDebug() << QString("dRa= %1\tdDec = %2\n").arg(rad2mas(dRa)).arg(rad2mas(dDec));
+
+    *ra = rad2grad(ra0 + dRa/cosd);
+    *dec = rad2grad(dec0 + dDec);
+
+}
+

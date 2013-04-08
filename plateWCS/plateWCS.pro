@@ -3,8 +3,8 @@
 # -------------------------------------------------
 # QT -= gui
 
-TARGET = ./../../../lab/ruler3PL.win32/plateWCS
-#win32:TARGET = ./../../bin/plateWCS
+win32:TARGET = ./../../../lab/ruler3PL.win32/plateWCS
+unix:TARGET = ./../../lab/ruler3PL.unix/plateWCS
 
 CONFIG += console \
     qt \

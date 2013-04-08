@@ -2,13 +2,14 @@
 #include "math.h"
 
 #ifndef COMF_H
-#include "./../libs/comfunc.h"
+//#include "./../libs/comfunc.h"
 #endif
 //#include "fitsio.h"
 
 #ifndef ASTRO_H
 
-
+#define PI 3.141592653589793238462
+#define SECINRAD 206264.806
 #define MAS_IN_GRAD 3600000.0
 //#define PI 3.141592653589
 //#define PI atan(1)*4
@@ -102,6 +103,9 @@ void deg_to_damas(QString *str, double de, QString spl_symb, int ndig);
 int hms_to_deg(double *raDeg, QString ra, QString spl_symb);
 int damas_to_deg(double *deDeg, QString de, QString spl_symb);
 
+int isVes(int year);
+double dinm(int mounth, int isves);
+
 
 /*
  int make_fits_header(fitsfile *fptr, char *fheadfn);
@@ -121,28 +125,13 @@ void rot2D(double *r, double ang);
 
 void desc2NumName(QString desc, int *num, QString *name);
 
+double rad_to_mas(double angle);
 
+double grad2rad(double grad);
+double rad2grad(double rad);
 
-
-struct refractionParam
-{
-    double utc;                     //MJD
-    double ra0, de0;
-    double Fi;                      //rad
-    double Long;                    //rad
-
-    double temp;                   //temperature
-    double press;                   //pressure
-    double lam;
-    double vi;
-
-
-//    impRedec(double *ra, double *dec);
-};
-
-void redRefraction(double *ra, double *dec, refractionParam refParam);
-
-
+double rad2mas(double rad);
+double mas2rad(double mas);
 /*
 #ifndef COMF_H
 int fakt(int n);

@@ -6,7 +6,8 @@
 //#include "./../libs/dele.h"
 #include "./../libs/orbit.h"
 //#include "./../libs/skyarea.h"
-#include "./../libs/astro.h"
+//#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
 //#include "./../libs/rada.h"
 #include "./../libs/redStat.h"
@@ -14,7 +15,7 @@
 #include "./../libs/ephem_util.h"
 #include "./../libs/calc_epm.h"
 #include "./../libs/mpccat.h"
-#include "./../libs/cspice/SpiceUsr.h"
+#include <SpiceUsr.h>
 
 #include <QDebug>
 #include <QSettings>

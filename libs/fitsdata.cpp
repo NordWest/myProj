@@ -6,7 +6,7 @@
 //#include "./../libs/mb.h"
 using namespace std;
 
-#define FD_LOG_LEVEL 0
+#define FD_LOG_LEVEL 1
 
 int initPlateRefParam(refractionParam *refParam, fitsdata *fitsd, obsy *obsPos)
 {
@@ -8342,6 +8342,16 @@ void fitsdata::detTanObj()
     if(FD_LOG_LEVEL) qDebug() << "\ndetTanObj\n";
     //detNaxes(&naxes[0], &naxes[1]);
     objMarks->detTan(&WCSdata[0]);
+
+    if(FD_LOG_LEVEL)
+    {
+        QString oName;
+        for(int i=0; i<objMarks->marks.size(); i++)
+        {
+            objMarks->marks.at(i)->getObjName(oName);
+            qDebug() << QString("%1 : %2\t%3").arg(oName).arg(objMarks->marks.at(i)->mTanImg[0]).arg(objMarks->marks.at(i)->mTanImg[1]);
+        }
+    }
 }
 
 void remCrossedMarks(marksGrid *mg0, marksGrid *mgRem, double dMin)
@@ -8814,7 +8824,7 @@ void marksGrid::detTan(double *WCSdata)
 
 		mks->mTanImg[0] = xti[0];
 		mks->mTanImg[1] = xti[1];
-                //if(FD_LOG_LEVEL) qDebug() << QString("\nmTan: %1\t%2\nmTanImg: %3\t%4\nscales: %5\t%6\n\n").arg(mks->mTan[0]).arg(mks->mTan[1]).arg(mks->mTanImg[0]).arg(mks->mTanImg[1]).arg(scales[0]).arg(scales[1]);
+        //if(FD_LOG_LEVEL) qDebug() << QString("\nmTan: %1\t%2\nmTanImg: %3\t%4\n\n").arg(mks->mTan[0]).arg(mks->mTan[1]).arg(mks->mTanImg[0]).arg(mks->mTanImg[1]);
 	}
 
 }
@@ -10899,6 +10909,7 @@ int getMpephObject(mpephRec *mpcObj, double mJD, QString objStr, int useObjNum, 
 
 void getMpephGrid(marksGrid *objMarks, double mJD, QStringList objList, int useObjNum, double mag0, double mag1, procData mpephProcData)
 {
+    qDebug() << QString("\ngetMpephGrid\n");
     int i, sz;
     marksP *mT;
     mT = new marksP(OBJ_TYPE_MPEPH);

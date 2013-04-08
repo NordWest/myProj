@@ -7,7 +7,7 @@
 QT       += core
 
 
-TARGET = /home/ymax/bin/wcsfind
+TARGET = wcsfind
 CONFIG   += console
 CONFIG   -= app_bundle
 

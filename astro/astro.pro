@@ -6,17 +6,16 @@
 
 QT       -= gui
 
-win32:TARGET = ./../../libs/win32/astro
-unix:TARGET = ./../libs/unix/astro
+#TARGET = ./../../libs/win32/astro
+TARGET = astro
 TEMPLATE = lib
 CONFIG += staticlib warn_off
 
-SOURCES += astro.cpp \
-    ../libs/comfunc.cpp
+SOURCES += astro.cpp
+HEADERS += astro.h
 
-HEADERS += astro.h \
-    ../libs/comfunc.h \
-    ../mb/mb.h
-
-win32:LIBS+=./../libs/win32/libmb.a
-unix:LIBS+=./../libs/unix/libmb.a
+header.path=/usr/local/include
+header.files=astro.h
+target.path +=/usr/local/lib
+INSTALLS+=header
+INSTALLS+=target
