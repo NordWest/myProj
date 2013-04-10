@@ -104,10 +104,19 @@ int observ::initDELE(char *fname_dele)
 
 int observ::initSPICE(QString bspName, QString lskName)
 {
+    erract_c ( "set", 0, "REPORT" );
     furnsh_c ( lskName.toAscii().data() );     //load LSK kernel
     furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     ephType = 1;
+    if(failed_c()) return 1;
     return 0;
+}
+
+int observ::initSPK(QString spkName)
+{
+    furnsh_c ( spkName.toAscii().data()  );     //load SPK kernel with asteroids ephemerides
+
+    return (failed_c());
 }
 
 
@@ -172,17 +181,20 @@ int observ::set_spice_parpam(QString obs_name, QString obsy_code, QString center
 void observ::setUTC(double tUTC)
 {
     ctime.setUTC(tUTC);
+    det_observ();
 }
 
 void observ::setTDB(double tTDB)
 {
     ctime.setTDB(tTDB);
+    det_observ();
 }
 
 
 int observ::det_observ()
 {
     this->obs->det_state(ctime.UTC());
+    int res = 0;
 
     switch(ephType)
     {
@@ -203,6 +215,7 @@ int observ::det_observ()
             ovy = state[4]/AUKM;
             ovz = state[5]/AUKM;
 
+            res = failed_c();
         }
         break;
     case 0:
@@ -229,7 +242,64 @@ int observ::det_observ()
 	this->ovyt = -(ka*ka*this->oy)/(fabs(pow(this->oy, 3.0)));
 	this->ovzt = -(ka*ka*this->oz)/(pow(fabs(this->oz), 3.0));
 */
-	return 0;
+    return res;
+}
+
+int observ::det_obj_radec(QString objName, double *ra, double *dec, double *range)
+{
+    double et, lt1;
+    double state1[6];
+    QString sTime;
+    double dstate[3];
+    double vstate[3];
+    int res = 0;
+
+    switch(ephType)
+    {
+    case 1:
+        {
+            //sTime = QString("%1 JD TDB").arg(ctime.TDB());
+            sTime = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+            str2et_c ( sTime.toAscii().data(), &et);
+
+            spkezr_c (  objName.toAscii().data(), et, refName.toAscii().data(), "LT", obsName.toAscii().data(), state1, &lt1 );
+            state1[0] -= obs->state[0]*AUKM;
+            state1[1] -= obs->state[1]*AUKM;
+            state1[2] -= obs->state[2]*AUKM;
+            state1[3] -= obs->state[3]*AUKM;
+            state1[4] -= obs->state[4]*AUKM;
+            state1[5] -= obs->state[5]*AUKM;
+/*
+            vstate[0] = V[0]*AUKM/SECINDAY;
+            vstate[1] = V[1]*AUKM/SECINDAY;
+            vstate[2] = V[2]*AUKM/SECINDAY;
+/
+            vstate[0] = obs->vx*AUKM/SECINDAY;
+            vstate[1] = obs->vy*AUKM/SECINDAY;
+            vstate[2] = obs->vz*AUKM/SECINDAY;
+
+            stelab_c (state1, vstate, &dstate[0]);
+/*
+            qDebug() << QString("state1: %1\t%2\t%3\n").arg(state1[0]).arg(state1[1]).arg(state1[2]);
+            qDebug() << QString("dstate: %1\t%2\t%3\n").arg(dstate[0]).arg(dstate[1]).arg(dstate[2]);
+
+            qDebug() << QString("dstate1: %1\t%2\t%3\n").arg(fabs(state1[0] - dstate[0])).arg(fabs(state1[1] - dstate[1])).arg(fabs(state1[2] - dstate[2]));
+/
+
+            state1[0] = dstate[0];
+            state1[1] = dstate[1];
+            state1[2] = dstate[2];
+*/
+            recrad_c (state1, range, ra, dec);
+            res = failed_c();
+        }
+        break;
+    default:
+        return 1;
+        break;
+    }
+
+    return 0;
 }
 
 int observ::detSunRADEC(double *raS, double *decS)

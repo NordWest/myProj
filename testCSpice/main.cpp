@@ -6,6 +6,7 @@
 #include "./../libs/comfunc.h"
 #include "./../libs/mpccat.h"
 #include "./../libs/observatory.h"
+#include "./../libs/observ.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[])
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     mpc mrec;
     double jdUTC;
     observatory obsy;
+    observ obsPos;
     /*
       Local constants
       */
@@ -41,9 +43,10 @@ int main(int argc, char *argv[])
       SpiceDouble             x[MAXPTS];
       SpiceDouble             y[MAXPTS];
       SpiceDouble             z[MAXPTS];
-      SpiceDouble             ra[MAXPTS];
-      SpiceDouble             dec[MAXPTS];
-      SpiceDouble             range[MAXPTS];
+      //SpiceDouble             ra[MAXPTS];
+      //SpiceDouble             dec[MAXPTS];
+      //SpiceDouble             range[MAXPTS];
+      double ra, dec, range;
 
       SpiceChar               leap  [FILE_SIZE];
       SpiceChar               obs   [WORD_SIZE];
@@ -72,6 +75,8 @@ int main(int argc, char *argv[])
       QString mpcFileName;
       double stime;
 
+      //erract_c ( "set", 0, "REPORT" );
+
       char *astr = new char[256];
       ref = new SpiceChar[256];
       corr = new SpiceChar[256];
@@ -87,10 +92,12 @@ int main(int argc, char *argv[])
       QSettings *sett = new QSettings("tcs.ini", QSettings::IniFormat);
       QString bspName = sett->value("general/bspName", "./de421.bsp").toString();
       QString spkName = sett->value("general/spkName", "./smp.spk").toString();
+      QString lskName = sett->value("general/leapName", "naif0010.tls").toString();
 
       sprintf(ref,"%s", sett->value("general/ref", "J2000").toString().toAscii().data());
       sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
       sprintf(obs,"%s", sett->value("general/obs", "Earth").toString().toAscii().data());
+
       QStringList objList = sett->value("general/objList").toString().split("|");
       QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
       QString obsFile = sett->value("general/obsFile", "./Obs.txt").toString();
@@ -100,13 +107,19 @@ int main(int argc, char *argv[])
       if(obsy.init(obsFile.toAscii().data(), OBS_SIZE)) exit(1);
       obsy.getobsynumO(obsCode.toAscii().data());
 
+      obsPos.initObservatory(obsFile.toAscii().data());
+      obsPos.initSPICE(bspName, lskName);
+      obsPos.initSPK(spkName);
+      obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
 
+      furnsh_c ( "./codes_300ast.tf"  );
+/*
       sprintf(leap,"%s", "./naif0009.tls");
       furnsh_c ( leap );                        //load LSK kernel
       furnsh_c ( bspName.toAscii().data()  );    //load SPK/BSP kernel with planets ephemerides
       furnsh_c ( "./codes_300ast.tf"  );        //load KPL/FK kernel with asteroids names and indexes
       furnsh_c ( spkName.toAscii().data() );                  //load SPK kernel with asteroids aphemerides
-
+*/
         //furnsh_c ( "earth_latest_high_prec.bpc"  );
         //furnsh_c ( "earth_fixed.tf"  );
         //furnsh_c ( "pck00010.tpc"  );
@@ -130,6 +143,7 @@ int main(int argc, char *argv[])
      {
          sprintf(targ1,"%s", objList.at(p).toAscii().data());
 
+         if(!initMpc) mCat.GetRecName(targ1);
 
 
          ut = utbeg;
@@ -141,7 +155,29 @@ int main(int argc, char *argv[])
         {
 
          sprintf(utctim,"%f JD", ut);
-         str2et_c ( utctim, &et);
+
+         obsPos.setUTC(ut);
+         obsPos.det_obj_radec(objList.at(p), &ra, &dec, &range);
+
+         mrec.r = ra;// + dRa;
+         mrec.d = dec;// + dDec;
+
+         //tstr = QString(utctim);
+         //jdUTC = mjd2jd(getMJDfromStrT(tstr));
+         mrec.eJD = obsPos.ctime.UTC();
+         //mrec.num = 1;
+
+         if(!initMpc) mCat.record->getNumStr(mrec.head->Snum);
+         else mrec.head->set_Snum(1);
+         //strcpy(, mCat.record->getNumStr(>number);
+         mrec.tail->set_numOfObs(obsCode.toAscii().data());
+         mrec.toString(astr);
+
+         mpcStm << astr << "\n";
+
+         ut += delta;
+
+//         str2et_c ( utctim, &et);
 /*
          tstr = QString(utctim);
          jdUTC = mjd2jd(getMJDfromStrT(tstr));
@@ -157,7 +193,7 @@ int main(int argc, char *argv[])
          obsy.dcx = obsy.h*obsy.record->Cos*cos(stime);
          obsy.dcy = obsy.h*obsy.record->Cos*sin(stime);
          obsy.dcz = obsy.h*obsy.record->Sin;
-*/
+/
          //find state vector of targ1 body relative to obs body and ssb point
          spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
          qDebug() << QString("lt: %1\n").arg(lt1);
@@ -167,7 +203,7 @@ int main(int argc, char *argv[])
          state1[0] -= obsy.dcx*AUKM;
          state1[1] -= obsy.dcy*AUKM;
          state1[2] -= obsy.dcz*AUKM;
-*/
+/
          x[i] = state1[0];
          y[i] = state1[1];
          z[i] = state1[2];
@@ -181,9 +217,9 @@ int main(int argc, char *argv[])
          printf ( "  %.20s:\t%15.8f\t%15.8f\t%15.8f\t%15.8f\n", utctim, state2[0]/AUKM,  state2[1]/AUKM, state2[2]/AUKM, sqrt(state2[0]*state2[0]+state2[1]*state2[1]+state2[2]*state2[2])/AUKM);
 
          qDebug() << QString("Earth@sun: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state3[0]/AUKM, 15, 'e', 10).arg(state3[1]/AUKM, 15, 'e', 10).arg(state3[2]/AUKM, 15, 'e', 10).arg(state3[3]/AUKM, 15, 'e', 10).arg(state3[4]/AUKM, 15, 'e', 10).arg(state3[5]/AUKM, 15, 'e', 10);
-
+*/
         }
-
+/*
              puts( " ");
              printf( "The rec coords of %s relative to obs ,\n",
                                                            targ1);
@@ -224,7 +260,7 @@ int main(int argc, char *argv[])
              puts( " ");
              puts( "#######################################################");
              puts( " ");
-
+*/
 
      }
     mpcFile.close();

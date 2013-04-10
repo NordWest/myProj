@@ -219,6 +219,13 @@ int observatory::det_state(double tUTC)
     vx = 2.0*PI*dcy;
     vz = 0.0;
 
+    state[0] = dcx;
+    state[1] = dcy;
+    state[2] = dcz;
+    state[3] = vx;
+    state[4] = vy;
+    state[5] = vz;
+
 	return 0;
 }
 

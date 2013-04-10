@@ -47,11 +47,12 @@ public:
     int initDELE(char *fname_dele_bin);
     int init(char *fname_obs, char *fname_dele_bin);
     int initSPICE(QString bspName, QString lskName);
+    int initSPK(QString spkName);
     int init(QString fname_obs, QString bspName, QString lskName);
 
 	int set_obs_parpam(int nplanet, int center, int sk, char *nobsy);
     int set_spice_parpam(QString obs_name, QString obsy_code, QString center_name, QString ref_name);
-    int det_observ();
+
 
     double X[3], V[3];
 
@@ -71,7 +72,8 @@ public:
 
     void setUTC(double tUTC);
     void setTDB(double tTDB);
-
+    int det_observ();
+    int det_obj_radec(QString objName, double *ra, double *dec, double *range);
 
 /*
 	mpcs *lmpc;

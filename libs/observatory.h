@@ -54,12 +54,13 @@ public:
 
 	double stime, dcx, dcy, dcz, h;
     double vx, vy, vz;
+    double state[6];
 
 	obsy *record;
 
 	int addobsy(char *num, double Long, double Cos, double Sin, char *name, int pos);
 	int getobsynum(int nofobsy);
-        int getobsynumO(char *nofobsy);
+        int getobsynumO(char *nofobsy); //right variant of pos determination!
 	int getobsyname(char *name);
 
         int getobsynumO_alt(char *nofobsy);
