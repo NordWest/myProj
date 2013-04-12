@@ -54,7 +54,7 @@ public:
     int set_spice_parpam(QString obs_name, QString obsy_code, QString center_name, QString ref_name);
 
 
-    double X[3], V[3];
+    double pos[3], vel[3];
 
     double ox, oy, oz, ovx, ovy, ovz;
     //double jdTDB;
@@ -70,10 +70,11 @@ public:
 
     int detSunRADEC(double *raS, double *decS);
 
-    void setUTC(double tUTC);
-    void setTDB(double tTDB);
+    int setUTC(double tUTC);
+    int setTDB(double tTDB);
     int det_observ();
     int det_obj_radec(QString objName, double *ra, double *dec, double *range);
+    int det_vect_radec(double *stateRV, double *ra, double *dec, double *range = NULL);
 
 /*
 	mpcs *lmpc;

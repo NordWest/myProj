@@ -33,7 +33,8 @@ SOURCES += main.cpp \
     ../libs/mpcfile.cpp \
     ../libs/listfile.cpp \
     ../libs/mpcs.cpp \
-    ../libs/DynArr.cpp
+    ../libs/DynArr.cpp \
+    ../libs/time_a.cpp
 
 HEADERS += \
     ../libs/sscat.h \
@@ -55,13 +56,15 @@ HEADERS += \
     ../libs/mpcfile.h \
     ../libs/listfile.h \
     ../libs/mpcs.h \
-    ../libs/DynArr.h
+    ../libs/DynArr.h \
+    ../libs/time_a.h \
+    ../libs/cspice/SpiceUsr.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
-
+unix:LIBS+=./../libs/unix/cspice.a
 
 
 

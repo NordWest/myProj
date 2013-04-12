@@ -178,16 +178,16 @@ int observ::set_spice_parpam(QString obs_name, QString obsy_code, QString center
 //	return 0;
 }
 
-void observ::setUTC(double tUTC)
+int observ::setUTC(double tUTC)
 {
     ctime.setUTC(tUTC);
-    det_observ();
+    return(det_observ());
 }
 
-void observ::setTDB(double tTDB)
+int observ::setTDB(double tTDB)
 {
     ctime.setTDB(tTDB);
-    det_observ();
+    return(det_observ());
 }
 
 
@@ -229,13 +229,13 @@ int observ::det_observ()
     }
 
 
-    X[0] = ox+obs->dcx;
-    X[1] = oy+obs->dcy;
-    X[2] = oz+obs->dcz;
+    pos[0] = ox+obs->dcx;
+    pos[1] = oy+obs->dcy;
+    pos[2] = oz+obs->dcz;
 
-    V[0] = ovx+obs->vx;
-    V[1] = ovy+obs->vy;
-    V[2] = ovz+obs->vz;
+    vel[0] = ovx+obs->vx;
+    vel[1] = ovy+obs->vy;
+    vel[2] = ovz+obs->vz;
 
 /*
 	this->ovxt = -(ka*ka*this->ox)/(fabs(pow(this->ox, 3.0)));
@@ -300,6 +300,140 @@ int observ::det_obj_radec(QString objName, double *ra, double *dec, double *rang
     }
 
     return 0;
+}
+
+int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *range)
+{
+    double *R, *X, *V, *X1, *V1, *XE0, *XEB0, *XS0, *VS0, *Q, *Qb, *P;
+    R = new double[3];
+    P = new double[3];
+    X = new double[3];
+    V = new double[3];
+    X1 = new double[3];
+    V1 = new double[3];
+    XE0 = new double[3];
+    XEB0 = new double[3];
+    XS0 = new double[3];
+    VS0 = new double[3];
+    Q = new double[3];
+    Qb = new double[3];
+
+    double normR, normE, normP, normQ;
+    double ct0, ct1, tau, muc2;
+
+    muc2 = 9.8704e-9;
+
+    X[0] = stateRV[0];
+    X[1] = stateRV[1];
+    X[2] = stateRV[2];
+
+    V[0] = stateRV[3];
+    V[1] = stateRV[4];
+    V[2] = stateRV[5];
+
+    XE0[0] = pos[0];
+    XE0[1] = pos[1];
+    XE0[2] = pos[2];
+
+    switch(ephType)
+    {
+    case 1:
+        {
+
+            QString sJD;
+            double et;
+            SpiceDouble             state [6];
+            SpiceDouble             lt;
+            sJD = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+            str2et_c(sJD.toAscii().data(), &et);
+            spkezr_c ("sun", et, refName.toAscii().data(), "NONE", "ssb", state, &lt );
+            XS0[0] = state[0]/AUKM;
+            XS0[1] = state[1]/AUKM;
+            XS0[2] = state[2]/AUKM;
+            /*ovx = state[3]/AUKM;
+            ovy = state[4]/AUKM;
+            ovz = state[5]/AUKM;
+
+            res = failed_c();*/
+        }
+        break;
+    case 0:
+        {
+
+            if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
+            if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
+
+        }
+        break;
+    }
+
+    X1[0] = X[0] + XS0[0];
+    X1[1] = X[1] + XS0[1];
+    X1[2] = X[2] + XS0[2];
+
+    V1[0] = V[0] + VS0[0];
+    V1[1] = V[1] + VS0[1];
+    V1[2] = V[2] + VS0[2];
+
+    XEB0[0] = XE0[0] + XS0[0];
+    XEB0[1] = XE0[1] + XS0[1];
+    XEB0[2] = XE0[2] + XS0[2];
+
+
+    R[0] = X[0] - XE0[0];
+    R[1] = X[1] - XE0[1];
+    R[2] = X[2] - XE0[2];
+
+    normR = norm(R);
+
+    normE = norm(XE0);
+    normP = normR;
+    normQ = norm(X);
+
+    ct1 = 0.0;
+
+
+    do
+    {
+
+        ct0 = ct1;
+        tau = ct1/CAU;
+
+        Qb[0] = X1[0] - V1[0]*tau;
+        Qb[1] = X1[1] - V1[1]*tau;
+        Qb[2] = X1[2] - V1[2]*tau;
+
+        P[0] = Qb[0] - XEB0[0];
+        P[1] = Qb[1] - XEB0[1];
+        P[2] = Qb[2] - XEB0[2];
+
+        normP = norm(P);
+
+        Q[0] = Qb[0] - XS0[0];
+        Q[1] = Qb[1] - XS0[1];
+        Q[2] = Qb[2] - XS0[2];
+
+        normQ = norm(Q);
+/*
+        qDebug() << QString("normQ: %1\n").arg(normQ);
+        qDebug() << QString("normP: %1\n").arg(normP);
+        qDebug() << QString("normE: %1\n").arg(normE);
+*/
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+        //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+
+//        qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
+//        qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
+
+    tau = ct1/CAU;
+
+
+    rdsys(ra, dec, P[0], P[1], P[2]);
+    //rdsys(ra, dec, X[0], X[1], X[2]);
+    if(range!=NULL)*range = sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]);
+
 }
 
 int observ::detSunRADEC(double *raS, double *decS)

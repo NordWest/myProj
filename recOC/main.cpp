@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     double muc2 = 9.8704e-9;
     double ct0, ct1, tau, et;
-    double normE, normQ, normP;
+    double normE, normQ, normP, range;
 
     SpiceDouble             state [6];
     SpiceDouble             lt;
@@ -287,12 +287,12 @@ int main(int argc, char *argv[])
             {
                 obsPos.setTDB(time);
                 obsPos.det_observ();
-                XE0[0] = obsPos.X[0];
-                XE0[1] = obsPos.X[1];
-                XE0[2] = obsPos.X[2];
-                VE0[0] = obsPos.V[0];
-                VE0[1] = obsPos.V[1];
-                VE0[2] = obsPos.V[2];
+                XE0[0] = obsPos.pos[0];
+                XE0[1] = obsPos.pos[1];
+                XE0[2] = obsPos.pos[2];
+                VE0[0] = obsPos.vel[0];
+                VE0[1] = obsPos.vel[1];
+                VE0[2] = obsPos.vel[2];
             }
                 break;
             }
@@ -413,6 +413,7 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 //P
+            /*
             R[0] = X[0] - XE0[0];
             R[1] = X[1] - XE0[1];
             R[2] = X[2] - XE0[2];
@@ -461,7 +462,7 @@ int main(int argc, char *argv[])
             }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
 
             tau = ct1/CAU;
-
+*/
 
 
             /*
@@ -564,11 +565,19 @@ int main(int argc, char *argv[])
                 n = mas_to_grad((2004.3109*dT)*1000);
 */
                 //detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                detRDnumGC(&ra, &de, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
-                //rdsys(&ra, &de, sA[0], sA[1], sA[2]);
+                //detRDnumGC(&ra, &de, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
+                //rdsys(&ra, &de, P[0], P[1], P[2]);
 
                 //dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
                 //dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
+
+                state[0] = X[0];
+                state[1] = X[1];
+                state[2] = X[2];
+                state[3] = V[0];
+                state[4] = V[1];
+                state[5] = V[2];
+                obsPos.det_vect_radec(state, &ra, &de, &range);
 
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;

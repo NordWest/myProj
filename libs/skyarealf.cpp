@@ -133,6 +133,26 @@ tlRecord* taskList::getTaskName(QString name)
     return NULL;
 }
 
+int taskList::getTaskName(QString name, tlRecord *tRec)
+{
+    int i, p, sz;
+    tlRecord *tlLoc;
+    sz = recList.size();
+    for(i=0; i<sz; i++)
+    {
+        //p = getRec(tRec, i);
+        //if(p) return NULL;
+        tlLoc = recList[i];
+
+        if(QString().compare(name, tlLoc->name)==0)
+        {
+            *tRec = *tlLoc;
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int taskList::addRec(tlRecord& nRec)
 {
     int i, sz;
@@ -674,6 +694,22 @@ catRecord* catList::getCatByName(QString cName)
     return NULL;
 }
 
+int catList::getCatByName(QString cName, catRecord* cRec)
+{
+    int i, sz;
+    sz = recList.size();
+    //catRecord *cR;
+    for(i=0; i<sz; i++)
+    {
+        if(QString().compare(cName, recList.at(i)->name)==0)
+        {
+            *cRec = *recList.at(i);
+            return 0;
+        }
+    }
+    return 1;
+}
+
 ////////////////////////////////////////////////
 
 ////////////////////////////////////////////
@@ -791,6 +827,13 @@ QString skyAreaLF::getTaskCatName(QString taskName)
     return(QString("%1/%2/ini.cat").arg(installDir.absolutePath()).arg(taskName));
 }
 
+int skyAreaLF::getTaskCat(QString taskName, tlRecord *tRec, catRecord *cRec)
+{
+    if(task_list.getTaskName(taskName, tRec)) return 1;
+    if(cat_list.getCatByName(tRec->catName, cRec)) return 1;
+    return 0;
+}
+
 int skyAreaLF::removeObj(QString taskName, QString objName)
 {
     return(task_list.removeObj(taskName, objName));
@@ -823,7 +866,7 @@ int skyAreaLF::initVisualProp(double jDay)
 int skyAreaLF::init_time(double jDay)
 {
     this->timeCur = jDay;
-    if(this->obs_pos->det_observ(jDay)) return 1;
+    if(this->obs_pos->setUTC(jDay)) return 1;
 
     return 0;
 }
@@ -854,15 +897,21 @@ int skyAreaLF::grade(resList &rList)
     orbit orb_elem;
 
     rList.clear();
-    rList.jdTime = this->obs_pos->otime;
+    rList.jdTime = this->obs_pos->ctime.TDB();
 
     double x, y, z, vx, vy, vz, Sdist, Edist;
     int plaNum;
+    double *state = new double[6];
     //mpcCat
     QString mpcFileName = "./mpc.txt";
     QFile mpcFile(mpcFileName);
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStm(&mpcFile);
+
+    QFile xyFile("xy.log");
+    xyFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream xyStm(&xyFile);
+
     mpc mrec;
     char *astr = new char[256];
 
@@ -871,6 +920,7 @@ int skyAreaLF::grade(resList &rList)
     for(tn=0; tn<taskNum; tn++)
     {
         tl = task_list.at(tn);
+        if(!tl->flag_active) continue;
         catR = cat_list.getCatByName(tl->catName);
 
 
@@ -909,7 +959,7 @@ int skyAreaLF::grade(resList &rList)
                 case DELE_CAT_TYPE:
                 {
                     plaNum = planet_num(iR->name.toAscii().data());
-                    if(this->obs_pos->place->detState(&x, &y, &z, &vx, &vy, &vz, this->obs_pos->otime, plaNum, CENTER_SUN, SK_EKVATOR))
+                    if(this->obs_pos->place->detState(&x, &y, &z, &vx, &vy, &vz, this->obs_pos->ctime.TDB(), plaNum, CENTER_SUN, SK_EKVATOR))
                     {
         //				AfxMessageBox("c0");
                         continue;
@@ -936,8 +986,8 @@ int skyAreaLF::grade(resList &rList)
                     }
 
                     orb_elem.get(orb_catalog);
-                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->otime);
-                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
+                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->ctime.TDB());
+                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->ctime.TDB());
 
                     resRec->number = orb_catalog->record->number;
                     resRec->name = QString(orb_catalog->record->name);
@@ -951,8 +1001,8 @@ int skyAreaLF::grade(resList &rList)
                     if(tsscat->GetName(iR->name.toAscii().data())) continue;
     //				if(tsscat->GetRecNameLSPM(this->ini_list->record->name)) continue;
 
-                    resRec->ra = tsscat->record->RAdeg + mas_to_grad(1000*tsscat->record->pmRA/cos(grad2rad(tsscat->record->DEdeg))*(getYearFromMJD(jd2mjd(this->obs_pos->otime))-2000));//taking proper motion into account
-                    resRec->dec = tsscat->record->DEdeg + mas_to_grad(1000*tsscat->record->pmDE*(getYearFromMJD(jd2mjd(this->obs_pos->otime))-2000));
+                    resRec->ra = tsscat->record->RAdeg + mas_to_grad(1000*tsscat->record->pmRA/cos(grad2rad(tsscat->record->DEdeg))*(getYearFromMJD(jd2mjd(this->obs_pos->ctime.TDB()))-2000));//taking proper motion into account
+                    resRec->dec = tsscat->record->DEdeg + mas_to_grad(1000*tsscat->record->pmDE*(getYearFromMJD(jd2mjd(this->obs_pos->ctime.TDB()))-2000));
 
                     resRec->magn = tsscat->record->BJmag;
 
@@ -972,25 +1022,33 @@ int skyAreaLF::grade(resList &rList)
                         continue;
                     }
                     orb_elem.get(mpc_catalog);
-                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->otime);
-                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->otime);
+                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->ctime.TDB());
+                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->ctime.TDB());
 
                     resRec->number = mpc_catalog->record->getNum();
                     resRec->name = QString(mpc_catalog->record->name).simplified();
 
-                    det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
+                    state[0] = x;
+                    state[1] = y;
+                    state[2] = z;
+                    state[3] = vx;
+                    state[4] = vy;
+                    state[5] = vz;
+                    det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
 
                     mrec.r = grad2rad(resRec->ra);// + dRa;
                     mrec.d = grad2rad(resRec->dec);// + dDec;
 
-                    mrec.eJD = this->obs_pos->otime;
+                    mrec.eJD = this->obs_pos->ctime.UTC();
                     //mrec.num = 1;
                     mpc_catalog->record->getNumStr(mrec.head->Snum);
                     //strcpy(, mCat.record->getNumStr(>number);
-                    mrec.tail->set_numOfObs(obs_pos->nobsy);
+                    mrec.tail->set_numOfObs(obs_pos->obs->record->num);
                     mrec.toString(astr);
 
                     mpcStm << astr << "\n";
+
+                    xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(resRec->name).arg(obs_pos->ctime.TDB(), 15, 'f',7).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);
                 }
                 break;
             }
@@ -1005,6 +1063,7 @@ int skyAreaLF::grade(resList &rList)
 
 void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype, double H)
 {
+
     double normP, normE, normQ;
     double *P, *E, *Q, *X;
     double ct1, ct0, tau, muc2;
@@ -1058,7 +1117,6 @@ void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double
     P[1] = Q[1] - E[1];
     P[2] = Q[2] - E[2];
 
-
     rdsys(&resRec->ra, &resRec->dec, P[0], P[1], P[2]);
 
     //detRDnumGC(&resRec->ra, &resRec->dec, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
@@ -1085,4 +1143,91 @@ void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double
     delete [] Q;
     delete [] E;
 
+}
+
+void det_res_list(resRecord *resRec, observ *obs_pos, double *state, double *Sdist, double *Edist, int ctype, double H)
+{
+    /*
+    double normP, normE, normQ;
+    double *P, *E, *Q, *X;
+    double ct1, ct0, tau, muc2;
+
+    muc2 = 9.8704e-9;
+
+    X = new double[3];
+    P = new double[3];
+    E = new double[3];
+    Q = new double[3];
+
+    X[0] = x;
+    X[1] = y;
+    X[2] = z;
+
+    Q[0] = x;
+    Q[1] = y;
+    Q[2] = z;
+
+    E[0] = obs_pos->ox + obs_pos->obs->dcx;
+    E[1] = obs_pos->oy + obs_pos->obs->dcy;
+    E[2] = obs_pos->oz + obs_pos->obs->dcz;
+
+    P[0] = Q[0] - E[0];
+    P[1] = Q[1] - E[1];
+    P[2] = Q[2] - E[2];
+
+    normP = norm(P);
+    normE = norm(E);
+    normQ = norm(Q);
+
+    ct1 = 0.0;
+
+    do
+    {
+        ct0 = ct1;
+
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+        //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+        tau = ct1/CAU;
+        Q[0] = X[0] - vx*tau;
+        Q[1] = X[1] - vy*tau;
+        Q[2] = X[2] - vz*tau;
+        normQ = norm(Q);
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
+
+    tau = ct1/CAU;
+
+    P[0] = Q[0] - E[0];
+    P[1] = Q[1] - E[1];
+    P[2] = Q[2] - E[2];
+*/
+
+    obs_pos->det_vect_radec(state, &resRec->ra, &resRec->dec);
+
+    //rdsys(&resRec->ra, &resRec->dec, P[0], P[1], P[2]);
+
+    //detRDnumGC(&resRec->ra, &resRec->dec, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
+
+        //detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
+
+        resRec->ra = rad2grad(resRec->ra);
+        resRec->dec = rad2grad(resRec->dec);
+
+        detRDnumGC(&resRec->mu_ra, &resRec->mu_dec, state[3], state[4], state[5], obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
+
+    resRec->mu_ra = grad_to_mas(rad2grad(resRec->mu_ra))/1000.0/86400.0;///cos(grad2rad(resRec->dec));
+    resRec->mu_dec = grad_to_mas(rad2grad(resRec->mu_dec))/1000.0/86400.0;
+
+    *Sdist = sqrt(state[0]*state[0] + state[1]*state[1] + state[2]*state[2]);
+    *Edist = sqrt((obs_pos->ox - state[0])*(obs_pos->ox - state[0]) + (obs_pos->oy - state[1])*(obs_pos->oy - state[1]) + (obs_pos->oz - state[2])*(obs_pos->oz - state[2]));
+
+    if(ctype==1) resRec->magn = det_m(H, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, state[0], state[1], state[2]));
+    if(ctype==3) resRec->magn = det_m(H, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, state[0], state[1], state[2]));
+    if(ctype==0) resRec->magn = det_m(det_planet_H(resRec->number)-5.5, *Sdist, *Edist, 5.8, detPhase(obs_pos->ox, obs_pos->oy, obs_pos->oz, state[0], state[1], state[2]));
+
+/*
+    delete [] P;
+    delete [] Q;
+    delete [] E;
+*/
 }

@@ -67,6 +67,7 @@ class resRecord;
 class resList;
 
 void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double z, double vx, double vy, double vz, double *Sdist, double *Edist, int ctype, double H = 0.0);
+void det_res_list(resRecord *resRec, observ *obs_pos, double *state, double *Sdist, double *Edist, int ctype, double H = 0.0);
 
 class iniRecord : tRecord
 {
@@ -193,6 +194,7 @@ class taskList : public listFile <tlRecord>
 {
 public:
     tlRecord* getTaskName(QString name);
+    int getTaskName(QString name, tlRecord *tRec);
     int addRec(tlRecord &nRec);
     int addRec(tlRecord* nRec);
 
@@ -253,6 +255,8 @@ public:
     int addRec(catRecord *cRec);
 
     catRecord* getCatByName(QString cName);
+    int getCatByName(QString cName, catRecord* cRec);
+
 
 };
 
@@ -308,6 +312,8 @@ public:
 
     QString getTaskIniName(QString taskName);
     QString getTaskCatName(QString taskName);
+
+    int getTaskCat(QString taskName, tlRecord *tRec, catRecord *cRec);
 
     int removeObj(QString taskName, QString objName);
 
