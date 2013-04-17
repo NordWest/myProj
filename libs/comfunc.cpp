@@ -1667,7 +1667,7 @@ return floor( val * p + .5 ) / p;
 
 int UTC2TDT(double jdUTC, double *jdTDT)
 {
-    *jdTDT = jdUTC - TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0;
+    *jdTDT = jdUTC - TAImUTC(jd2mjd(jdUTC)) - 32.184/86400.0;
 
 	return 0;
 }
@@ -1685,7 +1685,7 @@ int UTC2TDB(double jdUTC, double *jdTDB)
 
 int TDT2UTC(double jdTDT, double *jdUTC)
 {
-    *jdUTC = jdTDT + TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0;
+    *jdUTC = jdTDT - TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0;
 
     return 0;
 }
@@ -2562,6 +2562,39 @@ int detRDnumGC(double *RA, double *DEC, double x, double y, double z, double xc,
 	rdsys(RA, DEC, P1, P2, P3);
 
 	return 0;
+}
+
+int detRDnumGC_vel(double *muRAcosD, double *muDEC, double x, double y, double z, double xc, double yc, double zc, double xo, double yo, double zo, double *range)
+{
+    double *R, *R1, *V;
+    R = new double[3];
+    R1 = new double[3];
+    V = new double[3];
+
+    V[0] = (x - (xc + xo));
+    V[1] = (y - (yc + yo));
+    V[2] = (z - (zc + zo));
+    R[0] = range[0];
+    R[1] = range[1];
+    R[2] = range[2];
+
+    R1[0] = R[0] + V[0];
+    R1[1] = R[1] + V[1];
+    R1[2] = R[2] + V[2];
+
+
+    double ra, dec, ra1, dec1;
+
+    rdsys(&ra, &dec, R[0], R[1], R[2]);
+    rdsys(&ra1, &dec1, R1[0], R1[1], R1[2]);
+
+    *muRAcosD = (ra1-ra)*cos(dec);
+    *muDEC = (dec1-dec);
+
+    delete [] R;
+    delete [] V;
+    delete [] R1;
+    return 0;
 }
 
 int detAhnumGC(double *A, double *h, double s, double Cfi, double Sfi, double RA, double DEC)

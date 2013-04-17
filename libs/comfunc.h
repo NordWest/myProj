@@ -284,6 +284,8 @@ double Rx(double t, int n, double *ak);
 double Vx(double t, int n, double *ak);
 
 int detRDnumGC(double *RA, double *DEC, double x, double y, double z, double xc, double yc, double zc, double xo, double yo, double zo);
+int detRDnumGC_vel(double *muRAcosD, double *muDEC, double x, double y, double z, double xc, double yc, double zc, double xo, double yo, double zo, double *range);
+
 int detAhnumGC(double *A, double *h, double s, double Cfi, double Sfi, double RA, double DEC);
 //int detAhnumGC(double *A, double *h, double s, double RA, double DEC);
 

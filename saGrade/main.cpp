@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     rList.saveAs("res.lst");
 
     int i, j, sz, isObj;
-
+/*
     qDebug() << QString("proof mpc\n\n");
 
     sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
@@ -95,7 +95,8 @@ int main(int argc, char *argv[])
         for(j=0; j<rRec->tasks.size(); j++)
         {
             if(sa.getTaskCat(rRec->tasks.at(j), taskRec, cRec))continue;
-            if(cRec->catType==MPC_CAT_TYPE)
+            if(cRec->catType!=DELE_CAT_TYPE||cRec->catType!=MPC_CAT_TYPE) continue;
+            if(cRec->catType==DELE_CAT_TYPE)
             {
                 name = rRec->name;
                 outerArguments.clear();
@@ -106,12 +107,13 @@ int main(int argc, char *argv[])
                 outerArguments << QString("-ep=%1").arg(sJD);
                 //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
 
-        /*        if(useEPM) plaNum = epm_planet_num(name);
-                else plaNum = planet_num(name.toAscii().data());
-                if(plaNum!=-1) outerArguments << "-type=planet";
-                else */
 
-                outerArguments << "-type=aster";
+
+                if(cRec->catType==DELE_CAT_TYPE) outerArguments << "-type=planet";
+                if(cRec->catType==MPC_CAT_TYPE) outerArguments << "-type=aster";
+
+
+                outerArguments << QString("-observer=%1").arg(obsCode);
 
                 //outerArguments << QString("-observer=%1").arg(obsCode);
                 //outerArguments << QString("-observer=@sun");
@@ -155,17 +157,39 @@ int main(int argc, char *argv[])
 
                 rRecD->ra = rRec->ra - mpephR.ra;
                 rRecD->dec = rRec->dec - mpephR.de;
-                rRecD->mu_ra = rRec->mu_ra - mpephR.muRaCosDe;
-                rRecD->mu_dec = rRec->mu_dec - mpephR.muDe;
+                rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
+                rRecD->muDec = rRec->muDec - mpephR.muDe;
+                rRecD->magn = rRec->magn - mpephR.Vmag;
 
                 rRecD->toString(objDataStr);
                 qDebug() << QString("resRecD: %1").arg(objDataStr);
 
+
+
+
             }
         }
-    }
 
+        qDebug() << QString("TDB-TDT: %1").arg((sa.obs_pos->ctime.TDB() - sa.obs_pos->ctime.TDT())*86400);
+        qDebug() << QString("UTC-TDT: %1").arg((sa.obs_pos->ctime.UTC() - sa.obs_pos->ctime.TDT())*86400);
+    }
+*/
     //delete sa;
+    double jDayEnd;
+    dtCurr = QDateTime().currentDateTime();
+
+    utcStr = dtCurr.toString("yyyy MM dd hh mm ss.zzz");
+    qDebug() << QString("cTimeStr: %1\n").arg(utcStr);
+    yr = utcStr.section(" ", 0, 0).toInt();
+    mth = utcStr.section(" ", 1, 1).toInt();
+    day = utcStr.section(" ", 2, 2).toInt();
+    hr = utcStr.section(" ", 3, 3).toInt();
+    min = utcStr.section(" ", 4, 4).toInt();
+    sec = utcStr.section(" ", 5, 5).toDouble();
+    qDebug() << QString("%1|%2|%3|%4|%5|%6\n").arg(yr).arg(mth).arg(day).arg(hr).arg(min).arg(sec);
+    dat2JD_time(&jDayEnd, yr, mth, day, hr, min, sec);
+
+    qDebug() << QString("djDay: %1\n").arg((jDay-jDayEnd)*86400.0);
 
     return 0;//a.exec();
 }

@@ -602,7 +602,7 @@ void moveModelRec::rec2s(QString *str)
                 yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
-            case 1://relative positions in arcsec //Р  РЎС™Р  РІР‚СћР  РІР‚СњР  РЎСљР  РІР‚СњР  РІР‚СћР  РЎв„ўР  Р’В®Р  РЎС™Р  РЎСљ
+            case 1://relative positions in arcsec //п═  п═п▌п║Б└╒п═  п═п├п═Б─ п║я⌡п═  п═п├п═Б─ п║я п═  п═п▌п║я≥п═  п═п├п═Б─ п║я п═  п═п├п═Б─ п║я⌡п═  п═п▌п╡Б─·я·п═  п═Б─≥п▓б╝п═  п═п▌п║Б└╒п═  п═п▌п║я≥
             {
                 xStr = mas_to_hms(xTm, " ", 5);
                 yStr = mas_to_damas(yTm, " ", 5);

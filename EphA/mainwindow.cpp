@@ -260,11 +260,11 @@ void MainWindow::slotInitResTable()
         newItem->setTextAlignment(Qt::AlignCenter);
         mainTable->setItem(i, 4, newItem);
 
-        newItem = new QTableWidgetItem(QString("%1").arg(rRec->mu_ra));
+        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muRacosD));
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 5, newItem);
 
-        newItem = new QTableWidgetItem(QString("%1").arg(rRec->mu_dec));
+        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muDec));
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 6, newItem);
 
@@ -560,8 +560,8 @@ void MainWindow::slotUpdateTable()
     for(i=0; i<sz; i++)
     {
         rRec = rFile.at(i);
-        ra = rRec->ra + mas_to_grad(rRec->mu_ra*86400.0*dT);
-        dec = rRec->dec + mas_to_grad(rRec->mu_dec*86400.0*dT);
+        dec = rRec->dec + mas_to_grad(rRec->muDec*86400.0*dT);
+        ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*86400.0*dT);
 
         newItem = mainTable->item(i, 1);
         newItem->setText(QString("%1").arg(mas_to_hms(grad_to_mas(ra), " ", 1)));

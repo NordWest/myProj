@@ -432,7 +432,14 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
 
     rdsys(ra, dec, P[0], P[1], P[2]);
     //rdsys(ra, dec, X[0], X[1], X[2]);
-    if(range!=NULL)*range = sqrt(X[0]*X[0]+X[1]*X[1]+X[2]*X[2]);
+    //detRDnumGC(ra, dec, P[0], P[1], P[2], ox, oy, oz, obs_pos->obs->state[3], obs_pos->obs->state[4], obs_pos->obs->state[5]);
+
+    if(range!=NULL)
+    {
+        range[0] = X[0];
+        range[1] = X[1];
+        range[2] = X[2];
+    }
 
 }
 

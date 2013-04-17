@@ -17,26 +17,30 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
-    int i, sz, status, centr_num;
+    int i, sz, j, isObj, status, centr_num;
     int SK, CENTER;
+    mpephRec mpephR;
     mpccat mCat;
     orbit orbRec;
     QString name, sJD, objDataStr;
     QStringList outerArguments, resSL;
     QProcess outerProcess;
-    double timei, time1, dtime, jdUTC;
+    double timei, time1, dtime, jdUTC, jdTDB;
     double X[3], V[3];
     double X0[3], V0[3];
+    double ra, dec, time0, dT;
     observ obsPos;
+    QString resListFileName = QString(argv[1]);
 
     QSettings *sett = new QSettings("./satest.ini", QSettings::IniFormat);
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString epmDir = sett->value("general/epmDir", "./").toString();
+
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
-    double time0 = sett->value("general/time0", 2455201.0).toDouble();
+    //double time0 = sett->value("general/time0", 2455201.0).toDouble();
     int useEPM = sett->value("general/useEPM", 0).toInt();
     QString colSep = sett->value("general/colSep", "|").toString();
 
@@ -66,8 +70,22 @@ int main(int argc, char *argv[])
     }
     */
 
-    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+    skyAreaLF sa;
+    sa.init(obsFile, jplFile, "./");
+    sa.obs_pos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, obsCode.toAscii().data());
+    sa.set_opt(0, 360, -10, 90, 4, 18);
+
+    //obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    //obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+
+    resList rFile;
+    resRecord *rRec;
+    resRecord *rRecD= new resRecord;
+    tlRecord *taskRec = new tlRecord;
+    catRecord *cRec = new catRecord;
+    rFile.init(resListFileName);
+
+    time0 = rFile.jdTime;
 /*
     QString eassDir = QString("/home/nuts/Work/lab/EA_NA");
     QString taskListFile = QString("%1/task.lst").arg(eassDir);
@@ -102,7 +120,10 @@ int main(int argc, char *argv[])
     QTextStream logObsEStm(&logObsEFile);
 
 
-    name = "Ceres";
+//    name = "Ceres";
+
+    OrbCat orbC;
+    orbC.init("./orbcat300.txt");
 
     if(mCat.init(mpcCatFile.toAscii().data()))
     {
@@ -110,7 +131,13 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    for(i=0;i<orbC.nstr;i++)
+    {
+        orbC.GetRec(i);
+        logObsStm << QString("%1\n").arg(orbC.record->name);
+    }
 
+/*
     if(mCat.GetRecName(name.simplified().toAscii().data()))
     {
        qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
@@ -119,17 +146,120 @@ int main(int argc, char *argv[])
     qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
     orbRec.get(&mCat);
 
-    time0=mCat.record->getEpoch();
-    time1 = time0+10;
+    time0=mCat.record->getEpoch();*/
+    time1 = time0+1;
     dtime = 1.0;
+
+    qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
 
     for(timei=time0; timei<time1; timei+=dtime)
     {
         TDB2UTC(timei, &jdUTC);
         sJD = QString("%1").arg(jdUTC, 15, 'f',7);
-        obsPos.det_observ(timei);
+        //obsPos.setTDB(timei);
 
-        logObsEStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(timei, 13, 'f', 7).arg(obsPos.X[0], 26, 'e', 20).arg(obsPos.X[1], 26, 'e', 20).arg(obsPos.X[2], 26, 'e', 20).arg(obsPos.V[0], 26, 'e', 20).arg(obsPos.V[1], 26, 'e', 20).arg(obsPos.V[2], 26, 'e', 20);
+        sa.initVisualProp(timei);
+        dT = timei-time0;
+
+        sz = rFile.size();
+        //qDebug() << QString("rFile sz: %1\n").arg(sz);
+        for(i=0; i<sz; i++)
+        {
+
+            rRec = rFile.at(i);
+            name = rRec->name;
+            dec = rRec->dec + mas_to_grad(rRec->muDec*1440.0*dT);
+            ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*1440.0*dT);
+            qDebug() << QString("%1: %2\t%3\n").arg(name).arg(ra).arg(dec);
+/*
+            //qDebug() << QString("tasks.size: %1\n").arg(rRec->tasks.size());
+            for(j=0; j<rRec->tasks.size(); j++)
+            {
+                if(sa.getTaskCat(rRec->tasks.at(j), taskRec, cRec))continue;
+                if(cRec->catType!=DELE_CAT_TYPE&&cRec->catType!=MPC_CAT_TYPE) continue;
+
+
+                    outerArguments.clear();
+
+                    outerArguments << QString("-name=%1").arg(name.simplified().toLower());
+
+
+                    outerArguments << QString("-ep=%1").arg(sJD);
+                    //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
+
+            /*        if(useEPM) plaNum = epm_planet_num(name);
+                    else plaNum = planet_num(name.toAscii().data());
+                    if(plaNum!=-1) outerArguments << "-type=planet";
+                    else /
+
+                    if(cRec->catType==DELE_CAT_TYPE) outerArguments << "-type=planet";
+                    if(cRec->catType==MPC_CAT_TYPE) outerArguments << "-type=aster";
+
+
+                    outerArguments << QString("-observer=%1").arg(obsCode);
+
+                    //outerArguments << QString("-observer=%1").arg(obsCode);
+                    //outerArguments << QString("-observer=@sun");
+                    //outerArguments << "-tcoor=2";
+                    //outerArguments << "-rplane=1";
+
+                    qDebug() << outerArguments.join(" ") << "\n";
+
+                    outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                    outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                    outerProcess.start(miriadeProcData.name, outerArguments);
+
+                    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                    {
+                        qDebug() << "\nmiriadeProc finish error\n";
+                        break;
+                    }
+
+                    QTextStream objStream(outerProcess.readAllStandardOutput());
+
+                    isObj=0;
+                    while (!objStream.atEnd())
+                    {
+                        objDataStr = objStream.readLine();
+
+
+                        if(objDataStr.size()<1) continue;
+                        if(objDataStr.at(0)=='#') continue;
+                        isObj = !mpephR.fromMiriStr(objDataStr);
+                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                        break;
+
+                    }
+
+                    if(!isObj) break;
+
+                    rRec->toString(objDataStr);
+                    qDebug() << QString("resRec: %1").arg(objDataStr);
+
+
+
+                    rRecD->name = name;
+                    rRecD->ra = ra - mpephR.ra;
+                    rRecD->dec = dec - mpephR.de;
+                    /*rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
+                    rRecD->muDec = rRec->muDec - mpephR.muDe;
+                    rRecD->magn = rRec->magn - mpephR.Vmag;/
+
+                    rRecD->toString(objDataStr);
+                    qDebug() << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
+                    logStm << QString("resRecD: %1|%2\n").arg(dT).arg(objDataStr);
+
+
+
+
+
+            }*/
+        }
+        //obsPos.det_observ(timei);
+/*
+        logObsEStm << QString("%1|%2|%3|%4det_observ|%5|%6|%7\n").arg(timei, 13, 'f', 7).arg(obsPos.pos[0], 26, 'e', 20).arg(obsPos.pos[1], 26, 'e', 20).arg(obsPos.pos[2], 26, 'e', 20).arg(obsPos.vel[0], 26, 'e', 20).arg(obsPos.vel[1], 26, 'e', 20).arg(obsPos.vel[2], 26, 'e', 20);
 
         orbRec.detRecEkv(&X[0], &X[1], &X[2], timei);
         orbRec.detRecEkvVel(&V[0], &V[1], &V[2], timei);
@@ -141,16 +271,19 @@ int main(int argc, char *argv[])
         X0[0] = resSL.at(1).toDouble();
         X0[1] = resSL.at(2).toDouble();
         X0[2] = resSL.at(3).toDouble();
-*/
-        logObsStm << QString("%1|%2|%3|%4\n").arg(timei, 13, 'f', 7).arg(X[0]-obsPos.X[0], 26, 'e', 20).arg(X[1]-obsPos.X[1], 26, 'e', 20).arg(X[2]-obsPos.X[2], 26, 'e', 20);
+/
+        logObsStm << QString("%1|%2|%3|%4\n").arg(timei, 13, 'f', 7).arg(X[0]-obsPos.pos[0], 26, 'e', 20).arg(X[1]-obsPos.pos[1], 26, 'e', 20).arg(X[2]-obsPos.pos[2], 26, 'e', 20);*/
+
+
+
     }
 
 
 
 
     logFile.close();
-    logObsFile.close();
-    logObsEFile.close();
+    //logObsFile.close();
+    //logObsEFile.close();
 
     return 0;
 }

@@ -111,7 +111,9 @@ public:
         QString name;
         QStringList tasks;
 
-        double ra, dec, mu_ra, mu_dec, magn, exp;
+        double ra, dec;             //[deg]
+        double muRacosD, muDec;     //[mas/min]
+        double magn, exp;
 
         resRecord();
 
