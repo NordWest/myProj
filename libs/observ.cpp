@@ -436,9 +436,9 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
 
     if(range!=NULL)
     {
-        range[0] = X[0];
-        range[1] = X[1];
-        range[2] = X[2];
+        range[0] = R[0];
+        range[1] = R[1];
+        range[2] = R[2];
     }
 
 }

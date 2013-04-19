@@ -148,19 +148,20 @@ int main(int argc, char *argv[])
 
     time0=mCat.record->getEpoch();*/
     time1 = time0+1;
-    dtime = 1.0;
+    dtime = 0.25;
 
     qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
 
     for(timei=time0; timei<time1; timei+=dtime)
     {
         TDB2UTC(timei, &jdUTC);
-        sJD = QString("%1").arg(jdUTC, 15, 'f',7);
+
         //obsPos.setTDB(timei);
 
-        sa.initVisualProp(timei);
+        //sa.initVisualProp(timei);
+        sa.obs_pos->setTDB(timei);
         dT = timei-time0;
-
+        sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
         sz = rFile.size();
         //qDebug() << QString("rFile sz: %1\n").arg(sz);
         for(i=0; i<sz; i++)
@@ -169,9 +170,9 @@ int main(int argc, char *argv[])
             rRec = rFile.at(i);
             name = rRec->name;
             dec = rRec->dec + mas_to_grad(rRec->muDec*1440.0*dT);
-            ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*1440.0*dT);
+            ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(rRec->dec))*1440.0*dT);
             qDebug() << QString("%1: %2\t%3\n").arg(name).arg(ra).arg(dec);
-/*
+
             //qDebug() << QString("tasks.size: %1\n").arg(rRec->tasks.size());
             for(j=0; j<rRec->tasks.size(); j++)
             {
@@ -190,7 +191,7 @@ int main(int argc, char *argv[])
             /*        if(useEPM) plaNum = epm_planet_num(name);
                     else plaNum = planet_num(name.toAscii().data());
                     if(plaNum!=-1) outerArguments << "-type=planet";
-                    else /
+                    else */
 
                     if(cRec->catType==DELE_CAT_TYPE) outerArguments << "-type=planet";
                     if(cRec->catType==MPC_CAT_TYPE) outerArguments << "-type=aster";
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
                     //outerArguments << "-tcoor=2";
                     //outerArguments << "-rplane=1";
 
-                    qDebug() << outerArguments.join(" ") << "\n";
+                    //logStm << outerArguments.join(" ") << "\n";
 
                     outerProcess.setWorkingDirectory(miriadeProcData.folder);
                     outerProcess.setProcessChannelMode(QProcess::MergedChannels);
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
                         if(objDataStr.size()<1) continue;
                         if(objDataStr.at(0)=='#') continue;
                         isObj = !mpephR.fromMiriStr(objDataStr);
-                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                        //logStm << QString("objDataStr: %1\n").arg(objDataStr);
                         break;
 
                     }
@@ -243,19 +244,23 @@ int main(int argc, char *argv[])
                     rRecD->name = name;
                     rRecD->ra = ra - mpephR.ra;
                     rRecD->dec = dec - mpephR.de;
+                    if(rRecD->ra>180) rRecD->ra-=360;
+                    if(rRecD->ra<-180) rRecD->ra+=360;
+                    //if(rRecD->dec<-90) rRecD->dec = -90 - ;
                     /*rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
                     rRecD->muDec = rRec->muDec - mpephR.muDe;
-                    rRecD->magn = rRec->magn - mpephR.Vmag;/
+                    rRecD->magn = rRec->magn - mpephR.Vmag;*/
 
                     rRecD->toString(objDataStr);
                     qDebug() << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
-                    logStm << QString("resRecD: %1|%2\n").arg(dT).arg(objDataStr);
+                    //logStm << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
+                    logStm << QString("%1|%2|%3|%4\n").arg(name).arg(dT).arg(grad_to_mas(rRecD->ra)).arg(grad_to_mas(rRecD->dec));
 
 
 
 
 
-            }*/
+            }
         }
         //obsPos.det_observ(timei);
 /*

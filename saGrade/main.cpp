@@ -26,6 +26,10 @@ int main(int argc, char *argv[])
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
 
+    QFile logFile("./grade.log");
+    logFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream logStm(&logFile);
+
     skyAreaLF sa;
     int yr, mth, day, hr, min;
     double sec, jDay, s;
@@ -81,10 +85,10 @@ int main(int argc, char *argv[])
 
     sa.grade(rList);
 
-    rList.saveAs("res.lst");
+
 
     int i, j, sz, isObj;
-/*
+
     qDebug() << QString("proof mpc\n\n");
 
     sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
@@ -95,9 +99,8 @@ int main(int argc, char *argv[])
         for(j=0; j<rRec->tasks.size(); j++)
         {
             if(sa.getTaskCat(rRec->tasks.at(j), taskRec, cRec))continue;
-            if(cRec->catType!=DELE_CAT_TYPE||cRec->catType!=MPC_CAT_TYPE) continue;
-            if(cRec->catType==DELE_CAT_TYPE)
-            {
+            if(cRec->catType!=DELE_CAT_TYPE&&cRec->catType!=MPC_CAT_TYPE) continue;
+
                 name = rRec->name;
                 outerArguments.clear();
 
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
                 //outerArguments << "-tcoor=2";
                 //outerArguments << "-rplane=1";
 
-                qDebug() << outerArguments.join(" ") << "\n";
+                logStm << outerArguments.join(" ") << "\n";
 
                 outerProcess.setWorkingDirectory(miriadeProcData.folder);
                 outerProcess.setProcessChannelMode(QProcess::MergedChannels);
@@ -145,7 +148,7 @@ int main(int argc, char *argv[])
                     if(objDataStr.size()<1) continue;
                     if(objDataStr.at(0)=='#') continue;
                     isObj = !mpephR.fromMiriStr(objDataStr);
-                    qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                    logStm << QString("objDataStr: %1\n").arg(objDataStr);
                     break;
 
                 }
@@ -155,6 +158,7 @@ int main(int argc, char *argv[])
                 rRec->toString(objDataStr);
                 qDebug() << QString("resRec: %1").arg(objDataStr);
 
+                rRecD->name = name;
                 rRecD->ra = rRec->ra - mpephR.ra;
                 rRecD->dec = rRec->dec - mpephR.de;
                 rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
@@ -163,17 +167,21 @@ int main(int argc, char *argv[])
 
                 rRecD->toString(objDataStr);
                 qDebug() << QString("resRecD: %1").arg(objDataStr);
+                logStm << QString("%1\n").arg(objDataStr);
+                logStm << QString("%1|%2|%3\n").arg(name).arg(grad_to_mas(rRecD->ra)).arg(grad_to_mas(rRecD->dec));
 
 
+                rRec->muRacosD = mpephR.muRaCosDe;
+                rRec->muDec = mpephR.muDe;
 
-
-            }
         }
 
-        qDebug() << QString("TDB-TDT: %1").arg((sa.obs_pos->ctime.TDB() - sa.obs_pos->ctime.TDT())*86400);
-        qDebug() << QString("UTC-TDT: %1").arg((sa.obs_pos->ctime.UTC() - sa.obs_pos->ctime.TDT())*86400);
+        //qDebug() << QString("TDB-TDT: %1").arg((sa.obs_pos->ctime.TDB() - sa.obs_pos->ctime.TDT())*86400);
+        //qDebug() << QString("UTC-TDT: %1").arg((sa.obs_pos->ctime.UTC() - sa.obs_pos->ctime.TDT())*86400);
     }
-*/
+
+    rList.saveAs("res.lst");
+
     //delete sa;
     double jDayEnd;
     dtCurr = QDateTime().currentDateTime();
