@@ -8,9 +8,24 @@
 #include <QTime>
 #include <QLineEdit>
 #include <QTableWidget>
+#include <QTcpServer>
+#include <QNetworkSession>
+#include <QNetworkConfigurationManager>
+#include <QNetworkConfiguration>
+#include <QTcpSocket>
+
 
 #include "settwindow.h"
 #include "./../libs/skyarealf.h"
+#include "./../libs/redStat.h"
+
+QT_BEGIN_NAMESPACE
+class QLabel;
+class QPushButton;
+class QTcpServer;
+class QNetworkSession;
+QT_END_NAMESPACE
+
 
 namespace Ui {
     class MainWindow;
@@ -34,10 +49,10 @@ public:
 
     QSettings *sett;
 
-    QString timeStr;
+    QString datetimeStr;
     QString starTimeStr;
     QString jdTimeStr;
-    QTime sysTime;
+    QDateTime sysDateTime;
     int updaterEnabled;
     QList <QTableWidgetItem *> itemList;
 
@@ -48,16 +63,28 @@ public:
     QDockWidget *settDock;
     settWindow *settW;
 
+    QFile logFile;
+    QTextStream logStm;
+
+    procData miriadeProcData;
+    QString mpcCatName, deleCatName, obsCatName, installDir, obsCode;
 
 private slots:
     void slotUpdateTime();
     void slotUpdateTable();
     void slotStatBarUpdate();
 
+    void slotGrade();
+
+    void slotAddLog();
+
     void slotStartUpdater();
     void slotStopUpdater();
 
+    void slotUpdateMiri();
+
     void slotOpenResFileWindow();
+    void slotSaveResFileWindow();
     void slotInitResTable();
     void slotViewSettWindow();
     void slotViewNextObj();
@@ -65,6 +92,9 @@ private slots:
     void slotClearTable();
 
     void slotHeaderClicked(int colNum);
+
+    void sendCurObject();
+    void sessionOpened();
 
     void slotExit();
 
@@ -79,11 +109,16 @@ private:
     QTimer *tabUpd;
     QElapsedTimer *tabEla;
 
+    QTcpServer *tcpServer;
+    QStringList fortunes;
+    QNetworkSession *networkSession;
+
     QToolBar *mainToolBar;
     QPushButton *nextButton;
     QPushButton *prevButton;
     QPushButton *startButton;
     QPushButton *stopButton;
+    QPushButton *gradeButton;
 
     QPushButton *viewSettButton;
 
@@ -93,8 +128,11 @@ private:
     QTableWidget *mainTable;
     QTreeWidget *mainTree;
 
+    QPushButton *miriUpdateButton;
+
     QMenu *fileMenu;
     QAction *openResAct;
+    QAction *saveResAct;
     QAction *exitAct;
 
     QMenu *viewMenu;
@@ -103,7 +141,10 @@ private:
     QAction *viewStartAct;
     QAction *viewStopAct;
     QAction *viewSettAct;
-    //QAction *viewSettAct;
+    QAction *clearAct;
+
+    QMenu *instrMenu;
+    QAction *gradeAct;
 
     QDockWidget *infoDock;
     QWidget *infoWidget;
@@ -115,6 +156,9 @@ private:
     QLabel *mudecLabel;
     QLabel *expLabel;
     QLabel *tasksLabel;
+    QLabel *catNameLabel;
+
+
 protected:
     void closeEvent(QCloseEvent *event);
 };

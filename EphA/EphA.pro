@@ -13,6 +13,7 @@ CONFIG += console \
         warn_off \
         debug
 
+QT           += network
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -36,7 +37,9 @@ SOURCES += main.cpp\
 #    ../libs/astro.cpp
     settwindow.cpp \
     ../libs/listfile.cpp \
-    ../libs/mpcs.cpp
+    ../libs/mpcs.cpp \
+    ../libs/time_a.cpp \
+    ../libs/redStat.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -61,7 +64,10 @@ HEADERS  += mainwindow.h \
     ../libs/mb.h \
     settwindow.h \
     ../libs/listfile.h \
-    ../libs/mpcs.h
+    ../libs/mpcs.h \
+    ../libs/time_a.h \
+    ../libs/cspice/SpiceUsr.h \
+    ../libs/redStat.h
 
 
 FORMS    += mainwindow.ui \
@@ -71,6 +77,7 @@ win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+unix:LIBS+=./../libs/unix/cspice.a
 
 
 

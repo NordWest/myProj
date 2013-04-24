@@ -76,6 +76,8 @@ public:
     int det_obj_radec(QString objName, double *ra, double *dec, double *range);
     int det_vect_radec(double *stateRV, double *ra, double *dec, double *range = NULL);
 
+    QString getObsCode();
+
 /*
 	mpcs *lmpc;
 	int nmpcs;

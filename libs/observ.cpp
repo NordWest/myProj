@@ -443,6 +443,11 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
 
 }
 
+QString observ::getObsCode()
+{
+    return(QString(obs->record->num));
+}
+
 int observ::detSunRADEC(double *raS, double *decS)
 {
     double Xs, Ys, Zs;

@@ -369,7 +369,7 @@ int resRecord::fromString(QString tStr)
     QStringList strL;
     QString tStr0;
     strL = tStr.split("|");
-    if(strL.size()!=9) return 1;
+    if(strL.size()!=10) return 1;
     number = strL.at(0).toInt();
     name = strL.at(1).simplified();
     ra = mas_to_grad(hms_to_mas(strL.at(2), " "));
@@ -378,7 +378,8 @@ int resRecord::fromString(QString tStr)
     muRacosD = strL.at(5).toDouble();
     muDec = strL.at(6).toDouble();
     exp = strL.at(7).toDouble();
-    tStr0 = strL.at(8);
+    catName = strL.at(8);
+    tStr0 = strL.at(9);
     tasks = tStr0.split(",");
 
 
@@ -388,7 +389,7 @@ int resRecord::fromString(QString tStr)
 void resRecord::toString(QString &tStr)
 {
     tStr.clear();
-    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9").arg(number, 8).arg(name, 16).arg(mas_to_hms(grad_to_mas(ra), " ", 3)).arg(mas_to_damas(grad_to_mas(dec), " ", 2)).arg(magn, 5, 'f', 2).arg(muRacosD, 14, 'f', 6).arg(muDec, 14, 'f', 6).arg(exp, 10).arg(tasks.join(",")));
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10").arg(number, 8).arg(name, -16).arg(mas_to_hms(grad_to_mas(ra), " ", 3)).arg(mas_to_damas(grad_to_mas(dec), " ", 2)).arg(magn, 5, 'f', 2).arg(muRacosD, 14, 'f', 6).arg(muDec, 14, 'f', 6).arg(exp, 10).arg(catName, 16).arg(tasks.join(",")));
 }
 
 
@@ -411,7 +412,7 @@ resRecord& resRecord::operator=(const resRecord &rhs) {
     number = rhs.number;
     name = rhs.name;
     this->tasks = rhs.tasks;
-    //this->desc = rhs.desc;
+    this->catName = rhs.catName;
     this->exp = rhs.exp;
     this->ra = rhs.ra;
     this->dec = rhs.dec;
@@ -420,6 +421,12 @@ resRecord& resRecord::operator=(const resRecord &rhs) {
     this->magn = rhs.magn;
 
     return *this;
+}
+
+void resRecord::getRaDec(double dTime, double &raRes, double &decRes)
+{
+    decRes = dec + mas_to_grad(muDec*1440.0*dTime);
+    raRes = ra + mas_to_grad(muRacosD/cos(grad2rad(dec))*1440.0*dTime);
 }
 
 int resList::addRec(resRecord& nRec)
@@ -601,6 +608,72 @@ int resList::sortMagn()
         if(pMin>i) recList.swap(i, pMin);
     }
 }
+
+/////////////////////////////////////////////////
+
+logRecord::logRecord()
+{
+    name = "";
+    tasks.clear();
+    jdTime = ra = dec = magn = exp = 0.0;
+}
+
+int logRecord::fromString(QString tStr)
+{
+    QStringList strL;
+    QString tStr0;
+    strL = tStr.split("|");
+    if(strL.size()!=7) return 1;
+    jdTime = mjd2jd(getMJDfromStrT(strL.at(0)));
+    name = strL.at(1).simplified();
+    ra = mas_to_grad(hms_to_mas(strL.at(2), " "));
+    dec = mas_to_grad(damas_to_mas(strL.at(3), " "));
+    magn = strL.at(4).toDouble();
+    exp = strL.at(5).toDouble();
+    tStr0 = strL.at(6);
+    tasks = tStr0.split(",");
+
+
+    return 0;
+}
+
+void logRecord::toString(QString &tStr)
+{
+    QString timeStr;
+    tStr.clear();
+    getStrTfromMJD(&timeStr, jd2mjd(jdTime));
+    tStr.append(QString("%1|%2|%3|%4|%5|%6|%7").arg(timeStr).arg(name, 16).arg(mas_to_hms(grad_to_mas(ra), " ", 3)).arg(mas_to_damas(grad_to_mas(dec), " ", 2)).arg(magn, 5, 'f', 2).arg(exp, 10).arg(tasks.join(",")));
+}
+
+
+bool operator== ( const logRecord& lhs, const logRecord& rhs )
+{
+    return((QString().compare(lhs.name, rhs.name, Qt::CaseSensitive)==0)&&lhs.jdTime==rhs.jdTime);
+}
+
+bool operator== ( const logRecord& lhs, const logRecord* rhs )
+{
+    return((QString().compare(lhs.name, rhs->name, Qt::CaseSensitive)==0)&&lhs.jdTime==rhs->jdTime);
+}
+
+logRecord& logRecord::operator=(const logRecord &rhs) {
+    // Check for self-assignment!
+    if (this == &rhs)      // Same object?
+      return *this;        // Yes, so skip assignment, and just return *this.
+
+    //... // Deallocate, allocate new space, copy values...
+    jdTime = rhs.jdTime;
+    name = rhs.name;
+    this->tasks = rhs.tasks;
+    //this->desc = rhs.desc;
+    this->exp = rhs.exp;
+    this->ra = rhs.ra;
+    this->dec = rhs.dec;
+    this->magn = rhs.magn;
+
+    return *this;
+}
+
 
 
 ////////////////////////////////////////////////
@@ -895,9 +968,15 @@ int skyAreaLF::grade(resList &rList)
     sscatFB *tsscat;
     OrbCat *orb_catalog;
     orbit orb_elem;
+    QString strT;
+
+    setlocale(LC_NUMERIC, "C");
 
     rList.clear();
     rList.jdTime = this->obs_pos->ctime.TDB();
+
+    getStrTfromMJD(&strT, jd2mjd(rList.jdTime));
+    qDebug() << QString("jdTime: %1\n").arg(strT);
 
     double x, y, z, vx, vy, vz, Sdist, Edist;
     int plaNum;
@@ -981,6 +1060,7 @@ int skyAreaLF::grade(resList &rList)
                     det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
 
 
+                    resRec->catName = "Planets";
 
                 }
                 break;
@@ -1000,6 +1080,7 @@ int skyAreaLF::grade(resList &rList)
                     resRec->name = QString(orb_catalog->record->name);
 
                     det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, orb_catalog->record->H);
+                    resRec->catName = "orbcat";
 
                 }
                 break;
@@ -1019,13 +1100,14 @@ int skyAreaLF::grade(resList &rList)
                     resRec->name = QString(iR->name);
                     resRec->number = 0;
 
+                    resRec->catName = "LSPM";
                 }
                 break;
                 case MPC_CAT_TYPE:
                 {
                     if(mpc_catalog->GetRecName(iR->name.toAscii().data()))
                     {
-//				AfxMessageBox("c1");
+                        qDebug() << QString("mpc_catalog object not found\n");
                         continue;
                     }
                     orb_elem.get(mpc_catalog);
@@ -1042,6 +1124,8 @@ int skyAreaLF::grade(resList &rList)
                     state[4] = vy;
                     state[5] = vz;
                     det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
+
+                    resRec->catName = "MPCCAT";
 
                     mrec.r = grad2rad(resRec->ra);// + dRa;
                     mrec.d = grad2rad(resRec->dec);// + dDec;

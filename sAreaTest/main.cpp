@@ -150,16 +150,21 @@ int main(int argc, char *argv[])
     time1 = time0+1;
     dtime = 0.25;
 
-    qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
 
+    QDateTime sysDateTime = QDateTime().currentDateTime();
+
+    dat2JD_time(&timei, sysDateTime.date().year(), sysDateTime.date().month(), sysDateTime.date().day(), sysDateTime.time().hour(), sysDateTime.time().minute(), sysDateTime.time().second());
+    //
+    qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
+/*
     for(timei=time0; timei<time1; timei+=dtime)
     {
         TDB2UTC(timei, &jdUTC);
-
+*/
         //obsPos.setTDB(timei);
 
-        //sa.initVisualProp(timei);
-        sa.obs_pos->setTDB(timei);
+        sa.initVisualProp(timei);
+        //sa.obs_pos->setTDB(timei);
         dT = timei-time0;
         sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
         sz = rFile.size();
@@ -169,8 +174,9 @@ int main(int argc, char *argv[])
 
             rRec = rFile.at(i);
             name = rRec->name;
-            dec = rRec->dec + mas_to_grad(rRec->muDec*1440.0*dT);
-            ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(rRec->dec))*1440.0*dT);
+            //dec = rRec->dec + mas_to_grad(rRec->muDec*1440.0*dT);
+            //ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(rRec->dec))*1440.0*dT);
+            rRec->getRaDec(dT, ra, dec);
             qDebug() << QString("%1: %2\t%3\n").arg(name).arg(ra).arg(dec);
 
             //qDebug() << QString("tasks.size: %1\n").arg(rRec->tasks.size());
@@ -261,7 +267,7 @@ int main(int argc, char *argv[])
 
 
             }
-        }
+        //}
         //obsPos.det_observ(timei);
 /*
         logObsEStm << QString("%1|%2|%3|%4det_observ|%5|%6|%7\n").arg(timei, 13, 'f', 7).arg(obsPos.pos[0], 26, 'e', 20).arg(obsPos.pos[1], 26, 'e', 20).arg(obsPos.pos[2], 26, 'e', 20).arg(obsPos.vel[0], 26, 'e', 20).arg(obsPos.vel[1], 26, 'e', 20).arg(obsPos.vel[2], 26, 'e', 20);

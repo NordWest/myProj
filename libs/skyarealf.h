@@ -109,6 +109,7 @@ public:
         //int noftask;
         int number;
         QString name;
+        QString catName;
         QStringList tasks;
 
         double ra, dec;             //[deg]
@@ -122,6 +123,7 @@ public:
 
         resRecord& operator=(const resRecord &rhs);
 
+        void getRaDec(double dTime, double &raRec, double &decRes);//[day, deg, deg]
 };
 
 bool operator==( const resRecord& lhs, const resRecord& rhs );
@@ -261,6 +263,31 @@ public:
 
 
 };
+
+class logRecord : tRecord
+{
+public:
+        //int noftask;
+    double jdTime;
+    QString name;
+    QStringList tasks;
+
+        double ra, dec;             //[deg]
+    //    double muRacosD, muDec;     //[mas/min]
+        double magn, exp;
+
+        logRecord();
+
+        int fromString(QString tStr);
+        void toString(QString &tStr);
+
+        logRecord& operator=(const logRecord &rhs);
+
+        void getRaDec(double dTime, double &raRec, double &decRes);//[day, deg, deg]
+};
+
+bool operator==( const logRecord& lhs, const logRecord& rhs );
+bool operator==( const logRecord& lhs, const logRecord* rhs );
 
 
 

@@ -47,13 +47,17 @@
 Client::Client(QWidget *parent)
 :   QDialog(parent), networkSession(0)
 {
+    this->setBaseSize(500, 300);
 //! [0]
     hostLabel = new QLabel(tr("&Server name:"));
     portLabel = new QLabel(tr("S&erver port:"));
 
     // find out which IP to connect to
     QString ipAddress;
+
+
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+/*
     // use the first non-localhost IPv4 address
     for (int i = 0; i < ipAddressesList.size(); ++i) {
         if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
@@ -65,9 +69,11 @@ Client::Client(QWidget *parent)
     // if we did not find one, use IPv4 localhost
     if (ipAddress.isEmpty())
         ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+*/
+    ipAddress = "localhost";
 
     hostLineEdit = new QLineEdit(ipAddress);
-    portLineEdit = new QLineEdit;
+    portLineEdit = new QLineEdit("3467");
     portLineEdit->setValidator(new QIntValidator(1, 65535, this));
 
     hostLabel->setBuddy(hostLineEdit);
@@ -78,7 +84,7 @@ Client::Client(QWidget *parent)
 
     getFortuneButton = new QPushButton(tr("Get Fortune"));
     getFortuneButton->setDefault(true);
-    getFortuneButton->setEnabled(false);
+    getFortuneButton->setEnabled(true);
 
     quitButton = new QPushButton(tr("Quit"));
 
@@ -114,7 +120,7 @@ Client::Client(QWidget *parent)
     mainLayout->addWidget(buttonBox, 3, 0, 1, 2);
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Fortune Client"));
+    setWindowTitle(tr("Test Client"));
     portLineEdit->setFocus();
 
     QNetworkConfigurationManager manager;

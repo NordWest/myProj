@@ -2588,7 +2588,7 @@ int detRDnumGC_vel(double *muRAcosD, double *muDEC, double x, double y, double z
     rdsys(&ra, &dec, R[0], R[1], R[2]);
     rdsys(&ra1, &dec1, R1[0], R1[1], R1[2]);
 
-    *muRAcosD = (ra1-ra)*cos(dec1);
+    *muRAcosD = (ra1-ra)*cos(dec);
     *muDEC = (dec1-dec);
 
     delete [] R;

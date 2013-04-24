@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
 
     int i, j, sz, isObj;
-
+/*
     qDebug() << QString("proof mpc\n\n");
 
     sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         //qDebug() << QString("TDB-TDT: %1").arg((sa.obs_pos->ctime.TDB() - sa.obs_pos->ctime.TDT())*86400);
         //qDebug() << QString("UTC-TDT: %1").arg((sa.obs_pos->ctime.UTC() - sa.obs_pos->ctime.TDT())*86400);
     }
-
+*/
     rList.saveAs("res.lst");
 
     //delete sa;
