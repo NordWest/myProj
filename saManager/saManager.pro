@@ -34,7 +34,9 @@ SOURCES += main.cpp\
     addtaskdlg.cpp \
     addobjdlg.cpp \
     adddeledlg.cpp \
-    addmpcdlg.cpp
+    addmpcdlg.cpp \
+    ../libs/time_a.cpp \
+    addlspmdlg.cpp
 
 HEADERS  += mainwindow.h \
     ../libs/sscat.h \
@@ -60,12 +62,16 @@ HEADERS  += mainwindow.h \
     addtaskdlg.h \
     addobjdlg.h \
     adddeledlg.h \
-    addmpcdlg.h
+    addmpcdlg.h \
+    ../libs/time_a.h \
+    ../libs/cspice/SpiceUsr.h \
+    addlspmdlg.h
 
 win32:LIBS += ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
+unix:LIBS+=./../libs/unix/cspice.a
 
 
 FORMS    += mainwindow.ui \
@@ -74,4 +80,5 @@ FORMS    += mainwindow.ui \
     addtaskdlg.ui \
     addobjdlg.ui \
     adddeledlg.ui \
-    addmpcdlg.ui
+    addmpcdlg.ui \
+    addlspmdlg.ui

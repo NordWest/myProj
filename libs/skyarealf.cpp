@@ -982,6 +982,7 @@ int skyAreaLF::grade(resList &rList)
     int plaNum;
     double *state = new double[6];
     //mpcCat
+    /*
     QString mpcFileName = "./mpc.txt";
     QFile mpcFile(mpcFileName);
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -991,7 +992,7 @@ int skyAreaLF::grade(resList &rList)
     xyFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream xyStm(&xyFile);
 
-    mpc mrec;
+//    mpc mrec;*/
     char *astr = new char[256];
 
     int taskNum = task_list.size();
@@ -1126,7 +1127,7 @@ int skyAreaLF::grade(resList &rList)
                     det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
 
                     resRec->catName = "MPCCAT";
-
+/*
                     mrec.r = grad2rad(resRec->ra);// + dRa;
                     mrec.d = grad2rad(resRec->dec);// + dDec;
 
@@ -1139,7 +1140,7 @@ int skyAreaLF::grade(resList &rList)
 
                     mpcStm << astr << "\n";
 
-                    xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(resRec->name).arg(obs_pos->ctime.TDB(), 15, 'f',7).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);
+                    xyStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(resRec->name).arg(obs_pos->ctime.TDB(), 15, 'f',7).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);*/
                 }
                 break;
             }
@@ -1148,7 +1149,7 @@ int skyAreaLF::grade(resList &rList)
             rList.addRec(resRec);
         }
     }
-    mpcFile.close();
+    //mpcFile.close();
 }
 
 

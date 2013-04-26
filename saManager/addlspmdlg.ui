@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>addMpcDlg</class>
- <widget class="QDialog" name="addMpcDlg">
+ <class>addLspmDlg</class>
+ <widget class="QDialog" name="addLspmDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -39,47 +39,47 @@
      </column>
      <column>
       <property name="text">
-       <string>a</string>
+       <string>RA</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>e</string>
+       <string>DEC</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Peri.</string>
+       <string>Bmag</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Node</string>
+       <string comment="Total Proper Motion">pm</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Incl.</string>
+       <string>Vmag</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>M</string>
+       <string>Jmag</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>n</string>
+       <string>Hmag</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>H</string>
+       <string>Kmag</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>G</string>
+       <string>VJ</string>
       </property>
      </column>
     </widget>
@@ -90,6 +90,13 @@
       <string/>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="3" column="1">
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>From names list</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -97,20 +104,47 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
-       <widget class="QLineEdit" name="nameFilter"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>a</string>
+         <string>pm</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="a_min">
+      <item row="0" column="1" colspan="2">
+       <widget class="QLineEdit" name="nameFilter"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="e_min">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="searchBtn">
+        <property name="text">
+         <string>Search</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="clearBtn">
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="e_max">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximum">
+         <double>99.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -124,51 +158,17 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>e</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="e_min">
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="a_min">
         <property name="enabled">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QDoubleSpinBox" name="e_max">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="maximum">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="clearBtn">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Clear</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QPushButton" name="searchBtn">
-        <property name="text">
-         <string>Search</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>From names list</string>
+         <string>magn</string>
         </property>
        </widget>
       </item>
@@ -182,7 +182,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>addMpcDlg</receiver>
+   <receiver>addLspmDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -198,7 +198,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>addMpcDlg</receiver>
+   <receiver>addLspmDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

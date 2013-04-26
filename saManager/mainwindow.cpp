@@ -276,7 +276,7 @@ void MainWindow::slotAddFromCatObj()
             iObj = &taskR->iList;
             switch(catR->catType)
             {
-                case 0:
+                case DELE_CAT_TYPE:
                 {
 
                     addDeLeDlg addDE;
@@ -355,7 +355,7 @@ void MainWindow::slotAddFromCatObj()
 
                 }
                 break;
-            case 1:
+            case MPC_CAT_TYPE:
             {
                 addMpcDlg addMPC;
                 addMPC.cat = new mpccat;
@@ -378,6 +378,39 @@ void MainWindow::slotAddFromCatObj()
                     {
 
                         iRec->name = QString(addMPC.mpcList.at(i)->name).simplified();
+                        iRec->exp = 10;
+                        iObj->addRec(iRec);
+                    }
+
+
+                    slotUpdateObjList();
+                }
+            }
+            break;
+
+            case LSPM_CAT_TYPE:
+            {
+                addLspmDlg addLSPM;
+                addLSPM.cat = new sscatFB;
+                if(addLSPM.cat->init(catR->catFile.toAscii().data()))
+                {
+                    QMessageBox::warning(0, "has no cat", "has no cat");
+                    break;
+                }
+
+
+                if(addLSPM.exec()==QDialog::Accepted)
+                {
+                    //iniCatName = sArea.getTaskCatName(taskR->name);
+
+                    //QFile
+
+                    sz = addLSPM.lspmList.size();
+                    iRec = new iniRecord;
+                    for(i=0; i<sz; i++)
+                    {
+
+                        iRec->name = QString(addLSPM.lspmList.at(i)->getLSPM()).simplified();
                         iRec->exp = 10;
                         iObj->addRec(iRec);
                     }

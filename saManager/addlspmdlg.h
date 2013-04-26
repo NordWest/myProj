@@ -1,33 +1,34 @@
-#ifndef ADDMPCDLG_H
-#define ADDMPCDLG_H
+#ifndef ADDLSPMDLG_H
+#define ADDLSPMDLG_H
 
 #include <QDialog>
 #include <QLineEdit>
 #include <QTableWidget>
 #include <QFileDialog>
-#include "./../libs/mpccat.h"
-//#include "./../libs/
+//#include "./../libs/mpccat.h"
+#include "./../libs/sscatFB.h"
+#include "./../libs/sscat.h"
 
 namespace Ui {
-class addMpcDlg;
+class addLspmDlg;
 }
 
-class addMpcDlg : public QDialog
+class addLspmDlg : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit addMpcDlg(QWidget *parent = 0);
-    ~addMpcDlg();
+    explicit addLspmDlg(QWidget *parent = 0);
+    ~addLspmDlg();
 
     QLineEdit *nameLE;
     QPushButton *searchBtn;
     QPushButton *clearBtn;
     QTableWidget *objTable;
 
-    mpccat *cat;
+    sscatFB *cat;
 
-    QList <mpcrec*> mpcList;
+    QList <sscat_rec*> lspmList;
 
     
 private slots:
@@ -39,7 +40,7 @@ private slots:
     void on_pushButton_clicked();
 
 private:
-    Ui::addMpcDlg *ui;
+    Ui::addLspmDlg *ui;
 };
 
-#endif // ADDMPCDLG_H
+#endif // ADDLSPMDLG_H

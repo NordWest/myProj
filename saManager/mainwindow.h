@@ -12,6 +12,7 @@
 #include "addtaskdlg.h"
 #include "adddeledlg.h"
 #include "addmpcdlg.h"
+#include "addlspmdlg.h"
 
 #include "./../libs/skyarealf.h"
 
