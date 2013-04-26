@@ -14,8 +14,10 @@ CONFIG += staticlib warn_off
 SOURCES += astro.cpp
 HEADERS += astro.h
 
-header.path=/usr/local/include
-header.files=astro.h
-target.path +=/usr/local/lib
+unix:header.path=/usr/local/include
+unix:header.files=astro.h
+unix:target.path +=/usr/local/lib
+win32:header.path="c:\\Qt\\4.8.3\\include\\"
+win32:header.files=astro.h
 INSTALLS+=header
-INSTALLS+=target
+unix:INSTALLS+=target

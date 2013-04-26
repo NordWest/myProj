@@ -1,5 +1,5 @@
 win32 {
- TARGET = ./../../libs/win32/mb
+ TARGET = mb
 }
 unix {
 TARGET = ./../libs/unix/mb

@@ -60,8 +60,8 @@ HEADERS  += mainwindow.h \
     ../libs/coord.h \
     ../libs/commetorbcat.h \
     ../libs/comfunc.h \
-    ../libs/astro.h \
-    ../libs/mb.h \
+#    ../libs/astro.h \
+#    ../libs/mb.h \
     settwindow.h \
     ../libs/listfile.h \
     ../libs/mpcs.h \
@@ -73,8 +73,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     settwindow.ui
 
-win32:LIBS += ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a
+win32:LIBS += libmb libastro
+#            ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 unix:LIBS+=./../libs/unix/cspice.a
