@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
       obsy.getobsynumO(obsCode.toAscii().data());
 
       obsPos.initObservatory(obsFile.toAscii().data());
-      obsPos.initSPICE(bspName, lskName);
+      if(obsPos.initSPICE(bspName, lskName)) return 1;
       obsPos.initSPK(spkName);
       obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
 
