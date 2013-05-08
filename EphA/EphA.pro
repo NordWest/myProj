@@ -66,8 +66,33 @@ HEADERS  += mainwindow.h \
     ../libs/listfile.h \
     ../libs/mpcs.h \
     ../libs/time_a.h \
+    ../libs/redStat.h \
+    ../libs/cspice/zzerror.h \
+    ../libs/cspice/zzalloc.h \
+    ../libs/cspice/SpiceZst.h \
+    ../libs/cspice/SpiceZpr.h \
+    ../libs/cspice/SpiceZpl.h \
+    ../libs/cspice/SpiceZmc.h \
+    ../libs/cspice/SpiceZim.h \
+    ../libs/cspice/SpiceZfc.h \
+    ../libs/cspice/SpiceZdf.h \
+    ../libs/cspice/SpiceZad.h \
     ../libs/cspice/SpiceUsr.h \
-    ../libs/redStat.h
+    ../libs/cspice/SpiceSPK.h \
+    ../libs/cspice/SpicePln.h \
+    ../libs/cspice/SpiceGF.h \
+    ../libs/cspice/SpiceEll.h \
+    ../libs/cspice/SpiceEK.h \
+    ../libs/cspice/SpiceCK.h \
+    ../libs/cspice/SpiceCel.h \
+    ../libs/cspice/signal1.h \
+    ../libs/cspice/rawio.h \
+    ../libs/cspice/lio.h \
+    ../libs/cspice/fp.h \
+    ../libs/cspice/fmt.h \
+    ../libs/cspice/fio.h \
+    ../libs/cspice/f2cMang.h \
+    ../libs/cspice/f2c.h
 
 
 FORMS    += mainwindow.ui \
@@ -75,6 +100,7 @@ FORMS    += mainwindow.ui \
 
 win32:LIBS += libmb libastro
 #            ./../libs/win32/libastro.a
+win32:LIBS += ./../libs/win32/cspice.lib
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 unix:LIBS+=./../libs/unix/cspice.a
