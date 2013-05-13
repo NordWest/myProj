@@ -10,6 +10,29 @@
 #include "./../libs/cspice/SpiceUsr.h"
 #include "./../libs/observ.h"
 
+struct spkRecord
+{
+    double time, X[3], V[3];
+    QString toString()
+    {
+        return(QString("%1, %2, %3, %4, %5, %6, %7").arg(time, 15, 'f', 8).arg(X[0], 18, 'g', 12).arg(X[1], 18, 'g', 12).arg(X[2], 18, 'g', 12).arg(V[0], 18, 'g', 12).arg(V[1], 18, 'g', 12).arg(V[2], 18, 'g', 12));
+    };
+    int fromString(QString inStr)
+    {
+        QStringList opers;
+        opers = inStr.split(", ");
+        if(opers.size()<7) return 1;
+        time = opers[0].toDouble();
+        X[0] = opers[1].toDouble();
+        X[1] = opers[2].toDouble();
+        X[2] = opers[3].toDouble();
+        V[0] = opers[4].toDouble();
+        V[1] = opers[5].toDouble();
+        V[2] = opers[6].toDouble();
+        return 0;
+    };
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -52,6 +75,9 @@ int main(int argc, char *argv[])
     v2 = new double[3];
     double *Qb;
     Qb = new double[3];
+
+    spkRecord *spkRec;
+    QList <spkRecord *> spkList;
 
     observ obsPos;
 
@@ -159,6 +185,7 @@ int main(int argc, char *argv[])
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStm(&mpcFile);
 
+// Clear SPK dir
     QDir spkDir("./spks");
     QStringList filters, filesE;
     filters << "*.*";
@@ -168,6 +195,7 @@ int main(int argc, char *argv[])
     {
         spkDir.remove(filesE.at(i));
     }
+////////////////
 
     while(!inStm.atEnd())
     {
@@ -401,6 +429,8 @@ int main(int argc, char *argv[])
             qDebug() << QString("name: %1\n").arg(spkFileName);
 
 
+
+
             spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(time, 15, 'f', 8).arg(X1[0], 18, 'g', 12).arg(X1[1], 18, 'g', 12).arg(X1[2], 18, 'g', 12).arg(V1[0]/SECINDAY, 18, 'g', 12).arg(V1[1]/SECINDAY, 18, 'g', 12).arg(V1[2]/SECINDAY, 18, 'g', 12);
 
             spkFile.close();
@@ -619,11 +649,66 @@ int main(int argc, char *argv[])
     }
 
 
+
+////////////////////////////////sort SPK
+    double tmin, pmin;
+    int sz, j, p;
+
+
+    filesE = spkDir.entryList(filters, QDir::Files);
+    qDebug() << QString("spk files num: %1\n").arg(filesE.size());
+    for(p=0; p<filesE.size(); p++)
+    {
+        spkFileName = spkDir.absoluteFilePath(filesE.at(p));
+        spkFile.setFileName(spkFileName);
+        if(!spkFile.open(QFile::ReadOnly))
+        {
+            qDebug() << QString("File %1 not open.\n").arg(spkFileName);
+        }
+        spkStm.setDevice(&spkFile);
+
+        spkList.clear();
+        while(!spkStm.atEnd())
+        {
+            tStr = spkStm.readLine();
+            spkRec = new spkRecord;
+            if(!spkRec->fromString(tStr)) spkList << spkRec;
+        }
+
+        sz = spkList.size();
+
+        for(i=0; i<sz-1; i++)
+        {
+            tmin = spkList.at(i)->time;
+            pmin = i;
+            for(j=i+1; j<sz; j++)
+            {
+                if(spkList.at(j)->time<tmin)
+                {
+                    tmin = spkList.at(j)->time;
+                    pmin = j;
+                }
+            }
+            spkList.swap(i, pmin);
+        }
+
+        spkFile.close();
+        spkFile.open(QFile::WriteOnly | QFile::Truncate);
+        spkStm.setDevice(&spkFile);
+
+        for(i=0; i<sz; i++) spkStm << spkList.at(i)->toString() << "\n";
+
+        spkFile.close();
+    }
+////////////////////////////////////////////////////////////////////
+
+
+
     inFile.close();
     bigFile.close();
     dxFile.close();
     mpcFile.close();
-    spkFile.close();
+    //spkFile.close();
 
     return 0;//a.exec();
 }

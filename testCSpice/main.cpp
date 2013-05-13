@@ -113,6 +113,8 @@ int main(int argc, char *argv[])
       obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
 
       furnsh_c ( "./codes_300ast.tf"  );
+      //sprintf(leap,"%s", "./naif0010.tls");
+      //furnsh_c ( leap );                        //load LSK kernel
 /*
       sprintf(leap,"%s", "./naif0009.tls");
       furnsh_c ( leap );                        //load LSK kernel
@@ -136,6 +138,12 @@ int main(int argc, char *argv[])
 
      utbeg = 2456010.5;
      utend = 2456090.5;
+
+     //utbeg = 2434000.5;
+     //utend = 2434100.5;
+
+     //utbeg = 2455700.5;
+     //utend = 2455800.5;
 
      delta  = ( utend - utbeg ) / ( (SpiceDouble) MAXPTS  - 1.);
 
