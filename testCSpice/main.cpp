@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
          mrec.eJD = obsPos.ctime.UTC();
          //mrec.num = 1;
 
-         if(!initMpc) mCat.record->getNumStr(mrec.head->Snum);
+         if(!initMpc)mCat.record->getNumStr(mrec.head->Snum);
          else mrec.head->set_Snum(1);
          //strcpy(, mCat.record->getNumStr(>number);
          mrec.tail->set_numOfObs(obsCode.toAscii().data());

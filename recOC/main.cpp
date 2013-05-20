@@ -150,8 +150,11 @@ int main(int argc, char *argv[])
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
 
-    obsPos.init(obsFile, bspName, leapName);
-    obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
+    //obsPos.init(obsFile, bspName, leapName);
+    //obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
+
+    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, "500");
 
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
@@ -443,7 +446,40 @@ int main(int argc, char *argv[])
 */
 
 
-            qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
+            //qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
+
+            if(detMPC)
+            {
+                if(!initMpc) mCat.GetRecName(name.toAscii().data());
+
+                obsPos.setTDB(time);
+                obsPos.det_observ();
+                state[0] = X[0];
+                state[1] = X[1];
+                state[2] = X[2];
+                state[3] = V[0];
+                state[4] = V[1];
+                state[5] = V[2];
+                obsPos.det_vect_radec(state, &ra, &de, &range);
+                /*
+                //nbody->detState(&state[0], &state[1], &state[2], &state[3], &state[4], &state[5], time, GEOCENTR_NUM, CENTER_SUN, SK);
+                qDebug() << QString("Geocentr pos %1: %2\t%3\t%4\n").arg(time, 13, 'f', 4).arg(state[0], 18, 'g', 9).arg(state[1], 18, 'g', 9).arg(state[2], 18, 'g', 9);
+                detRDnumGC(&ra, &de, X[0], X[1], X[2], state[0], state[1], state[2], 0, 0, 0);
+*/
+                mrec.r = ra;// + dRa;
+                mrec.d = de;// + dDec;
+
+                mrec.eJD = obsPos.ctime.UTC();
+                //mrec.eJD = time;
+                mrec.num = 1;
+                mCat.record->getNumStr(mrec.head->Snum);
+                //strcpy(, mCat.record->getNumStr(>number);
+                mrec.tail->set_numOfObs(obsCode.toAscii().data());
+                mrec.toString(astr);
+
+                mpcStm << astr << "\n";
+            }
+
 //P
             /*
             R[0] = X[0] - XE0[0];
@@ -520,7 +556,7 @@ int main(int argc, char *argv[])
             sA[1] = sA[1]/norm_sA;
             sA[2] = sA[2]/norm_sA;
 */
-
+/*
             if(detMPC)
             {
                 outerArguments.clear();
@@ -533,7 +569,7 @@ int main(int argc, char *argv[])
         /*        if(useEPM) plaNum = epm_planet_num(name);
                 else plaNum = planet_num(name.toAscii().data());
                 if(plaNum!=-1) outerArguments << "-type=planet";
-                else */
+                else /
 
                 outerArguments << "-type=aster";
 
@@ -575,7 +611,7 @@ int main(int argc, char *argv[])
                     V0[0] = resSL.at(5).toDouble();
                     V0[1] = resSL.at(6).toDouble();
                     V0[2] = resSL.at(7).toDouble();
-    */
+    /
                     V0[0] = resSL.at(8).toDouble();
                     V0[1] = resSL.at(9).toDouble();
                     V0[2] = resSL.at(10).toDouble();
@@ -597,7 +633,7 @@ int main(int argc, char *argv[])
                     dT = (time-2451545.0)/36525.0;
                     m = mas_to_grad((4612.4362*dT)*1000);
                     n = mas_to_grad((2004.3109*dT)*1000);
-    */
+    /
                     //detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
                     //detRDnumGC(&ra, &de, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
                     //rdsys(&ra, &de, P[0], P[1], P[2]);
@@ -628,7 +664,7 @@ int main(int argc, char *argv[])
 
                     break;
                 }
-            }
+            }*/
         }
 
         dX[0] = X[0] - X0[0];

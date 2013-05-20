@@ -44,6 +44,7 @@ public:
 
         void set_typeOfObs(char *otype);
         void set_Snum(int num);
+        void set_SnumTemp(int num);
 
 };
 

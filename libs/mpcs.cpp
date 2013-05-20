@@ -73,6 +73,11 @@ void mpc_head::set_Snum(int num)
     sprintf(Snum, "%05d", num);
 }
 
+void mpc_head::set_SnumTemp(int num)
+{
+    sprintf(SnumTemp, "%07d", num);
+}
+
 
 /////////////mpc_tail
 
