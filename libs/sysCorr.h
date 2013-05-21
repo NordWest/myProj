@@ -1,7 +1,7 @@
 #ifndef SYSCORR_H
 #define SYSCORR_H
 
-#include "./../astro/astro.h"
+#include <astro.h>
 #include "comfunc.h"
 #include "vectGrid3D.h"
 

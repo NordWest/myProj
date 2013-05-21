@@ -38,7 +38,7 @@ class reductionMaker;
 #include "longnam.h"
 //#include "./../libs/astro.h"
 #include "identify.h"
-#include "./../astro/astro.h"
+#include <astro.h>
 #include "observatory.h"
 
 #include "./vectGrid3D.h"

@@ -13,7 +13,7 @@ CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
 TEMPLATE = app
-QT           += xml
+QT += xml
 
 SOURCES += main.cpp \
     ../libs/orbit.cpp \
@@ -89,5 +89,6 @@ HEADERS += ../libs/orbit.h \
 #win32:LIBS+=./../libs/win32/libmb.a
 #unix:LIBS+=./../libs/unix/libastro.a
 #win32:LIBS+=./../libs/win32/libastro.a
-#unix:LIBS+=./../libs/unix/cspice.a
-LIBS += -lmb -lcspice -lastro
+unix:LIBS+=./../libs/unix/cspice.a
+LIBS += -lmb -lastro
+#LIBS += cspice.a

@@ -1,13 +1,15 @@
 #include <QtCore>
 
 #include "./../libs/dele.h"
-#include "./../libs/astro.h"
+//#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
 #include "./../libs/calc_epm.h"
 #include "./../libs/mpccat.h"
 #include "./../libs/mpcs.h"
 
-#include "./../libs/cspice/SpiceUsr.h"
+//#include "./../libs/cspice/SpiceUsr.h"
+#include <SpiceUsr.h>
 #include "./../libs/observ.h"
 
 struct spkRecord

@@ -37,9 +37,9 @@ SOURCES += main.cpp \
     ../libs/sysCorr.cpp
 HEADERS += ../libs/fitsdata.h \
     ../libs/comfunc.h \
-    ../astro/astro.h \
+#    ../libs/astro.h \
     ../libs/multidim.h \
-    ../mb/mb.h \
+    ../libs/mb.h \
     ../libs/ccdmeasurements.h \
     ../libs/redStat.h \
     ../libs/identify.h \
@@ -59,9 +59,10 @@ HEADERS += ../libs/fitsdata.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h
 
-unix:LIBS += ./../libs/unix/libcfitsio.a \
-            ./../libs/unix/libmb.a \
-            ./../libs/unix/libastro.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
+#            ./../libs/unix/libmb.a \
+#            ./../libs/unix/libastro.a
+unix:LIBS += -lastro -lmb
 win32:LIBS += ./../libs/win32/cfitsio.lib \
               ./../libs/win32/libmb.a \
               ./../libs/win32/libastro.a

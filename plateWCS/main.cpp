@@ -1,7 +1,8 @@
 #include <QtCore>
 
 #include "./../libs/fitsdata.h"
-#include "./../astro/astro.h"
+//#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
 #include "./../libs/observatory.h"
 

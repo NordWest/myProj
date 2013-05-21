@@ -18,7 +18,7 @@
 # testprog targets. See also changes and comments in configure.in
 #
 
-prefix		= /usr/local
+prefix		= /home/nuts/Work/gitprojSF/cfitsio
 exec_prefix	= ${prefix}
 DESTDIR		= 
 CFITSIO_PREFIX	= $(prefix)

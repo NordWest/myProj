@@ -1,6 +1,6 @@
 #ifndef ASTRO_H
 
-#include "../astro/astro.h"
+#include <astro.h>
 
 #endif
 

@@ -56,10 +56,10 @@ HEADERS += ../libs/orbit.h \
     ../libs/coord.h \
     ../libs/sscat.h \
     ../libs/sscatFB.h \
-    ../libs/astro.h \
+#    ../libs/astro.h \
     ../libs/rec.h \
     ../libs/commetorbcat.h \
-    ../libs/mb.h \
+#    ../libs/mb.h \
     ../libs/ephem_types.h \
     ../libs/dele.h \
 #    dele.h \
@@ -89,5 +89,6 @@ win32:LIBS+=./../libs/win32/libmb.a
 #unix:LIBS+=./../libs/unix/libastro.a
 win32:LIBS+=./../libs/win32/libastro.a
 
-unix:LIBS += -lmb -lcspice -lastro
+unix:LIBS += -lmb -lastro
+unix:LIBS+= ./../libs/unix/cspice.a
 #INCLUDEPATH += /usr/local/cuda/include
