@@ -7,6 +7,19 @@ int main(int argc, char *argv[])//wcsFinder.exe wcsFinder.ini [workdir]
 
     setlocale(LC_NUMERIC, "C");
 
+    QString codecName;
+
+    #if defined(Q_OS_LINUX)
+        codecName = "UTF-8";
+    #elif defined(Q_OS_WIN)
+        codecName = "CP1251";
+    #endif
+
+    QTextCodec *codec1 = QTextCodec::codecForName(codecName.toAscii().constData());
+    Q_ASSERT( codec1 );
+    QTextCodec::setCodecForCStrings(codec1);
+    QTextCodec::setCodecForLocale(codec1);
+
 
     QString cfgFile = QString(argv[1]);
     QSettings *sett = new QSettings(cfgFile, QSettings::IniFormat);

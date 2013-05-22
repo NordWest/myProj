@@ -361,25 +361,25 @@ int main(int argc, char *argv[])
                     }
                     break;
                 }
-            case 2:
-            {
-                if(plaNum!=SUN_NUM)
+                case 2:
                 {
-                    sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
-                    qDebug() << QString("name: %1\n").arg(sName);
-                    sJD = QString("%1 JD").arg(time0, 15, 'f',7);
-                    str2et_c(sJD.toAscii().data(), &et);
-                    if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
-                    else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
-                    X[0] = state[0]/AUKM;
-                    X[1] = state[1]/AUKM;
-                    X[2] = state[2]/AUKM;
-                    V[0] = state[3]/AUKM;
-                    V[1] = state[4]/AUKM;
-                    V[2] = state[5]/AUKM;
+                    if(plaNum!=SUN_NUM)
+                    {
+                        sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                        qDebug() << QString("name: %1\n").arg(sName);
+                        sJD = QString("%1 JD").arg(time0, 15, 'f',7);
+                        str2et_c(sJD.toAscii().data(), &et);
+                        if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+                        else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
+                        X[0] = state[0]/AUKM;
+                        X[1] = state[1]/AUKM;
+                        X[2] = state[2]/AUKM;
+                        V[0] = state[3]/AUKM;
+                        V[1] = state[4]/AUKM;
+                        V[2] = state[5]/AUKM;
+                    }
                 }
-            }
-                break;
+                    break;
 
             }
 

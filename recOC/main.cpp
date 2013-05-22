@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     //obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
 
     obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, "500");
+    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
