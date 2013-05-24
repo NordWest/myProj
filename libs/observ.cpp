@@ -249,6 +249,7 @@ int observ::det_obj_radec(QString objName, double *ra, double *dec, double *rang
 {
     double et, lt1;
     double state1[6];
+    double state2[6];
     QString sTime;
     double dstate[3];
     double vstate[3];
@@ -269,6 +270,8 @@ int observ::det_obj_radec(QString objName, double *ra, double *dec, double *rang
             state1[3] -= obs->state[3]*AUKM;
             state1[4] -= obs->state[4]*AUKM;
             state1[5] -= obs->state[5]*AUKM;
+
+
 /*
             vstate[0] = V[0]*AUKM/SECINDAY;
             vstate[1] = V[1]*AUKM/SECINDAY;
@@ -292,6 +295,9 @@ int observ::det_obj_radec(QString objName, double *ra, double *dec, double *rang
 */
             recrad_c (state1, range, ra, dec);
             res = failed_c();
+
+            spkezr_c (  objName.toAscii().data(), et, "J2000", "NONE", "ssb", state2, &lt1 );
+            qDebug() << QString("%8 %7: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state2[0]/AUKM, 15, 'e', 10).arg(state2[1]/AUKM, 15, 'e', 10).arg(state2[2]/AUKM, 15, 'e', 10).arg(state2[3]/AUKM, 15, 'e', 10).arg(state2[4]/AUKM, 15, 'e', 10).arg(state2[5]/AUKM, 15, 'e', 10).arg(sTime).arg(objName);
         }
         break;
     default:

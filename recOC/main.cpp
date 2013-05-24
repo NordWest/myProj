@@ -152,11 +152,11 @@ int main(int argc, char *argv[])
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
 
-    //obsPos.init(obsFile, bspName, leapName);
-    //obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
+    obsPos.init(obsFile, bspName, leapName);
+    obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
 
-    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+    //obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    //obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());

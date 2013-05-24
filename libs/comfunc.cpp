@@ -1667,7 +1667,7 @@ return floor( val * p + .5 ) / p;
 
 int UTC2TDT(double jdUTC, double *jdTDT)
 {
-    *jdTDT = jdUTC - TAImUTC(jd2mjd(jdUTC)) - 32.184/86400.0;
+    *jdTDT = jdUTC + TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0;
 
 	return 0;
 }
