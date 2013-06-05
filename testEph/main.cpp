@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
 
 resFile.close();
 
-name = "Moon";
+name = "Geocentr";
 //dele
 nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], t0, planet_num(name.toAscii().data()), CENTER, SK);
 dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
@@ -494,7 +494,7 @@ qDebug() << QString("DELE: %1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 6).ar
 sJD = QString("%1 JD TDB").arg(t0, 15, 'f',7);
 str2et_c(sJD.toAscii().data(), &et);
 
-sName = "Moon";
+sName = "Earth";
 qDebug() << QString("name: %1\n").arg(sName);
 spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
 X0[0] = state[0]/AUKM;

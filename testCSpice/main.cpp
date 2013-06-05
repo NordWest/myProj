@@ -108,22 +108,22 @@ int main(int argc, char *argv[])
       int initMpc = mCat.init(mpcCatFile.toAscii().data());
       if(obsy.init(obsFile.toAscii().data(), OBS_SIZE)) exit(1);
       obsy.getobsynumO(obsCode.toAscii().data());
-
+/*
       obsPos.initObservatory(obsFile.toAscii().data());
       if(obsPos.initSPICE(bspName, lskName)) return 1;
       obsPos.initSPK(spkName);
       obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
-
+*/
       furnsh_c ( "./codes_300ast.tf"  );
       //sprintf(leap,"%s", "./naif0010.tls");
       //furnsh_c ( leap );                        //load LSK kernel
-/*
+
       sprintf(leap,"%s", "./naif0009.tls");
       furnsh_c ( leap );                        //load LSK kernel
       furnsh_c ( bspName.toAscii().data()  );    //load SPK/BSP kernel with planets ephemerides
       furnsh_c ( "./codes_300ast.tf"  );        //load KPL/FK kernel with asteroids names and indexes
       furnsh_c ( spkName.toAscii().data() );                  //load SPK kernel with asteroids aphemerides
-*/
+
         //furnsh_c ( "earth_latest_high_prec.bpc"  );
         //furnsh_c ( "earth_fixed.tf"  );
         //furnsh_c ( "pck00010.tpc"  );
@@ -165,28 +165,31 @@ int main(int argc, char *argv[])
         {
 
          sprintf(utctim,"%15.7f JD", ut);
-/*
+
         jdUTC = ut;
         UTC2TDB(jdUTC, &jdTDB);
         TDB2UTC(jdTDB, &jdUTC1);
 
         qDebug() << QString("jdUTC: %1\tjdTDB: %2\tjdUTC1: %3\n").arg(jdUTC, 15, 'f', 7).arg(jdTDB, 15, 'f', 7).arg(jdUTC1, 15, 'f', 7);
-*/
-/*
-         sJD = QString("%1 JD").arg(obsPos.ctime.TDB(), 16, 'f',8);
+
+
+         sJD = QString("%1 JD TDB").arg(jdTDB, 16, 'f',8);
          str2et_c(sJD.toAscii().data(), &et);
-         spkezr_c (  targ1, et, "J2000", "NONE", "ssb", state1, &lt1 );
-         qDebug() << QString("%8 %7: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state1[0]/AUKM, 15, 'e', 10).arg(state1[1]/AUKM, 15, 'e', 10).arg(state1[2]/AUKM, 15, 'e', 10).arg(state1[3]/AUKM, 15, 'e', 10).arg(state1[4]/AUKM, 15, 'e', 10).arg(state1[5]/AUKM, 15, 'e', 10).arg(sJD).arg(targ1);
-*/
+
+         spkezr_c (  targ1, et, ref, corr, obs, state1, &lt1 );
+         recrad_c (state1, &range, &ra, &dec);
+         //spkezr_c (  targ1, et, "J2000", "NONE", "ssb", state1, &lt1 );
+         //qDebug() << QString("%8 %7: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state1[0]/AUKM, 15, 'e', 10).arg(state1[1]/AUKM, 15, 'e', 10).arg(state1[2]/AUKM, 15, 'e', 10).arg(state1[3]/AUKM, 15, 'e', 10).arg(state1[4]/AUKM, 15, 'e', 10).arg(state1[5]/AUKM, 15, 'e', 10).arg(sJD).arg(targ1);
+/*
          obsPos.setTDB(ut);
          obsPos.det_obj_radec(objList.at(p), &ra, &dec, &range);
-
+*/
          mrec.r = ra;// + dRa;
          mrec.d = dec;// + dDec;
 
          //tstr = QString(utctim);
          //jdUTC = mjd2jd(getMJDfromStrT(tstr));
-         mrec.eJD = obsPos.ctime.UTC();
+         mrec.eJD = jdUTC;//obsPos.ctime.UTC();
          //mrec.num = 1;
 
          //qDebug() << QString("ut: %1\teJD: %2\n").arg(ut, 15, 'f', 7).arg(mrec.eJD, 15, 'f', 7);

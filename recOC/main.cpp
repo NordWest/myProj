@@ -456,6 +456,9 @@ int main(int argc, char *argv[])
 
                 obsPos.setTDB(time);
                 obsPos.det_observ();
+
+                qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.pos[0], 18, 'g', 9).arg(obsPos.pos[1], 18, 'g', 9).arg(obsPos.pos[2], 18, 'g', 9).arg(obsPos.vel[0], 18, 'g', 9).arg(obsPos.vel[1], 18, 'g', 9).arg(obsPos.vel[2], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
+
                 state[0] = X[0];
                 state[1] = X[1];
                 state[2] = X[2];

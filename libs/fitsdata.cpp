@@ -356,7 +356,7 @@ refractionMaker::~refractionMaker()
 void refractionMaker::forvRef(double *ra1, double *dec1, double ra0, double dec0)
 {
     QFile refFile("./refFile.txt");
-    refFile.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append);
+    refFile.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Truncate);
     QTextStream refStream(&refFile);
     ra0 = grad_to_rad(ra0);
     dec0 = grad_to_rad(dec0);
