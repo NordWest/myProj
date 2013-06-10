@@ -9,7 +9,8 @@
 #include "./../libs/fitsdata.h"
 #endif
 
-#include "./../astro/astro.h"
+//#include "./../astro/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
 #include "./../libs/observatory.h"
 

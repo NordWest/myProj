@@ -23,13 +23,16 @@ SOURCES += main.cpp \
     ../libs/alglib/alglibinternal.cpp \
     ../libs/sysCorr.cpp
 
+#LIBS += libastro libmb
 
-win32:LIBS += ./../libs/win32/cfitsio.lib \
-            ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a
-unix:LIBS += ./../libs/unix/libcfitsio.a \
-            ./../libs/unix/libmb.a \
-            ./../libs/unix/libastro.a
+LIBS += -lastro -lmb
+
+win32:LIBS += ./../libs/win32/cfitsio.lib
+#            ./../libs/win32/libmb.a \
+#            ./../libs/win32/libastro.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
+#            ./../libs/unix/libmb.a \
+#            ./../libs/unix/libastro.a
 
 unix:TARGET = ./../../lab/ruler3PL.unix/ruler3PL
 win32:TARGET = ./../../../lab/ruler3PL.win32/ruler3PL
@@ -39,9 +42,7 @@ CONFIG += console \
     exceptions \
     warn_off
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
-    ../libs/fitsio.h \
+HEADERS += ../libs/fitsio.h \
     ../libs/fitsdata.h \
     ../libs/comfunc.h \
     ../libs/multidim.h \
@@ -64,3 +65,6 @@ HEADERS += ../libs/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h
+
+#../libs/astro.h \
+#../libs/mb.h \
