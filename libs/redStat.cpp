@@ -602,7 +602,7 @@ void moveModelRec::rec2s(QString *str)
                 yStr = deg_to_damas(yTm, " ", 5);
                 break;
             }
-            case 1://relative positions in arcsec //п═  п═п▌п║Б└╒п═  п═п├п═Б─ п║я⌡п═  п═п├п═Б─ п║я п═  п═п▌п║я≥п═  п═п├п═Б─ п║я п═  п═п├п═Б─ п║я⌡п═  п═п▌п╡Б─·я·п═  п═Б─≥п▓б╝п═  п═п▌п║Б└╒п═  п═п▌п║я≥
+            case 1://relative positions in arcsec //п═  п═п▌п║Б└╒п═  п═п├п═Б─ п║я⌡п═  п═п├п═Б─ п║я п═  п═п▌п║я≥п═  п═п├п═Б─ п║я п═  п═п├п═Б─ п║я⌡п═  п═п▌п╡Б─·я·п═  п═Б─≥п▓б╝п═  п═п▌п║Б└╒п═  п═п▌п║я≥
             {
                 xStr = mas_to_hms(xTm, " ", 5);
                 yStr = mas_to_damas(yTm, " ", 5);
@@ -6035,6 +6035,8 @@ void appendRep0Rec(QString *dataStr, measurementStatRec* msRec, measurementRec* 
 
     dat2YMD(mjd2jd(mesRec->errBud->MJD), &year, &mth, &day);
     pyear = partOfYear(year, mth, day);
+
+    qDebug() << QString("%1|%2|%3 %4 %5|%6\n").arg(plateName).arg(mesRec->errBud->MJD).arg(year).arg(mth).arg(day).arg(pyear);
 
     dataStr->append(QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13").arg(plateName).arg(pyear, 7, 'f', 2).arg((int)mesRec->errBud->MJD).arg(versName).arg(msRec->Nx).arg(msRec->UWEx).arg(msRec->Ny).arg(msRec->UWEy).arg(msRec->ocNum).arg(msRec->rmsOneOCksi).arg(msRec->rmsOneOCeta).arg(msRec->rmsMeanOCksi).arg(msRec->rmsMeanOCeta));
 

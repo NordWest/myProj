@@ -2452,7 +2452,7 @@ int interp(double x1, double *x, double x2, double t1, double t, double t2)
 
 double partOfYear(int year, int mth, double day)
 {
-    return(year*1.0+mth*1.0/12.0+day/dinm(mth, isVes(year))/mth);
+    return(year*1.0+mth*1.0/12.0+day/dinm(mth, isVes(year))/12.0);
 }
 
 int strnsep(char *str, int nb, int nmax, char *sep, char *slo)
