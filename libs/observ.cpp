@@ -260,7 +260,7 @@ int observ::det_obj_radec(QString objName, double *ra, double *dec, double *rang
     case 1:
         {
             //sTime = QString("%1 JD TDB").arg(ctime.TDB());
-            sTime = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+            sTime = QString("%1 JD TDB").arg(ctime.TDB(), 16, 'f',8);
             str2et_c ( sTime.toAscii().data(), &et);
 
             spkezr_c (  objName.toAscii().data(), et, refName.toAscii().data(), "LT", obsName.toAscii().data(), state1, &lt1 );
@@ -350,7 +350,7 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
             double et;
             SpiceDouble             state [6];
             SpiceDouble             lt;
-            sJD = QString("%1 JD").arg(ctime.TDB(), 16, 'f',8);
+            sJD = QString("%1 JD TDB").arg(ctime.TDB(), 16, 'f',8);
             str2et_c(sJD.toAscii().data(), &et);
             spkezr_c ("sun", et, refName.toAscii().data(), "NONE", "ssb", state, &lt );
             XS0[0] = state[0]/AUKM;
@@ -431,7 +431,7 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
 //        qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
 //        qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
 
-    }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
 
     tau = ct1/CAU;
 

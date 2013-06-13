@@ -694,7 +694,13 @@ int main(int argc, char *argv[])
 ////////////////////////////////sort SPK
     double tmin, pmin;
     int sz, j, p;
+    SpiceInt       handle;
+    SpiceInt       bodyNum;
+    SpiceDouble sgT0, sgT1;
+    SpiceDouble *segmentState;
+    SpiceDouble *segmentEphs;
 
+    spkopn_c("./smp.spk", "SMP", 0, &handle);
 
     filesE = spkDir.entryList(filters, QDir::Files);
     qDebug() << QString("spk files num: %1\n").arg(filesE.size());
@@ -737,10 +743,34 @@ int main(int argc, char *argv[])
         spkFile.open(QFile::WriteOnly | QFile::Truncate);
         spkStm.setDevice(&spkFile);
 
-        for(i=0; i<sz; i++) spkStm << spkList.at(i)->toString() << "\n";
+        bodyNum = 2000001;
 
+        segmentState = new SpiceDouble[6*sz];
+        segmentEphs = new SpiceDouble[sz];
+        sJD = QString("%1 JD TDB").arg(spkList.first()->time, 15, 'f',7);
+        str2et_c(sJD.toAscii().data(), &sgT0);
+        sJD = QString("%1 JD TDB").arg(spkList.last()->time, 15, 'f',7);
+        str2et_c(sJD.toAscii().data(), &sgT1);
+
+        for(i=0; i<sz; i++)
+        {
+            spkStm << spkList.at(i)->toString() << "\n";
+            sJD = QString("%1 JD TDB").arg(spkList.at(i)->time, 15, 'f',7);
+            str2et_c(sJD.toAscii().data(), &et);
+            segmentEphs[i] = et;
+            segmentState[i*6+0] = spkList.at(i)->X[0]*AUKM;
+            segmentState[i*6+1] = spkList.at(i)->X[1]*AUKM;
+            segmentState[i*6+2] = spkList.at(i)->X[2]*AUKM;
+            segmentState[i*6+3] = spkList.at(i)->V[0]*AUKM/SECINDAY;
+            segmentState[i*6+4] = spkList.at(i)->V[1]*AUKM/SECINDAY;
+            segmentState[i*6+5] = spkList.at(i)->V[2]*AUKM/SECINDAY;
+        }
+
+        spkw13_c(handle, bodyNum, 0, "J2000", sgT0, sgT1, "SPK_STATES_13", 7, sz, segmentState, segmentEphs);
         spkFile.close();
     }
+
+    spkcls_c(handle);
 ////////////////////////////////////////////////////////////////////
 
 

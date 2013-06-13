@@ -1680,14 +1680,14 @@ int UTC2TDB(double jdUTC, double *jdTDB)
 
 int UTC2TDT(double jdUTC, double *jdTDT)
 {
-    *jdTDT = jdUTC - TAImUTC(jd2mjd(jdUTC)) - 32.184/86400.0;
+    *jdTDT = jdUTC + TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0;
 
     return 0;
 }
 
 int TDT2UTC(double jdTDT, double *jdUTC)
 {
-    *jdUTC = jdTDT + TAImUTC(jd2mjd(jdTDT)) + 32.184/86400.0;
+    *jdUTC = jdTDT - TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0;
 
     return 0;
 }
