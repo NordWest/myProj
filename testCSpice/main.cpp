@@ -113,11 +113,11 @@ int main(int argc, char *argv[])
       if(obsPos.initSPICE(bspName, lskName)) return 1;
       obsPos.initSPK(spkName);
       obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
-/*
+
       furnsh_c ( "./codes_300ast.tf"  );
       //sprintf(leap,"%s", "./naif0010.tls");
       //furnsh_c ( leap );                        //load LSK kernel
-
+/*
       sprintf(leap,"%s", "./naif0009.tls");
       furnsh_c ( leap );                        //load LSK kernel
       furnsh_c ( bspName.toAscii().data()  );    //load SPK/BSP kernel with planets ephemerides

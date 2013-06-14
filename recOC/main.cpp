@@ -700,6 +700,8 @@ int main(int argc, char *argv[])
     SpiceDouble *segmentState;
     SpiceDouble *segmentEphs;
 
+
+
     spkopn_c("./smp.spk", "SMP", 0, &handle);
 
     filesE = spkDir.entryList(filters, QDir::Files);
@@ -707,12 +709,16 @@ int main(int argc, char *argv[])
     for(p=0; p<filesE.size(); p++)
     {
         spkFileName = spkDir.absoluteFilePath(filesE.at(p));
+
         spkFile.setFileName(spkFileName);
         if(!spkFile.open(QFile::ReadOnly))
         {
             qDebug() << QString("File %1 not open.\n").arg(spkFileName);
         }
         spkStm.setDevice(&spkFile);
+
+        name = filesE.at(p).section("_", -2, -2);
+        qDebug() << QString("name: %1\n").arg(name);
 
         spkList.clear();
         while(!spkStm.atEnd())
@@ -723,6 +729,9 @@ int main(int argc, char *argv[])
         }
 
         sz = spkList.size();
+
+        segmentState = new SpiceDouble[sz*6];
+        segmentEphs = new SpiceDouble[sz];
 
         for(i=0; i<sz-1; i++)
         {
@@ -743,10 +752,10 @@ int main(int argc, char *argv[])
         spkFile.open(QFile::WriteOnly | QFile::Truncate);
         spkStm.setDevice(&spkFile);
 
-        bodyNum = 2000001;
+        if(!initMpc) mCat.GetRecName(name.toAscii().data());
+        bodyNum = 2000000 + mCat.record->getNum();
 
-        segmentState = new SpiceDouble[6*sz];
-        segmentEphs = new SpiceDouble[sz];
+
         sJD = QString("%1 JD TDB").arg(spkList.first()->time, 15, 'f',7);
         str2et_c(sJD.toAscii().data(), &sgT0);
         sJD = QString("%1 JD TDB").arg(spkList.last()->time, 15, 'f',7);
@@ -758,16 +767,27 @@ int main(int argc, char *argv[])
             sJD = QString("%1 JD TDB").arg(spkList.at(i)->time, 15, 'f',7);
             str2et_c(sJD.toAscii().data(), &et);
             segmentEphs[i] = et;
+/*            segmentState[i] = new SpiceDouble[6];
+            segmentState[i][0] = spkList.at(i)->X[0]*AUKM;
+            segmentState[i][1] = spkList.at(i)->X[1]*AUKM;
+            segmentState[i][2] = spkList.at(i)->X[2]*AUKM;
+            segmentState[i][3] = spkList.at(i)->V[0]*AUKM/SECINDAY;
+            segmentState[i][4] = spkList.at(i)->V[1]*AUKM/SECINDAY;
+            segmentState[i][5] = spkList.at(i)->V[2]*AUKM/SECINDAY;
+            */
             segmentState[i*6+0] = spkList.at(i)->X[0]*AUKM;
             segmentState[i*6+1] = spkList.at(i)->X[1]*AUKM;
             segmentState[i*6+2] = spkList.at(i)->X[2]*AUKM;
-            segmentState[i*6+3] = spkList.at(i)->V[0]*AUKM/SECINDAY;
-            segmentState[i*6+4] = spkList.at(i)->V[1]*AUKM/SECINDAY;
-            segmentState[i*6+5] = spkList.at(i)->V[2]*AUKM/SECINDAY;
+            segmentState[i*6+3] = spkList.at(i)->V[0]*AUKM;///SECINDAY;
+            segmentState[i*6+4] = spkList.at(i)->V[1]*AUKM;//SECINDAY;
+            segmentState[i*6+5] = spkList.at(i)->V[2]*AUKM;//SECINDAY;
         }
 
         spkw13_c(handle, bodyNum, 0, "J2000", sgT0, sgT1, "SPK_STATES_13", 7, sz, segmentState, segmentEphs);
         spkFile.close();
+
+        delete [] segmentState;
+        delete [] segmentEphs;
     }
 
     spkcls_c(handle);
