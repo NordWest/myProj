@@ -1118,6 +1118,8 @@ int skyAreaLF::grade(resList &rList)
                     resRec->number = mpc_catalog->record->getNum();
                     resRec->name = QString(mpc_catalog->record->name).simplified();
 
+                    //det_res_list(resRec, this->obs_pos, x, y, z, vx, vy, vz, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
+
                     state[0] = x;
                     state[1] = y;
                     state[2] = z;

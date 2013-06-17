@@ -68,7 +68,7 @@
 #define TAIDUTC 32.0
 #define T0J2000 2451545.0
 #define CAUSEC 2.0039888134770902821e-3
-#define CAU 173.144632685
+#define CAU 173.144632685                   //[AU/sec]
 
 #define STRLEN 1024
 #define SIMPLE_STR 1024

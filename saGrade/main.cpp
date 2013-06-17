@@ -39,9 +39,18 @@ int main(int argc, char *argv[])
     sa.init(obsCatName, deleCatName, installDir);
     sa.obs_pos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, obsCode.toAscii().data());
 
+    mpccat mCat;
+    orbit orbT;
+    int initMpc = mCat.init(mpcCatName.toAscii().data());
+    mCat.GetRecName("Ceres");
+    orbT.get(&mCat);
+    jDay = orbT.elem->eJD;
+
     QDateTime dtCurr;
     dtCurr = QDateTime().currentDateTime();
 
+    QString utcStr;
+/*
     QString utcStr = dtCurr.toString("yyyy MM dd hh mm ss.zzz");
     qDebug() << QString("cTimeStr: %1\n").arg(utcStr);
     yr = utcStr.section(" ", 0, 0).toInt();
@@ -52,7 +61,7 @@ int main(int argc, char *argv[])
     sec = utcStr.section(" ", 5, 5).toDouble();
     qDebug() << QString("%1|%2|%3|%4|%5|%6\n").arg(yr).arg(mth).arg(day).arg(hr).arg(min).arg(sec);
     dat2JD_time(&jDay, yr, mth, day, hr, min, sec);
-
+*/
     qDebug() << QString("jDay: %1\n").arg(jDay, 12, 'f', 5);
 
     //UTC2s_alt(jDay, sa.obs_pos->obs->record->Long, &s);

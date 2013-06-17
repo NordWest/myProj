@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     double timei, time1, dtime, jdUTC, jdTDB;
     double X[3], V[3];
     double X0[3], V0[3];
-    double ra, dec, time0, dT;
+    double ra, dec, time0, dT, dPos;
     observ obsPos;
     QString resListFileName = QString(argv[1]);
 
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     for(i=0;i<orbC.nstr;i++)
     {
         orbC.GetRec(i);
-        logObsStm << QString("%1\n").arg(orbC.record->name);
+        //logObsStm << QString("%1\n").arg(orbC.record->name);
     }
 
 /*
@@ -155,6 +155,8 @@ int main(int argc, char *argv[])
 
     dat2JD_time(&timei, sysDateTime.date().year(), sysDateTime.date().month(), sysDateTime.date().day(), sysDateTime.time().hour(), sysDateTime.time().minute(), sysDateTime.time().second());
     //
+    timei = time0+0.5;
+
     qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
 /*
     for(timei=time0; timei<time1; timei+=dtime)
@@ -177,7 +179,7 @@ int main(int argc, char *argv[])
             //dec = rRec->dec + mas_to_grad(rRec->muDec*1440.0*dT);
             //ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(rRec->dec))*1440.0*dT);
             rRec->getRaDec(dT, ra, dec);
-            qDebug() << QString("%1: %2\t%3\n").arg(name).arg(ra).arg(dec);
+            qDebug() << QString("\n%1: %2\t%3\ndT%4\n").arg(name).arg(ra).arg(dec).arg(dT);
 
             //qDebug() << QString("tasks.size: %1\n").arg(rRec->tasks.size());
             for(j=0; j<rRec->tasks.size(); j++)
@@ -242,25 +244,30 @@ int main(int argc, char *argv[])
 
                     if(!isObj) break;
 
+                    qDebug() << QString("miriStr: %1").arg(objDataStr);
+
                     rRec->toString(objDataStr);
                     qDebug() << QString("resRec: %1").arg(objDataStr);
 
 
 
+
                     rRecD->name = name;
+                    rRecD->number = rRec->number;
                     rRecD->ra = ra - mpephR.ra;
                     rRecD->dec = dec - mpephR.de;
                     if(rRecD->ra>180) rRecD->ra-=360;
                     if(rRecD->ra<-180) rRecD->ra+=360;
                     //if(rRecD->dec<-90) rRecD->dec = -90 - ;
-                    /*rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
+                    rRecD->muRacosD = rRec->muRacosD - mpephR.muRaCosDe;
                     rRecD->muDec = rRec->muDec - mpephR.muDe;
-                    rRecD->magn = rRec->magn - mpephR.Vmag;*/
+                    rRecD->magn = rRec->magn - mpephR.Vmag;
 
                     rRecD->toString(objDataStr);
                     qDebug() << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
-                    //logStm << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
-                    logStm << QString("%1|%2|%3|%4\n").arg(name).arg(dT).arg(grad_to_mas(rRecD->ra)).arg(grad_to_mas(rRecD->dec));
+                    logObsStm << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
+                    dPos = sqrt(rRecD->ra*rRecD->ra*cos(grad2rad(rRecD->dec))*cos(grad2rad(rRecD->dec)) + rRecD->dec*rRecD->dec);
+                    logStm << QString("%1|%2|%3|%4|%5\n").arg(name).arg(dT).arg(grad_to_mas(rRecD->ra)*cos(grad2rad(rRecD->dec))).arg(grad_to_mas(rRecD->dec)).arg(grad_to_mas(dPos));
 
 
 
