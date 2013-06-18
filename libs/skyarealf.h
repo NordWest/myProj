@@ -132,7 +132,7 @@ bool operator==( const resRecord& lhs, const resRecord* rhs );
 class resList : public listFile <resRecord>
 {
 public:
-    double jdTime;
+    double jdUTC;
     int addRec(resRecord &nRec);
     int addRec(resRecord* nRec);
 
@@ -324,10 +324,11 @@ public:
 
     observ *obs_pos;
     saParams params;
+    time_a *ctime;
 
     QDir installDir;
 
-    double timeCur;
+    //double timeCurUTC;
 
     skyAreaLF();
 
@@ -346,8 +347,8 @@ public:
 
     int removeObj(QString taskName, QString objName);
 
-    int initVisualProp(double jDay);
-    int init_time(double jDay);
+    int initVisualProp(double jdUTC);
+    int init_time_utc(double jdUTC);
     int set_opt(double RAmin, double RAmax, double DECmin, double DECmax, double magn_min, double magn_max);
 
     int grade(resList &rList);

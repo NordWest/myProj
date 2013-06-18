@@ -485,7 +485,7 @@ int resList::save()
     if(!resFile.open(QFile::WriteOnly | QFile::Truncate)) return 1;
     QTextStream resStm(&resFile);
 
-    resStm << QString("\%%1\n").arg(jdTime, 15, 'f', 8);
+    resStm << QString("\%%1\n").arg(jdUTC, 15, 'f', 8);
 
     for(i=0; i<sz; i++)
     {
@@ -519,7 +519,7 @@ int resList::init(QString fname)
 
         if(tStr.indexOf("\%")==0)
         {
-            jdTime = tStr.mid(1, -1).toDouble();
+            jdUTC = tStr.mid(1, -1).toDouble();
             continue;
         }
 
@@ -815,6 +815,7 @@ saParams::~saParams()
 skyAreaLF::skyAreaLF()
 {
     obs_pos = new observ();
+    ctime = &obs_pos->ctime;
 }
 
 int skyAreaLF::init(QString obsCat, QString deleCat, QString insDir)
@@ -912,10 +913,10 @@ int skyAreaLF::removeObj(QString taskName, QString objName)
     return(task_list.removeObj(taskName, objName));
 }
 
-int skyAreaLF::initVisualProp(double jDay)
+int skyAreaLF::initVisualProp(double jdUTC)
 {
     double tr, ts;
-    this->init_time(jDay);
+    this->init_time_utc(jdUTC);
 
 //	if(this->obs_pos->place->detR(&this->params.sunX, &this->params.sunY, &this->params.sunZ, this->obs_pos->otime, SUN_NUM, 0, this->obs_pos->center, obs_pos->sk)) return 1;
     detRDnumGC(&this->params.sunRA, &this->params.sunDE, 0.0, 0.0, 0.0, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
@@ -936,11 +937,11 @@ int skyAreaLF::initVisualProp(double jDay)
     return 0;
 }
 
-int skyAreaLF::init_time(double jDay)
+int skyAreaLF::init_time_utc(double jDay)   //
 {
-    this->timeCur = jDay;
-    if(this->obs_pos->setUTC(jDay)) return 1;
 
+    if(this->obs_pos->setUTC(jDay)) return 1;
+    //this->timeCurUTC = this->obs_pos->ctime.UTC();
     return 0;
 }
 
@@ -973,9 +974,9 @@ int skyAreaLF::grade(resList &rList)
     setlocale(LC_NUMERIC, "C");
 
     rList.clear();
-    rList.jdTime = this->obs_pos->ctime.TDB();
+    rList.jdUTC = this->obs_pos->ctime.UTC();
 
-    getStrTfromMJD(&strT, jd2mjd(rList.jdTime));
+    getStrTfromMJD(&strT, jd2mjd(rList.jdUTC));
     qDebug() << QString("jdTime: %1\n").arg(strT);
 
     double x, y, z, vx, vy, vz, Sdist, Edist;
@@ -1074,8 +1075,8 @@ int skyAreaLF::grade(resList &rList)
                     }
 
                     orb_elem.get(orb_catalog);
-                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->ctime.TDB());
-                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->ctime.TDB());
+                    orb_elem.detRecEkv(&x, &y, &z, this->obs_pos->ctime.TDT());
+                    orb_elem.detRecEkvVel(&vx, &vy, &vz, this->obs_pos->ctime.TDT());
 
                     resRec->number = orb_catalog->record->number;
                     resRec->name = QString(orb_catalog->record->name);

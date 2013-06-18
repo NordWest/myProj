@@ -72,6 +72,7 @@ public:
 
     int setUTC(double tUTC);
     int setTDB(double tTDB);
+    int setTT(double tTT);
     int det_observ();
     int det_obj_radec(QString objName, double *ra, double *dec, double *range);
     int det_vect_radec(double *stateRV, double *ra, double *dec, double *range = NULL);

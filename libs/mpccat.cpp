@@ -641,3 +641,140 @@ void mpccat::s2rec(char *str_in)
 }
 
 ///////////////////////////////////////////////////////////////
+
+mpccatL::mpccatL(char *fn) : fbStreamLine(fn)
+{
+    this->record = new mpcrec;
+    init_line(MPCCAT_NAME_BPOS);
+    this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
+}
+
+mpccatL::mpccatL() : fbStreamLine()
+{
+    this->record = new mpcrec;
+    init_line(MPCCAT_NAME_BPOS);
+    this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
+}
+
+mpccatL::~mpccatL()
+{
+    delete(this->record);
+}
+
+int mpccatL::init(char *fname)
+{
+    init_line(MPCCAT_NAME_BPOS);
+    this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
+        return(fbStreamStr::init(fname));
+}
+
+
+void mpccatL::s2rec(char *str_in)
+{
+    char *tstr;
+    tstr = new char[60];
+    strcpy(tstr, "\0");
+
+    slovoG(str_in, tstr, 0, 7);
+    strncpy(this->record->provnum, tstr, 7);
+    strcpy(&this->record->provnum[7], "\0");
+
+    slovoG(str_in, tstr, 8, 13);
+    this->record->H = atof(tstr);
+
+    slovoG(str_in, tstr, 14, 19);
+    this->record->G = atof(tstr);
+
+    slovoG(str_in, tstr, 20, 25);
+    strncpy(this->record->epoch, tstr, 5);
+    strcpy(&this->record->epoch[5], "\0");
+
+    slovoG(str_in, tstr, 26, 35);
+    this->record->meanA = atof(tstr);
+
+    slovoG(str_in, tstr, 36, 46);
+    this->record->w = atof(tstr);
+
+    slovoG(str_in, tstr, 47, 57);
+    this->record->Node = atof(tstr);
+
+    slovoG(str_in, tstr, 58, 68);
+    this->record->inc = atof(tstr);
+
+    slovoG(str_in, tstr, 69, 79);
+    this->record->ecc = atof(tstr);
+
+    slovoG(str_in, tstr, 80, 91);
+    this->record->n = atof(tstr);
+
+    slovoG(str_in, tstr, 92, 103);
+    this->record->a = atof(tstr);
+
+    slovoG(str_in, tstr, 104, 106);
+    this->record->U = atoi(tstr);
+
+    slovoG(str_in, tstr, 107, 117);
+    strncpy(this->record->ref, tstr, 10);
+    strcpy(&this->record->ref[10], "\0");
+
+    slovoG(str_in, tstr, 118, 122);
+    this->record->obsnum = atoi(tstr);
+
+    slovoG(str_in, tstr, 123, 126);
+    this->record->oppnum = atoi(tstr);
+
+    slovoG(str_in, tstr, 127, 131);
+    this->record->arclen = this->record->obs_fst = atoi(tstr);
+
+    slovoG(str_in, tstr, 131, 132);
+    strncpy(this->record->flag_multi, tstr, 1);
+    strcpy(&this->record->flag_multi[1], "\0");
+
+    slovoG(str_in, tstr, 132, 136);
+    this->record->obs_lst = atoi(tstr);
+    strncpy(this->record->days, tstr, 4);
+    strcpy(&this->record->days[4], "\0");
+
+    slovoG(str_in, tstr, 137, 141);
+    this->record->rms = atof(tstr);
+
+    slovoG(str_in, tstr, 142, 145);
+    strncpy(this->record->indCoarse, tstr, 3);
+    strcpy(&this->record->indCoarse[3], "\0");
+
+    slovoG(str_in, tstr, 146, 149);
+    strncpy(this->record->indPrecide, tstr, 3);
+    strcpy(&this->record->indPrecide[3], "\0");
+
+    slovoG(str_in, tstr, 150, 160);
+    strncpy(this->record->compName, tstr, 10);
+    strcpy(&this->record->compName[10], "\0");
+
+    slovoG(str_in, tstr, 161, 165);
+    strncpy(this->record->flags, tstr, 4);
+    strcpy(&this->record->flags[4], "\0");
+
+    slovoG(str_in, tstr, 166, 174);
+    strncpy(this->record->number, tstr, 8);
+    strcpy(&this->record->number[8], "\0");
+
+    slovoG(str_in, tstr, 175, 193);
+    strncpy(this->record->name, tstr, 18);
+    strcpy(&this->record->name[18], "\0");
+
+    slovoG(str_in, tstr, 194, 202);
+    strncpy(this->record->lastObs, tstr, 8);
+    strcpy(&this->record->lastObs[8], "\0");
+
+    delete [] tstr;
+}
+
+int mpccatL::GetRec(int pos)
+{
+    if(GetLine(pos)) return 1;
+    s2rec(this->str);
+}
+
+//int mpccatL::GetRecName(char *name);
+
+

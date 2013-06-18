@@ -2573,9 +2573,9 @@ int detRDnumGC_vel(double *muRAcosD, double *muDEC, double x, double y, double z
     R1 = new double[3];
     V = new double[3];
 
-    V[0] = (x - (xc + xo));
-    V[1] = (y - (yc + yo));
-    V[2] = (z - (zc + zo));
+    V[0] = (x - (xc - xo));
+    V[1] = (y - (yc - yo));
+    V[2] = (z - (zc - zo));
     R[0] = range[0];
     R[1] = range[1];
     R[2] = range[2];

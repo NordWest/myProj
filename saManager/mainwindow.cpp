@@ -229,7 +229,7 @@ void MainWindow::slotAddNameListObj()
             while(!inStm.atEnd())
             {
                 tStr = inStm.readLine();
-                iRec->name = tStr.section(" ", 0, 0);
+                iRec->name = tStr;//.section(" ", 0, 0);
                 iRec->exp = 10;
                 iObj->addRec(iRec);
             }

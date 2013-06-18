@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     int SK, CENTER;
     mpephRec mpephR;
     mpccat mCat;
+    mpc mrec;
     orbit orbRec;
     QString name, sJD, objDataStr;
     QStringList outerArguments, resSL;
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
     catRecord *cRec = new catRecord;
     rFile.init(resListFileName);
 
-    time0 = rFile.jdTime;
+    time0 = rFile.jdUTC;
 /*
     QString eassDir = QString("/home/nuts/Work/lab/EA_NA");
     QString taskListFile = QString("%1/task.lst").arg(eassDir);
@@ -118,6 +119,11 @@ int main(int argc, char *argv[])
     QFile logObsEFile("./satestObsE.log");
     logObsEFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream logObsEStm(&logObsEFile);
+
+    QFile mpcFile("./mpc_test.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+    char *astr = new char[255];
 
 
 //    name = "Ceres";
@@ -155,7 +161,7 @@ int main(int argc, char *argv[])
 
     dat2JD_time(&timei, sysDateTime.date().year(), sysDateTime.date().month(), sysDateTime.date().day(), sysDateTime.time().hour(), sysDateTime.time().minute(), sysDateTime.time().second());
     //
-    timei = time0+0.5;
+    timei = time0;
 
     qDebug() << QString("tasks.size: %1\n").arg(sa.task_list.size());
 /*
@@ -263,11 +269,40 @@ int main(int argc, char *argv[])
                     rRecD->muDec = rRec->muDec - mpephR.muDe;
                     rRecD->magn = rRec->magn - mpephR.Vmag;
 
+                    qDebug() << QString("mu: %1\t%2\n").arg(mpephR.muRaCosDe, 10, 'f', 4).arg(mpephR.muDe, 10, 'f', 4);
+
                     rRecD->toString(objDataStr);
-                    qDebug() << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
-                    logObsStm << QString("resRecD: %1|%2").arg(dT).arg(objDataStr);
+                    qDebug() << QString("resRecD: %1|%2\n").arg(dT).arg(objDataStr);
+                    logObsStm << QString("resRecD: %1|%2\n").arg(dT).arg(objDataStr);
                     dPos = sqrt(rRecD->ra*rRecD->ra*cos(grad2rad(rRecD->dec))*cos(grad2rad(rRecD->dec)) + rRecD->dec*rRecD->dec);
                     logStm << QString("%1|%2|%3|%4|%5\n").arg(name).arg(dT).arg(grad_to_mas(rRecD->ra)*cos(grad2rad(rRecD->dec))).arg(grad_to_mas(rRecD->dec)).arg(grad_to_mas(dPos));
+
+
+                    //MPC
+
+
+                /*
+                    sz = rList.size();
+
+                    for(i=0; i<sz; i++)
+                    {*/
+                        //if(mCat.GetRecName(rList.at(i)->name.toAscii().data())) continue;
+
+                        mrec.r = grad2rad(ra);// + dRa;
+                        mrec.d = grad2rad(dec);// + dDec;
+
+                        mrec.eJD = sa.ctime->UTC();//rList.jdUTC;//obsPos.ctime.UTC();
+                        //mrec.eJD = time;
+                        mrec.head->set_Snum(rRec->number);
+                        //mCat.record->getNumStr(mrec.head->Snum);
+                        //strcpy(, mCat.record->getNumStr(>number);
+                        mrec.tail->set_numOfObs(obsCode.toAscii().data());
+                        mrec.toString(astr);
+
+                        mpcStm << astr << "\n";
+                    //}
+
+
 
 
 
@@ -296,7 +331,7 @@ int main(int argc, char *argv[])
 
     }
 
-
+    mpcFile.close();
 
 
     logFile.close();

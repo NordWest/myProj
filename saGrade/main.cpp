@@ -40,6 +40,8 @@ int main(int argc, char *argv[])
     sa.obs_pos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, obsCode.toAscii().data());
 
     mpccat mCat;
+    mpc mrec;
+    double ra, de;
     orbit orbT;
     int initMpc = mCat.init(mpcCatName.toAscii().data());
     mCat.GetRecName("Ceres");
@@ -190,6 +192,36 @@ int main(int argc, char *argv[])
     }
 */
     rList.saveAs("res.lst");
+
+
+
+    QFile mpcFile("./mpc.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
+    char *astr = new char[255];
+
+    sz = rList.size();
+
+    for(i=0; i<sz; i++)
+    {
+        if(mCat.GetRecName(rList.at(i)->name.toAscii().data())) continue;
+
+        mrec.r = grad2rad(rList.at(i)->ra);// + dRa;
+        mrec.d = grad2rad(rList.at(i)->dec);// + dDec;
+
+        mrec.eJD = rList.jdUTC;//obsPos.ctime.UTC();
+        //mrec.eJD = time;
+        mrec.num = 1;
+        mCat.record->getNumStr(mrec.head->Snum);
+        //strcpy(, mCat.record->getNumStr(>number);
+        mrec.tail->set_numOfObs(obsCode.toAscii().data());
+        mrec.toString(astr);
+
+        mpcStm << astr << "\n";
+    }
+
+    mpcFile.close();
+
 
     //delete sa;
     double jDayEnd;

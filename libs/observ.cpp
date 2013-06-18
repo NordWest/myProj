@@ -190,6 +190,12 @@ int observ::setTDB(double tTDB)
     return(det_observ());
 }
 
+int observ::setTT(double tTT)
+{
+    ctime.setTDT(tTT);
+    return(det_observ());
+}
+
 
 int observ::det_observ()
 {
@@ -413,8 +419,8 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
         P[1] = Qb[1] - XEB0[1];
         P[2] = Qb[2] - XEB0[2];
 
-        qDebug() << QString("Qb: %1\t%2\t%3\n").arg(Qb[0], 17, 'f', 8).arg(Qb[1], 17, 'f', 8).arg(Qb[2], 17, 'f', 8);
-        qDebug() << QString("P: %1\t%2\t%3\n").arg(P[0], 17, 'f', 8).arg(P[1], 17, 'f', 8).arg(P[2], 17, 'f', 8);
+        //qDebug() << QString("Qb: %1\t%2\t%3\n").arg(Qb[0], 17, 'f', 8).arg(Qb[1], 17, 'f', 8).arg(Qb[2], 17, 'f', 8);
+        //qDebug() << QString("P: %1\t%2\t%3\n").arg(P[0], 17, 'f', 8).arg(P[1], 17, 'f', 8).arg(P[2], 17, 'f', 8);
 
         normP = norm(P);
 
@@ -429,10 +435,10 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
         qDebug() << QString("normE: %1\n").arg(normE);
 */
         ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
-        qDebug() << QString("ct1: %1\n").arg(ct1, 10);
+        //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
 
 //        qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
-        qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
+        //qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
 
     }while((fabs(ct1-ct0)/fabs(ct1))>1e-8);
 

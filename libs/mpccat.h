@@ -17,6 +17,7 @@
 
 #define MPCCAT_LEN 203
 #define MPCCAT_NAME_KPOS 175
+#define MPCCAT_NAME_BPOS 2296
 
 
 class mpcrec
@@ -164,7 +165,7 @@ public:
 	int init(char *fname);
 	int init(char *fname, int catKpos);
 };
-/*
+
 class mpccatL : public fbStreamLine
 {
 public:
@@ -174,19 +175,19 @@ public:
 //	void rec2s(char *str_out);
 
     int GetRec(int pos);
-    int GetRecName(char *name);
+    //int GetRecName(char *name);
 //	int GetRecNum(int num);
 //	int AddRec(int pos);
 //	int AddRec();
 
-    mpccat();
-    mpccat(char *fn);
-    ~mpccat();
+    mpccatL();
+    mpccatL(char *fn);
+    ~mpccatL();
 
     int init(char *fname);
-    int init(char *fname, int catKpos);
+    int init(char *fname, int catBpos);
 };
-*/
+
 
 #define MPCCAT_H
 #endif
