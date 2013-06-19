@@ -44,16 +44,16 @@ int main(int argc, char *argv[])
     double ra, de;
     orbit orbT;
     int initMpc = mCat.init(mpcCatName.toAscii().data());
-    mCat.GetRecName("Ceres");
+/*    mCat.GetRecName("Ceres");
     orbT.get(&mCat);
-    jDay = orbT.elem->eJD;
-
+    jDay = orbT.elem->eJD+30;
+*/
     QDateTime dtCurr;
     dtCurr = QDateTime().currentDateTime();
 
     QString utcStr;
-/*
-    QString utcStr = dtCurr.toString("yyyy MM dd hh mm ss.zzz");
+
+    utcStr = dtCurr.toString("yyyy MM dd hh mm ss.zzz");
     qDebug() << QString("cTimeStr: %1\n").arg(utcStr);
     yr = utcStr.section(" ", 0, 0).toInt();
     mth = utcStr.section(" ", 1, 1).toInt();
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     sec = utcStr.section(" ", 5, 5).toDouble();
     qDebug() << QString("%1|%2|%3|%4|%5|%6\n").arg(yr).arg(mth).arg(day).arg(hr).arg(min).arg(sec);
     dat2JD_time(&jDay, yr, mth, day, hr, min, sec);
-*/
+
     qDebug() << QString("jDay: %1\n").arg(jDay, 12, 'f', 5);
 
     //UTC2s_alt(jDay, sa.obs_pos->obs->record->Long, &s);

@@ -151,12 +151,12 @@ int main(int argc, char *argv[])
         furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
-
+/*
     obsPos.init(obsFile, bspName, leapName);
     obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
-
-    //obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    //obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+*/
+    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
@@ -454,7 +454,8 @@ int main(int argc, char *argv[])
             {
                 if(!initMpc) mCat.GetRecName(name.toAscii().data());
 
-                obsPos.setTDB(time);
+
+                obsPos.setUTC(time);
                 obsPos.det_observ();
 
                 qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.pos[0], 18, 'g', 9).arg(obsPos.pos[1], 18, 'g', 9).arg(obsPos.pos[2], 18, 'g', 9).arg(obsPos.vel[0], 18, 'g', 9).arg(obsPos.vel[1], 18, 'g', 9).arg(obsPos.vel[2], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);

@@ -737,7 +737,7 @@ void MainWindow::slotUpdateTable()
     int i;
     int sz = rFile.recList.size();
     double ra, dec, dT;
-    dT = jDay - rFile.jdTime;
+    dT = jDay - rFile.jdUTC;
     qDebug() << QString("dT: %1\n").arg(dT);
     resRecord *rRec;
     QTableWidgetItem *newItem;
