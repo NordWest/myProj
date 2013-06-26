@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 */
     rList.saveAs("res.lst");
 
-
+/*
 
     QFile mpcFile("./mpc.txt");
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
     mpcFile.close();
 
-
+*/
     //delete sa;
     double jDayEnd;
     dtCurr = QDateTime().currentDateTime();

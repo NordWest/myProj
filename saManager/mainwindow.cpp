@@ -206,7 +206,8 @@ void MainWindow::slotAddNameListObj()
         taskR = sArea.task_list.recList.at(cr);
         catR = sArea.cat_list.getCatByName(taskR->catName);
 
-        if(catR->catType==0)
+
+        if(catR->catType==DELE_CAT_TYPE)
         {
             QMessageBox::warning(this, tr("Add Names task"),
                                                                                                tr("Try to use \"Add from cat\" option for DeLe cat"),
@@ -214,29 +215,55 @@ void MainWindow::slotAddNameListObj()
             return;
 
         }
-
         QFile inFile(fileName);
 
         if(!inFile.open(QFile::ReadOnly))
         {
             QMessageBox::warning(NULL, "Can't open names file", QString("File %1 not open").arg(fileName), QMessageBox::Ok);
+            return;
         }
-        else
+
+        QTextStream inStm(&inFile);
+
+        sscatFB locCat, globCat;
+        QString catName;
+        if(catR->catType==LSPM_CAT_TYPE)
         {
-            QTextStream inStm(&inFile);
+            if(globCat.init(catR->catFile.toAscii().data()))
+            {
+                QMessageBox::warning(0, "has no cat", "has no cat");
+            }
+            taskR->getCatName(catName);
+            if(locCat.init(catName.toAscii().data())) return;
+        }
+
+
             iRec = new iniRecord;
             iObj = &taskR->iList;
             while(!inStm.atEnd())
             {
                 tStr = inStm.readLine();
-                iRec->name = tStr;//.section(" ", 0, 0);
+                iRec->name = tStr.section("|", 0, 0).simplified();
                 iRec->exp = 10;
                 iObj->addRec(iRec);
+
+                if(catR->catType==LSPM_CAT_TYPE)
+                {
+
+                    globCat.GetName(iRec->name.toAscii().data());
+                    globCat.record->copyTo(locCat.record);
+
+                    locCat.AddRec(0);
+
+                }
             }
 
-            inFile.close();
-            slotUpdateObjList();
-        }
+
+
+        if(catR->catType==LSPM_CAT_TYPE)locCat.Save();
+
+        inFile.close();
+        slotUpdateObjList();
     }
 
 
@@ -256,9 +283,7 @@ void MainWindow::slotAddFromCatObj()
 
     if(sz==0)
     {
-        QMessageBox::warning(this, tr("Del task"),
-                                                              tr("Please, select proper task"),
-                                                              QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Del task"), tr("Please, select proper task"), QMessageBox::Ok);
     }
     else
     {
@@ -404,6 +429,11 @@ void MainWindow::slotAddFromCatObj()
                     //iniCatName = sArea.getTaskCatName(taskR->name);
 
                     //QFile
+                    sscatFB locCat;
+                    QString catName;
+                    taskR->getCatName(catName);
+                    locCat.init(catName.toAscii().data());
+
 
                     sz = addLSPM.lspmList.size();
                     iRec = new iniRecord;
@@ -413,8 +443,11 @@ void MainWindow::slotAddFromCatObj()
                         iRec->name = QString(addLSPM.lspmList.at(i)->getLSPM()).simplified();
                         iRec->exp = 10;
                         iObj->addRec(iRec);
+                        addLSPM.lspmList.at(i)->copyTo(locCat.record);
+                        locCat.AddRec(0);
                     }
 
+                    locCat.Save();
 
                     slotUpdateObjList();
                 }

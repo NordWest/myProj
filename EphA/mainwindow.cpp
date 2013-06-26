@@ -92,6 +92,8 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendCurObject()));
+
+    slotGrade();
 }
 
 void MainWindow::sessionOpened()

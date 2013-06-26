@@ -84,7 +84,7 @@ void tlRecord::getCatName(QString &catName)
 {
     QString dirPath = QString("./%1").arg(name);
     QDir tDir(dirPath);
-    catName = QString("%1ini.cat").arg(tDir.absolutePath());
+    catName = QString("%1/ini.cat").arg(tDir.absolutePath());
 }
 
 int tlRecord::getIniList(iniList *iList)
@@ -998,12 +998,19 @@ int skyAreaLF::grade(resList &rList)
 
     int taskNum = task_list.size();
 
+    QTime timer;
+
+    timer.start();
+
+    qDebug() << QString("%1: begin\n").arg(timer.elapsed());
+
     for(tn=0; tn<taskNum; tn++)
     {
         tl = task_list.at(tn);
         if(!tl->flag_active) continue;
         catR = cat_list.getCatByName(tl->catName);
 
+        qDebug() << QString("%1: task: %2\n").arg(timer.elapsed()).arg(tl->name);
 
         switch(catR->catType)
         {
@@ -1025,6 +1032,9 @@ int skyAreaLF::grade(resList &rList)
 
         tl->getIniList(iL);
         sz = iL->size();
+
+        qDebug() << QString("%1: objnum: %2\n").arg(timer.elapsed()).arg(sz);
+
 
         for(i=0; i<sz; i++)
         {
