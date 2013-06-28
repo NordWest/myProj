@@ -999,6 +999,7 @@ int skyAreaLF::grade(resList &rList)
     int taskNum = task_list.size();
 
     QTime timer;
+    QString locCatName;
 
     timer.start();
 
@@ -1008,6 +1009,7 @@ int skyAreaLF::grade(resList &rList)
     {
         tl = task_list.at(tn);
         if(!tl->flag_active) continue;
+        tl->getCatName(locCatName);
         catR = cat_list.getCatByName(tl->catName);
 
         qDebug() << QString("%1: task: %2\n").arg(timer.elapsed()).arg(tl->name);
@@ -1022,11 +1024,11 @@ int skyAreaLF::grade(resList &rList)
         case LSPM_CAT_TYPE:
             tsscat = new sscatFB;
 //			this->lspm_catalog->init(str_cat);
-            tsscat->init(catR->catFile.toAscii().data());
+            tsscat->init(locCatName.toAscii().data());
             break;
         case MPC_CAT_TYPE:
             mpc_catalog = new mpccat();
-            mpc_catalog->init(catR->catFile.toAscii().data());
+            mpc_catalog->init(locCatName.toAscii().data());
             break;
         }
 
@@ -1069,7 +1071,7 @@ int skyAreaLF::grade(resList &rList)
                     state[3] = vx;
                     state[4] = vy;
                     state[5] = vz;
-                    det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, mpc_catalog->record->H);
+                    det_res_list(resRec, this->obs_pos, state, &Sdist, &Edist, catR->catType, 0.0);
 
 
                     resRec->catName = "Planets";

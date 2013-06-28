@@ -775,6 +775,11 @@ int mpccatL::GetRec(int pos)
     s2rec(this->str);
 }
 
+int mpccatL::PushRec()
+{
+
+}
+
 //int mpccatL::GetRecName(char *name);
 
 

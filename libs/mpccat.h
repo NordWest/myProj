@@ -178,7 +178,7 @@ public:
     //int GetRecName(char *name);
 //	int GetRecNum(int num);
 //	int AddRec(int pos);
-//	int AddRec();
+    int PushRec();
 
     mpccatL();
     mpccatL(char *fn);

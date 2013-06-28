@@ -150,6 +150,12 @@ void MainWindow::setupWidgets()
     objTools->addWidget(remObjBtn);
     connect(remObjBtn, SIGNAL(clicked()), this, SLOT(slotRemSelectedObj()));
 
+    objTools->addSeparator();
+
+    updCatBtn = new QPushButton("Update Local Cat");
+    objTools->addWidget(updCatBtn);
+    connect(updCatBtn, SIGNAL(clicked()), this, SLOT(slotUpdateLocalCat()));
+
 }
 
 void MainWindow::show()
@@ -225,7 +231,8 @@ void MainWindow::slotAddNameListObj()
 
         QTextStream inStm(&inFile);
 
-        sscatFB locCat, globCat;
+        sscatFB globCat;
+        sscat locCat;
         QString catName;
         if(catR->catType==LSPM_CAT_TYPE)
         {
@@ -429,10 +436,10 @@ void MainWindow::slotAddFromCatObj()
                     //iniCatName = sArea.getTaskCatName(taskR->name);
 
                     //QFile
-                    sscatFB locCat;
+                    //sscatFB locCat;
                     QString catName;
                     taskR->getCatName(catName);
-                    locCat.init(catName.toAscii().data());
+                    //locCat.init(catName.toAscii().data());
 
 
                     sz = addLSPM.lspmList.size();
@@ -443,11 +450,11 @@ void MainWindow::slotAddFromCatObj()
                         iRec->name = QString(addLSPM.lspmList.at(i)->getLSPM()).simplified();
                         iRec->exp = 10;
                         iObj->addRec(iRec);
-                        addLSPM.lspmList.at(i)->copyTo(locCat.record);
-                        locCat.AddRec(0);
+                        //addLSPM.lspmList.at(i)->copyTo(locCat.record);
+                        //locCat.AddRec(0);
                     }
 
-                    locCat.Save();
+                    //locCat.Save();
 
                     slotUpdateObjList();
                 }
@@ -455,6 +462,8 @@ void MainWindow::slotAddFromCatObj()
             break;
 
             }
+
+            slotUpdateLocalCat();
 
 
     }
@@ -471,6 +480,111 @@ void MainWindow::slotRemSelectedObj()
     int taskRow = smod->selectedRows().at(0).row();
 
     taskName = taskTable->item(taskRow, 1)->text().simplified();
+
+
+    //taskR = sArea.task_list.recList.at(cr);
+
+    //catR = sArea.cat_list.getCatByName(taskR->catName);
+
+    QList <QTableWidgetItem*> itemList;
+    itemList = taskTable->selectedItems();
+    sz = objTable->selectionModel()->selectedRows().count();
+    for(i=sz-1;i>=0;i--)
+    {
+        objName = objTable->item(objTable->selectionModel()->selectedRows().at(i).row(), 0)->text().simplified();
+        sArea.removeObj(taskName, objName);
+    }
+    slotUpdateObjList();
+}
+
+void MainWindow::slotUpdateLocalCat()
+{
+    int i, j, sz;
+
+    QString objName, locCatName;
+    QString taskName;
+    tlRecord *taskR = new tlRecord;
+    catRecord *catR = new catRecord;
+    iniRecord *iRec;
+
+    QFile outFile;
+    QTextStream outStm;
+
+    QItemSelectionModel *smod = taskTable->selectionModel();
+
+    int taskRow = smod->selectedRows().at(0).row();
+
+    taskName = taskTable->item(taskRow, 1)->text().simplified();
+    sArea.getTaskCat(taskName, taskR, catR);
+
+    switch(catR->catType)
+    {
+    case DELE_CAT_TYPE:
+        break;
+    case MPC_CAT_TYPE:
+    {
+        mpccat globCat;
+        //mpccat locCat;
+        globCat.init(catR->catFile.toAscii().data());
+        taskR->getCatName(locCatName);
+        outFile.setFileName(locCatName);
+        outFile.open(QFile::WriteOnly | QFile::Truncate);
+        outStm.setDevice(&outFile);
+        //locCat.init(locCatName.toAscii().data());
+        //locCat.Free();
+        sz = objTable->rowCount();
+        for(i=0; i<sz; i++)
+        {
+            objName = objTable->item(i, 0)->text();
+            if(globCat.GetRecName(objName.toAscii().data()))
+            {
+                switch(QMessageBox::question(0, "Obj not found", "Object not found, delete?", QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll))
+                {
+                    case QMessageBox::Yes:
+                    break;
+                }
+
+                continue;
+            }
+            //globCat.record->copyTo(locCat.record);
+            //locCat.Insert(QString("%1\n").arg(globCat.str).toAscii().data(), 0);
+            outStm << globCat.str;
+        }
+        outFile.close();
+    }
+        break;
+    case LSPM_CAT_TYPE:
+        sscatFB lspmCat;
+
+        lspmCat.init(catR->catFile.toAscii().data());
+        taskR->getCatName(locCatName);
+        outFile.setFileName(locCatName);
+        outFile.open(QFile::WriteOnly | QFile::Truncate);
+        outStm.setDevice(&outFile);
+
+        sz = objTable->rowCount();
+        for(i=0; i<sz; i++)
+        {
+            objName = objTable->item(i, 0)->text();
+            if(lspmCat.GetName(objName.toAscii().data()))
+            {
+                switch(QMessageBox::question(0, "Obj not found", "Object not found, delete?", QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll))
+                {
+                    case QMessageBox::Yes:
+                    break;
+                }
+
+                continue;
+            }
+            //globCat.record->copyTo(locCat.record);
+            //locCat.Insert(QString("%1\n").arg(globCat.str).toAscii().data(), 0);
+            outStm << lspmCat.str;
+        }
+        outFile.close();
+
+        break;
+    }
+
 
     QList <QTableWidgetItem*> itemList;
     itemList = taskTable->selectedItems();

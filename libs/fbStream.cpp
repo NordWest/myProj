@@ -90,11 +90,13 @@ int fbStream::init(char* fname)
 	strncpy(this->fn, fname, FNLEN);
 	this->get_file_size();
 
-	ifstream infile( fn, std::ios::binary );
-    if (!infile)
+    ifstream infile;
+    infile.open(fn, ios_base::binary );
+    if (!infile.is_open())
     {
-		infile.open(fn, std::ios::binary | ios_base::trunc);
-        if (!infile) return 1;
+        infile.open(fn, ios_base::binary | ios_base::trunc | ios_base::out | ios_base::in);
+        //ios_base::trunc);
+        if (!infile.is_open()) return 1;
     }
 
 	is_edited = 0;

@@ -64,6 +64,7 @@ private:
     QPushButton *addNameListBtn;
     QPushButton *addFromCatBtn;
     QPushButton *remObjBtn;
+    QPushButton *updCatBtn;
 
     skyAreaLF sArea;
 
@@ -86,6 +87,8 @@ private slots:
     void slotAddFromCatObj();
 
     void slotRemSelectedObj();
+
+    void slotUpdateLocalCat();
 
     void slotUpdateObjList();
 
