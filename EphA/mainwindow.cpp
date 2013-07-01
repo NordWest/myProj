@@ -254,6 +254,8 @@ void MainWindow::setWidgets()
     mainTable->setColumnWidth(1, 150);
     mainTable->setColumnWidth(2, 150);
 
+    //mainTable->column(6);
+
     sysTimeEdit = new QLineEdit(this);
     sysTimeEdit->setMaximumWidth(150);
     sysTimeEdit->setReadOnly(1);
@@ -311,11 +313,11 @@ void MainWindow::setWidgets()
     settDock->setMinimumSize(400, 300);
     settW = new settWindow(settDock);
     settDock->setWidget(settW);
-    addDockWidget(Qt::BottomDockWidgetArea, settDock);
+    addDockWidget(Qt::AllDockWidgetAreas, settDock);
 
     settDock->setFloating(1);
     viewMenu->addAction(settDock->toggleViewAction());
-    settDock->hide();
+//
 
     infoDock = new QDockWidget("Information", this, Qt::Widget);
     infoDock->setMinimumSize(100, 200);
@@ -381,7 +383,7 @@ void MainWindow::setWidgets()
     infoDock->setFloating(0);
     viewMenu->addAction(infoDock->toggleViewAction());
     //infoDock->hide();
-
+settDock->hide();
 }
 
 void MainWindow::slotOpenResFileWindow()
@@ -448,11 +450,11 @@ void MainWindow::slotInitResTable()
         newItem->setTextAlignment(Qt::AlignCenter);
         mainTable->setItem(i, 5, newItem);
 
-        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muRacosD));
+        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muRacosD, 6, 'f', 0));
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 6, newItem);
 
-        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muDec));
+        newItem = new QTableWidgetItem(QString("%1").arg(rRec->muDec, 6, 'f', 0));
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 7, newItem);
 
@@ -651,7 +653,6 @@ void MainWindow::slotUpdateTime()
     int expTime;
 
     QString raStr;
-    int yr, mth, day, hr, min, sec;
     QTableWidgetItem *newItem;
     lam = sa.obs_pos->obs->record->Long;
 
@@ -694,8 +695,6 @@ void MainWindow::slotUpdateTime()
     sz = mainTable->rowCount();
     for(i=0;i<sz;i++)
     {
-
-
         res = 0;
         cs = 0;
         if(maxRa<=minRa) cs = 1;
@@ -871,10 +870,10 @@ void MainWindow::slotUpdateMiri()
 
 
         raLabel->setText(mas_to_hms(grad_to_mas(mpephR.ra), " ", 1));
-        decLabel->setText(mas_to_damas(grad_to_mas(mpephR.de), " ", 1));
+        decLabel->setText(mas_to_damas(grad_to_mas(mpephR.de), " ", 2));
         magnLabel->setText(QString("%1").arg(mpephR.Vmag, 6, 'f', 2));
-        muraLabel->setText(QString("%1").arg((mpephR.muRaCosDe, 6, 'f')));
-        mudecLabel->setText(QString("%1").arg((mpephR.muDe, 6, 'f')));
+        muraLabel->setText(QString("%1").arg(mpephR.muRaCosDe, 6, 'f', 0));
+        mudecLabel->setText(QString("%1").arg(mpephR.muDe, 6, 'f', 0));
 
 
 

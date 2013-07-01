@@ -1846,7 +1846,7 @@ int UTC2s_alt(double utc, double lam, double *s)
 	return 0;
 }
 
-int UTC2s(double utc, double lam, double *s)    //[utc] = day; [lam] = ?; [s] = rad
+int UTC2s(double utc, double lam, double *s)    //[utc] = day; [lam] = rad; [s] = rad
 {
 	double d_day, eJD;
 	d_day=utc*2.0;
@@ -1867,7 +1867,7 @@ int UTC2s(double utc, double lam, double *s)    //[utc] = day; [lam] = ?; [s] = 
 	double S = S0+d_day*366.25/365.25+7278;
 	if (S>86400){S=S-86400;}
         *s = (S/86400.0)*2.0*PI;
-        //*s+=lam;
+        *s+=lam;
 //	if(*s>2.0*PI) *s -= 2.0*PI;
 //	if(*s<0.0) *s += 2.0*PI;
 

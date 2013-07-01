@@ -223,7 +223,7 @@ double dUT1();	//=UT1-UTC
 double gmst0(double T);
 
 int UTC2s(double utc, double lam, double *s);
-int UTC2s_alt(double utc, double lam, double *s);
+//int UTC2s_alt(double utc, double lam, double *s);
 
 int s2UTC(double s, double lam, double *utc);
 int sJD2UT1(double utcJDay, double s, double lam, double *utc);//[s]=day, [utc] = day

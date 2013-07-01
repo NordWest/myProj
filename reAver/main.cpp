@@ -76,7 +76,7 @@ int main(int argc, char *argv[])    //ruler3PL.exe file.wcs [options] [config=cf
         QTextCodec::setCodecForCStrings(codec1);
 
         QString uTime;
-        QString dateStr, timeStr;
+        QString dateStr, timeStr, tFile;
         QProcess outerProcess;
         QStringList outerArguments;
         QStringList objList;
