@@ -40,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setWidgets();
     setSettings();
 
+
+
     //connect(this, SIGNAL(clicked()), this, SLOT(slotViewSettWindow()));
 
     timeUpd = new QTimer(this);
@@ -91,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent) :
         sessionOpened();
     }
 
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendCurObject()));
+    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendNextObject()));
 
     slotGrade();
 }
@@ -167,6 +169,29 @@ void MainWindow::sendCurObject()
 //! [5]
 }
 
+void MainWindow::sendNextObject()
+{
+    slotViewNextObj();
+//! [5]
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_4_0);
+//! [4] //! [6]
+    out << (quint16)0;
+    out << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(sysTimeEdit->text()).arg(nameLabel->text(), -16).arg(raLabel->text()).arg(decLabel->text()).arg(magnLabel->text()).arg(expLabel->text()).arg(tasksLabel->text()).arg(catNameLabel->text());
+    out.device()->seek(0);
+    out << (quint16)(block.size() - sizeof(quint16));
+//! [6] //! [7]
+
+    QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
+    connect(clientConnection, SIGNAL(disconnected()), clientConnection, SLOT(deleteLater()));
+//! [7] //! [8]
+
+    clientConnection->write(block);
+    clientConnection->disconnectFromHost();
+//! [5]
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -213,6 +238,10 @@ void MainWindow::setMenu()
     clearAct->setStatusTip(tr("clear table"));//
     viewMenu->addAction(clearAct);
     connect(clearAct, SIGNAL(triggered()), this, SLOT(slotClearTable()));
+
+    add2seqAtc = new QAction(tr("&Add to seq list"), this);
+    viewMenu->addAction(add2seqAtc);
+    connect(add2seqAtc, SIGNAL(triggered()), this, SLOT(slotAdd2Seq()));
 /*
     viewSettAct = new QAction(tr("&view sett"), this);
     viewSettAct->setShortcut(tr("Ctrl+U"));
@@ -226,6 +255,9 @@ void MainWindow::setMenu()
     gradeAct->setStatusTip(tr("grade"));//
     instrMenu->addAction(gradeAct);
     connect(gradeAct, SIGNAL(triggered()), this, SLOT(slotGrade()));
+
+    //spreadsheet->addAction(add2seqAtc);
+    //spreadsheet->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void MainWindow::setWidgets()
@@ -236,8 +268,9 @@ void MainWindow::setWidgets()
 
 
     mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
-    mainTable->setColumnCount(10);
+    mainTable->setColumnCount(11);
     QStringList vhLabelsT;
+    vhLabelsT << QString(tr("   "));
     vhLabelsT << QString(tr("Name"));
     vhLabelsT << QString(tr("RA"));
     vhLabelsT << QString(tr("DEC"));
@@ -250,9 +283,13 @@ void MainWindow::setWidgets()
     vhLabelsT << QString(tr("Catalog"));
 
     mainTable->setHorizontalHeaderLabels(vhLabelsT);
-    mainTable->setColumnWidth(0, 200);
-    mainTable->setColumnWidth(1, 150);
+    mainTable->setColumnWidth(0, 20);
+    mainTable->setColumnWidth(1, 200);
     mainTable->setColumnWidth(2, 150);
+    mainTable->setColumnWidth(3, 150);
+
+    mainTable->setContextMenuPolicy(Qt::ActionsContextMenu);
+    mainTable->addAction(add2seqAtc);
 
     //mainTable->column(6);
 
@@ -383,7 +420,7 @@ void MainWindow::setWidgets()
     infoDock->setFloating(0);
     viewMenu->addAction(infoDock->toggleViewAction());
     //infoDock->hide();
-settDock->hide();
+    //settDock->hide();
 }
 
 void MainWindow::slotOpenResFileWindow()
@@ -425,46 +462,48 @@ void MainWindow::slotInitResTable()
 
         rRec = rFile.at(i);
         newItem = new QTableWidgetItem();
+        newItem->setTextAlignment(Qt::AlignCenter);
+        mainTable->setItem(i, 0, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->name));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 0, newItem);
+        mainTable->setItem(i, 1, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(mas_to_hms(grad_to_mas(rRec->ra), " ", 1)));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 1, newItem);
+        mainTable->setItem(i, 2, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(mas_to_damas(grad_to_mas(rRec->dec), " ", 2)));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 2, newItem);
+        mainTable->setItem(i, 3, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->magn, 6, 'f', 2));//, 5, 'f', 1, QLatin1Char('0')));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 3, newItem);
+        mainTable->setItem(i, 4, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->tasks.join("|")));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 4, newItem);
+        mainTable->setItem(i, 5, newItem);
 
         newItem = new QTableWidgetItem(QString("0"));//, 5, 'f', 1, QLatin1Char('0')));
         newItem->setTextAlignment(Qt::AlignCenter);
-        mainTable->setItem(i, 5, newItem);
+        mainTable->setItem(i, 6, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->muRacosD, 6, 'f', 0));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 6, newItem);
+        mainTable->setItem(i, 7, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->muDec, 6, 'f', 0));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 7, newItem);
+        mainTable->setItem(i, 8, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->exp));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 8, newItem);
+        mainTable->setItem(i, 9, newItem);
 
         newItem = new QTableWidgetItem(QString("%1").arg(rRec->catName.simplified()));
         newItem->setTextAlignment(Qt::AlignLeft);
-        mainTable->setItem(i, 9, newItem);
+        mainTable->setItem(i, 10, newItem);
 
     }
 
@@ -490,16 +529,16 @@ void MainWindow::slotHeaderClicked(int colNum)
 
     switch(colNum)
     {
-    case 0:
+    case 1:
         mainTable->sortByColumn(colNum);
         break;
-    case 1:
+    case 2:
         sortRa();
         break;
-    case 2:
+    case 3:
         sortDec();
         break;
-    case 3:
+    case 4:
         sortMagn();
         break;
     }
@@ -699,18 +738,18 @@ void MainWindow::slotUpdateTime()
         cs = 0;
         if(maxRa<=minRa) cs = 1;
 
-        raStr = mainTable->item(i, 1)->text();
-        ra = mas_to_grad(hms_to_mas(raStr, " "))/15.0;
         raStr = mainTable->item(i, 2)->text();
+        ra = mas_to_grad(hms_to_mas(raStr, " "))/15.0;
+        raStr = mainTable->item(i, 3)->text();
         dec = mas_to_grad(damas_to_mas(raStr, " "));
-        magn = mainTable->item(i, 3)->text().toDouble();
+        magn = mainTable->item(i, 4)->text().toDouble();
 
         meriDist = ra - rad2grad(s)/15.0;
         if(meriDist<-12) meriDist+=24;
         if(meriDist>12) meriDist-=24;
 
-        newItem = mainTable->item(i, 5);
-        newItem->setText(QString("%1").arg(meriDist));
+        newItem = mainTable->item(i, 6);
+        newItem->setText(QString("%1").arg(meriDist, 6, 'f', 2));
 
         res = (dec<=maxDec)&&(dec>=minDec)&&(magn<=maxMagn)&&(magn>=minMagn);
 
@@ -749,9 +788,9 @@ void MainWindow::slotUpdateTable()
         ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*86400.0*dT);
         rRec->getRaDec(dT, ra, dec);
 
-        newItem = mainTable->item(i, 1);
-        newItem->setText(QString("%1").arg(mas_to_hms(grad_to_mas(ra), " ", 1)));
         newItem = mainTable->item(i, 2);
+        newItem->setText(QString("%1").arg(mas_to_hms(grad_to_mas(ra), " ", 1)));
+        newItem = mainTable->item(i, 3);
         newItem->setText(QString("%1").arg(mas_to_damas(grad_to_mas(dec), " ", 2)));
     }
 
@@ -784,6 +823,10 @@ void MainWindow::slotClearTable()
 //
     itemList.clear();
     rFile.clear();
+}
+
+void MainWindow::slotAdd2Seq()
+{
 }
 
 
@@ -890,15 +933,15 @@ void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QT
     if(current==NULL) return;
     if(previous!=NULL) itemList << previous;
 
-    nameLabel->setText(mainTable->item(current->row(), 0)->text());
-    raLabel->setText(mainTable->item(current->row(), 1)->text());
-    decLabel->setText(mainTable->item(current->row(), 2)->text());
-    magnLabel->setText(mainTable->item(current->row(), 3)->text());
-    tasksLabel->setText(mainTable->item(current->row(), 4)->text());
-    muraLabel->setText(mainTable->item(current->row(), 6)->text());
-    mudecLabel->setText(mainTable->item(current->row(), 7)->text());
-    expLabel->setText(mainTable->item(current->row(), 8)->text());
-    catNameLabel->setText(mainTable->item(current->row(), 9)->text());
+    nameLabel->setText(mainTable->item(current->row(), 1)->text());
+    raLabel->setText(mainTable->item(current->row(), 2)->text());
+    decLabel->setText(mainTable->item(current->row(), 3)->text());
+    magnLabel->setText(mainTable->item(current->row(), 4)->text());
+    tasksLabel->setText(mainTable->item(current->row(), 5)->text());
+    muraLabel->setText(mainTable->item(current->row(), 7)->text());
+    mudecLabel->setText(mainTable->item(current->row(), 8)->text());
+    expLabel->setText(mainTable->item(current->row(), 9)->text());
+    catNameLabel->setText(mainTable->item(current->row(), 10)->text());
     miriUpdateButton->setEnabled((QString().compare(catNameLabel->text(), "mpccat", Qt::CaseInsensitive)==0)||(QString().compare(catNameLabel->text(), "Planets", Qt::CaseInsensitive)==0));
     slotAddLog();
 }

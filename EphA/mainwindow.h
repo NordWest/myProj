@@ -91,9 +91,12 @@ private slots:
     void slotViewPrevObj();
     void slotClearTable();
 
+    void slotAdd2Seq();
+
     void slotHeaderClicked(int colNum);
 
     void sendCurObject();
+    void sendNextObject();
     void sessionOpened();
 
     void slotExit();
@@ -142,6 +145,7 @@ private:
     QAction *viewStopAct;
     QAction *viewSettAct;
     QAction *clearAct;
+    QAction *add2seqAtc;
 
     QMenu *instrMenu;
     QAction *gradeAct;
