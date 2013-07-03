@@ -31,6 +31,12 @@ namespace Ui {
     class MainWindow;
 }
 
+struct logListItem
+{
+    QTableWidgetItem* item;
+    QDateTime timeStamp;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -54,7 +60,7 @@ public:
     QString jdTimeStr;
     QDateTime sysDateTime;
     int updaterEnabled;
-    QList <QTableWidgetItem *> itemList;
+    QList <logListItem *> logItemList;
 
     skyAreaLF sa;
     resList rFile;
@@ -75,6 +81,7 @@ private slots:
     void slotStatBarUpdate();
 
     void slotGrade();
+    void slotUpdLocCats();
 
     void slotAddLog();
 
@@ -122,6 +129,7 @@ private:
     QPushButton *startButton;
     QPushButton *stopButton;
     QPushButton *gradeButton;
+    QPushButton *quitButton;
 
     QPushButton *viewSettButton;
 
@@ -149,6 +157,7 @@ private:
 
     QMenu *instrMenu;
     QAction *gradeAct;
+    QAction *updLocCatsAct;
 
     QDockWidget *infoDock;
     QWidget *infoWidget;

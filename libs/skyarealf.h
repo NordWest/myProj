@@ -187,6 +187,7 @@ public:
     int updateIniList(iniList iList);
 //    int
     int removeObj(QString name);
+
 };
 
 
@@ -337,6 +338,8 @@ public:
 
     int updateIniList(iniList iList, QString taskName);
     int addIniList(iniList iList, QString taskName);
+
+    int updateLocalCats();
 
     int save();
 

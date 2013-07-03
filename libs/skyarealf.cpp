@@ -112,6 +112,7 @@ int tlRecord::removeObj(QString name)
     return(iList.removeObj(name));
 }
 
+
 void tlRecord::initIList()
 {
     getIniList(&iList);
@@ -873,6 +874,79 @@ int skyAreaLF::addIniList(iniList iList, QString taskName)
     ini_list.save();
 
     return 0;
+}
+
+int skyAreaLF::updateLocalCats()
+{
+    QString globCatName, locCatName, iniName;
+    int i, szT, catType, j, sz;
+    tlRecord *tTemp = new tlRecord;
+    catRecord *cTemp = new catRecord;
+    iniList *iList = new iniList;
+
+    sscatFB lspmCat;
+    mpccat mpcCat;
+    QFile outFile;
+    QTextStream outStm;
+
+    szT = task_list.size();
+
+    for(i=0; i<szT; i++)
+    {
+        tTemp = task_list.at(i);
+        tTemp->getIniList(iList);
+        tTemp->getIniName(iniName);
+        tTemp->getCatName(locCatName);
+        cTemp = cat_list.getCatByName(tTemp->catName);
+        globCatName = cTemp->catFile;
+
+        if((cTemp->catType==DELE_CAT_TYPE)||(cTemp->catType==ORB_CAT_TYPE)) continue;
+
+        outFile.setFileName(locCatName);
+        outFile.open(QFile::WriteOnly | QFile::Truncate);
+        outStm.setDevice(&outFile);
+
+        sz = iList->size();
+        switch(cTemp->catType)
+        {
+        case LSPM_CAT_TYPE:
+            if(lspmCat.init(globCatName.toAscii().data()))
+            {
+                qDebug() << "\nglobal lspm cat error\n";
+                continue;
+            }
+            //taskR->getCatName(locCatName);
+
+
+            for(j=0; j<sz; j++)
+            {
+                if(lspmCat.GetName(iList->at(j)->name.toAscii().data())) continue;
+                outStm << lspmCat.str << "\n";
+            }
+
+
+
+            break;
+        case MPC_CAT_TYPE:
+            if(mpcCat.init(globCatName.toAscii().data()))
+            {
+                qDebug() << "\nglobal MPC cat error\n";
+                continue;
+            }
+
+            for(j=0; j<sz; j++)
+            {
+                if(mpcCat.GetRecName(iList->at(j)->name.toAscii().data())) continue;
+                outStm << mpcCat.str << "\n";
+            }
+
+            break;
+
+        }
+        outFile.close();
+    }
+
+
 }
 
 int skyAreaLF::save()
