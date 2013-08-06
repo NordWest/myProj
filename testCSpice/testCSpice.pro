@@ -50,3 +50,6 @@ unix:LIBS+= ./../libs/unix/cspice.a
 #            ./../libs/unix/libastro.a \
 #            ./../libs/unix/libmb.a
 unix:LIBS += -lmb -lastro
+
+win32:LIBS += ./../libs/win32/cspice.lib
+win32:LIBS += -lmb -lastro

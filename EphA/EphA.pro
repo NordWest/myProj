@@ -6,7 +6,8 @@
 
 QT       += core gui
 
-TARGET = ./../../lab/saTest/EphA
+unix:TARGET = ./../../lab/saTest/EphA
+win32:TARGET = ./../../lab/EphA/EphA
 TEMPLATE = app
 
 CONFIG += console \
@@ -106,4 +107,5 @@ unix:LIBS += ./../libs/unix/libmb.a \
 unix:LIBS+=./../libs/unix/cspice.a
 
 
-
+unix:INCLUDEPATH += ../libs/cspice
+win32:INCLUDEPATH += d:/dev/NBody/SPICE/win/include

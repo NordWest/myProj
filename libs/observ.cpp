@@ -4,6 +4,8 @@
 
 #include "observ.h"
 
+//#include "SpiceUsr.h"
+
 //#include "comfunc.h"
 #include <stdio.h>
 #include <math.h>

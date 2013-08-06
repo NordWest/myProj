@@ -22,11 +22,12 @@
 #include "time_a.h"
 #endif
 
-#include "./cspice/SpiceUsr.h"
+//
+
 
 #ifndef OBSERV_H
 
-
+#include "SpiceUsr.h"
 
 class observ
 {

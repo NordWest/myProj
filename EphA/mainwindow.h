@@ -13,7 +13,7 @@
 #include <QNetworkConfigurationManager>
 #include <QNetworkConfiguration>
 #include <QTcpSocket>
-
+#include <time.h>
 
 #include "settwindow.h"
 #include "./../libs/skyarealf.h"
