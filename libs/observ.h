@@ -27,7 +27,6 @@
 
 #ifndef OBSERV_H
 
-#include "SpiceUsr.h"
 
 class observ
 {
@@ -39,7 +38,7 @@ public:
 	double *mass;
 
     QString obsName, obsyCode, centerName, refName;
-    int ephType;    //0-dele;   1-SPICE;    2-calceph
+//    int ephType;    //0-dele;   1-SPICE;    2-calceph
 
 	int initObservatory(char *fname_obs);
         //int initDELE(char *fname_dele_h, char *fname_dele_bin);
@@ -47,12 +46,8 @@ public:
 
     int initDELE(char *fname_dele_bin);
     int init(char *fname_obs, char *fname_dele_bin);
-    int initSPICE(QString bspName, QString lskName);
-    int initSPK(QString spkName);
-    int init(QString fname_obs, QString bspName, QString lskName);
 
 	int set_obs_parpam(int nplanet, int center, int sk, char *nobsy);
-    int set_spice_parpam(QString obs_name, QString obsy_code, QString center_name, QString ref_name);
 
 
     double pos[3], vel[3];
@@ -75,7 +70,6 @@ public:
     int setTDB(double tTDB);
     int setTT(double tTT);
     int det_observ();
-    int det_obj_radec(QString objName, double *ra, double *dec, double *range);
     int det_vect_radec(double *stateRV, double *ra, double *dec, double *range = NULL);
 
     QString getObsCode();
