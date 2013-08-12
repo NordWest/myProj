@@ -8,7 +8,8 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/saTest/saGrade
+unix:TARGET = ./../../lab/saTest/saGrade
+win32:TARGET = ./../../../lab/EphA/saGrade
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
@@ -58,10 +59,11 @@ HEADERS += \
     ../libs/mpcs.h \
     ../libs/DynArr.h \
     ../libs/time_a.h \
-    ../libs/cspice/SpiceUsr.h
+ #   ../libs/cspice/SpiceUsr.h
 
-win32:LIBS += ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a
+win32:LIBS += libmb libastro
+#win32:LIBS += ./../libs/win32/libmb.a \
+#            ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 unix:LIBS+=./../libs/unix/cspice.a

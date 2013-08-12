@@ -6,7 +6,8 @@
 
 QT       += core gui
 
-TARGET = ./../../lab/saTest/saManager
+unix:TARGET = ./../../lab/saTest/saManager
+win32:TARGET = ./../../../lab/EphA/saManager
 TEMPLATE = app
 
 CONFIG += warn_off
@@ -64,11 +65,12 @@ HEADERS  += mainwindow.h \
     adddeledlg.h \
     addmpcdlg.h \
     ../libs/time_a.h \
-    ../libs/cspice/SpiceUsr.h \
+#    ../libs/cspice/SpiceUsr.h \
     addlspmdlg.h
 
-win32:LIBS += ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a
+win32:LIBS += libmb libastro
+#win32:LIBS += ./../libs/win32/libmb.a \
+#            ./../libs/win32/libastro.a
 unix:LIBS += ./../libs/unix/libmb.a \
             ./../libs/unix/libastro.a
 unix:LIBS+=./../libs/unix/cspice.a

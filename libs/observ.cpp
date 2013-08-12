@@ -128,12 +128,15 @@ int observ::setTT(double tTT)
 
 int observ::det_observ()
 {
+    qDebug() << "det_observ\n";
+    qDebug() << "det_state\n";
     this->obs->det_state(ctime.UTC());
     int res = 0;
 
 
+    qDebug() << "detState\n";
     if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
-
+    qDebug() << "detRtt\n";
     if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
 
 

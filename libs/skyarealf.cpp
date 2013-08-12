@@ -990,11 +990,18 @@ int skyAreaLF::removeObj(QString taskName, QString objName)
 int skyAreaLF::initVisualProp(double jdUTC)
 {
     double tr, ts;
-    this->init_time_utc(jdUTC);
+    qDebug() << "init_time_utc\n";
+    if(this->init_time_utc(jdUTC))
+    {
+        qDebug() << "init_time_utc error\n";
+        return 1;
+    }
 
+    qDebug() << "detRDnumGC\n";
 //	if(this->obs_pos->place->detR(&this->params.sunX, &this->params.sunY, &this->params.sunZ, this->obs_pos->otime, SUN_NUM, 0, this->obs_pos->center, obs_pos->sk)) return 1;
     detRDnumGC(&this->params.sunRA, &this->params.sunDE, 0.0, 0.0, 0.0, this->obs_pos->ox, this->obs_pos->oy, this->obs_pos->oz, this->obs_pos->obs->dcx, this->obs_pos->obs->dcy, this->obs_pos->obs->dcz);
 
+    qDebug() << "detRiseSet\n";
     detRiseSet(&tr, &ts, params.sunDE, this->obs_pos->obs->record->getFi());
 
         params.timeSunRise = tr;
@@ -1013,7 +1020,7 @@ int skyAreaLF::initVisualProp(double jdUTC)
 
 int skyAreaLF::init_time_utc(double jDay)   //
 {
-
+    qDebug() << "obs_pos: " << obs_pos << "\n";
     if(this->obs_pos->setUTC(jDay)) return 1;
     //this->timeCurUTC = this->obs_pos->ctime.UTC();
     return 0;

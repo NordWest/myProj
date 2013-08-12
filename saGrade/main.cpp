@@ -71,7 +71,13 @@ int main(int argc, char *argv[])
 
     qDebug() << QString("s: %1\n").arg(s);
 
-    sa.initVisualProp(jDay);
+    qDebug() << "initVisualProp\n";
+
+    if(sa.initVisualProp(jDay))
+    {
+        qDebug() << "initVisualProp error\n";
+        return 1;
+    }
     sa.set_opt(0, 360, -10, 90, 4, 18);
 
     //deg_to_damas(&strT0, le de, QString spl_symb, int ndig);
@@ -94,9 +100,12 @@ int main(int argc, char *argv[])
     QStringList resSL;
     mpephRec mpephR;
 
+    qDebug() << "grade\n";
+
     sa.grade(rList);
 
 
+    qDebug() << QString("rList size: %1\n").arg(rList.size());
 
     int i, j, sz, isObj;
 /*
@@ -191,7 +200,7 @@ int main(int argc, char *argv[])
         //qDebug() << QString("UTC-TDT: %1").arg((sa.obs_pos->ctime.UTC() - sa.obs_pos->ctime.TDT())*86400);
     }
 */
-    rList.saveAs("res.lst");
+    if(rList.saveAs("./res.lst")) qDebug() << "save res.lst error\n";
 
 /*
 

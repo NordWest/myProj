@@ -5,13 +5,14 @@ SOURCES += main.cpp \
 HEADERS += miriadeeph.h \
     ../libs/comfunc.h \
     ../mb/mb.h
-HEADERS += ./../astro/astro.h
+HEADERS += ./../libs/astro.h
 
 #win32:TARGET = ./../../bin/miriadeEph
 #unix:TARGET = ./../bin/miriadeEph
 TARGET = miriadeEph
 QT += network
 CONFIG += console exceptions warn_off release
+win32:LIBS += libmb libastro
 win32:LIBS += ./../libs/win32/cfitsio.lib
 unix:LIBS += ./../libs/unix/libcfitsio.a
 unix:LIBS += ./../libs/unix/libmb.a \

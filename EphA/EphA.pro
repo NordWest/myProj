@@ -7,7 +7,7 @@
 QT       += core gui
 
 unix:TARGET = ./../../lab/saTest/EphA
-win32:TARGET = ./../../lab/EphA/EphA
+win32:TARGET = ./../../../lab/EphA/EphA
 TEMPLATE = app
 
 CONFIG += console \
