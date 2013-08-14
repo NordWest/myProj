@@ -425,7 +425,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_9">
        <property name="text">
-        <string>Repet</string>
+        <string>Repeat</string>
        </property>
       </widget>
      </item>
