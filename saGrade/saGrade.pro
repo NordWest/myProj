@@ -30,7 +30,7 @@ SOURCES += main.cpp \
     ../libs/comfunc.cpp \
     ../libs/sscatFB.cpp \
     ../libs/fbStream.cpp \
-    ../libs/redStat.cpp \
+#    ../libs/redStat.cpp \
     ../libs/mpcfile.cpp \
     ../libs/listfile.cpp \
     ../libs/mpcs.cpp \
@@ -53,7 +53,7 @@ HEADERS += \
     ../libs/fbStream.h \
     ../libs/mb.h \
     ../libs/astro.h \
-    ../libs/redStat.h \
+#    ../libs/redStat.h \
     ../libs/mpcfile.h \
     ../libs/listfile.h \
     ../libs/mpcs.h \

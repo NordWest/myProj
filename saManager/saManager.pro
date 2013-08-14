@@ -65,7 +65,6 @@ HEADERS  += mainwindow.h \
     adddeledlg.h \
     addmpcdlg.h \
     ../libs/time_a.h \
-#    ../libs/cspice/SpiceUsr.h \
     addlspmdlg.h
 
 win32:LIBS += libmb libastro

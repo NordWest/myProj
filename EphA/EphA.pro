@@ -35,7 +35,6 @@ SOURCES += main.cpp\
     ../libs/coord.cpp \
     ../libs/commetorbcat.cpp \
     ../libs/comfunc.cpp \
-#    ../libs/astro.cpp
     settwindow.cpp \
     ../libs/listfile.cpp \
     ../libs/mpcs.cpp \
@@ -61,8 +60,6 @@ HEADERS  += mainwindow.h \
     ../libs/coord.h \
     ../libs/commetorbcat.h \
     ../libs/comfunc.h \
-#    ../libs/astro.h \
-#    ../libs/mb.h \
     settwindow.h \
     ../libs/listfile.h \
     ../libs/mpcs.h \
