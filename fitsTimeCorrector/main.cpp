@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
      szi = dirList.size();
      for(i=0; i<szi; i++)
      {
+        //skip dark dir
          if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1) continue;
          qDebug() << dirList.at(i) << "\n\n";
          tDir.setPath(dirList.at(i));
@@ -219,6 +220,7 @@ int main(int argc, char *argv[])
              if(objName1.indexOf("target")!=-1)
              {
                  qDebug() << QString("skip target: %1\n").arg(objName1);
+                 //target miss counter
                  brCounter++;
                  sTarg = 1;
                  //continue;
@@ -265,6 +267,7 @@ int main(int argc, char *argv[])
                          expCorr0 = detCorr0(fitsd.exptime, 0, aAcorr, aBcorr, bAcorr, bBcorr);
                          break;
                      case 2:
+
                          if(detCorrL(expCorr0, fitsd.exptime, 0, eAplyL, aAplyL, bAplyL)) expCorr0 = detCorr0(fitsd.exptime, 0, aAcorr, aBcorr, bAcorr, bBcorr);
                          break;
                      default:
