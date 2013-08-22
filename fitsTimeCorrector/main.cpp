@@ -124,8 +124,14 @@ int main(int argc, char *argv[])
 
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
     QString resDirName = QDir(sett->value("general/resDir", "./res").toString()).absolutePath();
-    QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
+    //QString goodPathName = QDir(sett->value("general/goodPath", "./resG/").toString()).absolutePath();
     int detCorr = sett->value("general/detCorr", 0).toInt();
+    /*
+     2 - номер файла в серии - просто порядковый номер выделенного фрагмента.
+     number of file in serie - just a sequence number in selected fragment.
+
+     >0 -
+     */
     int aplyType = sett->value("general/aplyType", 0).toInt();
     int saveCorr = sett->value("general/saveCorr", 0).toInt();
     double dTcorr = sett->value("general/dTcorr", 0.0).toDouble();
