@@ -52,6 +52,7 @@ struct expCorrRec
     QVector <double> durat;
     QVector <double> dExp;
     QVector <int> kNum;
+    QStringList dateStr;
 };
 
 double detCorr0(double expTime, int k, double aA, double aB, double bA, double bB)
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
-    QString tFile;
+    QString tFile, strT;
     QDir tDir, rDir;
     int i, j, k, l, lNum, szi, szj, wfSz, expNum, sTarg;
     double t0, t1, dt;
@@ -403,6 +404,8 @@ int main(int argc, char *argv[])
                                          expCorrList.at(l)->durat << expNum*dt*86400.0;
                                          expCorrList.at(l)->kNum << expNum;
                                          expCorrList.at(l)->dExp << realExp-fitsd.exptime;
+                                         getStrTfromMJD(&strT, fitsd.MJD);
+                                         expCorrList.at(l)->dateStr << QString("%1").arg(strT);
                                          break;
                                      }
                                  }
@@ -414,6 +417,8 @@ int main(int argc, char *argv[])
                                      ecRec->durat << expNum*dt*86400.0;
                                      ecRec->kNum << expNum;
                                      ecRec->dExp << realExp-fitsd.exptime;
+                                     getStrTfromMJD(&strT, fitsd.MJD);
+                                     ecRec->dateStr << QString("%1").arg(strT);
                                      expCorrList << ecRec;
                                  }
                              }
@@ -574,7 +579,7 @@ int main(int argc, char *argv[])
 
              for(i=0; i<szi; i++)
              {
-                 residStm << QString("%1|%2|%3|%4\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4).arg(expCorrList.at(l)->durat[i], 8, 'f', 4).arg(expCorrList.at(l)->dExp[i], 8, 'f', 4);
+                 residStm << QString("%1|%2|%3|%4|%5\n").arg(expCorrList.at(l)->kNum[i], 3).arg(expCorrList.at(l)->corrL[i], 12, 'f', 4).arg(expCorrList.at(l)->durat[i], 8, 'f', 4).arg(expCorrList.at(l)->dExp[i], 8, 'f', 4).arg(expCorrList.at(l)->dateStr[i]);
                  L[i] = expCorrList.at(l)->corrL[i];
                  C[i*2] = expCorrList.at(l)->kNum[i];
                  C[i*2+1] = 1;
