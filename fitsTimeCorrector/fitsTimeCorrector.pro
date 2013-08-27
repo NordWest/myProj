@@ -45,7 +45,7 @@ win32:LIBS += ./../libs/win32/libmb.a
 win32:LIBS += ./../libs/win32/libastro.a
 #unix:LIBS += ./../libs/unix/libastro.a
 
-unix:LIBS += -libmb -libastro
+unix:LIBS += -lmb -lastro
 
 HEADERS += ../libs/mb.h \
     ../libs/astro.h \

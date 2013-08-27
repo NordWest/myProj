@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     slotInitResTable();
     slotUpdateTable();
 
+    slotViewSettWindow();
 //Networking
 
     QNetworkConfigurationManager manager;
@@ -360,14 +361,16 @@ void MainWindow::setWidgets()
 
     settDock = new QDockWidget("Settings", this, Qt::Widget);
 
-
     settDock->setMinimumSize(400, 300);
     settW = new settWindow(settDock);
     settDock->setWidget(settW);
-    addDockWidget(Qt::AllDockWidgetAreas, settDock);
-
     settDock->setFloating(1);
+
     viewMenu->addAction(settDock->toggleViewAction());
+
+addDockWidget(Qt::NoDockWidgetArea, settDock);
+
+
 //
 
     infoDock = new QDockWidget("Information", this, Qt::Widget);
@@ -381,46 +384,55 @@ void MainWindow::setWidgets()
     vertLA->addWidget(nLab, 0, 0);
     nameLabel = new QLabel("name");
     vertLA->addWidget(nameLabel, 0, 1);
+    nameLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *raLab = new QLabel("RA");
     vertLA->addWidget(raLab, 1, 0);
     raLabel = new QLabel("ra");
     vertLA->addWidget(raLabel, 1, 1);
+    raLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *decLab = new QLabel("DEC");
     vertLA->addWidget(decLab, 2, 0);
     decLabel = new QLabel("dec");
     vertLA->addWidget(decLabel, 2, 1);
+    decLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *mLab = new QLabel("Mang");
     vertLA->addWidget(mLab, 3, 0);
     magnLabel = new QLabel("magn");
     vertLA->addWidget(magnLabel, 3, 1);
+    magnLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *mraLab = new QLabel("mu_RA");
     vertLA->addWidget(mraLab, 4, 0);
     muraLabel = new QLabel("mu_ra");
     vertLA->addWidget(muraLabel, 4, 1);
+    muraLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *mdecLab = new QLabel("mu_DEC");
     vertLA->addWidget(mdecLab, 5, 0);
     mudecLabel = new QLabel("mu_dec");
     vertLA->addWidget(mudecLabel, 5, 1);
+    mudecLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *eLab = new QLabel("Exp");
     vertLA->addWidget(eLab, 6, 0);
     expLabel = new QLabel("exp");
     vertLA->addWidget(expLabel, 6, 1);
+    expLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *tsLab = new QLabel("Tasks");
     vertLA->addWidget(tsLab, 7, 0);
     tasksLabel = new QLabel("tasks");
     vertLA->addWidget(tasksLabel, 7, 1);
+    tasksLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QLabel *catLab = new QLabel("Catalog");
     vertLA->addWidget(catLab, 8, 0);
     catNameLabel = new QLabel("Catalog");
     vertLA->addWidget(catNameLabel, 8, 1);
+    catNameLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     vertLA->setRowStretch(9, 1);
 

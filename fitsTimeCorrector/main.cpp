@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
      for(i=0; i<szi; i++)
      {
         //skip dark dir
-         if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1) continue;
+         if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1||dirList.at(i).indexOf("draft")!=-1) continue;
          qDebug() << dirList.at(i) << "\n\n";
          tDir.setPath(dirList.at(i));
          dataFiles = tDir.entryList(filters, QDir::Files, QDir::Name);// | QDir::Reversed);
@@ -200,6 +200,11 @@ int main(int argc, char *argv[])
 
          for(j=0; j<szj; j++)
          {
+             if(dataFiles.at(j).indexOf("focus")==0)
+             {
+                 qDebug() << QString("SKIP: %1\n").arg(dataFiles.at(j));
+                 continue;
+             }
              mjd0 = mjd1;
              dmjd0 = dmjd1;
              objName0 = objName1;
