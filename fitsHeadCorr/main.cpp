@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     QTextCodec *codec1 = QTextCodec::codecForName("Windows-1251");
     Q_ASSERT( codec1 );
 
-    QList <expCorrRec*> expCorrListAply;
-    QList <expCorrRec*> expCorrList;
-    expCorrRec* ecRec;
+    //QList <expCorrRec*> expCorrListAply;
+    //QList <expCorrRec*> expCorrList;
+    //expCorrRec* ecRec;
 
     QStringList dirList;
     QStringList dataFiles, filters, wfList;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     int i, j, k, l, lNum, szi, szj, wfSz, expNum, sTarg;
     double t0, t1, dt;
     fitsdata fitsd;
-    QString dateCode0, dateCode1, dateCodeNew, nName, nDirName;
+    QString dateCode0, dateCode1, dateCodeNew, nName, nDirName, fileName, obsName, obsNewName;
     QFileInfo fi;
     double mjd0, mjd1, dmjd0, dmjd1, mjdN, mjdNend, mjdEnd, mjdBeg, realExp, realMJD, dobsN, dendN, expCorr0;
     QString objName0, objName1, tstr;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     int isCorr;
 
 
-    QSettings *sett = new QSettings("./ftc.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings("./fhc.ini", QSettings::IniFormat);
 
     QString workDirName = QDir(sett->value("general/workDir", "./orig").toString()).absolutePath();
     QString resDirName = QDir(sett->value("general/resDir", "./res").toString()).absolutePath();
@@ -136,11 +136,64 @@ int main(int argc, char *argv[])
 
      int fitsType;
 
+     char strkey[81];
+
 
      QFile residFile;
      residFile.setFileName("./timeRes.txt");
      residFile.open(QFile::WriteOnly | QFile::Truncate);
      QTextStream residStm(&residFile);
+
+     szi = dirList.size();
+     for(i=0; i<szi; i++)
+     {
+        //skip dark dir
+         if(dirList.at(i).indexOf("dark")!=-1||dirList.at(i).indexOf("flat")!=-1||dirList.at(i).indexOf("draft")!=-1) continue;
+         qDebug() << dirList.at(i) << "\n\n";
+         tDir.setPath(dirList.at(i));
+         dataFiles = tDir.entryList(filters, QDir::Files, QDir::Name);// | QDir::Reversed);
+         qDebug() << QString("filesNum: %1\n\n").arg(dataFiles.size());
+         szj = dataFiles.size();
+         wfList.clear();
+
+         nDirName = dirList.at(i);
+         nDirName.replace(workDirName, resDirName);
+         qDebug() << QString("ndir: %1\n").arg(nDirName);
+         if(saveFits) QDir().mkpath(nDirName);
+
+         for(j=0; j<szj; j++)
+         {
+             if(dataFiles.at(j).indexOf("focus")==0)
+             {
+                 qDebug() << QString("SKIP: %1\n").arg(dataFiles.at(j));
+                 continue;
+             }
+             fileName = QString("%1/%2").arg(dirList.at(i)).arg(dataFiles.at(j));
+
+
+             fits_open_file(&fptr, fileName.toAscii().data(), READWRITE, &status);
+             if(status)
+             {
+                 qDebug() << QString("%1: file not open\n").arg(fileName);
+                 return 1;
+             }
+             status = 0;
+
+             fits_read_key(fptr, TSTRING, "OBSERVER", strkey, NULL, &status);// try to read first WCS tag
+             status = 0;
+             obsName = QString(strkey);
+             if((QString().compare(obsName, "Khovritchev")==0)||(QString().compare(obsName, "M.Yu.Khovritchev")==0)||(QString().compare(obsName, "M.Yu. Khovritch")==0)) obsNewName = "M.Yu. Khovritchev";
+
+             fits_update_key(fptr, TSTRING, "OBSERVER", obsNewName.toAscii().data(), "", &status);
+             status = 0;
+
+             fits_close_file(fptr, &status);
+             status = 0;
+         }
+
+
+
+     }
 
     
     return 0;//a.exec();
