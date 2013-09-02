@@ -5,7 +5,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "moody/moody.h"
+#include "./../libs/moody/moody.h"
 int main(int argc, char *argv[]) {
     if (argc!=3) {
         std::cout <<std::endl << "> Error: Incorrect number of parameters." << std::endl;

@@ -28,9 +28,10 @@ SOURCES += main.cpp \
 win32:LIBS += ./../libs/win32/cfitsio.lib \
             ./../libs/win32/libmb.a \
             ./../libs/win32/libastro.a
-unix:LIBS += ./../libs/unix/libcfitsio.a \
-            ./../libs/unix/libmb.a \
-            ./../libs/unix/libastro.a
+unix:LIBS += ./../libs/unix/libcfitsio.a
+#            ./../libs/unix/libmb.a \
+#            ./../libs/unix/libastro.a
+unix:LIBS += -lmb -lastro
 
 TARGET = ruler3
 #unix:TARGET = ./../bin/ruler3
@@ -39,8 +40,7 @@ CONFIG += console \
     exceptions \
     warn_off \
     release
-HEADERS += ../astro/astro.h \
-    ../libs/comfunc.h \
+HEADERS += ../libs/comfunc.h \
     ../libs/sscat.h \
     ../libs/redStat.h \
     ../libs/observatory.h \
@@ -49,7 +49,6 @@ HEADERS += ../astro/astro.h \
     ../libs/fitsdata.h \
     ../libs/fBuffer.h \
     ../libs/ccdmeasurements.h \
-    ../mb/mb.h \
     ../libs/identify.h \
     ../libs/cmnk.h \
     ../libs/fitstools.h\
@@ -64,3 +63,5 @@ HEADERS += ../astro/astro.h \
     ../libs/alglib/alglibmisc.h \
     ../libs/alglib/alglibinternal.h \
     ../libs/sysCorr.h
+#   ../libs/astro.h \
+#   ../libs/mb.h
