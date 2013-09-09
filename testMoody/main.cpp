@@ -1,6 +1,8 @@
 #include <QtCore/QCoreApplication>
 
 #define OMPLIB
+//#define TBBLIB
+//#define SERIAL
 
 #include <iostream>
 #include <iomanip>
@@ -56,7 +58,7 @@ int main(int argc, char *argv[]) {
             }
 
             pct = (float) ((float)i/experiment->getNumStates())*100;
-            std::cout <<"> State "<<i<<" of "<<experiment->getNumStates()<< " Completed - " << std::setprecision(3) <<pct<<"%"<<std::endl;
+            //std::cout <<"> State "<<i<<" of "<<experiment->getNumStates()<< " Completed - " << std::setprecision(3) <<pct<<"%"<<std::endl;
             experiment->writeCurrentStateToMopFile();
 
 
