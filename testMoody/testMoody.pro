@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = ./../../lab/testMoody/testMoody
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
+INCLUDEPATH+=/usr/local/cuda/include
 
 
 TEMPLATE = app
@@ -32,5 +33,11 @@ HEADERS  +=  ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.h \
     ./../libs/moody/capsule/capsuleBase/etc/Advisor.h \
     ./../libs/moody/moody/capsule/capsuleBase/particle/Particle.h \
-    ./../libs/moody/moody/capsule/capsuleBase/CapsuleBase.h
+    ./../libs/moody/moody/capsule/capsuleBase/CapsuleBase.h \
+    ../libs/moody/capsule/Capsule.h \
+    ../libs/moody/capsule/capsuleBase/CapsuleTBB.h \
+    ../libs/moody/capsule/capsuleBase/CapsuleSerial.h \
+    ../libs/moody/capsule/capsuleBase/CapsuleOpenMP.h \
+    ../libs/moody/capsule/capsuleBase/CapsuleCUDA.h \
+    ../libs/moody/capsule/capsuleBase/CapsuleBase.h
 

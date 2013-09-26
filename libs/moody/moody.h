@@ -5,6 +5,10 @@
 
 #include "capsule/Capsule.h"
 
+#ifdef CUDALIB
+#include "capsule/capsuleBase/CapsuleCUDA.h"
+#endif
+
 #ifdef OMPLIB
 #include "capsule/capsuleBase/CapsuleOpenMP.h"
 #endif
