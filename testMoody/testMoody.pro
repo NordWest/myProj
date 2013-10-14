@@ -17,6 +17,7 @@ INCLUDEPATH+=/usr/local/cuda/include
 TEMPLATE = app
 
 LIBS += -lgomp
+QMAKE_CXXFLAGS+=-fopenmp
 
 
 SOURCES += main.cpp \
