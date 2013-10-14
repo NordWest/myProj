@@ -9,7 +9,7 @@ QT       += core
 QT       -= gui
 
 TARGET = testCUDA
-CONFIG   += console
+CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
 TEMPLATE = app

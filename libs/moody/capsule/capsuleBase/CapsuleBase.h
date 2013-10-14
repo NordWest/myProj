@@ -155,7 +155,8 @@ protected:
 	/**
 	* Load the particles for the current experiment from file - used internally by Moody, you don't need to call this directly
 	*/
-	virtual void loadParticles( std::string fileName) {
+    virtual void
+    loadParticles( std::string fileName) {
 		try {
 			ticpp::Document doc(fileName.c_str());
 			doc.LoadFile();

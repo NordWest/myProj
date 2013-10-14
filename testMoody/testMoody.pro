@@ -32,8 +32,8 @@ HEADERS  +=  ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopItem.h \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.h \
     ./../libs/moody/capsule/capsuleBase/etc/Advisor.h \
-    ./../libs/moody/moody/capsule/capsuleBase/particle/Particle.h \
-    ./../libs/moody/moody/capsule/capsuleBase/CapsuleBase.h \
+    ./../libs/moody/capsule/capsuleBase/particle/Particle.h \
+    ./../libs/moody/capsule/capsuleBase/CapsuleBase.h \
     ../libs/moody/capsule/Capsule.h \
     ../libs/moody/capsule/capsuleBase/CapsuleTBB.h \
     ../libs/moody/capsule/capsuleBase/CapsuleSerial.h \
