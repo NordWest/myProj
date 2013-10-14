@@ -16,6 +16,8 @@ INCLUDEPATH+=/usr/local/cuda/include
 
 TEMPLATE = app
 
+LIBS += -lgomp
+
 
 SOURCES += main.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.cpp \
