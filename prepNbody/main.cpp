@@ -212,11 +212,11 @@ int main(int argc, char *argv[])
     X0 = new double[3];
     V0 = new double[3];
 
-    QFile bigFile("big.in");
+    QFile bigFile("pnbRes/big.in");
     bigFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream bigStm(&bigFile);
 
-    QFile smlFile("small.in");
+    QFile smlFile("pnbRes/small.in");
     smlFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream smlStm(&smlFile);
 
@@ -616,7 +616,7 @@ int main(int argc, char *argv[])
     bigFile.close();
     smlFile.close();
 
-    saveCFG("test.xml", pList);
+    //saveCFG("pnbRes/test.xml", pList);
 
     if(saveMoody)
     {
@@ -636,8 +636,9 @@ int main(int argc, char *argv[])
             pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
         }
 
-        saveCFG("particles.xml", pList);
+        saveCFG("pnbRes/particles.xml", pList);
     }
+    else saveCFG("pnbRes/particles.xml", pList);
 
     //experiment->exportParticlesToXMLFile("test.xml");
     return 0;//a.exec();

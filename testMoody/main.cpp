@@ -62,7 +62,6 @@ int main(int argc, char *argv[]) {
             std::cout <<"> State "<<i<<" of "<<experiment->getNumStates()<< " Completed - " << std::setprecision(3) <<pct<<"%"<<std::endl;
             experiment->writeCurrentStateToMopFile();
 
-
         }
         experiment->timer.stop();
     } else if (integrator =="mp") {
@@ -99,6 +98,38 @@ int main(int argc, char *argv[]) {
         }
         experiment->timer.stop();
     }
+/*
+    experiment->mop->resetFile();
+    experiment->mop->readState();
+    MopState* mSt;
+    MopItem* mItem;
+    int iC;
+    for(j=0; j<experiment->getNumStates();j++)
+    {
+        mSt = experiment->mop->readState();
+        iC = mSt->getItemCount();
+        for(i=0; i<iC; i++)
+        {
+
+            mIt = mSt->getMopItem(i);
+        }
+    }
+    if(getMopName(mState, mItem, name)!=-1)
+    {
+        //mItem = mState->getMopItem(teloi);
+
+        Xm[i] = mItem.x/AUKM/1000;
+        Xm[i+1] = mItem.y/AUKM/1000;
+        Xm[i+2] = mItem.z/AUKM/1000;
+        Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+        Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+        Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+
+        //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
+
+
+    }*/
+
     delete experiment;
     std::cout <<"> fin "<<std::endl;
 

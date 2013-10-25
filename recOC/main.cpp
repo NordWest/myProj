@@ -690,6 +690,7 @@ int main(int argc, char *argv[])
 
     }
 
+    mpcFile.close();
 
 
 ////////////////////////////////sort SPK
