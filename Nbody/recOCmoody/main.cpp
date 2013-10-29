@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     corr = new SpiceChar[256];
 
 
-    double time, time0, dt, et;
+    double time, time0, time1, dt, et;
     int nstep;
     double X[3], V[3];
     double XS0[3], VS0[3];
@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
     time0 = sett->value("general/time0", 0).toDouble();
     dt = sett->value("general/dt", 0).toDouble();
     nstep = sett->value("general/nstep", 0).toInt();
+
+    time1 = time0+dt*nstep;
 
     dele *nbody;
     nbody = new dele();
@@ -131,6 +133,24 @@ int main(int argc, char *argv[])
     MopState *mopSt;
     MopItem mopIt;
 
+    double tmin, pmin;
+    int sz, j, p;
+    SpiceInt       handle;
+    SpiceInt       bodyNum;
+    SpiceDouble sgT0, sgT1;
+    SpiceDouble *segmentState;
+    SpiceDouble *segmentEphs;
+
+    segmentState = new SpiceDouble[sz*6];
+    segmentEphs = new SpiceDouble[sz];
+
+    sJD = QString("%1 JD TDB").arg(time0, 15, 'f',7);
+    str2et_c(sJD.toAscii().data(), &sgT0);
+    sJD = QString("%1 JD TDB").arg(time1, 15, 'f',7);
+    str2et_c(sJD.toAscii().data(), &sgT1);
+
+    spkopn_c("./smp.spk", "SMP", 0, &handle);
+
     for(i=0; i<nstep; i++)
     {
         mopSt = mopFile.readCyclingState();
@@ -173,6 +193,7 @@ int main(int argc, char *argv[])
 
         qDebug() << QString("Sun: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
+
         for(j=0; j<sz; j++)
         {
             mopIt = mopSt->getMopItem(j);
@@ -187,6 +208,9 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("%1:%2: %3\t%4\t%5\t%6\t%7\t%8\n").arg(mopIt.name).arg(time).arg(XS0[0]).arg(X[1]).arg(X[2]).arg(V[0]).arg(V[1]).arg(V[2]);
 
+            if(mCat.GetRecName(mopIt.name.toAscii().data())) continue;
+            bodyNum = 2000000 + mCat.record->getNum();
+
         }
     }
 
@@ -194,3 +218,68 @@ int main(int argc, char *argv[])
     
     return 0;//a.exec();
 }
+
+
+int det_obj_radec(QString objName, double *ra, double *dec, double *range)
+{
+    double et, lt1;
+    double state1[6];
+    double state2[6];
+    QString sTime;
+    double dstate[3];
+    double vstate[3];
+    int res = 0;
+
+    switch(ephType)
+    {
+    case 1:
+        {
+            //sTime = QString("%1 JD TDB").arg(ctime.TDB());
+            sTime = QString("%1 JD TDB").arg(ctime.TDB(), 16, 'f',8);
+            str2et_c ( sTime.toAscii().data(), &et);
+
+            spkezr_c (  objName.toAscii().data(), et, refName.toAscii().data(), "LT", obsName.toAscii().data(), state1, &lt1 );
+            state1[0] -= obs->state[0]*AUKM;
+            state1[1] -= obs->state[1]*AUKM;
+            state1[2] -= obs->state[2]*AUKM;
+            state1[3] -= obs->state[3]*AUKM;
+            state1[4] -= obs->state[4]*AUKM;
+            state1[5] -= obs->state[5]*AUKM;
+
+
+/*
+            vstate[0] = V[0]*AUKM/SECINDAY;
+            vstate[1] = V[1]*AUKM/SECINDAY;
+            vstate[2] = V[2]*AUKM/SECINDAY;
+/
+            vstate[0] = obs->vx*AUKM/SECINDAY;
+            vstate[1] = obs->vy*AUKM/SECINDAY;
+            vstate[2] = obs->vz*AUKM/SECINDAY;
+
+            stelab_c (state1, vstate, &dstate[0]);
+/*
+            qDebug() << QString("state1: %1\t%2\t%3\n").arg(state1[0]).arg(state1[1]).arg(state1[2]);
+            qDebug() << QString("dstate: %1\t%2\t%3\n").arg(dstate[0]).arg(dstate[1]).arg(dstate[2]);
+
+            qDebug() << QString("dstate1: %1\t%2\t%3\n").arg(fabs(state1[0] - dstate[0])).arg(fabs(state1[1] - dstate[1])).arg(fabs(state1[2] - dstate[2]));
+/
+
+            state1[0] = dstate[0];
+            state1[1] = dstate[1];
+            state1[2] = dstate[2];
+*/
+            recrad_c (state1, range, ra, dec);
+            res = failed_c();
+
+            spkezr_c (  objName.toAscii().data(), et, "J2000", "NONE", "ssb", state2, &lt1 );
+            qDebug() << QString("%8 %7: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state2[0]/AUKM, 15, 'e', 10).arg(state2[1]/AUKM, 15, 'e', 10).arg(state2[2]/AUKM, 15, 'e', 10).arg(state2[3]/AUKM, 15, 'e', 10).arg(state2[4]/AUKM, 15, 'e', 10).arg(state2[5]/AUKM, 15, 'e', 10).arg(sTime).arg(objName);
+        }
+        break;
+    default:
+        return 1;
+        break;
+    }
+
+    return 0;
+}
+
