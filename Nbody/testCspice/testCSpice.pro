@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/testCSpice/testCSpice
+TARGET = ~/bin/testCSpice
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 

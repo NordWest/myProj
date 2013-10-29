@@ -8,7 +8,8 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/testMoody/testMoody
+#TARGET = ./../../../lab/testMoody/testMoody
+TARGET = ~/bin/testMoody
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 INCLUDEPATH+=/usr/local/cuda/include

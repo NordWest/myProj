@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/testNbody/recOC
+TARGET = ~/bin/recOC
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 

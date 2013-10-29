@@ -2,7 +2,8 @@
 # Project created by QtCreator 2010-02-21T18:45:28
 # -------------------------------------------------
 QT -= gui
-TARGET = ./../../lab/testNbody/testNbody
+#TARGET = ./../../../lab/testNbody/testNbody
+TARGET = ~/bin/testNbody
 CONFIG += qt \
     console \
     warn_off \

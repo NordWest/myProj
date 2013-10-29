@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/testNbody/prepNbody
+TARGET = ~/bin/prepNbody
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
