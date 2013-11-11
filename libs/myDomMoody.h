@@ -95,7 +95,7 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
               p->green = rgb.firstChildElement("green").text().toInt();
               p->blue = rgb.firstChildElement("blue").text().toInt();
 
-              qDebug() << QString("%1\n").arg(p->name.data());
+              //qDebug() << QString("%1\n").arg(p->name.data());
               pList << p;
               child = child.nextSiblingElement("particle");
           }

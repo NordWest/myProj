@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = ~/bin/recOCmoody
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
+QT += xml
 
 TEMPLATE = app
 
@@ -84,7 +85,8 @@ HEADERS += ./../../libs/orbit.h \
     ./../../libs//moody/capsule/capsuleBase/CapsuleSerial.h \
     ./../../libs//moody/capsule/capsuleBase/CapsuleOpenMP.h \
     ./../../libs//moody/capsule/capsuleBase/CapsuleCUDA.h \
-    ./../../libs//moody/capsule/capsuleBase/CapsuleBase.h
+    ./../../libs//moody/capsule/capsuleBase/CapsuleBase.h \
+    ../../libs/myDomMoody.h
 
 #unix:LIBS+=././../../libs/unix/libmb.a
 win32:LIBS+=././../../libs/win32/libmb.a
