@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     QList <ParticleStruct*> pList;
 
 
-    QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString epmDir = sett->value("general/epmDir", "./").toString();
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
     double time0 = sett->value("general/time0", 2455201.0).toDouble();
-    int saveMoody = sett->value("general/saveMoody", 0).toInt();
+    int useMoody = sett->value("general/useMoody", 0).toInt();
     int trMass = sett->value("general/trMass", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
 
@@ -146,6 +146,9 @@ int main(int argc, char *argv[])
     miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
+
+    //moody
+    QString part_file = sett->value("moody/part_file").toString();
 
     //SPICE
     QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
@@ -191,7 +194,7 @@ int main(int argc, char *argv[])
 
     //QList <ParticleStruct*> pmList;
 
-    if(readCFG(confFile, pList))
+    if(readParticles(part_file, pList))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -618,10 +621,16 @@ int main(int argc, char *argv[])
 
     //saveCFG("pnbRes/test.xml", pList);
 
-    if(saveMoody)
+    if(useMoody)
     {
         coefX = AUKM*1000;
         coefXD = 1000*AUKM/SECINDAY;
+
+        cfgStruct cfgPar;
+
+        cfgPar.gConst = 6.67428E-11;
+
+        saveCFG(part_file, cfgPar);
 
         for(i=0;i<pList.size();i++)
         {
@@ -636,9 +645,9 @@ int main(int argc, char *argv[])
             pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
         }
 
-        saveCFG("pnbRes/particles.xml", pList);
+        saveParticles(part_file, pList);
     }
-    else saveCFG("pnbRes/particles.xml", pList);
+    //else saveCFG(part_file, pList);
 
     //experiment->exportParticlesToXMLFile("test.xml");
     return 0;//a.exec();

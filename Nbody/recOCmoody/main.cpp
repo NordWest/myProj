@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
     double tmin, pmin;
     SpiceInt       handle;
     SpiceInt       bodyNum;
-    SpiceDouble sgT0, sgT1;
+    SpiceDouble sgT0, sgT1, et;
     SpiceDouble *segmentState;
     SpiceDouble *segmentEphs;
     SpiceBoolean found;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
     corr = new SpiceChar[256];
 
 
-    double timei, time0, time1, dt, et;
+    double timei, time0, time1, dt;
     int nstep;
     double X[3], V[3];
     double XS0[3], VS0[3];
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
     //QString inFileName(argv[1]);
 
     qDebug() << QString("part_file: %1\n").arg(part_file);
-    if(readCFG(part_file, pList))
+    if(readParticles(part_file, pList))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -198,14 +198,21 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
 
     sJD = QString("%1 JD TDB").arg(time0, 15, 'f',7);
     str2et_c(sJD.toAscii().data(), &sgT0);
+    qDebug() << QString("sJD0: %1\tet0: %2\n").arg(sJD).arg(sgT0, 15, 'f',7);
+
     sJD = QString("%1 JD TDB").arg(time1, 15, 'f',7);
     str2et_c(sJD.toAscii().data(), &sgT1);
+    qDebug() << QString("sJD1: %1\tet1: %2\n").arg(sJD).arg(sgT1, 15, 'f',7);
 
     QDir().remove("./smp.spk");
     spkopn_c("./smp.spk", "SMP", 0, &handle);
 
     int szObj = pList.size();
     qDebug() << QString("szObj: %1\n").arg(szObj);
+
+    double coefX, coefXD;
+    coefX = AUKM*1000;
+    coefXD = 1000*AUKM/SECINDAY;
 
     for(p=0; p<szObj; p++)
     {
@@ -273,18 +280,19 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
                 V[2] = mopIt.zd;// + VS0[2];
 
 
+
                 sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
                 str2et_c(sJD.toAscii().data(), &et);
                 segmentEphs[i] = et;
 
-                segmentState[i*6+0] = mopIt.x*AUKM;
-                segmentState[i*6+1] = mopIt.y*AUKM;
-                segmentState[i*6+2] = mopIt.z*AUKM;
-                segmentState[i*6+3] = mopIt.xd*AUKM;///SECINDAY;
-                segmentState[i*6+4] = mopIt.yd*AUKM;//SECINDAY;
-                segmentState[i*6+5] = mopIt.zd*AUKM;//SECINDAY;
+                segmentState[i*6+0] = mopIt.x/coefX;
+                segmentState[i*6+1] = mopIt.y/coefX;
+                segmentState[i*6+2] = mopIt.z/coefX;
+                segmentState[i*6+3] = mopIt.xd/coefXD;
+                segmentState[i*6+4] = mopIt.yd/coefXD;
+                segmentState[i*6+5] = mopIt.zd/coefXD;
 
-
+qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bodyNum).arg(timei).arg(segmentState[i*6+0]).arg(segmentState[i*6+1]).arg(segmentState[i*6+2]).arg(segmentState[i*6+3]).arg(segmentState[i*6+4]).arg(segmentState[i*6+5]);
 
                 /*if(*found==false)
                 {
@@ -321,9 +329,10 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     mpcStm.setDevice(&mpcFile);
 
+
     for(p=0; p<szObj; p++)
     {
-        objName = QString(pList[p]->name.data());
+
         bodyNum = body_num(pList[p]->name.data());
 
         if(bodyNum!=-1)continue;
@@ -334,8 +343,9 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
         //}
         //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
         qDebug() << QString("%1: %2\n").arg(pList[p]->name.data()).arg(bodyNum);
+        objName = QString("%1").arg(bodyNum);
 
-        for(i=0; i<nstep; i++)
+        for(i=1; i<nstep-1; i++)
         {
 //            mopSt = mopFile.readCyclingState();
 //            qDebug() << "mopSt:" << mopSt << "\n";
@@ -343,8 +353,8 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
             timei = time0+dt*i;
 
             sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
-            qDebug() << QString("sJD: %1\n").arg(sJD);
             str2et_c(sJD.toAscii().data(), &et);
+            //qDebug() << QString("sJD: %1\tet: %2\n").arg(sJD).arg(et, 15, 'f',7);
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "LT", "Earth", state, &lt );
             recrad_c(state, &range, &ra, &dec);

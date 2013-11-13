@@ -80,6 +80,8 @@
 #define XI1RAD 0.000001559
 #define XI1GRAD 0.000088889
 
+#define GKONST 6.67428E-11
+
 struct valacc
 {
 	double val;

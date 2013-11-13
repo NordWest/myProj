@@ -5,7 +5,13 @@
 
 #include <QDomDocument>
 
-int readCFG(QString fileName, QList <ParticleStruct*> &pList)
+struct cfgStruct
+{
+    double gConst;
+    int states, steps, stepSize;
+};
+
+int readParticles(QString fileName, QList <ParticleStruct*> &pList)
 {
     QString errorStr;
     int errorLine;
@@ -104,7 +110,9 @@ int readCFG(QString fileName, QList <ParticleStruct*> &pList)
     return 0;
 }
 
-int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
+
+
+int saveParticles(QString fileName, QList <ParticleStruct*> &pList)
 {
     QString errorStr;
     int errorLine;
@@ -278,6 +286,55 @@ int saveCFG(QString fileName, QList <ParticleStruct*> &pList)
          }
 
 //
+
+     QString xml = domDocument.toString();
+     //qDebug() << "xml:" << xml << "\n";
+
+     cfgStm << xml << "\n";
+     cfgStm << "</root>" << "\n";
+
+    cfgFile.close();
+}
+
+int saveCFG(QString fileName, cfgStruct& cfgPar)
+{
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    QString objName;
+    QDomDocument domDocument;
+    ParticleStruct *p;
+
+    QFile cfgFile(fileName);
+    cfgFile.open(QIODevice::ReadWrite | QFile::Truncate);
+    QTextStream cfgStm(&cfgFile);
+
+/*
+    if(!domDocument.setContent(&cfgFile)) {
+        qDebug() << "error setContent\n";
+        return 1;
+    }
+
+*/
+    domDocument.createElement("root");
+
+    cfgStm << "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root xsi:noNamespaceSchemaLocation = \"EnvironmentSet.xsd\" xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\">" << "\n";
+
+
+     std::string srep;
+     std::string irep;
+
+     QDomElement child, vector, rgb, partDom;// = root.firstChildElement("particle");
+    QDomText childText;
+
+    //partDom = domDocument.createElement("G");
+    child = domDocument.createElement("G");
+    childText = domDocument.createTextNode(QString("%1").arg(cfgPar.gConst, 20, 'e', 12));
+    child.appendChild(childText);
+    domDocument.appendChild(child);
+
+
+
 
      QString xml = domDocument.toString();
      //qDebug() << "xml:" << xml << "\n";
