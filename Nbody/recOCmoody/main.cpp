@@ -51,15 +51,15 @@ int getMopName(MopState *mState, MopItem &mItem, QString name)
 
 int body_num(QString pname)
 {
-    if(QString().compare(pname, "Mercury")==0) return 199;
-    if(QString().compare(pname, "Venus")==0) return 299;
-    if(QString().compare(pname, "Earth")==0) return 399;
-    if(QString().compare(pname, "Mars")==0) return 499;
-    if(QString().compare(pname, "Jupiter")==0) return 599;
-    if(QString().compare(pname, "Saturn")==0) return 699;
-    if(QString().compare(pname, "Uran")==0) return 799;
-    if(QString().compare(pname, "Neptune")==0) return 899;
-    if(QString().compare(pname, "Pluto")==0) return 999;
+    if(QString().compare(pname, "Mercury")==0) return 1;
+    if(QString().compare(pname, "Venus")==0) return 2;
+    if(QString().compare(pname, "Earth")==0) return 3;
+    if(QString().compare(pname, "Mars")==0) return 4;
+    if(QString().compare(pname, "Jupiter")==0) return 5;
+    if(QString().compare(pname, "Saturn")==0) return 6;
+    if(QString().compare(pname, "Uran")==0) return 7;
+    if(QString().compare(pname, "Neptune")==0) return 8;
+    if(QString().compare(pname, "Pluto")==0) return 9;
     if(QString().compare(pname, "Sun")==0) return 10;
 
 
@@ -211,28 +211,28 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
     qDebug() << QString("szObj: %1\n").arg(szObj);
 
     double coefX, coefXD;
-    coefX = AUKM*1000;
-    coefXD = 1000*AUKM/SECINDAY;
+    coefX = 1000;
+    coefXD = 1000;
 
     for(p=0; p<szObj; p++)
     {
         bodyNum = body_num(pList[p]->name.data());
 
-        if(bodyNum==-1)
-        {
+        if(bodyNum!=-1)continue;
+        //if(bodyNum==-1)
+        //{
             if(mCat.GetRecName((char*)pList[p]->name.data())) continue;
             bodyNum = 2000000 + mCat.record->getNum();
-        }
+        //}
         //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
         qDebug() << QString("%1: %2\n").arg(pList[p]->name.data()).arg(bodyNum);
 
         for(i=0; i<nstep; i++)
         {
-            mopSt = mopFile.readCyclingState();
-//            qDebug() << "mopSt:" << mopSt << "\n";
+            //            qDebug() << "mopSt:" << mopSt << "\n";
 //            sz = mopSt->getItemCount();
             timei = time0+dt*i;
-/*
+
             if(center) //helio to barycenter
             {
                 switch(bigType)
@@ -241,58 +241,84 @@ int main(int argc, char *argv[]) //recOCmoody res.mop
                 {
                     if(useEPM)
                     {
-                        status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
+                        status = calc_EPM(SUN_NUM, centr_num, (int)timei, timei-(int)timei, XS0, VS0);
                          if(!status)
                          {
                              qDebug() << QString("error EPM\n");
                              return 1;
                          }
                     }
-                    else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, sk);
+                    else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], timei, SUN_NUM, CENTER_BARY, sk);
                 }
                     break;
                 case 2:
                 {
-                    sJD = QString("%1 JD").arg(time, 15, 'f',7);
+                    sJD = QString("%1 JD").arg(timei, 15, 'f',7);
                     str2et_c(sJD.toAscii().data(), &et);
                     spkezr_c (  "sun", et, ref, "NONE", "ssb", state, &lt );
                     XS0[0] = state[0]/AUKM;
                     XS0[1] = state[1]/AUKM;
                     XS0[2] = state[2]/AUKM;
-                    VS0[0] = state[3]/AUKM;
-                    VS0[1] = state[4]/AUKM;
-                    VS0[2] = state[5]/AUKM;
+                    VS0[0] = state[3]/AUKM*SECINDAY;
+                    VS0[1] = state[4]/AUKM*SECINDAY;
+                    VS0[2] = state[5]/AUKM*SECINDAY;
                 }
                     break;
                 }
+
+                XS0[0] *= AUKM*1000.0;
+                XS0[1] *= AUKM*1000.0;
+                XS0[2] *= AUKM*1000.0;
+                VS0[0] *= AUKM*1000.0/SECINDAY;
+                VS0[1] *= AUKM*1000.0/SECINDAY;
+                VS0[2] *= AUKM*1000.0/SECINDAY;
             }
 
-            qDebug() << QString("Sun: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
-*/
-            if(getMopName(mopSt, mopIt, QString(pList[p]->name.data()))==-1)continue;
+            //qDebug() << QString("Sun: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0], 21, 'e',15).arg(XS0[1], 21, 'e',15).arg(XS0[2], 21, 'e',15).arg(VS0[0], 21, 'e',15).arg(VS0[1], 21, 'e',15).arg(VS0[2], 21, 'e',15);
 
-                X[0] = mopIt.x;// + XS0[0];
-                X[1] = mopIt.y;// + XS0[1];
-                X[2] = mopIt.z;// + XS0[2];
+            sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
+            str2et_c(sJD.toAscii().data(), &et);
+            segmentEphs[i] = et;
 
-                V[0] = mopIt.xd;// + VS0[0];
-                V[1] = mopIt.yd;// + VS0[1];
-                V[2] = mopIt.zd;// + VS0[2];
+            if(i==0)
+            {
+                X[0] = pList[p]->x + XS0[0];
+                X[1] = pList[p]->y + XS0[1];
+                X[2] = pList[p]->z + XS0[2];
+
+                V[0] = pList[p]->xd + VS0[0];
+                V[1] = pList[p]->yd + VS0[1];
+                V[2] = pList[p]->zd + VS0[2];
+            }
+            else
+            {
+
+
+                mopSt = mopFile.readCyclingState();
+
+                if(getMopName(mopSt, mopIt, QString(pList[p]->name.data()))==-1)continue;
+
+                X[0] = mopIt.x + XS0[0];
+                X[1] = mopIt.y + XS0[1];
+                X[2] = mopIt.z + XS0[2];
+
+                V[0] = mopIt.xd + VS0[0];
+                V[1] = mopIt.yd + VS0[1];
+                V[2] = mopIt.zd + VS0[2];
+            }
 
 
 
-                sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
-                str2et_c(sJD.toAscii().data(), &et);
-                segmentEphs[i] = et;
 
-                segmentState[i*6+0] = mopIt.x/coefX;
-                segmentState[i*6+1] = mopIt.y/coefX;
-                segmentState[i*6+2] = mopIt.z/coefX;
-                segmentState[i*6+3] = mopIt.xd/coefXD;
-                segmentState[i*6+4] = mopIt.yd/coefXD;
-                segmentState[i*6+5] = mopIt.zd/coefXD;
 
-qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bodyNum).arg(timei).arg(segmentState[i*6+0]).arg(segmentState[i*6+1]).arg(segmentState[i*6+2]).arg(segmentState[i*6+3]).arg(segmentState[i*6+4]).arg(segmentState[i*6+5]);
+                segmentState[i*6+0] = X[0]/coefX;
+                segmentState[i*6+1] = X[1]/coefX;
+                segmentState[i*6+2] = X[2]/coefX;
+                segmentState[i*6+3] = V[0]/coefXD;
+                segmentState[i*6+4] = V[1]/coefXD;
+                segmentState[i*6+5] = V[2]/coefXD;
+
+//qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(segmentState[i*6+0], 21, 'e',15).arg(segmentState[i*6+1], 21, 'e',15).arg(segmentState[i*6+2], 21, 'e',15).arg(segmentState[i*6+3], 21, 'e',15).arg(segmentState[i*6+4], 21, 'e',15).arg(segmentState[i*6+5], 21, 'e',15);
 
                 /*if(*found==false)
                 {
@@ -305,7 +331,7 @@ qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bo
 
         }
 
-        spkw13_c(handle, bodyNum, 0, "J2000", sgT0, sgT1, "SPK_STATES_13", 7, nstep, segmentState, segmentEphs);
+        spkw09_c(handle, bodyNum, 0, "J2000", sgT0, sgT1, "SPK_STATES_09", 9, nstep, segmentState, segmentEphs);
 
         //delete [] segmentState;
         //delete [] segmentEphs;
@@ -350,7 +376,7 @@ qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bo
 //            mopSt = mopFile.readCyclingState();
 //            qDebug() << "mopSt:" << mopSt << "\n";
 //            sz = mopSt->getItemCount();
-            timei = time0+dt*i;
+            timei = time0+dt*(i);
 
             sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
             str2et_c(sJD.toAscii().data(), &et);
@@ -358,6 +384,8 @@ qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bo
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "LT", "Earth", state, &lt );
             recrad_c(state, &range, &ra, &dec);
+
+            qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0]/AUKM, 21, 'e',15).arg(state[1]/AUKM, 21, 'e',15).arg(state[2]/AUKM, 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
 
             mrec.r = ra;// + dRa;
             mrec.d = dec;// + dDec;

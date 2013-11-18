@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
       #define                 FILE_SIZE 128
       #define                 WORD_SIZE  48
-      #define                 MAXPTS     9
+      #define                 MAXPTS     10
 
       /*
       Local variables
@@ -110,9 +110,13 @@ int main(int argc, char *argv[])
       obsy.getobsynumO(obsCode.toAscii().data());
 
       obsPos.initObservatory(obsFile.toAscii().data());
-      if(obsPos.initSPICE(bspName, lskName)) return 1;
-      obsPos.initSPK(spkName);
-      obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
+      //if(obsPos.initSPICE(bspName, lskName)) return 1;
+      //obsPos.initSPK(spkName);
+      //obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
+
+      furnsh_c ( bspName );
+      furnsh_c ( lskName );
+      furnsh_c ( spkName );
 
       furnsh_c ( "./codes_300ast.tf"  );
       //sprintf(leap,"%s", "./naif0010.tls");
@@ -138,8 +142,8 @@ int main(int argc, char *argv[])
 
       //sprintf(obs,"%s", "Earth");
 
-     utbeg = 2456010.5;
-     utend = 2456090.5;
+     utbeg = 2456005.5;
+     utend = 2456025.5;
 
      //utbeg = 2434000.5;
      //utend = 2434100.5;
