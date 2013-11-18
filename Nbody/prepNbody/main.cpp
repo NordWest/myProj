@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
-    double time0 = sett->value("general/time0", 2455201.0).toDouble();
+
     int useMoody = sett->value("general/useMoody", 0).toInt();
     int trMass = sett->value("general/trMass", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
@@ -141,6 +141,8 @@ int main(int argc, char *argv[])
 
     int bigType = sett->value("general/bigType", 0).toInt();
     int smlType = sett->value("general/smlType", 0).toInt();
+
+    double time0 = sett->value("time/time0", 2455201.0).toDouble();
 
     miriadeProcData.name = sett->value("miriadeProcData/name", "./mpeph.exe").toString();
     miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
