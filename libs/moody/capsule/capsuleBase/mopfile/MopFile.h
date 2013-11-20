@@ -232,6 +232,7 @@ public:
     void writeState(Particle *localSet, int environmentSetSize) {
         std::stringstream tmp;
         MopItem mi;
+        tmp.precision(10);
         tmp << environmentSetSize;
         for (int x(0);x<environmentSetSize;x++) {
             tmp << "|";

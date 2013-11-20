@@ -114,9 +114,9 @@ int main(int argc, char *argv[])
       //obsPos.initSPK(spkName);
       //obsPos.set_spice_parpam("Earth", obsCode, "sun", "J2000");
 
-      furnsh_c ( bspName );
-      furnsh_c ( lskName );
-      furnsh_c ( spkName );
+      furnsh_c ( bspName.toAscii().constData() );
+      furnsh_c ( lskName.toAscii().data() );
+      furnsh_c ( spkName.toAscii().data() );
 
       furnsh_c ( "./codes_300ast.tf"  );
       //sprintf(leap,"%s", "./naif0010.tls");

@@ -81,6 +81,9 @@ dele *nbody;
 //#define CENTER CENTER_BARY
 //#define SK SK_EKVATOR
 
+void writeState(QList <ParticleStruct*> pList);
+void makeParamIn(double time0, double time1, double dtime, double timestep);
+
 //int readCFG(QString fileName, QList<ParticleStruct *> &pList);
 //int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
 
@@ -109,6 +112,8 @@ int main(int argc, char *argv[])
     QString sJD;
 
     double dist, vel, jdUTC, jdTDB, jdTDT, et;
+    double time0, time1, dtime, timestep;
+    int nstep;
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
@@ -142,7 +147,10 @@ int main(int argc, char *argv[])
     int bigType = sett->value("general/bigType", 0).toInt();
     int smlType = sett->value("general/smlType", 0).toInt();
 
-    double time0 = sett->value("time/time0", 2455201.0).toDouble();
+    time0 = sett->value("time/time0", 2455201.0).toDouble();
+    dtime = sett->value("time/dtime", 0).toDouble();
+    nstep = sett->value("time/nstep", 0).toInt();
+    timestep = sett->value("time/timestep", 0).toDouble();
 
     miriadeProcData.name = sett->value("miriadeProcData/name", "./mpeph.exe").toString();
     miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
@@ -160,6 +168,11 @@ int main(int argc, char *argv[])
 
     int jday = (int)time0;
     double pday = time0 - jday;
+
+    time1 = time0+dtime*(nstep-1);
+
+    makeParamIn(time0, time1, dtime, timestep);
+
 
     nbody = new dele();
 
@@ -217,11 +230,11 @@ int main(int argc, char *argv[])
     X0 = new double[3];
     V0 = new double[3];
 
-    QFile bigFile("pnbRes/big.in");
+    QFile bigFile("mercury6/big.in");
     bigFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream bigStm(&bigFile);
 
-    QFile smlFile("pnbRes/small.in");
+    QFile smlFile("mercury6/small.in");
     smlFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream smlStm(&smlFile);
 
@@ -652,5 +665,54 @@ int main(int argc, char *argv[])
     //else saveCFG(part_file, pList);
 
     //experiment->exportParticlesToXMLFile("test.xml");
+
+
     return 0;//a.exec();
+}
+
+void makeParamIn(double time0, double time1, double dtime, double timestep)
+{
+    QFile cfgFile("mercury6/param.in");
+    cfgFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream cfgStm(&cfgFile);
+
+    cfgStm << ")O+_06 Integration parameters  (WARNING: Do not delete this line!!)\n";
+    cfgStm << ") Lines beginning with `)' are ignored.\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << ") Important integration parameters:\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << " algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = bs\n";
+    cfgStm << QString(" start time (days) = %1\n").arg(time0, 15, 'f', 8);
+    cfgStm << QString(" stop time (days) = %1\n").arg(time1, 15, 'f', 8);
+    cfgStm << QString(" output interval (days) = %1\n").arg(dtime, 15, 'f', 8);
+    cfgStm << QString(" timestep (days) = %1\n").arg(timestep, 15, 'f', 8);
+    cfgStm << " accuracy parameter=1.d-12\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << ") Integration options:\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << " stop integration after a close encounter = no\n";
+    cfgStm << " allow collisions to occur = no\n";
+    cfgStm << " include collisional fragmentation = no\n";
+    cfgStm << " express time in days or years = years\n";
+    cfgStm << " express time relative to integration start time = no\n";
+    cfgStm << " output precision = medium\n";
+    cfgStm << " < not used at present >\n";
+    cfgStm << " include relativity in integration= no\n";
+    cfgStm << " include user-defined force = no\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << ") These parameters do not need to be adjusted often:\n";
+    cfgStm << ")---------------------------------------------------------------------\n";
+    cfgStm << " ejection distance (AU)= 100\n";
+    cfgStm << " radius of central body (AU) = 0.005\n";
+    cfgStm << " central mass (solar) = 1.0\n";
+    cfgStm << " central J2 = 0\n";
+    cfgStm << " central J4 = 0\n";
+    cfgStm << " central J6 = 0\n";
+    cfgStm << " < not used at present >\n";
+    cfgStm << " < not used at present >\n";
+    cfgStm << " Hybrid integrator changeover (Hill radii) = 3.\n";
+    cfgStm << " number of timesteps between data dumps = 500\n";
+    cfgStm << " number of timesteps between periodic effects = 100\n";
+
+    cfgFile.close();
 }
