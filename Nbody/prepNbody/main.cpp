@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     int jday = (int)time0;
     double pday = time0 - jday;
 
-    time1 = time0+dtime*(nstep-1);
+    time1 = time0+dtime*nstep;
 
     makeParamIn(time0, time1, dtime, timestep);
 
@@ -415,7 +415,7 @@ int main(int argc, char *argv[])
 
             if(plaNum!=SUN_NUM)
             {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(1.0/pList[i]->mass);
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[0]->mass/pList[i]->mass);
                 bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
             }
 

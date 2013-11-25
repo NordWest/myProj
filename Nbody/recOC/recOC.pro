@@ -11,6 +11,7 @@ QT       -= gui
 TARGET = ~/bin/recOC
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
+QT += xml
 
 TEMPLATE = app
 

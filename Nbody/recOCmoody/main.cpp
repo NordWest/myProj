@@ -16,6 +16,7 @@ struct spkRecord;
 int getMopName(MopState *mState, MopItem &mItem, QString name);
 int body_num(QString pname);
 int prepSPK(int center, int sk);
+int spk2mpc();
 
 
 struct spkRecord
@@ -63,7 +64,7 @@ int body_num(QString pname)
     if(QString().compare(pname, "Mars")==0) return 4;
     if(QString().compare(pname, "Jupiter")==0) return 5;
     if(QString().compare(pname, "Saturn")==0) return 6;
-    if(QString().compare(pname, "Uran")==0) return 7;
+    if(QString().compare(pname, "Uranus")==0) return 7;
     if(QString().compare(pname, "Neptune")==0) return 8;
     if(QString().compare(pname, "Pluto")==0) return 9;
     if(QString().compare(pname, "Sun")==0) return 10;
@@ -90,6 +91,7 @@ int centr_num, status;
 QString jplFile, epmDir, obsFile, obsCode, mpcCatFile, colSep;
 int useEPM, bigType, smlType;
 QString part_file, mop_file;
+QString bspName, leapName;
 
 
 dele *nbody;
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) //recOCmoody
     QCoreApplication a(argc, argv);
 
     //Variables
-QString bspName, leapName;
+
 
     int i, j, sz, p;
     int sk, center;
@@ -117,26 +119,12 @@ QString bspName, leapName;
     QList <spkRecord *> spkList;
 
 
-
-
     QSettings *sett;
-
-
-
-
-
 
     /////////////////
 
-
-
-
-
     ref = new SpiceChar[256];
     corr = new SpiceChar[256];
-
-
-
 
     sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
@@ -224,19 +212,35 @@ QString bspName, leapName;
     szObj = pList.size();
     qDebug() << QString("szObj: %1\n").arg(szObj);
 ///
-    if(prepSPK(center, sk)) qDebug() << QString("error: prepSPK\n");
+    if(prepSPK(center, sk))
+    {
+        qDebug() << QString("error: prepSPK\n");
+        return 1;
+    }
+
+    if(spk2mpc())
+    {
+        qDebug() << QString("error: spk2mpc");
+        return 1;
+    }
 
 
+    return 0;//a.exec();
+}
 
-    double range, ra, dec;
+
+int spk2mpc()
+{
+    double range, ra, dec, timei;
+    int bodyNum, i, p;
 
     mpc mrec;
     double jdUTC;
     QFile mpcFile;
     QTextStream mpcStm;
     char *astr = new char[256];
-    QString objName;
-    //double state[6], lt;
+    QString objName, sJD;
+    double state[6], lt;
 
     furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
     furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
@@ -245,6 +249,8 @@ QString bspName, leapName;
     mpcFile.setFileName("./mpc.txt");
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     mpcStm.setDevice(&mpcFile);
+
+    int szObj = pList.size();
 
 
     for(p=0; p<szObj; p++)
@@ -304,9 +310,8 @@ QString bspName, leapName;
     }
 
     mpcFile.close();
-    return 0;//a.exec();
+    return 0;
 }
-
 
 
 int prepSPK(int center, int sk)
@@ -462,4 +467,5 @@ int prepSPK(int center, int sk)
     }
 
     spkcls_c(handle);
+    return 0;
 }

@@ -11,6 +11,7 @@
 //#include "./../libs/cspice/SpiceUsr.h"
 #include <SpiceUsr.h>
 #include "./../libs/observ.h"
+#include "./../../libs/myDomMoody.h"
 
 struct spkRecord
 {
@@ -35,12 +36,40 @@ struct spkRecord
     };
 };
 
+int body_num(QString pname)
+{
+    if(QString().compare(pname, "Mercury")==0) return 1;
+    if(QString().compare(pname, "Venus")==0) return 2;
+    if(QString().compare(pname, "Earth")==0) return 3;
+    if(QString().compare(pname, "Mars")==0) return 4;
+    if(QString().compare(pname, "Jupiter")==0) return 5;
+    if(QString().compare(pname, "Saturn")==0) return 6;
+    if(QString().compare(pname, "Uranus")==0) return 7;
+    if(QString().compare(pname, "Neptune")==0) return 8;
+    if(QString().compare(pname, "Pluto")==0) return 9;
+    if(QString().compare(pname, "Sun")==0) return 10;
+
+
+    return -1;
+}
+
+QString bspName, leapName;
+
+QList <ParticleStruct*> pList;
+mpccat mCat;
+SpiceDouble et;
+int initMpc;
+
+
+int spk2mpc(double time0, double dtime, int nstep);
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
 
+    double timei, time0, time1, dtime;
+    int nstep;
     QString tStr, name, sJD;
     QStringList dataSL, resSL, outerArguments;
     double time, jdUTC, jdTDB;
@@ -82,6 +111,7 @@ int main(int argc, char *argv[])
     QList <spkRecord *> spkList;
 
     observ obsPos;
+    QString part_file, mop_file;
 
     double muc2 = 9.8704e-9;
     double ct0, ct1, tau, et;
@@ -96,7 +126,7 @@ int main(int argc, char *argv[])
 
     procData miriadeProcData;
 
-    QSettings *sett = new QSettings("./pnb.ini", QSettings::IniFormat);
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString epmDir = sett->value("general/epmDir", "./").toString();
@@ -119,9 +149,19 @@ int main(int argc, char *argv[])
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
+    //moody
+    part_file = sett->value("moody/part_file").toString();
+    mop_file = sett->value("moody/mop_file").toString();
+
+    time0 = sett->value("time/time0", 0).toDouble();
+    dtime = sett->value("time/dtime", 0).toDouble();
+    nstep = sett->value("time/nstep", 0).toInt();
+
+    time1 = time0+dtime*nstep;
+
     //SPICE
-    QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
-    QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
+    bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
+    leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
     sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
     sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
 
@@ -146,11 +186,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(bigType==2)
-    {
+//    if(bigType==2)
+//    {
         furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
-    }
+//    }
 /*
     obsPos.init(obsFile, bspName, leapName);
     obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
@@ -158,8 +198,22 @@ int main(int argc, char *argv[])
     obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
     obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
-    mpccat mCat;
-    int initMpc = mCat.init(mpcCatFile.toAscii().data());
+    //mpccat mCat;
+    initMpc = mCat.init(mpcCatFile.toAscii().data());
+    if(initMpc)
+    {
+        qDebug() << QString("initMpc error\n");
+        return 1;
+    }
+
+    qDebug() << QString("part_file: %1\n").arg(part_file);
+    if(readParticles(part_file, pList))
+    {
+        qDebug() << QString("readCFG error\n");
+        return 1;
+    }
+
+
 
     QString inFileName(argv[1]);
     QFileInfo fi(inFileName);
@@ -427,7 +481,7 @@ int main(int argc, char *argv[])
 
             getStrTfromMJD(&strT, jd2mjd(time));
 
-            spkFileName = QString("%1/spks/%2_spk.txt").arg(fi.absolutePath()).arg(name);
+            spkFileName = QString("./spks/%2_spk.txt").arg(name);
             spkFile.setFileName(spkFileName);
             spkFile.open(QFile::WriteOnly | QFile::Append);
             spkStm.setDevice(&spkFile);
@@ -692,6 +746,7 @@ int main(int argc, char *argv[])
 
     mpcFile.close();
 
+//    exit(0);
 
 ////////////////////////////////sort SPK
     double tmin, pmin;
@@ -702,7 +757,7 @@ int main(int argc, char *argv[])
     SpiceDouble *segmentState;
     SpiceDouble *segmentEphs;
 
-
+    QDir().remove("./smp.spk");
 
     spkopn_c("./smp.spk", "SMP", 0, &handle);
 
@@ -803,5 +858,97 @@ int main(int argc, char *argv[])
     mpcFile.close();
     //spkFile.close();
 
+    if(spk2mpc(time0, dtime, nstep))
+    {
+        qDebug() << QString("error: spk2mpc");
+        return 1;
+    }
+
     return 0;//a.exec();
+}
+
+int spk2mpc(double time0, double dtime, int nstep)
+{
+    double range, ra, dec, timei;
+    int bodyNum, i, p;
+
+    mpc mrec;
+    double jdUTC;
+    QFile mpcFile;
+    QTextStream mpcStm;
+    char *astr = new char[256];
+    QString objName, sJD;
+    double state[6], lt;
+
+    furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
+    furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+    furnsh_c ( "./smp.spk"  );
+
+    mpcFile.setFileName("./mpc.txt");
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    mpcStm.setDevice(&mpcFile);
+
+    int szObj = pList.size();
+
+    qDebug() << QString("szObj %1\n").arg(szObj);
+
+    for(p=0; p<szObj; p++)
+    {
+
+
+        bodyNum = body_num(pList[p]->name.data());
+
+        if(bodyNum!=-1)continue;
+        //if(bodyNum==-1)
+        //{
+            if(mCat.GetRecName((char*)pList[p]->name.data())) continue;
+            bodyNum = 2000000 + mCat.record->getNum();
+        //}
+        //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
+        qDebug() << QString("%1: %2\n").arg(pList[p]->name.data()).arg(bodyNum);
+        objName = QString("%1").arg(bodyNum);
+
+        for(i=1; i<nstep-1; i++)
+        {
+//            mopSt = mopFile.readCyclingState();
+//            qDebug() << "mopSt:" << mopSt << "\n";
+//            sz = mopSt->getItemCount();
+            timei = time0+dtime*(i+0.5);
+
+            sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
+            str2et_c(sJD.toAscii().data(), &et);
+            //qDebug() << QString("sJD: %1\tet: %2\n").arg(sJD).arg(et, 15, 'f',7);
+
+            spkezr_c (  objName.toAscii().data(), et, "J2000", "LT", "Earth", state, &lt );
+            recrad_c(state, &range, &ra, &dec);
+
+            qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0]/AUKM, 21, 'e',15).arg(state[1]/AUKM, 21, 'e',15).arg(state[2]/AUKM, 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
+
+            mrec.r = ra;// + dRa;
+            mrec.d = dec;// + dDec;
+
+            //tstr = QString(utctim);
+            //jdUTC = mjd2jd(getMJDfromStrT(tstr));
+            TDB2UTC(timei, &jdUTC);
+            mrec.eJD = jdUTC;//obsPos.ctime.UTC();
+            //mrec.num = 1;
+
+            //qDebug() << QString("ut: %1\teJD: %2\n").arg(ut, 15, 'f', 7).arg(mrec.eJD, 15, 'f', 7);
+
+            if(!initMpc)mCat.record->getNumStr(mrec.head->Snum);
+            else mrec.head->set_Snum(1);
+
+            //strcpy(, mCat.record->getNumStr(>number);
+            mrec.tail->set_numOfObs("500");
+            mrec.toString(astr);
+
+            mpcStm << astr << "\n";
+
+        }
+
+
+    }
+
+    mpcFile.close();
+    return 0;
 }
