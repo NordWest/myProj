@@ -158,7 +158,10 @@ int main(int argc, char *argv[])
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
     //moody
-    QString part_file = sett->value("moody/part_file").toString();
+    QString cfg_file, part_file, mop_file;
+    cfg_file = sett->value("moody/cfg_file").toString();
+    part_file = sett->value("moody/part_file").toString();
+    mop_file = sett->value("moody/mop_file").toString();
 
     //SPICE
     QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
@@ -638,14 +641,18 @@ int main(int argc, char *argv[])
 
     if(useMoody)
     {
+
         coefX = AUKM*1000;
         coefXD = 1000*AUKM/SECINDAY;
 
         cfgStruct cfgPar;
 
         cfgPar.gConst = 6.67428E-11;
+        cfgPar.stepSize = timestep*86400;
+        cfgPar.steps = dtime/timestep;
+        cfgPar.states = nstep;
 
-        saveCFG(part_file, cfgPar);
+        saveCFG(cfg_file, cfgPar);
 
         for(i=0;i<pList.size();i++)
         {
@@ -661,6 +668,8 @@ int main(int argc, char *argv[])
         }
 
         saveParticles(part_file, pList);
+
+        QDir().remove(mop_file);
     }
     //else saveCFG(part_file, pList);
 

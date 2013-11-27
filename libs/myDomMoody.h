@@ -333,6 +333,21 @@ int saveCFG(QString fileName, cfgStruct& cfgPar)
     child.appendChild(childText);
     domDocument.appendChild(child);
 
+    child = domDocument.createElement("states");
+    childText = domDocument.createTextNode(QString("%1").arg(cfgPar.states));
+    child.appendChild(childText);
+    domDocument.appendChild(child);
+
+    child = domDocument.createElement("steps");
+    childText = domDocument.createTextNode(QString("%1").arg(cfgPar.steps));
+    child.appendChild(childText);
+    domDocument.appendChild(child);
+
+    child = domDocument.createElement("stepSize");
+    childText = domDocument.createTextNode(QString("%1").arg(cfgPar.stepSize));
+    child.appendChild(childText);
+    domDocument.appendChild(child);
+
 
 
 
@@ -340,6 +355,8 @@ int saveCFG(QString fileName, cfgStruct& cfgPar)
      //qDebug() << "xml:" << xml << "\n";
 
      cfgStm << xml << "\n";
+     cfgStm << "<version>1.0</version>" << "\n";
+     cfgStm << "<MopName>moodyProject</MopName>" << "\n";
      cfgStm << "</root>" << "\n";
 
     cfgFile.close();
