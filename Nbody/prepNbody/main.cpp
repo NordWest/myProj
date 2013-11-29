@@ -125,6 +125,8 @@ int main(int argc, char *argv[])
     ref = new SpiceChar[256];
     corr = new SpiceChar[256];
 
+    QString cfg_file, part_file, mop_file;
+
     QList <ParticleStruct*> pList;
 
 
@@ -135,7 +137,8 @@ int main(int argc, char *argv[])
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
-    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+    QString confFile = sett->value("general/confFile", "particles.xml").toString();
+    QString moodyDir = QDir(sett->value("general/moodyDir", "./testProject").toString()).absolutePath();
 
     int useMoody = sett->value("general/useMoody", 0).toInt();
     int trMass = sett->value("general/trMass", 0).toInt();
@@ -157,11 +160,13 @@ int main(int argc, char *argv[])
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
-    //moody
-    QString cfg_file, part_file, mop_file;
+    /*moody
     cfg_file = sett->value("moody/cfg_file").toString();
     part_file = sett->value("moody/part_file").toString();
-    mop_file = sett->value("moody/mop_file").toString();
+    mop_file = sett->value("moody/mop_file").toString();*/
+    cfg_file = QString("%1/cfg/cfg.xml").arg(moodyDir);
+    part_file = QString("%1/particles/particles.xml").arg(moodyDir);
+    mop_file = QString("%1/result/moodyProject.mop").arg(moodyDir);
 
     //SPICE
     QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
@@ -212,7 +217,7 @@ int main(int argc, char *argv[])
 
     //QList <ParticleStruct*> pmList;
 
-    if(readParticles(part_file, pList))
+    if(readParticles(confFile, pList))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -418,7 +423,7 @@ int main(int argc, char *argv[])
 
             if(plaNum!=SUN_NUM)
             {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[0]->mass/pList[i]->mass);
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(SUN_MASS_KG/pList[i]->mass);
                 bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
             }
 
@@ -664,7 +669,7 @@ int main(int argc, char *argv[])
             pList.at(i)->yd *= coefXD;
             pList.at(i)->zd *= coefXD;
 
-            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+
         }
 
         saveParticles(part_file, pList);

@@ -67,7 +67,7 @@ int body_num(QString pname)
     if(QString().compare(pname, "Uranus")==0) return 7;
     if(QString().compare(pname, "Neptune")==0) return 8;
     if(QString().compare(pname, "Pluto")==0) return 9;
-    if(QString().compare(pname, "Sun")==0) return 10;
+    if((QString().compare(pname, "Sun")==0)||(QString().compare(pname, "Sol")==0)) return 10;
 
 
     return -1;
@@ -313,6 +313,20 @@ int spk2mpc()
     return 0;
 }
 
+int clearSPKdir(QString dName)
+{
+    QDir spkDir(dName);
+    QStringList filters, filesE;
+    filters << "*.*";
+
+    filesE = spkDir.entryList(filters);
+    for(int i=0; i<filesE.size(); i++)
+    {
+        spkDir.remove(filesE.at(i));
+    }
+    return 0;
+}
+
 
 int prepSPK(int center, int sk)
 {
@@ -328,7 +342,38 @@ int prepSPK(int center, int sk)
 
     MopState *mopSt;
     MopItem mopIt;
+/*
+    QFile mopFile(mop_file.toAscii().data());
+    mopFile.open(QFile::ReadOnly);
+    QTextStream mopStm(&mopFile);
 
+    QStringList stateList;
+    QString mopStr, name;
+
+    QString spkFileName;
+    QFile spkFile;
+    QTextStream spkStm;
+
+    clearSPKdir("./moodyProject/result/spk");
+
+    mopStr = mopStm.readAll();
+    stateList = mopStr.split("\$");
+
+    for(p=0; p<szObj; p++)
+    {
+        name = pList[p]->name.data();
+        spkFileName = QString("./moodyProject/result/spk/%1_spk.txt").arg(name);
+        spkFile.setFileName(spkFileName);
+        spkFile.open(QFile::WriteOnly | QFile::Append);
+        spkStm.setDevice(&spkFile);
+        qDebug() << QString("name: %1\n").arg(spkFileName);
+
+        for(i=0; i<nstep; i++)
+        {
+            timei = time0+dtime*(i+1);
+        }
+    }
+  */
     MopFile mopFile;
     mopFile.setFilename(mop_file.toAscii().data());
     mopFile.resetFile();
@@ -340,11 +385,16 @@ int prepSPK(int center, int sk)
     QDir().remove("./smp.spk");
     spkopn_c("./smp.spk", "SMP", 0, &handle);
 
+    QFile mRecFile("./moodyProject/result/rec.txt");
+    mRecFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream mRecStm(&mRecFile);
+
     coefX = 1000;
     coefXD = 1000;
 
     for(p=0; p<szObj; p++)
     {
+        mopFile.resetFile();
         bodyNum = body_num(pList[p]->name.data());
 
         if(bodyNum!=-1)continue;
@@ -423,7 +473,7 @@ int prepSPK(int center, int sk)
             {
 
 
-                mopSt = mopFile.readCyclingState();
+                mopSt = mopFile.readState();
 
                 if(getMopName(mopSt, mopIt, QString(pList[p]->name.data()))==-1)continue;
 
@@ -437,7 +487,7 @@ int prepSPK(int center, int sk)
             }
 
 
-
+            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(pList[p]->name.data()).arg(timei, 15, 'f',7).arg(X[0]/1000.0/AUKM, 21, 'e',15).arg(X[1]/1000.0/AUKM, 21, 'e',15).arg(X[2]/1000.0/AUKM, 21, 'e',15).arg(V[0]/1000.0/AUKM*SECINDAY, 21, 'e',15).arg(V[1]/1000.0/AUKM*SECINDAY, 21, 'e',15).arg(V[2]/1000.0/AUKM*SECINDAY, 21, 'e',15);
 
 
                 segmentState[i*6+0] = X[0]/coefX;
@@ -467,5 +517,6 @@ int prepSPK(int center, int sk)
     }
 
     spkcls_c(handle);
+    mRecFile.close();
     return 0;
 }
