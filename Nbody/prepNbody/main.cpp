@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     double *X, *V;
     double *X0, *V0;
     QVector <double*> xVect, vVect;
+    double Xsun[3], Vsun[3];
 
     QStringList outerArguments, resSL;
     QProcess outerProcess;
@@ -423,8 +424,17 @@ int main(int argc, char *argv[])
 
             if(plaNum!=SUN_NUM)
             {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(SUN_MASS_KG/pList[i]->mass);
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[i]->mass/SUN_MASS_KG);
                 bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+            }
+            else
+            {
+                Xsun[0] = X[0];
+                Xsun[1] = X[1];
+                Xsun[2] = X[2];
+                Vsun[0] = V[0];
+                Vsun[1] = V[1];
+                Vsun[2] = V[2];
             }
 
         }
@@ -593,6 +603,16 @@ int main(int argc, char *argv[])
 
                     orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
                     orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
+
+                    if(!center)
+                    {
+                        X[0] += Xsun[0];
+                        X[1] += Xsun[1];
+                        X[2] += Xsun[2];
+                        V[0] += Vsun[0];
+                        V[1] += Vsun[1];
+                        V[2] += Vsun[2];
+                    }
 
                     isObj = 1;
                     break;
