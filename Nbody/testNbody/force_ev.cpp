@@ -1,14 +1,15 @@
-#include "./../libs/stdafx.h"
+//#include "./../libs/stdafx.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "rada.h"
 //#include "mymatrix.h"
-#include "./../libs/dele.h"
-#include "./../libs/calc_epm.h"
+#include "./../../libs/dele.h"
+#include "./../../libs/calc_epm.h"
 //#include "DynArr.h"
-#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include <omp.h>
 
 
 //  #define k2 6.672590000e-8
@@ -26,21 +27,126 @@
   //extern double *mass;
   int iterNum;
 
-  extern QList <ParticleStruct*> iList;
-  extern QList <ParticleStruct*> jList;
+  //extern ParticleStruct* sun;
+  extern QList <ParticleStruct*> pList;
+  //extern QList <ParticleStruct*> jList;
 
  extern dele *nbody;
  // extern int nofzbody;
 
-  double dist(double X0[], double X1[])
-  {
-      return(sqrt(pow(X1[0] - X0[0], 2) + pow(X1[1] - X0[1], 2) + pow(X1[2] - X0[2], 2)));
-  }
+double dist(double X0[], double X1[])
+{
+  return(sqrt(pow(X1[0] - X0[0], 2) + pow(X1[1] - X0[1], 2) + pow(X1[2] - X0[2], 2)));
+}
+/*
+double psR(ParticleStruct* par)
+{
+  return(sqrt(par->x*par->x + par->y*par->y + par->z*par->z));
+}
+
+double psDist(ParticleStruct* par0, ParticleStruct* par1)
+{
+    return(sqrt(pow(par1->x - par0->x, 2.0) + pow(par1->y - par0->y, 2.0) + pow(par1->z - par0->z, 2.0)));
+}
+  */
 
     void force_N(double X[], double V[], double F[]);
     int force_PPN(double X[], double V[], double F[]);
     void force_GN(double X[], double V[], double F[]);
 
+    void Everhardt::force(double X[], double V[], double TS, double F[])
+    {
+            int i, j, N, komp, teloi, teloj;
+            double Rij, Rik, Rjk;
+            int iNum = nofzbody;
+            int Ni = nofzbody*3;
+            int jNum = iNum;//eparam->NV;
+            int Nj = Ni;//eparam->NV*3;
+            double Ri, Rj, *D, res0, res1;
+
+    //        double beta = 1.0;
+    //        double gamma = 1.0;
+            iterNum = 0;
+
+            force_GN(X, V, F);
+          //force_N(X, V, F);
+          //if(force_PPN(X, V, F)) printf("warn iterate overflow\n\n");
+          //else printf("iterateNum %d\n\n", iterNum);
+
+
+    }
+
+    //GELIOCENTR
+      void force_GN(double X[], double V[], double F[])
+      {
+          int i, komp, teloi, teloj;
+          double res1, res0;
+
+          int iNum = pList.size();//nofzbody-1;
+          int Ni = iNum*3;
+          //int jNum = jList.size();//eparam->NV;
+          //int Nj = jNum*3;//eparam->NV*3;
+
+          //teloi=-1;
+
+          //#pragma omp parallel for
+          for(teloi=0; teloi<iNum; teloi++)
+          {
+              int i=teloi*3;
+              double Ri = norm(&X[i]);// dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+              //Ri = psR(iList[teloi]);//norm(&X[i]);
+
+              if(Ri>(eparam->vout))
+              {
+                  printf("WARN!!!! V OUT!!!!\n");
+                  printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+                  exit(1);
+              }
+
+              double massI = 0.0;
+              if(pList[teloi]->identity==Advisor::ordinary) massI=pList[teloi]->mass;
+                  //#pragma omp for
+                  for(komp=0; komp<3; komp++)
+                  {
+                          res0 = res1 = 0.0;
+                          //#pragma omp parallel for reduction(+:res0)
+                          for(teloj=0; teloj<iNum; teloj++)
+                          {
+                             int j=teloj*3;
+                             if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
+                             {
+                                double Rij = dist(&X[i], &X[j]);
+                                //Rj = dist(teloj, 0, X);
+                                double Rj = norm(&X[j]);
+
+
+                                if(Rij<eparam->col)
+                                {
+
+                                    printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                    printf("Rij= %f\n", Rij);
+                                    printf("WARN!!!! CRASH!!!!\n");
+                                    exit(1);
+                                }
+
+
+
+                                res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                             }
+
+                          }
+
+                          res1 = -((1.0 + pow(massI, -1.0))*X[i+komp])/(pow(Ri, 3));
+
+
+                          F[i+komp] = ka*ka*(res0+res1);
+
+                      }
+                  //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
+          }
+      }
+/*
     void Everhardt::force(double X[], double V[], double TS, double F[])
     {
         int i, j , komp;
@@ -63,7 +169,7 @@
         };
         int pla[10] = {
                 SUN_NUM, MERCURY_NUM, VENUS_NUM, EARTH_NUM, MARS_NUM, JUPITER_NUM, SATURN_NUM, URANUS_NUM, NEPTUNE_NUM, PLUTO_NUM
-        };*/
+        };/
 
         mu0 = 1.0;
 

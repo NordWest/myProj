@@ -129,6 +129,7 @@ int main(int argc, char *argv[])
     QString cfg_file, part_file, mop_file;
 
     QList <ParticleStruct*> pList;
+    //QList <ParticleStruct*> pmList;
 
 
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
@@ -216,7 +217,7 @@ int main(int argc, char *argv[])
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
 
-    //QList <ParticleStruct*> pmList;
+
 
     if(readParticles(confFile, pList))
     {
@@ -420,11 +421,11 @@ int main(int argc, char *argv[])
             pList[i]->xd = coefXD*V[0];
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
-            //if(si) pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
 
             if(plaNum!=SUN_NUM)
             {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[i]->mass/SUN_MASS_KG);
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(1.0/pList[i]->mass);
                 bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
             }
             else
@@ -662,7 +663,7 @@ int main(int argc, char *argv[])
     bigFile.close();
     smlFile.close();
 
-    //saveCFG("pnbRes/test.xml", pList);
+    saveParticles("./test.xml", pList);
 
     if(useMoody)
     {
@@ -689,6 +690,7 @@ int main(int argc, char *argv[])
             pList.at(i)->yd *= coefXD;
             pList.at(i)->zd *= coefXD;
 
+            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
 
         }
 

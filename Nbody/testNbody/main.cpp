@@ -1,20 +1,20 @@
 #include <QtCore/QCoreApplication>
 //#include <QApplication>
 
-#include "./../libs/dele.h"
-//#include "./../libs/orbcat.h"
-//#include "./../libs/observ.h"
-//#include "./../libs/dele.h"
-//#include "./../libs/orbit.h"
-//#include "./../libs/skyarea.h"
-#include "./../libs/astro.h"
-#include "./../libs/comfunc.h"
+#include "./../../libs/dele.h"
+//#include "./../../libs/orbcat.h"
+//#include "./../../libs/observ.h"
+//#include "./../../libs/dele.h"
+//#include "./../../libs/orbit.h"
+//#include "./../../libs/skyarea.h"
+#include "./../../libs/astro.h"
+#include "./../../libs/comfunc.h"
 #include "./rada.h"
-#include "./../libs/redStat.h"
-#include "./../libs/mpcs.h"
-#include "./../libs/mpccat.h"
+#include "./../../libs/redStat.h"
+#include "./../../libs/mpcs.h"
+#include "./../../libs/mpccat.h"
 
-#include "./../libs/calc_epm.h"
+#include "./../../libs/calc_epm.h"
 
 #include <QDebug>
 #include <QSettings>
@@ -33,13 +33,13 @@
 
 #define OMPLIB
 
-#include "./../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
-#include "./../libs/moody/moody.h"
-#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
-#include "./../libs/moody/capsule/Capsule.h"
-#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
+#include "./../../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
+#include "./../../libs/moody/moody.h"
+#include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../../libs/moody/capsule/Capsule.h"
+#include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
 
-#include "./../libs/myDomMoody.h"
+#include "./../../libs/myDomMoody.h"
 
 //int readCFG(QString fileName, QList<ParticleStruct *> &pList);
 //int saveCFG(QString fileName, QList<ParticleStruct *> &pList);
@@ -91,8 +91,8 @@ int centr_num;
 int useEPM;
 //double *mass;
 QList <ParticleStruct*> pList;
-QList <ParticleStruct*> iList;
-QList <ParticleStruct*> jList;
+//QList <ParticleStruct*> iList;
+//QList <ParticleStruct*> jList;
 
 void CM_int(double *CM, double X[], double V[])
 {
@@ -254,6 +254,8 @@ int main(int argc, char *argv[])
     QProcess outerProcess;
     procData miriadeProcData;
 
+    QList <ParticleStruct*> iniList;
+
 
     Everhardt *solSys;
 
@@ -274,15 +276,18 @@ int main(int argc, char *argv[])
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
-    QString confFile = sett->value("general/confFile", "testMajor.xml").toString();
+    QString confFile = "./test.xml";//sett->value("general/confFile", "testMajor.xml").toString();
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     //int useConfMasses = sett->value("general/useConfMasses", 0).toInt();
-    int useMoody = sett->value("general/useMoody", 0).toInt();
-    t0 = sett->value("general/time0", 0).toDouble();
-    dt = sett->value("general/dt", 1).toDouble();
-    nstep = sett->value("general/nstep", 1).toDouble();
+    int useMoody = 0;//sett->value("general/useMoody", 0).toInt();
+
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
     int obrat = !sett->value("general/obrat", 1).toInt();
+
+    //time
+    t0 = sett->value("time/time0", 0).toDouble();
+    dt = sett->value("time/dtime", 1).toDouble();
+    nstep = sett->value("time/nstep", 1).toDouble();
 
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
 
@@ -324,7 +329,7 @@ int main(int argc, char *argv[])
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
 
-    if(readCFG(confFile, pList))
+    if(readParticles(confFile, iniList))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -350,14 +355,15 @@ int main(int argc, char *argv[])
     //int iNum, jNum;
     //nofzbody=0;
     //nofjbody=0;
-    for(i=0; i<pList.size(); i++)
+    for(i=0; i<iniList.size(); i++)
     {
-        if(pList.at(i)->identity==Advisor::collapsorFixed) continue;
-        if(pList.at(i)->identity==Advisor::ordinary) iList << pList.at(i);
-        if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
+        if(iniList.at(i)->identity==Advisor::collapsorFixed) continue;
+        pList << iniList.at(i);
+        //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
+        //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }
 
-    nofzbody=iList.size();
+    nofzbody=pList.size();
 
     //mass = new double[nofzbody];
     //if(CENTER) nofzbody-=1;
@@ -464,19 +470,19 @@ int main(int argc, char *argv[])
         //mass[i] = pList[i]->mass;
 //        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
 
-        name = QString(iList[i]->name.data());
+        name = QString(pList[i]->name.data());
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
         //if(plaNum==10) continue;
         p = i*3;
 
-        X[p] = iList[i]->x;
-        X[p+1] = iList[i]->y;
-        X[p+2] = iList[i]->z;
-        V[p] = iList[i]->xd;
-        V[p+1] = iList[i]->yd;
-        V[p+2] = iList[i]->zd;
+        X[p] = pList[i]->x;
+        X[p+1] = pList[i]->y;
+        X[p+2] = pList[i]->z;
+        V[p] = pList[i]->xd;
+        V[p+1] = pList[i]->yd;
+        V[p+2] = pList[i]->zd;
 
 
 /*
@@ -713,6 +719,12 @@ int main(int argc, char *argv[])
         V[i+2] = -V[i+2];
     }
 */
+
+    //QTime timeStart = QTime.currentTime();
+    //qDebug() << QString("Time start: %1\n").arg(timeStart.toString("hh:mm:ss.zzz"));
+    QTime timeElapsed;// = QTime.currentTime();
+    timeElapsed.start();
+
     do
     {
         for(nt=0; nt<nstep; nt++)
@@ -784,10 +796,10 @@ int main(int argc, char *argv[])
             ssb[2] /= muis;
 */
             //i=0;
-            for(teloi=0; teloi<iList.size(); teloi++)
+            for(teloi=0; teloi<pList.size(); teloi++)
             {
                 //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
-                name = QString(iList[teloi]->name.data());
+                name = QString(pList[teloi]->name.data());
                 if(useEPM) plaNum = epm_planet_num(name);
                 else plaNum = planet_num(name.toAscii().data());
     /*
@@ -1129,6 +1141,7 @@ int main(int argc, char *argv[])
 
     }while(1);
 
+    qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
 
     resFileBig.close();
