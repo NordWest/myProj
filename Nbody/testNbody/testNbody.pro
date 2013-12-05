@@ -49,7 +49,7 @@ SOURCES += main.cpp \
     ./../../libs/calc_epm.cpp \
     ./../../libs/time_a.cpp
 
-HEADERS += ../libs/orbit.h \
+HEADERS += ../../libs/orbit.h \
     ./../../libs/orbcat.h \
     ./../../libs/observatory.h \
     ./../../libs/observ.h \
