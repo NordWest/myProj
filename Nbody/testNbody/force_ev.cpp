@@ -80,7 +80,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
       void force_GN(double X[], double V[], double F[])
       {
           int i, komp, teloi, teloj;
-          double res1, res0;
+          //double res1, res0;
 
           int iNum = pList.size();//nofzbody-1;
           int Ni = iNum*3;
@@ -105,11 +105,12 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
 
               double massI = 0.0;
               if(pList[teloi]->identity==Advisor::ordinary) massI=pList[teloi]->mass;
-                  //#pragma omp for
+                  #pragma omp parallel for
                   for(komp=0; komp<3; komp++)
                   {
+                      double res0, res1;
                           res0 = res1 = 0.0;
-                          //#pragma omp parallel for reduction(+:res0)
+                          #pragma omp parallel for reduction(+:res0)
                           for(teloj=0; teloj<iNum; teloj++)
                           {
                              int j=teloj*3;
