@@ -110,7 +110,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
                   {
                       double res0, res1;
                           res0 = res1 = 0.0;
- //                         #pragma omp parallel for reduction(+:res0)
+                         #pragma omp parallel for reduction(+:res0)
                           for(teloj=0; teloj<iNum; teloj++)
                           {
                              int j=teloj*3;
