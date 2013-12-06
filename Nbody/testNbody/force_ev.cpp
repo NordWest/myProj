@@ -79,7 +79,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
     //GELIOCENTR
       void force_GN(double X[], double V[], double F[])
       {
-          int i, komp, teloi, teloj;
+//          int teloi, teloj;
           //double res1, res0;
 
           int iNum = pList.size();//nofzbody-1;
@@ -89,8 +89,8 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
 
           //teloi=-1;
 
-          //#pragma omp parallel for
-          for(teloi=0; teloi<iNum; teloi++)
+          #pragma omp parallel for
+          for(int teloi=0; teloi<iNum; teloi++)
           {
               int i=teloi*3;
               double Ri = norm(&X[i]);// dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
@@ -106,12 +106,12 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
               double massI = 0.0;
               if(pList[teloi]->identity==Advisor::ordinary) massI=pList[teloi]->mass;
 //                  #pragma omp parallel for
-                  for(komp=0; komp<3; komp++)
+                  for(int komp=0; komp<3; komp++)
                   {
                       double res0, res1;
                           res0 = res1 = 0.0;
-                         #pragma omp parallel for reduction(+:res0)
-                          for(teloj=0; teloj<iNum; teloj++)
+//                         #pragma omp parallel for reduction(+:res0)
+                          for(int teloj=0; teloj<iNum; teloj++)
                           {
                              int j=teloj*3;
                              if(teloi!=teloj&&pList[teloj]->identity==Advisor::ordinary)
