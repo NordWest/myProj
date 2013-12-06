@@ -75,7 +75,6 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
 
 
     }
-
     //GELIOCENTR
       void force_GN(double X[], double V[], double F[])
       {
@@ -88,8 +87,9 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
           //int Nj = jNum*3;//eparam->NV*3;
 
           //teloi=-1;
-
+#ifdef OMPLIB
           #pragma omp parallel for
+#endif
           for(int teloi=0; teloi<iNum; teloi++)
           {
               int i=teloi*3;
@@ -147,6 +147,8 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
                   //printf("force: %e %e %e\n\n", F[i], F[i+1], F[i+2]);
           }
       }
+
+
 /*
     void Everhardt::force(double X[], double V[], double TS, double F[])
     {

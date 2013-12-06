@@ -30,8 +30,8 @@
 #include <shrUtils.h>
 #include <shrQATest.h>
 */
-
-#define OMPLIB
+#define SERIAL
+//#define OMPLIB
 
 #include "./../../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
 #include "./../../libs/moody/moody.h"
