@@ -69,3 +69,4 @@ protected:
 	double SS;
 	int rada_maker(double *, double *, double);
 };
+
