@@ -220,7 +220,7 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
     normP = normR;
     normQ = norm(X);
 
-    ct1 = 0.0;
+    ct1 = normP;
 
 
     do
@@ -258,7 +258,7 @@ int observ::det_vect_radec(double *stateRV, double *ra, double *dec, double *ran
 //        qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
         //qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
 
-    }while((fabs(ct1-ct0)/fabs(ct1))>1e-8);
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
 
 //    tau = ct1/CAU;
 

@@ -509,7 +509,7 @@ int main(int argc, char *argv[])
                 if(!initMpc) mCat.GetRecName(name.toAscii().data());
 
 
-                obsPos.setUTC(time);
+                obsPos.setTDB(time);
                 obsPos.det_observ();
 
                 qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.pos[0], 18, 'g', 9).arg(obsPos.pos[1], 18, 'g', 9).arg(obsPos.pos[2], 18, 'g', 9).arg(obsPos.vel[0], 18, 'g', 9).arg(obsPos.vel[1], 18, 'g', 9).arg(obsPos.vel[2], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
