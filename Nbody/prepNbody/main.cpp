@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
     int useMoody = sett->value("general/useMoody", 0).toInt();
     int trMass = sett->value("general/trMass", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
+    int si = sett->value("general/si", 0).toInt();
 
     SK = sett->value("general/sk", 0).toInt();
     CENTER = sett->value("general/center", 0).toInt();
@@ -274,6 +275,8 @@ int main(int argc, char *argv[])
         qDebug() << QString("mass %1: %2 - %3\n").arg(i).arg(mass[i]).arg(gmass[i]);
     }
 */
+
+
     double coefX, coefXD;
     coefX = coefXD = 1.0;
     int isObj;
@@ -421,7 +424,7 @@ int main(int argc, char *argv[])
             pList[i]->xd = coefXD*V[0];
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
-            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+            if(si) pList[i]->mass = pList[i]->mass/pList[0]->mass;
 
             if(plaNum!=SUN_NUM)
             {

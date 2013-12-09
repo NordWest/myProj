@@ -125,6 +125,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
                                 {
 
                                     printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                                    printf("teloi= %s\tteloj= %s\n", pList[teloi]->name.c_str(), pList[teloj]->name.c_str());
                                     printf("Rij= %f\n", Rij);
                                     printf("WARN!!!! CRASH!!!!\n");
                                     exit(1);
