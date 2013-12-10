@@ -139,7 +139,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
 
                           }
 
-                          res1 = -((1.0 + pow(massI, -1.0))*X[i+komp])/(pow(Ri, 3));
+                          res1 = -((1.0 + massI)*X[i+komp])/(pow(Ri, 3));
 
 
                           F[i+komp] = ka*ka*(res0+res1);

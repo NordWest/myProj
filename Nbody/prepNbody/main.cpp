@@ -143,9 +143,8 @@ int main(int argc, char *argv[])
     QString moodyDir = QDir(sett->value("general/moodyDir", "./testProject").toString()).absolutePath();
 
     int useMoody = sett->value("general/useMoody", 0).toInt();
-    int trMass = sett->value("general/trMass", 0).toInt();
+    int massType = sett->value("general/massType", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
-    int si = sett->value("general/si", 0).toInt();
 
     SK = sett->value("general/sk", 0).toInt();
     CENTER = sett->value("general/center", 0).toInt();
@@ -228,9 +227,17 @@ int main(int argc, char *argv[])
 
     sz = pList.size();
     qDebug() << QString("pList: %1\n").arg(sz);
-    if(trMass)
+    double iniMassSun = pList.at(0)->mass;
+    switch(massType)
     {
-        for(i=0;i<sz;i++) pList.at(i)->mass = SUN_MASS_KG/pList.at(i)->mass;
+    case 0:         //Msol
+        break;
+    case 1:         //Msol^-1
+        for(i=0;i<sz;i++) pList.at(i)->mass = 1.0/iniMassSun;
+        break;
+    case 2:         //GM or kg
+        for(i=0;i<sz;i++) pList.at(i)->mass = pList.at(i)->mass/iniMassSun;
+        break;
     }
     //Capsule *experiment = new Capsule;
 
@@ -424,11 +431,11 @@ int main(int argc, char *argv[])
             pList[i]->xd = coefXD*V[0];
             pList[i]->yd = coefXD*V[1];
             pList[i]->zd = coefXD*V[2];
-            if(si) pList[i]->mass = pList[i]->mass/pList[0]->mass;
+            //if(si) pList[i]->mass = pList[0]->mass/pList[i]->mass;
 
             if(plaNum!=SUN_NUM)
             {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(1.0/pList[i]->mass);
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[i]->mass);
                 bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
             }
             else
@@ -653,14 +660,6 @@ int main(int argc, char *argv[])
         }
 
 
-
-
-
-        //Particle *p = new Particle;
-
-        //p->fillFromExistingParticleStruct(*pList[i]);
-
-        //experiment->addToPopulationSet(*p);
     }
 
     bigFile.close();
@@ -693,7 +692,7 @@ int main(int argc, char *argv[])
             pList.at(i)->yd *= coefXD;
             pList.at(i)->zd *= coefXD;
 
-            pList[i]->mass = SUN_MASS_KG/pList[i]->mass;
+            pList[i]->mass = SUN_MASS_KG*pList[i]->mass;
 
         }
 
@@ -701,10 +700,6 @@ int main(int argc, char *argv[])
 
         QDir().remove(mop_file);
     }
-    //else saveCFG(part_file, pList);
-
-    //experiment->exportParticlesToXMLFile("test.xml");
-
 
     return 0;//a.exec();
 }
