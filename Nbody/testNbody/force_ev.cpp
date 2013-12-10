@@ -133,7 +133,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
 
 
 
-                                res0 += pow(pList[teloj]->mass, -1.0)*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+                                res0 += pList[teloj]->mass*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
 
                              }
 
