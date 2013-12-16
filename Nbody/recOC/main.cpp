@@ -59,6 +59,7 @@ QList <ParticleStruct*> pList;
 mpccat mCat;
 SpiceDouble et;
 int initMpc;
+observ obsPos;
 
 
 int spk2mpc(double time0, double dtime, int nstep);
@@ -110,7 +111,7 @@ int main(int argc, char *argv[])
     spkRecord *spkRec;
     QList <spkRecord *> spkList;
 
-    observ obsPos;
+
     QString part_file, mop_file;
 
     double muc2 = 9.8704e-9;
@@ -387,56 +388,8 @@ int main(int argc, char *argv[])
             }
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
-/*
 
 
-
-            outerArguments.clear();
-
-            outerArguments << QString("-name=earth");
-            outerArguments << QString("-type=planet");
-            outerArguments << QString("-teph=1");
-            outerArguments << QString("-observer=@sun");
-            outerArguments << QString("-ep=%1").arg(sJD);
-            //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
-            outerArguments << "-tcoor=2";
-            outerArguments << "-rplane=1";
-
-            qDebug() << outerArguments.join(" ") << "\n";
-
-            outerProcess.setWorkingDirectory(miriadeProcData.folder);
-            outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-            outerProcess.setReadChannel(QProcess::StandardOutput);
-
-            outerProcess.start(miriadeProcData.name, outerArguments);
-
-            if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-            {
-                qDebug() << "\nmiriadeProc finish error\n";
-                break;
-            }
-
-            QTextStream ethStream(outerProcess.readAllStandardOutput());
-
-            while (!ethStream.atEnd())
-            {
-                objDataStr = ethStream.readLine();
-                qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                if(objDataStr.size()<1) continue;
-                if(objDataStr.at(0)=='#') continue;
-
-                resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                if(resSL.size()<8) continue;
-                isObj = 1;
-                XE0[0] = resSL.at(1).toDouble();
-                XE0[1] = resSL.at(2).toDouble();
-                XE0[2] = resSL.at(3).toDouble();
-                VE0[0] = resSL.at(5).toDouble();
-                VE0[1] = resSL.at(6).toDouble();
-                VE0[2] = resSL.at(7).toDouble();
-                break;
-            }
-*/
             switch(bigType)
             {
             case 0:
@@ -493,16 +446,7 @@ int main(int argc, char *argv[])
             spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(time, 15, 'f', 8).arg(X1[0], 18, 'g', 12).arg(X1[1], 18, 'g', 12).arg(X1[2], 18, 'g', 12).arg(V1[0]/SECINDAY, 18, 'g', 12).arg(V1[1]/SECINDAY, 18, 'g', 12).arg(V1[2]/SECINDAY, 18, 'g', 12);
 
             spkFile.close();
-/*
-            T = (time - 2451545)/36525.0;
-            mPrec = 4612.4362*T;
-            nPrec = 2004.3109*T;
 
-            qDebug() << QString("T: %3\nm: %1\tn:%2\n").arg(mPrec).arg(nPrec).arg(T);
-*/
-
-
-            //qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 
             if(detMPC)
             {
@@ -521,210 +465,20 @@ int main(int argc, char *argv[])
                 state[4] = V[1];
                 state[5] = V[2];
                 obsPos.det_vect_radec(state, &ra, &de, &range);
-                /*
-                //nbody->detState(&state[0], &state[1], &state[2], &state[3], &state[4], &state[5], time, GEOCENTR_NUM, CENTER_SUN, SK);
-                qDebug() << QString("Geocentr pos %1: %2\t%3\t%4\n").arg(time, 13, 'f', 4).arg(state[0], 18, 'g', 9).arg(state[1], 18, 'g', 9).arg(state[2], 18, 'g', 9);
-                detRDnumGC(&ra, &de, X[0], X[1], X[2], state[0], state[1], state[2], 0, 0, 0);
-*/
+
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;
 
                 mrec.eJD = obsPos.ctime.UTC();
-                //mrec.eJD = time;
                 mrec.num = 1;
                 mCat.record->getNumStr(mrec.head->Snum);
-                //strcpy(, mCat.record->getNumStr(>number);
                 mrec.tail->set_numOfObs(obsCode.toAscii().data());
                 mrec.toString(astr);
 
                 mpcStm << astr << "\n";
             }
 
-//P
-            /*
-            R[0] = X[0] - XE0[0];
-            R[1] = X[1] - XE0[1];
-            R[2] = X[2] - XE0[2];
 
-            normR = norm(R);
-
-            normE = norm(XE0);
-            normP = normR;
-            normQ = norm(X);
-
-            ct1 = 0.0;
-
-
-            do
-            {
-
-                ct0 = ct1;
-                tau = ct1/CAU;
-
-                Qb[0] = X1[0] - V1[0]*tau;
-                Qb[1] = X1[1] - V1[1]*tau;
-                Qb[2] = X1[2] - V1[2]*tau;
-
-                P[0] = Qb[0] - XEB0[0];
-                P[1] = Qb[1] - XEB0[1];
-                P[2] = Qb[2] - XEB0[2];
-
-                normP = norm(P);
-
-                Q[0] = Qb[0] - XS0[0];
-                Q[1] = Qb[1] - XS0[1];
-                Q[2] = Qb[2] - XS0[2];
-
-                normQ = norm(Q);
-
-                qDebug() << QString("normQ: %1\n").arg(normQ);
-                qDebug() << QString("normP: %1\n").arg(normP);
-                qDebug() << QString("normE: %1\n").arg(normE);
-
-                ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
-                //qDebug() << QString("ct1: %1\n").arg(ct1, 10);
-
-                qDebug() << QString("dct1: %1\n").arg(fabs(ct1-ct0)/fabs(ct1), 10);
-                qDebug() << QString("tau: %1\n").arg(tau*86400.0);//qDebug() << QString("normQ: %1\n").arg(normQ);
-
-            }while((fabs(ct1-ct0)/fabs(ct1))>1e-10);
-
-            tau = ct1/CAU;
-*/
-
-
-            /*
-
-            s[0] = R[0]/normR;
-            s[1] = R[1]/normR;
-            s[2] = R[2]/normR;
-
-            sV[0] = V[0] - VE0[0];
-            sV[1] = V[1] - VE0[1];
-            sV[2] = V[2] - VE0[2];
-
-            Vmul3(v0, s, sV);
-            Vmul3(v1, s, v0);
-
-            sA[0] = s[0] + v1[0]*(1.0/CAU);
-            sA[1] = s[1] + v1[1]*(1.0/CAU);
-            sA[2] = s[2] + v1[2]*(1.0/CAU);
-
-            norm_sA = norm(sA);
-/*
-            sA[0] = sA[0]/norm_sA;
-            sA[1] = sA[1]/norm_sA;
-            sA[2] = sA[2]/norm_sA;
-*/
-/*
-            if(detMPC)
-            {
-                outerArguments.clear();
-
-                outerArguments << QString("-name=%1").arg(name.simplified().toLower());
-
-                outerArguments << QString("-ep=%1").arg(sJD);
-                //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
-
-        /*        if(useEPM) plaNum = epm_planet_num(name);
-                else plaNum = planet_num(name.toAscii().data());
-                if(plaNum!=-1) outerArguments << "-type=planet";
-                else /
-
-                outerArguments << "-type=aster";
-
-                outerArguments << QString("-observer=%1").arg(obsCode);
-                //outerArguments << QString("-observer=@sun");
-                outerArguments << "-tcoor=2";
-                outerArguments << "-rplane=1";
-
-                qDebug() << outerArguments.join(" ") << "\n";
-
-                outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                outerProcess.start(miriadeProcData.name, outerArguments);
-
-                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                {
-                    qDebug() << "\nmiriadeProc finish error\n";
-                    break;
-                }
-
-                QTextStream objStream(outerProcess.readAllStandardOutput());
-
-                while (!objStream.atEnd())
-                {
-                    objDataStr = objStream.readLine();
-                    //qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                    if(objDataStr.size()<1) continue;
-                    if(objDataStr.at(0)=='#') continue;
-
-                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                    if(resSL.size()<8) continue;
-                    isObj = 1;
-                    X0[0] = resSL.at(1).toDouble();
-                    X0[1] = resSL.at(2).toDouble();
-                    X0[2] = resSL.at(3).toDouble();
-    /*
-                    V0[0] = resSL.at(5).toDouble();
-                    V0[1] = resSL.at(6).toDouble();
-                    V0[2] = resSL.at(7).toDouble();
-    /
-                    V0[0] = resSL.at(8).toDouble();
-                    V0[1] = resSL.at(9).toDouble();
-                    V0[2] = resSL.at(10).toDouble();
-
-                    X0[0] += XE0[0];
-                    X0[1] += XE0[1];
-                    X0[2] += XE0[2];
-                    V0[0] += VE0[0];
-                    V0[1] += VE0[1];
-                    V0[2] += VE0[2];
-                    //
-
-
-                    qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
-
-                    if(initMpc) break;
-                    if(mCat.GetRecName(name.simplified().toAscii().data())) break;
-    /*
-                    dT = (time-2451545.0)/36525.0;
-                    m = mas_to_grad((4612.4362*dT)*1000);
-                    n = mas_to_grad((2004.3109*dT)*1000);
-    /
-                    //detRDnumGC(&ra, &de, Q[0], Q[1], Q[2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                    //detRDnumGC(&ra, &de, P[0], P[1], P[2], 0, 0, 0, 0, 0, 0);
-                    //rdsys(&ra, &de, P[0], P[1], P[2]);
-
-                    //dDec = (1.0/CAU)*(VE0[2]/cos(de) - VE0[0]*sin(de)*cos(ra) - VE0[1]*sin(de)*sin(ra) - VE0[2]*(pow(sin(de), 2.0)/cos(de)));
-                    //dRa = (1.0/CAU)*(-VE0[0]*sin(ra) + VE0[1]*cos(ra))/cos(de);
-
-                    state[0] = X[0];
-                    state[1] = X[1];
-                    state[2] = X[2];
-                    state[3] = V[0];
-                    state[4] = V[1];
-                    state[5] = V[2];
-                    obsPos.det_vect_radec(state, &ra, &de, &range);
-
-                    mrec.r = ra;// + dRa;
-                    mrec.d = de;// + dDec;
-
-                    mrec.eJD = jdTDB;
-                    //mrec.eJD = time;
-                    mrec.num = 1;
-                    mCat.record->getNumStr(mrec.head->Snum);
-                    //strcpy(, mCat.record->getNumStr(>number);
-                    mrec.tail->set_numOfObs(obsCode.toAscii().data());
-                    mrec.toString(astr);
-
-                    mpcStm << astr << "\n";
-
-                    break;
-                }
-            }*/
         }
 
         dX[0] = X[0] - X0[0];
@@ -920,6 +674,18 @@ int spk2mpc(double time0, double dtime, int nstep)
             //qDebug() << QString("sJD: %1\tet: %2\n").arg(sJD).arg(et, 15, 'f',7);
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "LT", "Earth", state, &lt );
+
+//topocentr
+            obsPos.setTDB(timei);
+            obsPos.det_observ();
+            state[0] -= obsPos.obs->state[0]*AUKM;
+            state[1] -= obsPos.obs->state[1]*AUKM;
+            state[2] -= obsPos.obs->state[2]*AUKM;
+            state[3] -= obsPos.obs->state[3]*AUKM*SECINDAY;
+            state[4] -= obsPos.obs->state[4]*AUKM*SECINDAY;
+            state[5] -= obsPos.obs->state[5]*AUKM*SECINDAY;
+///////////
+
             recrad_c(state, &range, &ra, &dec);
 
             qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0]/AUKM, 21, 'e',15).arg(state[1]/AUKM, 21, 'e',15).arg(state[2]/AUKM, 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
@@ -939,7 +705,7 @@ int spk2mpc(double time0, double dtime, int nstep)
             else mrec.head->set_Snum(1);
 
             //strcpy(, mCat.record->getNumStr(>number);
-            mrec.tail->set_numOfObs("500");
+            mrec.tail->set_numOfObs(obsPos.getObsCode().toAscii().data());
             mrec.toString(astr);
 
             mpcStm << astr << "\n";

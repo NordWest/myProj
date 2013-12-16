@@ -137,40 +137,20 @@ void LF_int(double *LF, double X[], double V[])
 //#define SK SK_EKVATOR
 
 //void saveResults(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm, QTextStream &deStm)
-void saveResults(double t0, double *X, double *V, int pos, QString name, QTextStream &resStm)
+void saveResults(double t0, double *X, double *V, int pos, QString name, QTextStream &resStm, int dtneg)
 {
 //    double* r = new double[3];
 //    double* v = new double[3];
     double Ri, Vi;
 
+    double vmul = pow(-1, dtneg);
+
     Ri = sqrt(X[pos+0]*X[pos+0] + X[pos+1]*X[pos+1] + X[pos+2]*X[pos+2]);
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
-    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(name).arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(V[pos], 22, 'e', 15).arg(V[pos+1], 22, 'e', 15).arg(V[pos+2], 22, 'e', 15);
+    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(name).arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(V[pos]*vmul, 22, 'e', 15).arg(V[pos+1]*vmul, 22, 'e', 15).arg(V[pos+2]*vmul, 22, 'e', 15);
 
     resStm.flush();
-/*
-    if(X0==NULL||V0==NULL) return;
 
-
-    r[0] = X[pos]-X0[pos];
-    r[1] = X[pos+1]-X0[pos+1];
-    r[2] = X[pos+2]-X0[pos+2];
-
-    Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-
-    v[0] = V[pos]-V0[pos];
-    v[1] = V[pos+1]-V0[pos+1];
-    v[2] = V[pos+2]-V0[pos+2];
-
-    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 15, 'f', 7).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);
-
-    dxStm.flush();
-
-    Ri = sqrt(X0[pos+0]*X0[pos+0] + X0[pos+1]*X0[pos+1] + X0[pos+2]*r[pos+2]);
-
-    deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[pos], 18, 'g', 9).arg(X0[pos+1], 18, 'g', 9).arg(X0[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V0[pos], 18, 'g', 9).arg(V0[pos+1], 18, 'g', 9).arg(V0[pos+2], 18, 'g', 9).arg(name);
-
-    deStm.flush();*/
 }
 
 //void saveResultsM(double t0, double *X, double *V, double *X0, double *V0, int pos, QString name, QTextStream &resStm, QTextStream &dxStm)
@@ -184,19 +164,7 @@ void saveResultsM(double t0, double *X, double *V, int pos, QString name, QTextS
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
     resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[pos], 18, 'g', 9).arg(X[pos+1], 18, 'g', 9).arg(X[pos+2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(V[pos], 18, 'g', 9).arg(V[pos+1], 18, 'g', 9).arg(V[pos+2], 18, 'f', 9).arg(name);
 
-/*
 
-    r[0] = X[pos]-X0[pos];
-    r[1] = X[pos+1]-X0[pos+1];
-    r[2] = X[pos+2]-X0[pos+2];
-
-    Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-
-    v[0] = V[pos]-V0[pos];
-    v[1] = V[pos+1]-V0[pos+1];
-    v[2] = V[pos+2]-V0[pos+2];
-
-    dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 18, 'g', 9).arg(r[1], 18, 'g', 9).arg(r[2], 18, 'g', 9).arg(Ri, 18, 'g', 9).arg(v[0], 18, 'g', 9).arg(v[1], 18, 'g', 9).arg(v[2], 18, 'g', 9).arg(name);*/
 }
 
 int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData);
@@ -464,6 +432,9 @@ int main(int argc, char *argv[])
     }
 
 
+    double vmul;
+    vmul = pow(-1, dt<0);
+
    // p = 0;
     for(i=0; i<nofzbody; i++)
     {
@@ -480,9 +451,9 @@ int main(int argc, char *argv[])
         X[p] = pList[i]->x;
         X[p+1] = pList[i]->y;
         X[p+2] = pList[i]->z;
-        V[p] = pList[i]->xd;
-        V[p+1] = pList[i]->yd;
-        V[p+2] = pList[i]->zd;
+        V[p] = pList[i]->xd*vmul;
+        V[p+1] = pList[i]->yd*vmul;
+        V[p+2] = pList[i]->zd*vmul;
 
 
 /*
@@ -521,7 +492,7 @@ int main(int argc, char *argv[])
                 nbody->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
             }*/
 
-            saveResults(t0, X, V, p, name, resStmBig);
+            saveResults(t0, X, V, p, name, resStmBig, dt<0);
 
             //if(useMoody) saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
 
@@ -529,7 +500,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            saveResults(t0, X, V, p, name, resStmSmall);
+            saveResults(t0, X, V, p, name, resStmSmall, dt<0);
     /*
             if(initMpc) break;
             mCat.GetRecName(name.simplified().toAscii().data());
@@ -710,15 +681,9 @@ int main(int argc, char *argv[])
     TF = t0;
     int jday;
     double pday;
-/*
-    for(teloi=0; teloi<nofzbody; teloi++)
-    {
-        i=teloi*3;
-        V[i] = -V[i];
-        V[i+1] = -V[i+1];
-        V[i+2] = -V[i+2];
-    }
-*/
+
+
+
 
     //QTime timeStart = QTime.currentTime();
     //qDebug() << QString("Time start: %1\n").arg(timeStart.toString("hh:mm:ss.zzz"));
@@ -830,8 +795,8 @@ int main(int argc, char *argv[])
 
                 if(plaNum!=-1)
                 {
-                    saveResults(TF, X, V, i, name, resStmBig);
-                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig);
+                    saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
 /*
                     if(useEPM)
                     {
@@ -927,8 +892,8 @@ int main(int argc, char *argv[])
                 else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                 {
 
-                    saveResults(TF, X, V, i, name, resStmSmall);
-                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall);
+                    saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
 /*
                     if(initMpc) break;
                     if(mCat.GetRecName(name.simplified().toAscii().data())) break;

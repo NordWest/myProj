@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
     case 0:         //Msol
         break;
     case 1:         //Msol^-1
-        for(i=0;i<sz;i++) pList.at(i)->mass = 1.0/iniMassSun;
+        for(i=0;i<sz;i++) pList.at(i)->mass = 1.0/pList.at(i)->mass;
         break;
     case 2:         //GM or kg
         for(i=0;i<sz;i++) pList.at(i)->mass = pList.at(i)->mass/iniMassSun;
