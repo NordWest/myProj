@@ -45,7 +45,8 @@ SOURCES += main.cpp \
     ./../../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
     ../../libs/ephem_util.cpp \
     ../../libs/calc_epm.cpp \
-    ../../libs/time_a.cpp
+    ../../libs/time_a.cpp \
+    ../../libs/mpcfile.cpp
 
 HEADERS += ../../libs/orbit.h \
     ../../libs/orbcat.h \
@@ -83,7 +84,8 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/ephem_util.h \
     ../../libs/myDomMoody.h \
     ../../libs/calc_epm.h \
-    ../../libs/time_a.h
+    ../../libs/time_a.h \
+    ../../libs/mpcfile.h
 
 unix:LIBS+=./../../libs/unix/cspice.a
 LIBS += -lmb -lastro

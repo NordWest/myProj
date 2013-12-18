@@ -85,7 +85,7 @@ void fbStream::defSizeBuf()
 	}
 }
 
-int fbStream::init(char* fname)
+int fbStream:: init(char* fname)
 {
 	strncpy(this->fn, fname, FNLEN);
 	this->get_file_size();
@@ -172,7 +172,7 @@ int fbStream::Get(char *str, char *name, int kpos, int szstr, int startpos)
     static const basic_string <char>::size_type npos = -1;
         char *tname = new char[256];
         int res;
-        sprintf(tname, " %s ", name);
+        sprintf(tname, "%s", name);
         spos = buf->find(tname, startpos);
         res = 1;
     if(spos!=npos)

@@ -1,14 +1,15 @@
 #include <QCoreApplication>
 
 #include "./../../libs/dele.h"
-#include "./../libs/orbit.h"
+#include "./../../libs/orbit.h"
 #include <astro.h>
-#include "./../libs/comfunc.h"
-#include "./../libs/redStat.h"
-#include "./../libs/mpcs.h"
-#include "./../libs/ephem_util.h"
-#include "./../libs/calc_epm.h"
-#include "./../libs/mpccat.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/redStat.h"
+#include "./../../libs/mpcs.h"
+#include "./../../libs/ephem_util.h"
+#include "./../../libs/calc_epm.h"
+#include "./../../libs/mpccat.h"
+#include "./../../libs/mpcfile.h"
 #include <SpiceUsr.h>
 
 #define OMPLIB
@@ -17,10 +18,10 @@
 #include <iomanip>
 
 #include "./../../libs/moody/moody.h"
-#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
-#include "./../libs/moody/capsule/Capsule.h"
-#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
-#include "./../libs/myDomMoody.h"
+#include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../../libs/moody/capsule/Capsule.h"
+#include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
+#include "./../../libs/myDomMoody.h"
 
 static QDataStream* clog0 = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -65,6 +66,22 @@ void customMessageHandler(QtMsgType type, const char* msg)
 int nofzbody;
 dele *nbody;
 
+struct eqObjRec
+{
+    QString objName;
+    eqFile* eq_list;
+    void sortByTime()
+    {
+        eq_list->sortOClist();
+    }
+    int size()
+    {
+        return eq_list->ocList.size();
+    }
+
+};
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -74,7 +91,7 @@ int main(int argc, char *argv[])
 
     int SK, CENTER;
     procData miriadeProcData;
-    int i, sz;
+    int i, j, sz;
     dele *nbody;
     int centr_num;
     int status;
@@ -160,17 +177,105 @@ int main(int argc, char *argv[])
 
     time1 = time0+dtime*nstep;
 
+    if(mCat.init(mpcCatFile.toAscii().data())) return 1;
+
 //Init MPC file
 
     QString iniMpcFile = QString(argv[1]);
 
-    QFile mpcFile(iniMpcFile);
-    mpcFile.open(QFile::ReadOnly);
-    QTextStream mpcStm(&mpcFile);
+    mpcFile mpc_file;
+    mpcFile mpcfTemp;
+    mpcRec* mpc_rec;
+    mpcObjRec* moRec;
+    mpc_file.init(iniMpcFile);
 
-    while(!mpcStm.atEnd())
+    mpcObjList m_objList;
+
+    int mNum = mpc_file.size();//.nstr();
+    double tBeg, tEnd;
+    tBeg = 9999999999;
+    tEnd = 0;
+    QString tStr, objName;
+    char *tname = new char[256];
+
+    for(i=0;i<mNum;i++)
     {
+        mpc_rec = mpc_file.at(i);
+        mpc_rec->getMpNumber(tStr);
 
+        tStr.replace(" ", "0");
+
+
+        sprintf(tname, "%s", tStr.toAscii().data());
+
+        //qDebug() << QString("tStr: %1\n").arg(tname);
+
+        if(mCat.GetProvDest(tname))
+        {
+            mpc_rec->getProvDest(tStr);
+            if(mCat.GetProvDest(tStr.toAscii().data())) exit(1);
+        }
+        objName = QString(mCat.record->name);
+
+        mCat.GetRecName(objName.toAscii().data());
+
+        //qDebug() << QString("mCat record: %1").arg(mCat.str);
+
+        m_objList.addMpcRec(mpc_rec, objName);
+        //if(mpc_rec->mjd()<tBeg)
+    }
+
+    m_objList.sortByTime();
+    QList <eqObjRec*> eqo_list;
+    eqObjRec* eqoTemp;
+    eqFile* eqTemp;
+    ocRec *ocTemp;
+    int nObj;
+
+    for(i=0; i<m_objList.size(); i++)
+    {
+        moRec = m_objList.obj_list.at(i);
+        qDebug() << QString("%1: %2").arg(moRec->objName).arg(moRec->size());
+
+        nObj=1;
+        for(j=0;j<eqo_list.size(); j++)
+        {
+            if(QString().compare(moRec->objName, eqo_list.at(j)->objName)==0)
+            {
+                nObj=0;
+                eqoTemp = eqo_list.at(j);
+                break;
+            }
+        }
+        if(nObj)
+        {
+            eqoTemp = new eqObjRec;
+            eqoTemp->objName = moRec->objName;
+            eqoTemp->eq_list = new eqFile;
+            eqo_list << eqoTemp;
+        }
+
+        for(j=0; j<moRec->size(); j++)
+        {
+
+            qDebug() << moRec->mpc_list.at(j)->toStr();
+           ocTemp = new ocRec;
+           ocTemp->catName = "MPCCAT";
+           ocTemp->name = eqoTemp->objName;
+           ocTemp->ra = moRec->mpc_list.at(j)->ra();
+           ocTemp->de = moRec->mpc_list.at(j)->dec();
+           ocTemp->mag0 = moRec->mpc_list.at(j)->magn();
+           ocTemp->MJday = moRec->mpc_list.at(j)->mjd();
+
+           eqoTemp->eq_list->ocList << ocTemp;
+        }
+        for(j=0; j<eqoTemp->eq_list->ocList.size(); j++)
+        {
+            eqoTemp->eq_list->ocList.at(j)->rec2s_short(&tStr);
+            qDebug() << tStr;
+        }
+
+        qDebug() << "\n";
     }
 
 
@@ -178,5 +283,5 @@ int main(int argc, char *argv[])
 
 
     
-    return a.exec();
+    return 0;//a.exec();
 }

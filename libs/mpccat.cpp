@@ -375,7 +375,7 @@ mpccat::~mpccat()
 
 int mpccat::init(char *fname)
 {
-	this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
+    this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
         return(fbStreamStr::init(fname));
 }
 
@@ -397,6 +397,26 @@ int mpccat::GetRecName(char *name)
 	if(this->GetStr(name)) return 1;
 	this->s2rec(this->str);
 	
+    return 0;
+}
+
+int mpccat::GetRecNum(char *name)
+{
+    char *brname = new char[256];
+    sprintf(brname, "(%s)", name);
+    if(this->Get(str, brname, MPCCAT_NUM_KPOS, MPCCAT_LEN, MPCCAT_NAME_BPOS)) return 1;
+    this->s2rec(this->str);
+
+    return 0;
+}
+
+int mpccat::GetProvDest(char *name)
+{
+    //printf("name: %s", name);
+    if(this->Get(str, name, MPCCAT_PDEST_KPOS, MPCCAT_LEN, MPCCAT_NAME_BPOS)) return 1;
+    //printf("str: %s\n", str);
+    this->s2rec(this->str);
+
     return 0;
 }
 

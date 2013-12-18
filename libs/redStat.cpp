@@ -357,6 +357,14 @@ void ocRec::rec2sBase(QString *recStr)
     recStr->insert(0, QString("%1 %2 ").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5) + getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6) + " " + deg_to_hms(ra, " ", 3) + " "+ deg_to_damas(de, " ", 2) + " " + QString("%1 %2").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')));//+QString(" %1").arg(catName, 8));
 }
 
+void ocRec::rec2s_short(QString *recStr)
+{
+    recStr->clear();
+//	DATEOBS dobs = getDATEOBSfromMJD(MJday);
+
+    recStr->insert(0, QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5).arg(getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6)).arg(deg_to_hms(ra, " ", 3)).arg(deg_to_damas(de, " ", 2)).arg(mag0, 6, 'f', 3, QLatin1Char(' ')));
+}
+
 void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, QString objType)
 {
     //int obj_num;

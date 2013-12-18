@@ -61,4 +61,76 @@ public:
     int save();
 };
 
+
+
+struct mpcObjRec
+{
+    QString objName;
+    QList <mpcRec*> mpc_list;
+    void sortByTime()
+    {
+        double tMin;
+        int pMin;
+        int mNum = mpc_list.size();
+
+        for(int i=0; i<mNum-1;i++)
+        {
+            tMin = mpc_list.at(i)->mjd();
+            pMin = i;
+            for(int j=i+1; j<mNum; j++)
+            {
+                if(mpc_list.at(j)->mjd()<tMin)
+                {
+                    tMin = mpc_list.at(j)->mjd();
+                    pMin = j;
+                }
+            }
+            if(pMin!=i) mpc_list.swap(i, pMin);
+        }
+    }
+    int size()
+    {
+        return mpc_list.size();
+    }
+};
+
+class mpcObjList
+{
+public:
+    QList <mpcObjRec*> obj_list;
+    void addMpcRec(mpcRec* mRec, QString objName)
+    {
+        //QString objName;
+        //mRec->getMpNumber(objName);
+        int nobj =1;
+        for(int i=0; i<obj_list.size(); i++)
+        {
+            if(QString().compare(objName, obj_list.at(i)->objName)==0)
+            {
+                obj_list.at(i)->mpc_list << mRec;
+                nobj = 0;
+                break;
+            }
+        }
+        if(nobj)
+        {
+            mpcObjRec* mnRec = new mpcObjRec;
+            mnRec->objName = objName;
+            mnRec->mpc_list << mRec;
+            obj_list << mnRec;
+        }
+    }
+
+    void sortByTime()
+    {
+        for(int i=0; i<obj_list.size();i++) obj_list.at(i)->sortByTime();
+    }
+
+    int size()
+    {
+        return obj_list.size();
+    }
+
+};
+
 #endif // MPCFILE_H

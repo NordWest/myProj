@@ -16,9 +16,10 @@
 #ifndef MPCCAT_H
 
 #define MPCCAT_LEN 203
-#define MPCCAT_NAME_KPOS 175
+#define MPCCAT_NAME_KPOS 176
 #define MPCCAT_NAME_BPOS 2296
-
+#define MPCCAT_NUM_KPOS 166
+#define MPCCAT_PDEST_KPOS 1
 
 class mpcrec
 {
@@ -153,6 +154,8 @@ public:
 
 //	int GetRec(int pos);
 	int GetRecName(char *name);
+    int GetRecNum(char *name);
+    int GetProvDest(char *name);
     int getRegExpName(QString name, QList <mpcrec *> recL);
 //	int GetRecNum(int num);
 //	int AddRec(int pos);
