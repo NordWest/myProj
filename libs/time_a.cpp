@@ -20,9 +20,7 @@ double time_a::TDB()
 //double time_a::UT();
 double time_a::UTC()
 {
-    double jdUTC;
-    TDB2UTC(value, &jdUTC);
-    return(jdUTC);
+    return(TDB2UTC(value));
 }
 
 double time_a::TDT()
@@ -38,7 +36,7 @@ void time_a::setTDB(double jdTime)
 //void time_a::setUT(double jdTime);
 void time_a::setUTC(double jdTime)
 {
-    UTC2TDB(jdTime, &value);
+    value = UTC2TDB(jdTime);
 }
 
 void time_a::setTDT(double jdTime)

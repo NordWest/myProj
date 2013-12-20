@@ -81,6 +81,8 @@ struct eqObjRec
 
 };
 
+int doNbody();
+
 
 int main(int argc, char *argv[])
 {
@@ -198,6 +200,16 @@ int main(int argc, char *argv[])
     QString tStr, objName;
     char *tname = new char[256];
 
+    QList <eqObjRec*> eqo_list;
+    eqObjRec* eqoTemp;
+    eqFile* eqTemp;
+    ocRec *ocTemp;
+    int nObj;
+    QList <orbit*> orbList;
+    orbit* tOrb;
+    int objNum;
+    double T0, T1, DT;
+
     for(i=0;i<mNum;i++)
     {
         mpc_rec = mpc_file.at(i);
@@ -213,11 +225,17 @@ int main(int argc, char *argv[])
         if(mCat.GetProvDest(tname))
         {
             mpc_rec->getProvDest(tStr);
-            if(mCat.GetProvDest(tStr.toAscii().data())) exit(1);
+            if(mCat.GetProvDest(tStr.toAscii().data()))
+            {
+                qDebug() << QString("not found: %1\n").arg(mpc_rec->toStr());
+                continue;
+            }
         }
-        objName = QString(mCat.record->name);
+        objName = QString(mCat.record->name).simplified();
 
-        mCat.GetRecName(objName.toAscii().data());
+
+
+        //mCat.GetRecName(objName.toAscii().data());
 
         //qDebug() << QString("mCat record: %1").arg(mCat.str);
 
@@ -226,16 +244,18 @@ int main(int argc, char *argv[])
     }
 
     m_objList.sortByTime();
-    QList <eqObjRec*> eqo_list;
-    eqObjRec* eqoTemp;
-    eqFile* eqTemp;
-    ocRec *ocTemp;
-    int nObj;
 
     for(i=0; i<m_objList.size(); i++)
     {
         moRec = m_objList.obj_list.at(i);
         qDebug() << QString("%1: %2").arg(moRec->objName).arg(moRec->size());
+
+        if(!mCat.GetRecName(moRec->objName.toAscii().data()))
+        {
+            tOrb = new orbit;
+            tOrb->get(&mCat);
+            orbList << tOrb;
+        }
 
         nObj=1;
         for(j=0;j<eqo_list.size(); j++)
@@ -258,7 +278,7 @@ int main(int argc, char *argv[])
         for(j=0; j<moRec->size(); j++)
         {
 
-            qDebug() << moRec->mpc_list.at(j)->toStr();
+            //qDebug() << moRec->mpc_list.at(j)->toStr();
            ocTemp = new ocRec;
            ocTemp->catName = "MPCCAT";
            ocTemp->name = eqoTemp->objName;
@@ -269,19 +289,269 @@ int main(int argc, char *argv[])
 
            eqoTemp->eq_list->ocList << ocTemp;
         }
+
+        /*
         for(j=0; j<eqoTemp->eq_list->ocList.size(); j++)
         {
             eqoTemp->eq_list->ocList.at(j)->rec2s_short(&tStr);
             qDebug() << tStr;
+        }*/
+
+        if(moRec->mpc_list.at(0)->mjd()<tBeg) tBeg = moRec->mpc_list.at(0)->mjd();
+        if(moRec->mpc_list.at(moRec->mpc_list.size()-1)->mjd()>tEnd) tEnd = moRec->mpc_list.at(moRec->mpc_list.size()-1)->mjd();
+
+
+    }
+
+    tBeg = UTC2TDB(tBeg);
+    tEnd = UTC2TDB(tEnd);
+    qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
+
+    tBeg = floor(tBeg-1);
+    tEnd = floor(tEnd+1);
+    qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
+
+
+
+    objNum = orbList.size();
+
+    qDebug() << QString("objNum: %1\n").arg(objNum);
+    double orbJD = 0.0;
+    for(i=0; i<objNum; i++)
+    {
+        orbJD += orbList.at(i)->elem->eJD;
+        //qDebug() << QString("orb eJD: %1\n").arg(jd2mjd(orbList.at(i)->elem->eJD));
+    }
+
+    orbJD /= 1.0*objNum;
+    orbJD = jd2mjd(orbJD);
+    qDebug() << QString("orb eJD mean: %1\n").arg(orbJD);
+
+    int intCase;    //0-normal; 1-back in time; 2-between
+
+///////////////
+    if((orbJD<=tBeg)&&(orbJD<tEnd)) intCase = 0;
+    if((orbJD>tBeg)&&(orbJD>=tEnd)) intCase = 1;
+    if((orbJD>tBeg)&&(orbJD<tEnd)) intCase = 2;
+
+    qDebug() << QString("intCase: %1\n").arg(intCase);
+
+
+
+    T0 = orbJD;
+//prepNbody
+
+
+    nbody = new dele();
+
+    if(useEPM)
+    {
+        status = !InitTxt(epmDir.toAscii().data());
+        centr_num = 11+!CENTER;
+    }
+    else
+    {
+        status = nbody->init(jplFile.toAscii().data());
+    }
+
+    if(status)
+    {
+        qDebug() << QString("init ephemeride error\n");
+        return 1;
+    }
+
+    if(readParticles(confFile, pList))
+    {
+        qDebug() << QString("readCFG error\n");
+        return 1;
+    }
+
+    int envSize = pList.size();
+    qDebug() << QString("envSize: %1\n").arg(envSize);
+
+    double iniMassSun = pList.at(0)->mass;
+    switch(massType)
+    {
+    case 0:         //Msol
+        break;
+    case 1:         //Msol^-1
+        for(i=0;i<envSize;i++) pList.at(i)->mass = 1.0/pList.at(i)->mass;
+        break;
+    case 2:         //GM or kg
+        for(i=0;i<envSize;i++) pList.at(i)->mass = pList.at(i)->mass/iniMassSun;
+        break;
+    }
+
+    X = new double[3];
+    V = new double[3];
+
+    X0 = new double[3];
+    V0 = new double[3];
+
+    double coefX, coefXD;
+    coefX = coefXD = 1.0;
+    int isObj;
+
+    jdTDT = TDB2TDT(T0);
+    jdUTC = TDB2UTC(T0);
+    sJD = QString("%1").arg(jdUTC, 11, 'f',7);
+    jdTDB = UTC2TDB(jdUTC);
+    qDebug() << QString("test jd: %1 - %2 - %3 - %4\n").arg(time0, 11, 'f',7).arg(jdUTC, 11, 'f',7).arg(jdTDB, 11, 'f',7).arg(jdTDT, 11, 'f',7);
+
+
+    for(i=0; i<envSize; i++)
+    {
+        name = QString(pList[i]->name.data());
+
+        if(useEPM) plaNum = epm_planet_num(name);
+        else plaNum = planet_num(name.toAscii().data());
+
+        if(plaNum!=-1)
+        {
+            if(useEPM)
+            {
+                status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
+                 if(!status)
+                 {
+                     qDebug() << QString("error EPM\n");
+                     return 1;
+                 }
+            }
+            else
+            {
+                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], time0, plaNum, CENTER, SK);
+            }
+
+            if(plaNum==SUN_NUM)
+            {
+                Xsun[0] = X[0];
+                Xsun[1] = X[1];
+                Xsun[2] = X[2];
+                Vsun[0] = V[0];
+                Vsun[1] = V[1];
+                Vsun[2] = V[2];
+            }
+
+        }
+        else
+        {
+            isObj = 0;
+
+            if(mCat.GetRecName(name.simplified().toAscii().data()))
+            {
+               qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+               break;
+            }
+            qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
+            orbRec.get(&mCat);
+
+            orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
+            orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
+
+            if(!center)
+            {
+                X[0] += Xsun[0];
+                X[1] += Xsun[1];
+                X[2] += Xsun[2];
+                V[0] += Vsun[0];
+                V[1] += Vsun[1];
+                V[2] += Vsun[2];
+            }
+
+
         }
 
-        qDebug() << "\n";
+        xVect << X;
+        vVect << V;
+        dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
+        vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
+        pList[i]->x = coefX*X[0];
+        pList[i]->y = coefX*X[1];
+        pList[i]->z = coefX*X[2];
+        pList[i]->xd = coefXD*V[0];
+        pList[i]->yd = coefXD*V[1];
+        pList[i]->zd = coefXD*V[2];
     }
 
 
-///////////////
+    ParticleStruct *nPar;
+    for(i=0; i<objNum; i++)
+    {
+        moRec = m_objList.obj_list.at(i);
+        isObj=1;
+
+        for(j=envSize-1; j>=0; j--)
+        {
+            if(QString().compare(moRec->objName, QString(pList.at(j)->name.data()), Qt::CaseInsensitive)==0)
+            {
+                isObj=0;
+                break;
+            }
+        }
+        if(isObj)
+        {
+            orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
+            orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
+
+            if(!center)
+            {
+                X[0] += Xsun[0];
+                X[1] += Xsun[1];
+                X[2] += Xsun[2];
+                V[0] += Vsun[0];
+                V[1] += Vsun[1];
+                V[2] += Vsun[2];
+            }
+
+            nPar = new ParticleStruct;
+            nPar->name = moRec->objName.toAscii().data();
+            nPar->x = X[0];
+            nPar->y = X[1];
+            nPar->z = X[2];
+            nPar->xd = V[0];
+            nPar->yd = V[1];
+            nPar->zd = V[2];
+            nPar->identity = Advisor::planetesimal;
+            nPar->interactionPermission = Advisor::interactALL;
+
+            pList << nPar;
+
+        }
+    }
+
+    saveParticles("./test.xml", pList);
+
+/////////////////////////
+
+
+    switch(intCase)
+    {
+    case 0:
+        T1 = tEnd;
+        DT = dtime;
+        break;
+    case 1:
+        T1 = tBeg;
+        DT = -dtime;
+        break;
+    case 2:
+        break;
+    }
+
+
+
 
 
     
     return 0;//a.exec();
+}
+
+int prepNbody()
+{
+
+}
+
+int doNbody()
+{
+
 }

@@ -211,13 +211,13 @@ int streqv1(char *str, char *strBase);
 
 int chet(int val);
 
-int UTC2TDT(double jdUTC, double *jdTDT);
+double UTC2TDT(double jdUTC);
 double TDB2TDT(double jdTDB);
-int UTC2TDB(double jdUTC, double *jdTDB);
+double UTC2TDB(double jdUTC);
 double TAImUTC(double mjd);
-int TDT2UTC(double jdTDT, double *jdUTC);
-int TDB2UTC(double jdTDB, double *jdUTC);
-int TDB2TT(double jdTDB, double *jdTT);
+double TDT2UTC(double jdTDT);
+double TDB2UTC(double jdTDB);
+double TDB2TT(double jdTDB);
 double TDT2TDB(double jdTDT);
 
 double dUT1();	//=UT1-UTC

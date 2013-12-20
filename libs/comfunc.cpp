@@ -1667,29 +1667,23 @@ return floor( val * p + .5 ) / p;
 
 
 
-int UTC2TDB(double jdUTC, double *jdTDB)
+double UTC2TDB(double jdUTC)
 {
     double jdTDT;
-    UTC2TDT(jdUTC, &jdTDT);
+    jdTDT = UTC2TDT(jdUTC);
     double T=(jdTDT-2451545)/36525.0;
     double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
-    *jdTDB = jdTDT + 0.001658*sin(g+0.0167*sin(g))/86400.0;
-
-    return 0;
+    return(jdTDT + 0.001658*sin(g+0.0167*sin(g))/86400.0);
 }
 
-int UTC2TDT(double jdUTC, double *jdTDT)
+double UTC2TDT(double jdUTC)
 {
-    *jdTDT = jdUTC + TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0;
-
-    return 0;
+    return(jdUTC + TAImUTC(jd2mjd(jdUTC)) + 32.184/86400.0);
 }
 
-int TDT2UTC(double jdTDT, double *jdUTC)
+double TDT2UTC(double jdTDT)
 {
-    *jdUTC = jdTDT - TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0;
-
-    return 0;
+    return(jdTDT - TAImUTC(jd2mjd(jdTDT)) - 32.184/86400.0);
 }
 
 double TDB2TDT(double jdTDB)
@@ -1708,25 +1702,16 @@ double TDT2TDB(double jdTDT)
     return(res);
 }
 
-int TDB2UTC(double jdTDB, double *jdUTC)
+double TDB2UTC(double jdTDB)
 {
-    double jdTDT;
-
-    jdTDT = TDB2TDT(jdTDB);
-    TDT2UTC(jdTDT, jdUTC);
-
-    return 0;
+    return(TDT2UTC(TDB2TDT(jdTDB)));
 }
 
-int TDB2TT(double jdTDB, double *jdTT)
+double TDB2TT(double jdTDB)
 {
-    double jdTDT;
-
     double T=(jdTDB-2451545)/36525;
     double g = (357.528 + 35999.050*T)*2.0*PI/360.0;
-    *jdTT = jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0;
-
-    return 0;
+    return(jdTDB - 0.001658*sin(g+0.0167*sin(g))/86400.0);
 }
 
 double dUT1() {return -0.39;}
