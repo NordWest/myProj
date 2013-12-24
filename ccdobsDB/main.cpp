@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             mjdDateCode(&ccd_rec.dateObsCode, ccd_rec.mjdEpoch);
             tstr = ccd_rec.dateObsCode;
             tstr.chop(1);
-            qDebug() << QString("tstr: %1\n").arg(tstr);
+            //qDebug() << QString("tstr: %1\n").arg(tstr);
             ccd_rec.dtObs = QDateTime().fromString(tstr, "yyyyMMddhhmmss");
             ccd_rec.ra = fdata.WCSdata[2];
             ccd_rec.de = fdata.WCSdata[3];
