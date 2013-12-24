@@ -127,22 +127,11 @@ int main(int argc, char *argv[])
             dat2YMD(jdn, &year, &mth, &day);
             ccd_rec.obsDate.setYMD(year, mth, (int) day);
 
-
-            //qDebug() << QString("obscode: %1\nDATETIMEOBS: %2\nmjdEpoch: %3\nra: %4\nde: %5\nTarget: %6\nPath: %7\ndate: %8\ndate: %9\n").arg(ccd_rec.dateObsCode).arg(ccd_rec.dtObs.toString("yyyy-MM-dd hh:mm:ss")).arg(ccd_rec.mjdEpoch).arg(ccd_rec.ra).arg(ccd_rec.de).arg(ccd_rec.target).arg(ccd_rec.originName).arg(ccd_rec.obsDate.toString("yyyy-MM-dd")).arg(QString("%1 %2 %3").arg(year).arg(mth).arg(day));
-
-
-
-
             queryStr.clear();
             queryStr = QString("INSERT INTO fitsheader (obscode, DATETIMEOBS, mjdEpoch, ra, de, Target, season, relFileName, observer, exptime, obsDate) VALUE (\'%1\', \'%2\', \'%3\', \'%4\', \'%5\', \'%6\', \'%7\', \'%8\', \'%9\', \'%10\', \'%11\')").arg(ccd_rec.dateObsCode).arg(ccd_rec.dtObs.toString("yyyy-MM-dd hh:mm:ss")).arg(ccd_rec.mjdEpoch, 15, 'f', 7, QLatin1Char('0')).arg(ccd_rec.ra, 13, 'f', 8, QLatin1Char('0')).arg(ccd_rec.de, 13, 'f', 8, QLatin1Char('0')).arg(ccd_rec.target).arg(ccd_rec.season).arg(ccd_rec.relFileName).arg(ccd_rec.observer).arg(ccd_rec.expTime).arg(ccd_rec.obsDate.toString("yyyy-MM-dd"));
-            qDebug() << QString("queryStr: %1").arg(queryStr);
+            //qDebug() << QString("queryStr: %1").arg(queryStr);
 
             query.exec(queryStr);
-
-            /*
-            query.exec("SELECT * FROM 'fitsheader'");
-        */
-
 
             while (query.next()) {
                      tstr = query.value(0).toString();
