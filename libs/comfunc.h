@@ -1,8 +1,5 @@
 #ifndef COMF_H
 #define COMF_H
-//#pragma once
-//#include "..\DAster\Eassistant\StdAfx.h"
-//#include "..\DAster\DAster.h"
 
 #include <QtCore>
 #include <mb.h>
@@ -11,37 +8,15 @@
 #include <astro.h>
 #endif
 
-//#include "..\DAster\MainFrm.h"
-/*
-//#ifndef DA_H
-#include "DynArr.h"
-//#endif
-*/
-
 #include <stdio.h>
-//#include <conio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-
-
-/*
-#ifndef REC_H
-#include "rec.h"
-#endif*/
-//#ifndef DELE_H
-//#include "dele.h"
-//#endif
 
 #define BOWELL_ORIG 276
 #define BOWELL_NEW 285
 #define EPOS5_CAT 192
 
-/*
-#ifndef ORB_H
-#include "orbit.h"
-#endif
-*/
 #define AU_CONST 1
 #define AUKM 1.49597870691000015e+8
 #define AUSM 1.49597870691000015e+13
@@ -88,8 +63,6 @@ struct valacc
 	double acc;
 };
 
-//double det_average(myvector *x);
-
 double str2JD(char *str);
 double str2JD_time(char *str);
 
@@ -97,7 +70,6 @@ void JD2str(double JD, char *str);
 void JD2str_time(double JD, char *str);
 
 double partOfYear(int year, int mth, double day);
-
 
 int dat2YMD(double Jday, int *year, int *mth, double *day);
 void dat2YMD_time(double Jday, int *year, int *mth, int *day, int *hour, int *min, double *sec);
@@ -108,12 +80,8 @@ void day2HMS(double day, int *hour, int *min, double *sec);
 void day2HMS(double day, int *iday, int *hour, int *min, double *sec);
 void HMS2day(double *day, int hour, int min, double sec);
 
-
-
 int dat2JD(double *Jday, int year, int mth, double day);
 int dat2JD_time(double *Jday, int year, int mth, int day, int hour, int min, double sec);
-//int dat2JDalt(double *Jday, int year, int mth, double day);
-//int dat2JDalt2(double *Jday, int year, int mth, double day);
 
 void dat2YMD_str(double JD, char *str, int acc=7);
 
@@ -191,11 +159,6 @@ int int2str(char *str, int i);
 
 int detRiseSet(double *tr, double *ts, double de, double fi);
 
-//Rotation against hour hand [XYZ]
-
-//int RotZ(myvector *x, myvector *x0, double angr);
-//int RotX(myvector *x, myvector *x0, double angr);
-
 struct logstuff
 {
 //	int klog;
@@ -263,11 +226,6 @@ void Vmul3(double *vectRes, double *vect0, double *vect1);
 
 void detABC(double *A, double *B, double *C, double R);
 
-//double VectAng(myvector *V1, myvector *V2);
-
-//int IntAlongCurv(myvector *C, myvector *A, myvector *B, double ca, double cb, int direct);
-//int IntAlongCurv1(myvector *C, myvector *A, myvector *B, double ca, double cb);
-
 double grad2rad(double grad);
 double rad2grad(double rad);
 
@@ -300,11 +258,6 @@ int unpackString(QString *upStr, QString pStr);
 
 int epm_planet_num(QString name);
 
-//int planet_num(char *pname);
-
-//class bufStrRec;
-//class bufStr;
-
 //Fast Fourier Transform
 void FFT(const double& dIn, const double *dOut, int dSz, int nn, int beginData);
 
@@ -312,15 +265,11 @@ void sortX(double *x, double *dx, int num);
 
 void desc2NumName(QString desc, int *num, QString *name);
 
-
-
 struct procData
 {
     QString name, folder;
     int waitTime;
 };
-
-
 
 class FileDynStr
 {
