@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 
-#include "./../../libs/dele.h"
+#include <dele.h>
 #include "./../../libs/orbit.h"
 #include <astro.h>
 #include "./../../libs/comfunc.h"
@@ -81,7 +81,46 @@ struct eqObjRec
 
 };
 
-int doNbody();
+struct particleList
+{
+    QString bodyName;
+    QList <ParticleStruct*> parList;
+};
+
+struct bodyParList
+{
+    QList <particleList*> psList;
+    int addParticle(ParticleStruct* par);
+};
+
+int bodyParList::addParticle(ParticleStruct* par)
+{
+    QString bodyName = par->name.data();
+
+    int np = 1;
+
+    for(int i=0; i<psList.size(); i++)
+    {
+        if(QString().compare(bodyName, psList.at(i)->bodyName)==0)
+        {
+            np = 0;
+            psList.at(i)->parList << par;
+            break;
+        }
+    }
+
+    particleList* nbd;
+
+    if(np)
+    {
+        nbd = new particleList;
+        nbd->bodyName = bodyName;
+        nbd->parList << par;
+        psList << nbd;
+    }
+}
+
+int doNbody(double tf, double dt, double nstep, bodyParList &bpList);
 
 
 int main(int argc, char *argv[])
@@ -126,6 +165,8 @@ int main(int argc, char *argv[])
     corr = new SpiceChar[256];
 
     QString cfg_file, part_file, mop_file;
+
+    bodyParList bpList;
 
     QList <ParticleStruct*> pList;
 //Settings
@@ -515,6 +556,7 @@ int main(int argc, char *argv[])
             nPar->interactionPermission = Advisor::interactALL;
 
             pList << nPar;
+            bpList.addParticle(nPar);
 
         }
     }
@@ -523,20 +565,25 @@ int main(int argc, char *argv[])
 
 /////////////////////////
 
+    QTime timeElapsed;// = QTime.currentTime();
+    timeElapsed.start();
+    double TI, TF, DT;
 
     switch(intCase)
     {
     case 0:
-        T1 = tEnd;
+        TF = tEnd;
         DT = dtime;
         break;
     case 1:
-        T1 = tBeg;
+        TF = tBeg;
         DT = -dtime;
         break;
     case 2:
         break;
     }
+
+
 
 
 
@@ -551,7 +598,47 @@ int prepNbody()
 
 }
 
-int doNbody()
+int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
 {
+    Everhardt *solSys;
 
+
+    for(nt=0; nt<nstep; nt++)
+    {
+        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+
+        TI = TF;
+        TF += dt;
+
+        jday = int(TF);
+        pday = TF - jday;
+        qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
+
+        solSys->rada27(X, V, 0, fabs(dt));
+
+        for(teloi=0; teloi<pList.size(); teloi++)
+        {
+            name = QString(pList[teloi]->name.data());
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
+
+            i = teloi*3;
+
+
+
+            bpList.addParticle(npar);
+
+            if(plaNum!=-1)
+            {
+                saveResults(TF, X, V, i, name, resStmBig, dt<0);
+            }
+            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+            {
+                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+            }
+
+        }
+
+        //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+    }
 }

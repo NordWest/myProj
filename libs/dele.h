@@ -59,106 +59,24 @@
 int planet_num(char *pname);
 double det_planet_H(int pl_num);
 
-/*
-class group1010	//titul
+int body_num(QString pname)
 {
-public:
-	char *eph_name;
-	char *eph_begin;
-	char *eph_end;
+    if(QString().compare(pname, "Mercury")==0) return 1;
+    if(QString().compare(pname, "Venus")==0) return 2;
+    if(QString().compare(pname, "Earth")==0) return 3;
+    if(QString().compare(pname, "Mars")==0) return 4;
+    if(QString().compare(pname, "Jupiter")==0) return 5;
+    if(QString().compare(pname, "Saturn")==0) return 6;
+    if(QString().compare(pname, "Uranus")==0) return 7;
+    if(QString().compare(pname, "Neptune")==0) return 8;
+    if(QString().compare(pname, "Pluto")==0) return 9;
+    if(QString().compare(pname, "Sun")==0) return 10;
 
-	group1010();
-	~group1010();
-};
 
-class group1030
-{
-public:
-        double eph_begin;
-        double eph_end;
-        double eph_step;
-};
+    return -1;
+}
 
-class rec1040
-{
-public:
-	char *name;
-	double value;
-	
 
-	rec1040();
-	~rec1040();
-};
-
-class Mrec1040
-{
-public:
-	rec1040 *top;
-	Mrec1040 *next;
-
-	Mrec1040();
-	~Mrec1040();
-};
-
-class group1040
-{
-public:
-	Mrec1040 *root;
-	int num;
-
-	group1040();
-	~group1040();
-
-	int addElem(rec1040 *npar);
-	int remElem(int num);
-	int getElem(rec1040 *nrec, int pos);
-	int getElemByName(rec1040 *nrec, char *name);
-	int clear();
-};
-
-class group1041
-{
-};
-
-class group1050
-{
-public:
-	mymatrix *coef;
-
-	group1050();
-	~group1050();
-};
-
-class group1070
-{
-public:
-	group1070();
-	group1070(char *fnbin);
-	~group1070();
-	int convert2bin(char *asc_name, char *bin_name);
-
-	char *fname;
-
-//	FileDynStrBin *fbin;
-
-	double value;
-
-//	int get(int nrecord, int nplan, int ngran);
-
-};
-
-class ch_coeff
-{
-};
-
-struct part_head
-{
-	int npart;
-	int ncoeff;
-	double T0;
-	double T1;
-};
-*/
 class dele
 {
 public:

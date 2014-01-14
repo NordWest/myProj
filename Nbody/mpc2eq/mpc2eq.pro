@@ -88,4 +88,4 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/mpcfile.h
 
 unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro
+LIBS += -lmb -lastro -ldele

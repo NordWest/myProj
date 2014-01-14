@@ -7,7 +7,7 @@
 //#include "./../../libs/dele.h"
 //#include "./../../libs/orbit.h"
 //#include "./../../libs/skyarea.h"
-#include "./../../libs/astro.h"
+#include <astro.h>
 #include "./../../libs/comfunc.h"
 #include "./rada.h"
 #include "./../../libs/redStat.h"

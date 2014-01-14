@@ -18,7 +18,7 @@ int body_num(QString pname);
 int prepSPK(int center, int sk);
 int spk2mpc();
 
-
+/*
 struct spkRecord
 {
     double time, X[3], V[3];
@@ -41,7 +41,7 @@ struct spkRecord
         return 0;
     };
 };
-
+*/
 int getMopName(MopState *mState, MopItem &mItem, QString name)
 {
     int i, sz;
@@ -55,7 +55,7 @@ int getMopName(MopState *mState, MopItem &mItem, QString name)
     return -1;
 
 }
-
+/*
 int body_num(QString pname)
 {
     if(QString().compare(pname, "Mercury")==0) return 1;
@@ -72,7 +72,7 @@ int body_num(QString pname)
 
     return -1;
 }
-
+*/
 double timei, time0, time1, dtime;
 int nstep;
 QString sJD;

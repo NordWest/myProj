@@ -1,57 +1,19 @@
 #include <QtCore>
 
-#include "./../libs/dele.h"
-//#include "./../libs/astro.h"
+#include "./../../libs/dele.h"
+//#include "./../../libs/astro.h"
 #include <astro.h>
-#include "./../libs/comfunc.h"
-#include "./../libs/calc_epm.h"
-#include "./../libs/mpccat.h"
-#include "./../libs/mpcs.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/calc_epm.h"
+#include "./../../libs/mpccat.h"
+#include "./../../libs/mpcs.h"
 
-//#include "./../libs/cspice/SpiceUsr.h"
+//#include "./../../libs/cspice/SpiceUsr.h"
 #include <SpiceUsr.h>
-#include "./../libs/observ.h"
+#include "./../../libs/observ.h"
 #include "./../../libs/myDomMoody.h"
 
-struct spkRecord
-{
-    double time, X[3], V[3];
-    QString toString()
-    {
-        return(QString("%1, %2, %3, %4, %5, %6, %7").arg(time, 15, 'f', 8).arg(X[0], 18, 'g', 12).arg(X[1], 18, 'g', 12).arg(X[2], 18, 'g', 12).arg(V[0], 18, 'g', 12).arg(V[1], 18, 'g', 12).arg(V[2], 18, 'g', 12));
-    };
-    int fromString(QString inStr)
-    {
-        QStringList opers;
-        opers = inStr.split(", ");
-        if(opers.size()<7) return 1;
-        time = opers[0].toDouble();
-        X[0] = opers[1].toDouble();
-        X[1] = opers[2].toDouble();
-        X[2] = opers[3].toDouble();
-        V[0] = opers[4].toDouble();
-        V[1] = opers[5].toDouble();
-        V[2] = opers[6].toDouble();
-        return 0;
-    };
-};
 
-int body_num(QString pname)
-{
-    if(QString().compare(pname, "Mercury")==0) return 1;
-    if(QString().compare(pname, "Venus")==0) return 2;
-    if(QString().compare(pname, "Earth")==0) return 3;
-    if(QString().compare(pname, "Mars")==0) return 4;
-    if(QString().compare(pname, "Jupiter")==0) return 5;
-    if(QString().compare(pname, "Saturn")==0) return 6;
-    if(QString().compare(pname, "Uranus")==0) return 7;
-    if(QString().compare(pname, "Neptune")==0) return 8;
-    if(QString().compare(pname, "Pluto")==0) return 9;
-    if(QString().compare(pname, "Sun")==0) return 10;
-
-
-    return -1;
-}
 
 QString bspName, leapName;
 
@@ -276,7 +238,7 @@ int main(int argc, char *argv[])
         qDebug() << QString("X: %1\t%2\t%3\nV: %4\t%5\t%6\n").arg(X[0]).arg(X[1]).arg(X[2]).arg(V[0]).arg(V[1]).arg(V[2]);
 
 
-        TDB2UTC(time, &jdUTC);
+        jdUTC = TDB2UTC(time);
         sJD = QString("%1").arg(jdUTC, 15, 'f',7);
         jdTDB = TDB2TDT(time);
 
@@ -695,7 +657,7 @@ int spk2mpc(double time0, double dtime, int nstep)
 
             //tstr = QString(utctim);
             //jdUTC = mjd2jd(getMJDfromStrT(tstr));
-            TDB2UTC(timei, &jdUTC);
+            jdUTC = TDB2UTC(timei);
             mrec.eJD = jdUTC;//obsPos.ctime.UTC();
             //mrec.num = 1;
 
