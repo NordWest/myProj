@@ -380,7 +380,9 @@ int main(int argc, char *argv[])
 
 
     T0 = orbJD;
-//prepNbody
+
+
+//////////////prepNB
 
 
     nbody = new dele();
@@ -563,7 +565,7 @@ int main(int argc, char *argv[])
 
     saveParticles("./test.xml", pList);
 
-/////////////////////////
+/////////////////////////testNB
 
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
@@ -583,6 +585,46 @@ int main(int argc, char *argv[])
         break;
     }
 
+
+    for(nt=0; nt<nstep; nt++)
+    {
+
+
+        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+
+        TI = TF;
+        TF += dt;
+
+
+        jday = int(TF);
+        pday = TF - jday;
+        qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
+
+        solSys->rada27(X, V, 0, fabs(dt));
+
+
+        for(teloi=0; teloi<pList.size(); teloi++)
+        {
+            //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+            name = QString(pList[teloi]->name.data());
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
+
+            if(plaNum!=-1)
+            {
+                saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
+
+            }
+            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+            {
+
+                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
+
+            }
+
+    }
 
 
 

@@ -295,9 +295,9 @@ int main(int argc, char *argv[])
 */
 
     jdTDT = TDB2TDT(time0);
-    TDB2UTC(time0, &jdUTC);
+    jdUTC = TDB2UTC(time0);
     sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-    UTC2TDB(jdUTC, &jdTDB);
+    jdTDB = UTC2TDB(jdUTC);
 
     qDebug() << QString("jd: %1 - %2 - %3 - %4\n").arg(time0, 11, 'f',7).arg(jdUTC, 11, 'f',7).arg(jdTDB, 11, 'f',7).arg(jdTDT, 11, 'f',7);
 

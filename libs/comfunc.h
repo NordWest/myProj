@@ -173,7 +173,7 @@ int streqv(char *str1, char *str2);
 int streqv1(char *str, char *strBase);
 
 int chet(int val);
-
+/*  astro.h
 double UTC2TDT(double jdUTC);
 double TDB2TDT(double jdTDB);
 double UTC2TDB(double jdUTC);
@@ -184,8 +184,8 @@ double TDB2TT(double jdTDB);
 double TDT2TDB(double jdTDT);
 
 double dUT1();	//=UT1-UTC
-
-double gmst0(double T);
+*/
+//////////////////////////////////////////////////////////////
 
 int UTC2s(double utc, double lam, double *s);
 //int UTC2s_alt(double utc, double lam, double *s);
@@ -194,7 +194,7 @@ int s2UTC(double s, double lam, double *utc);
 int sJD2UT1(double utcJDay, double s, double lam, double *utc);//[s]=day, [utc] = day
 
 double UT0JD(double utJD, double *part_day = NULL);
-//////////////////////////////////////////////////////////////
+
 double gmst0(double T);
 double pdayUT1(double jdUT1, double *pday);
 double detT(double jd0);

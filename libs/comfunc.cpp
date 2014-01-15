@@ -1665,8 +1665,7 @@ double p = pow( 10., signs );
 return floor( val * p + .5 ) / p;
 }
 
-
-
+/*
 double UTC2TDB(double jdUTC)
 {
     double jdTDT;
@@ -1762,7 +1761,7 @@ double TAImUTC(double mjd) // [day]
 
     return(res/86400.0);
 }
-
+*/
 
 int UTC2s_alt(double utc, double lam, double *s)
 {
