@@ -1,0 +1,12 @@
+#ifndef EPHEM_READ_GLOBAL_H
+#define EPHEM_READ_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(EPHEM_READ_LIBRARY)
+#  define EPHEM_READSHARED_EXPORT Q_DECL_EXPORT
+#else
+#  define EPHEM_READSHARED_EXPORT Q_DECL_IMPORT
+#endif
+
+#endif // EPHEM_READ_GLOBAL_H
