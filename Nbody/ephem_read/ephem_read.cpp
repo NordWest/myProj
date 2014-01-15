@@ -50,7 +50,7 @@
    static FILE        *Ephemeris_File;
    static double       Coeff_Array[ARRAY_SIZE] , T_beg , T_end , T_span;
 */
-   static int Debug = FALSE;             /* Generates detailed output if true */
+ static int Debug = FALSE;             /* Generates detailed output if true */
 
 /**==========================================================================**/
 /**  Read_Coefficients                                                       **/
