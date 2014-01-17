@@ -21,8 +21,8 @@ unix:!symbian {
     maemo5 {
         target.path = /opt/usr/lib
     } else {
-        target.path = /usr/lib
-        target.path = /usr/local/include
+        target.path = /usr/local/lib
+        header.path = /usr/local/include
 
     }
     header.files=rada.h

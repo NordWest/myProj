@@ -3,8 +3,12 @@
 
 #include <QtCore>
 
+#ifndef ASTRO_H
 #include <astro.h>
+#endif
+#ifndef COMF_H
 #include "comfunc.h"
+#endif
 
 QString trCatFlag(QString catFlag);
 

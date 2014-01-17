@@ -11,6 +11,7 @@
 #include "./../../libs/mpccat.h"
 #include "./../../libs/mpcfile.h"
 #include <SpiceUsr.h>
+#include <rada.h>
 
 #define OMPLIB
 
@@ -65,6 +66,9 @@ void customMessageHandler(QtMsgType type, const char* msg)
 
 int nofzbody;
 dele *nbody;
+double *mass;
+ever_params *eparam;
+int *interact_permitions;
 
 struct eqObjRec
 {
@@ -250,6 +254,7 @@ int main(int argc, char *argv[])
     orbit* tOrb;
     int objNum;
     double T0, T1, DT;
+    double TI, TF;
 
     for(i=0;i<mNum;i++)
     {
@@ -569,8 +574,7 @@ int main(int argc, char *argv[])
 
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
-    double TI, TF;
-/*    int nt;
+    //double TI, TF, DT;
 
     switch(intCase)
     {
@@ -587,45 +591,6 @@ int main(int argc, char *argv[])
     }
 
 
-    for(nt=0; nt<nstep; nt++)
-    {
-
-
-        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
-
-        TI = TF;
-        TF += dt;
-
-
-        jday = int(TF);
-        pday = TF - jday;
-        qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
-
-        solSys->rada27(X, V, 0, fabs(dt));
-
-
-        for(teloi=0; teloi<pList.size(); teloi++)
-        {
-            //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
-            name = QString(pList[teloi]->name.data());
-            if(useEPM) plaNum = epm_planet_num(name);
-            else plaNum = planet_num(name.toAscii().data());
-
-            if(plaNum!=-1)
-            {
-                saveResults(TF, X, V, i, name, resStmBig, dt<0);
-                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
-
-            }
-            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-            {
-
-                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
-                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
-
-            }
-
-    }
 
 
 
@@ -643,22 +608,25 @@ int prepNbody()
 
 int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
 {
-    //Everhardt *solSys;
-/*
+    Everhardt *solSys;
+
+    int i, teloi, nt, jday;
+    double ti, pday;
+    double *X, *V;
 
     for(nt=0; nt<nstep; nt++)
     {
-        qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+        qDebug() << QString("\njd: %1\ntime: %2\n").arg(tf, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(tf)), ":", 0, 3));
 
-        TI = TF;
-        TF += dt;
+        ti = tf;
+        tf += dt;
 
-        jday = int(TF);
-        pday = TF - jday;
+        jday = int(tf);
+        pday = tf - jday;
         qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
 
         solSys->rada27(X, V, 0, fabs(dt));
-
+/*
         for(teloi=0; teloi<pList.size(); teloi++)
         {
             name = QString(pList[teloi]->name.data());
@@ -673,15 +641,15 @@ int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
 
             if(plaNum!=-1)
             {
-                saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                //saveResults(TF, X, V, i, name, resStmBig, dt<0);
             }
             else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
             {
-                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                //saveResults(TF, X, V, i, name, resStmSmall, dt<0);
             }
 
         }
-
+*/
         //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
-    }*/
+    }
 }

@@ -1,5 +1,4 @@
 #ifndef COMF_H
-
 #include "comfunc.h"
 #endif
 
