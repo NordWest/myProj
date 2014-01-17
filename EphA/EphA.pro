@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-unix:TARGET = ./../../lab/saTest/EphA
+unix:TARGET = ~/bin/EphA
 win32:TARGET = ./../../../lab/EphA/EphA
 TEMPLATE = app
 
@@ -73,4 +73,4 @@ win32:LIBS += libmb libastro libdele
 #unix:LIBS += ./../libs/unix/libmb.a \
 #            ./../libs/unix/libastro.a
 
-unix:LIBS += -lmb -lastro -ldele -lephem_read
+unix:LIBS += -lmb -lastro -lephem_read -ldele

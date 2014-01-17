@@ -1,5 +1,7 @@
+#ifndef DELE_H
+#include <dele.h>
+#endif
 #include "skyarealf.h"
-#include "mpcs.h"
 
 tlRecord::tlRecord()
 {

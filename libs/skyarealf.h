@@ -23,9 +23,6 @@
 #include "orbcat.h"
 #endif
 
-#ifndef DELE_H
-#include <dele.h>
-#endif
 
 #ifndef OBSERV_H
 #include "observ.h"
@@ -50,6 +47,13 @@
 #ifndef ORBCAT_H
 #include "orbcat.h"
 #endif
+
+#ifndef DELE_H
+#include <dele.h>
+#endif
+
+#include "mpcs.h"
+
 
 #define DELE_CAT_TYPE 0
 #define ORB_CAT_TYPE 1

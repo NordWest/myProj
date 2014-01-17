@@ -569,7 +569,8 @@ int main(int argc, char *argv[])
 
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
-    double TI, TF, DT;
+    double TI, TF;
+/*    int nt;
 
     switch(intCase)
     {
@@ -629,7 +630,7 @@ int main(int argc, char *argv[])
 
 
 
-
+*/
 
     
     return 0;//a.exec();
@@ -642,8 +643,8 @@ int prepNbody()
 
 int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
 {
-    Everhardt *solSys;
-
+    //Everhardt *solSys;
+/*
 
     for(nt=0; nt<nstep; nt++)
     {
@@ -682,5 +683,5 @@ int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
         }
 
         //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
-    }
+    }*/
 }
