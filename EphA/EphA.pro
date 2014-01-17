@@ -31,7 +31,7 @@ SOURCES += main.cpp\
     ../libs/fBuffer.cpp \
     ../libs/fbStream.cpp \
     ../libs/DynArr.cpp \
-    ../libs/dele.cpp \
+#    ../libs/dele.cpp \
     ../libs/coord.cpp \
     ../libs/commetorbcat.cpp \
     ../libs/comfunc.cpp \
@@ -56,7 +56,7 @@ HEADERS  += mainwindow.h \
     ../libs/fBuffer.h \
     ../libs/fbStream.h \
     ../libs/DynArr.h \
-    ../libs/dele.h \
+#    ../libs/dele.h \
     ../libs/coord.h \
     ../libs/commetorbcat.h \
     ../libs/comfunc.h \
@@ -68,10 +68,9 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     settwindow.ui
-
-win32:LIBS += libmb libastro
+win32:LIBS += libmb libastro libdele
 #            ./../libs/win32/libastro.a
-unix:LIBS += ./../libs/unix/libmb.a \
-            ./../libs/unix/libastro.a
+#unix:LIBS += ./../libs/unix/libmb.a \
+#            ./../libs/unix/libastro.a
 
-
+unix:LIBS += -lmb -lastro -ldele -lephem_read

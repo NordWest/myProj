@@ -1,7 +1,8 @@
 #include <QtCore/QCoreApplication>
 //#include <QApplication>
 
-#include "./../../libs/dele.h"
+//#include "./../../libs/dele.h"
+#include <dele.h>
 //#include "./../../libs/orbcat.h"
 //#include "./../../libs/observ.h"
 //#include "./../../libs/dele.h"
@@ -796,7 +797,7 @@ int main(int argc, char *argv[])
                 if(plaNum!=-1)
                 {
                     saveResults(TF, X, V, i, name, resStmBig, dt<0);
-                    if(useMoody) saveResultsM(TF, Xm, Vm, i, name, resmStmBig, dt<0);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
 /*
                     if(useEPM)
                     {
@@ -893,7 +894,7 @@ int main(int argc, char *argv[])
                 {
 
                     saveResults(TF, X, V, i, name, resStmSmall, dt<0);
-                    if(useMoody) saveResultsM(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
+                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
 /*
                     if(initMpc) break;
                     if(mCat.GetRecName(name.simplified().toAscii().data())) break;

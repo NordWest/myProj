@@ -5,12 +5,13 @@
 #include <math.h>
 #include "rada.h"
 //#include "mymatrix.h"
-#include "./../../libs/dele.h"
+//#include "./../../libs/dele.h"
 #include "./../../libs/calc_epm.h"
 //#include "DynArr.h"
 #include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
 #include <omp.h>
 
+#include <QList>
 
 //  #define k2 6.672590000e-8
 //  mymatrix *r;
@@ -31,7 +32,7 @@
   extern QList <ParticleStruct*> pList;
   //extern QList <ParticleStruct*> jList;
 
- extern dele *nbody;
+ //extern dele *nbody;
  // extern int nofzbody;
 
 double dist(double X0[], double X1[])

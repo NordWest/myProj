@@ -35,7 +35,7 @@ SOURCES += main.cpp \
     ./force_ev.cpp \
 #    ../libs/rada.cpp \
     ./rada.cpp \
-    ./../../libs/dele.cpp \
+#    ./../../libs/dele.cpp \
 #    dele.cpp \
     ./../../libs/redStat.cpp \
     ./../../libs/mpcs.cpp \
@@ -66,7 +66,7 @@ HEADERS += ../../libs/orbit.h \
     ./../../libs/commetorbcat.h \
 #    ../libs/mb.h \
     ./../../libs/ephem_types.h \
-    ./../../libs/dele.h \
+#    ./../../libs/dele.h \
 #    dele.h \
     ./../../libs/ephem_types.h \
 #    ../libs/rada.h \
@@ -94,6 +94,6 @@ win32:LIBS+=./../../libs/win32/libmb.a
 #unix:LIBS+=./../../libs/unix/libastro.a
 win32:LIBS+=./../../libs/win32/libastro.a
 
-unix:LIBS += -lmb -lastro
+unix:LIBS += -lmb -lastro -ldele -lephem_read
 unix:LIBS+= ./../../libs/unix/cspice.a
 #INCLUDEPATH += /usr/local/cuda/include

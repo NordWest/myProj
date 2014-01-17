@@ -24,7 +24,7 @@
 #endif
 
 #ifndef DELE_H
-#include "dele.h"
+#include <dele.h>
 #endif
 
 #ifndef REC_H

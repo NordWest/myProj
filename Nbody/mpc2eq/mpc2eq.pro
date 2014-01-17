@@ -33,7 +33,7 @@ SOURCES += main.cpp \
     ../../libs/rec.cpp \
     ../../libs/commetorbcat.cpp \
     #../libs/force_ev.cpp \
-    ../../libs/dele.cpp \
+#    ../../libs/dele.cpp \
     #../libs/rada.cpp \
     ../../libs/redStat.cpp \
     ../../libs/mpcs.cpp \
@@ -43,7 +43,7 @@ SOURCES += main.cpp \
     ./../../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.cpp \
     ./../../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
     ./../../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
-    ../../libs/ephem_util.cpp \
+#    ../../libs/ephem_util.cpp \
     ../../libs/calc_epm.cpp \
     ../../libs/time_a.cpp \
     ../../libs/mpcfile.cpp
@@ -64,9 +64,9 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/rec.h \
     ../../libs/commetorbcat.h \
 #    ../libs/mb.h \
-    ../../libs/ephem_types.h \
-    ../../libs/dele.h \
-    ../../libs/ephem_types.h \
+ #   ../../libs/ephem_types.h \
+ #   ../../libs/dele.h \
+ #   ../../libs/ephem_types.h \
     #../libs/rada.h \
     ../../libs/redStat.h \
     ../../libs/mpcs.h \
@@ -81,11 +81,11 @@ HEADERS += ../../libs/orbit.h \
     ./../../libs/moody/capsule/capsuleBase/CapsuleBase.h \
     ../../libs/moody/moody.h \
     ../../libs/moody/capsule/Capsule.h \
-    ../../libs/ephem_util.h \
+ #   ../../libs/ephem_util.h \
     ../../libs/myDomMoody.h \
     ../../libs/calc_epm.h \
     ../../libs/time_a.h \
     ../../libs/mpcfile.h
 
 unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro -ldele
+LIBS += -lmb -lastro -ldele -lephem_read

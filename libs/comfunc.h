@@ -468,7 +468,7 @@ struct spkRecord
     };
 };
 
-
+/*
 int body_num(QString pname)
 {
     if(QString().compare(pname, "Mercury")==0) return 1;
@@ -485,5 +485,5 @@ int body_num(QString pname)
 
     return -1;
 }
-
+*/
 #endif
