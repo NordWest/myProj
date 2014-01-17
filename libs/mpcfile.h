@@ -3,7 +3,7 @@
 
 #include <QtCore>
 
-#include "astro.h"
+#include <astro.h>
 #include "comfunc.h"
 
 QString trCatFlag(QString catFlag);

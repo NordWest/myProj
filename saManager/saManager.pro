@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-unix:TARGET = ./../../lab/saTest/saManager
+unix:TARGET = ~/bin/saManager
 win32:TARGET = ./../../../lab/EphA/saManager
 TEMPLATE = app
 
@@ -20,7 +20,7 @@ SOURCES += main.cpp\
     ../libs/observatory.cpp \
     ../libs/observ.cpp \
     ../libs/mpccat.cpp \
-    ../libs/dele.cpp \
+#    ../libs/dele.cpp \
     ../libs/coord.cpp \
     ../libs/fBuffer.cpp \
     ../libs/comfunc.cpp \
@@ -46,14 +46,14 @@ HEADERS  += mainwindow.h \
     ../libs/observatory.h \
     ../libs/observ.h \
     ../libs/mpccat.h \
-    ../libs/dele.h \
+#    ../libs/dele.h \
     ../libs/coord.h \
     ../libs/fBuffer.h \
     ../libs/comfunc.h \
     ../libs/sscatFB.h \
     ../libs/fbStream.h \
-    ../libs/mb.h \
-    ../libs/astro.h \
+#    ../libs/mb.h \
+#    ../libs/astro.h \
     ../libs/redStat.h \
     ../libs/mpcfile.h \
     ../libs/listfile.h \
@@ -70,10 +70,11 @@ HEADERS  += mainwindow.h \
 win32:LIBS += libmb libastro
 #win32:LIBS += ./../libs/win32/libmb.a \
 #            ./../libs/win32/libastro.a
-unix:LIBS += ./../libs/unix/libmb.a \
-            ./../libs/unix/libastro.a
-unix:LIBS+=./../libs/unix/cspice.a
+#unix:LIBS += ./../libs/unix/libmb.a \
+#            ./../libs/unix/libastro.a
+#unix:LIBS+=./../libs/unix/cspice.a
 
+unix:LIBS += -lmb -lastro -lephem_read -ldele
 
 FORMS    += mainwindow.ui \
     catsview.ui \

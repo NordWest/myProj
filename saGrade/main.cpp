@@ -2,7 +2,7 @@
 #include "./../libs/observ.h"
 #include "./../libs/orbit.h"
 #include "./../libs/skyarealf.h"
-#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
 #include "./../libs/redStat.h"
 #include "./../libs/mpcfile.h"
