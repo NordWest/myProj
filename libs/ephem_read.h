@@ -17,11 +17,8 @@
 #include "ephem_types.h"
 #endif
 
-static headOneType  H1;
-static headTwoType  H2;
-static recOneType   R1;
-static FILE        *Ephemeris_File;
-static double       Coeff_Array[ARRAY_SIZE] , T_beg , T_end , T_span;
+#ifndef EPHEM_READ
+#define EPHEM_READ
 
 /*----------------------------------------------------------------------------*/
 /*  Initialize_Ephemeris                                                      */
@@ -53,3 +50,7 @@ static double       Coeff_Array[ARRAY_SIZE] , T_beg , T_end , T_span;
 
     void Interpolate_State( double Time , int Target , stateType *Planet );
 
+
+    void GetParams(headOneType  &pH1, headTwoType  &pH2, recOneType   &pR1);
+
+#endif

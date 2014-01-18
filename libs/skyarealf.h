@@ -12,7 +12,7 @@
 #endif
 
 #ifndef ASTRO_H
-#include <astro.h>
+#include "astro.h"
 #endif
 
 #ifndef OBSRY_H
@@ -47,11 +47,11 @@
 #ifndef ORBCAT_H
 #include "orbcat.h"
 #endif
-
+/*
 #ifndef DELE_H
-#include <dele.h>
+#include "dele.h"
 #endif
-
+*/
 #include "mpcs.h"
 
 

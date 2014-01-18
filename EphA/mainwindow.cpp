@@ -1004,7 +1004,7 @@ void MainWindow::slotUpdateMiri()
 
     outerArguments.clear();
 
-    outerArguments << QString("-name=%1").arg(nameLabel->text().simplified().toLower());
+    outerArguments << QString("-name=%1").arg(nameLabel->text().simplified().replace(" ", "_"));
 
     sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
 

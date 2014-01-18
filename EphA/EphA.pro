@@ -6,7 +6,8 @@
 
 QT       += core gui
 
-unix:TARGET = ~/bin/EphA
+#unix:TARGET = ~/bin/EphA
+unix:TARGET = ./../../lab/EphA/EphA
 win32:TARGET = ./../../../lab/EphA/EphA
 TEMPLATE = app
 

@@ -68,7 +68,7 @@
 #define NUTATIONS 13
 #define LIBRATIONS 14
 
-static int Debug = FALSE;
+//static int Debug = FALSE;
 
 /**==========================================================================**/
 /**  C Record Type Definitions                                               **/

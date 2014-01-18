@@ -1,6 +1,6 @@
-#ifndef DELE_H
+/*#ifndef DELE_H
 #include <dele.h>
-#endif
+#endif*/
 #include "skyarealf.h"
 
 tlRecord::tlRecord()
@@ -1339,8 +1339,9 @@ void det_res_list(resRecord *resRec, observ *obs_pos, double x, double y, double
 void det_res_list(resRecord *resRec, observ *obs_pos, double *state, double *Sdist, double *Edist, int ctype, double H)
 {
     double *range = new double[3];
+    double ra, dec;
 
-    obs_pos->det_vect_radec(state, &resRec->ra, &resRec->dec, range);
+    obs_pos->det_vect_radec(state, &ra, &dec, range);
 
     //rdsys(&resRec->ra, &resRec->dec, P[0], P[1], P[2]);
 
@@ -1348,8 +1349,8 @@ void det_res_list(resRecord *resRec, observ *obs_pos, double *state, double *Sdi
 
         //detRDnumGC(&resRec->ra, &resRec->dec, x, y, z, obs_pos->ox, obs_pos->oy, obs_pos->oz, obs_pos->obs->dcx, obs_pos->obs->dcy, obs_pos->obs->dcz);
 
-        resRec->ra = rad2grad(resRec->ra);
-        resRec->dec = rad2grad(resRec->dec);
+        resRec->ra = rad2grad(ra);
+        resRec->dec = rad2grad(dec);
 
         //rdsys(&resRec->muRacosD, &resRec->muDec, , P2, P3);
         detRDnumGC_vel(&resRec->muRacosD, &resRec->muDec, state[3], state[4], state[5], obs_pos->ovx, obs_pos->ovy, obs_pos->ovz, obs_pos->obs->state[3], obs_pos->obs->state[4], obs_pos->obs->state[5], range);

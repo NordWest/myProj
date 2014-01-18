@@ -1,10 +1,6 @@
 #include <QtCore>
 #include "math.h"
 
-#ifndef COMF_H
-//#include "./../libs/comfunc.h"
-#endif
-//#include "fitsio.h"
 
 #ifndef ASTRO_H
 

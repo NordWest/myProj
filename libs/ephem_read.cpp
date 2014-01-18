@@ -37,20 +37,21 @@
 #ifndef TYPES_DEFINED
 #include "ephem_types.h"
 #endif
-
+//#ifndef EPHEM_READ
 #include "ephem_read.h"
+//#endif
 
 /**==========================================================================**/
 /**  Global Variables                                                        **/
 /**==========================================================================**/
-/*
+
    static headOneType  H1;
    static headTwoType  H2;
    static recOneType   R1;
    static FILE        *Ephemeris_File;
    static double       Coeff_Array[ARRAY_SIZE] , T_beg , T_end , T_span;
-*/
-   static int Debug = FALSE;             /* Generates detailed output if true */
+
+ static int Debug = FALSE;             /* Generates detailed output if true */
 
 /**==========================================================================**/
 /**  Read_Coefficients                                                       **/
@@ -799,6 +800,13 @@ void Interpolate_State(double Time , int Target, stateType *Planet)
   *Planet = X;
 
   return;
+}
+
+void GetParams(headOneType  &pH1, headTwoType  &pH2, recOneType &pR1)
+{
+    pH1 = H1;
+    pH2 = H2;
+    pR1 = R1;
 }
 
 /********************************************************* END: ephem_read.c **/
