@@ -1,6 +1,7 @@
 //это заголовочный файл класса miriadeEph. Пусть название класса не смущает.
 #include <QtCore>
 #include <QtNetwork>
+#include <astro.h>
 
 class miriadeEph: public QObject
 {
