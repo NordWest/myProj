@@ -19,6 +19,8 @@
 #include "./../libs/skyarealf.h"
 #include "./../libs/redStat.h"
 
+//#include "ephthread.h"
+
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QPushButton;

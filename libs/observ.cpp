@@ -134,9 +134,9 @@ int observ::det_observ()
     int res = 0;
 
 
-    qDebug() << "detState\n";
+//    qDebug() << "detState\n";
     if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
-    qDebug() << "detRtt\n";
+//    qDebug() << "detRtt\n";
     if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
 
 

@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "ephthread.h"
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     logFile.setFileName("./epha.log");
     logFile.open(QFile::WriteOnly | QFile::Truncate);
     logStm.setDevice(&logFile);
-
 
     QSettings sett("./saGrade.ini", QSettings::IniFormat);
 
@@ -35,14 +34,9 @@ MainWindow::MainWindow(QWidget *parent) :
     sa.init(obsCatName, deleCatName, installDir);
     sa.obs_pos->set_obs_parpam(GEOCENTR_NUM, CENTER_SUN, SK_EKVATOR, obsCode.toAscii().data());
 
-
     setMenu();
     setWidgets();
     setSettings();
-
-
-
-    //connect(this, SIGNAL(clicked()), this, SLOT(slotViewSettWindow()));
 
     timeUpd = new QTimer(this);
     connect(timeUpd, SIGNAL(timeout()), this, SLOT(slotUpdateTime()));
@@ -50,14 +44,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tabUpd, SIGNAL(timeout()), this, SLOT(slotUpdateTable()));
 
     updaterEnabled = 0;
-    //expTime = 1000*10;
     ui->expProgBar->setRange(0, 100);
     ui->expProgBar->setValue(0);
 
     timeUpd->setSingleShot(0);
     slotUpdateTime();
-
-
 
     tabEla = new QElapsedTimer;
 
@@ -66,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     slotUpdateTable();
 
     slotViewSettWindow();
+
 //Networking
 
     QNetworkConfigurationManager manager;
@@ -82,9 +74,6 @@ MainWindow::MainWindow(QWidget *parent) :
             QNetworkConfiguration::Discovered) {
             config = manager.defaultConfiguration();
         }
-
-
-
         networkSession = new QNetworkSession(config, this);
         connect(networkSession, SIGNAL(opened()), this, SLOT(sessionOpened()));
 
@@ -96,7 +85,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendNextObject()));
 
-    //sa.updateLocalCats();
     slotGrade();
 }
 
@@ -215,7 +203,6 @@ void MainWindow::setMenu()
     fileMenu->addAction(saveResAct);
     connect(saveResAct, SIGNAL(triggered()), this, SLOT(slotSaveResFileWindow()));
 
-
     exitAct = new QAction(tr("&exit"), this);
     exitAct->setShortcut(tr("Ctrl+X"));
     exitAct->setStatusTip(tr("exit"));
@@ -244,13 +231,7 @@ void MainWindow::setMenu()
     add2seqAtc = new QAction(tr("&Add to seq list"), this);
     viewMenu->addAction(add2seqAtc);
     connect(add2seqAtc, SIGNAL(triggered()), this, SLOT(slotAdd2Seq()));
-/*
-    viewSettAct = new QAction(tr("&view sett"), this);
-    viewSettAct->setShortcut(tr("Ctrl+U"));
-    viewSettAct->setStatusTip(tr("view settings"));
-    viewMenu->addAction(viewSettAct);
-    connect(viewSettAct, SIGNAL(triggered()), this, SLOT(slotViewSettWindow()));
-*/
+
     instrMenu = menuBar()->addMenu(tr("Instruments"));
     gradeAct = new QAction(tr("&grade"), this);
     gradeAct->setShortcut(tr("Ctrl+g"));//
@@ -259,22 +240,13 @@ void MainWindow::setMenu()
     connect(gradeAct, SIGNAL(triggered()), this, SLOT(slotGrade()));
 
     updLocCatsAct = new QAction(tr("&Update Local Cats"), this);
-    //updLocCatsAct->setShortcut(tr("Ctrl+g"));//
     updLocCatsAct->setStatusTip(tr("Update Local Cats"));//
     instrMenu->addAction(updLocCatsAct);
     connect(updLocCatsAct, SIGNAL(triggered()), this, SLOT(slotUpdLocCats()));
-
-    //spreadsheet->addAction(add2seqAtc);
-    //spreadsheet->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
 void MainWindow::setWidgets()
 {
-//    mainTree = new QTreeWidget(this);
-//    mainTree = qFindChild<QTreeWidget*>(this, "treeWidget");
-//    mainTree->setColumnCount();
-
-
     mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
     mainTable->setColumnCount(11);
     QStringList vhLabelsT;
@@ -298,8 +270,6 @@ void MainWindow::setWidgets()
 
     mainTable->setContextMenuPolicy(Qt::ActionsContextMenu);
     mainTable->addAction(add2seqAtc);
-
-    //mainTable->column(6);
 
     sysTimeEdit = new QLineEdit(this);
     sysTimeEdit->setMaximumWidth(150);
@@ -341,12 +311,7 @@ void MainWindow::setWidgets()
     viewSettButton = new QPushButton(tr("sett"));
     mainToolBar->addWidget(viewSettButton);
     connect(viewSettButton, SIGNAL(clicked()), this, SLOT(slotViewSettWindow()));
-/*
-    gradeButton = new QPushButton(tr("grade"));
-    gradeButton->setIcon(QIcon("icons/grade.png"));
-    mainToolBar->addWidget(gradeButton);
-    connect(gradeButton, SIGNAL(clicked()), this, SLOT(slotGrade()));
-*/
+
     mainToolBar->addSeparator();
 
     quitButton = new QPushButton(tr("Quit"));
@@ -354,10 +319,8 @@ void MainWindow::setWidgets()
     mainToolBar->addWidget(quitButton);
     connect(quitButton, SIGNAL(clicked()), this, SLOT(slotExit()));
 
-
     connect(mainTable->horizontalHeader(),SIGNAL(sectionClicked(int)),
                   this,SLOT(slotHeaderClicked(int)));
-
 
     settDock = new QDockWidget("Settings", this, Qt::Widget);
 
@@ -368,10 +331,7 @@ void MainWindow::setWidgets()
 
     viewMenu->addAction(settDock->toggleViewAction());
 
-addDockWidget(Qt::NoDockWidgetArea, settDock);
-
-
-//
+    addDockWidget(Qt::NoDockWidgetArea, settDock);
 
     infoDock = new QDockWidget("Information", this, Qt::Widget);
     infoDock->setMinimumSize(100, 200);
@@ -445,8 +405,6 @@ addDockWidget(Qt::NoDockWidgetArea, settDock);
     addDockWidget(Qt::RightDockWidgetArea, infoDock);
     infoDock->setFloating(0);
     viewMenu->addAction(infoDock->toggleViewAction());
-    //infoDock->hide();
-    //settDock->hide();
 }
 
 void MainWindow::slotOpenResFileWindow()
@@ -477,10 +435,6 @@ void MainWindow::slotInitResTable()
     QTableWidgetItem *newItem;
     sz = rFile.size();
     resRecord *rRec;
-
-    //mainTable->clearSelection();
-    //mainTable->clearContents();
-    //mainTable->setRowCount(0);
 
     for(i=0; i<sz; i++)
     {
@@ -545,13 +499,8 @@ void MainWindow::slotInitResTable()
 
 void MainWindow::slotHeaderClicked(int colNum)
 {
-    //QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(colNum));
-
-    //mainTable->sortByColumn(colNum);
-//    mainTable->ro
     if(updatesEnabled())tabUpd->stop();
     timeUpd->stop();
-
 
     switch(colNum)
     {
@@ -576,12 +525,9 @@ void MainWindow::slotHeaderClicked(int colNum)
 
 void MainWindow::setSettings()
 {
-    //settWindow settW;
     sett = new QSettings("./epha.ini", QSettings::IniFormat);
 
     if(sett==NULL) return;
-
-
 
 //general
     settW->expSpinBox->setValue(sett->value("general/expTime", 0.1).toInt());
@@ -609,8 +555,6 @@ void MainWindow::setSettings()
     miriadeProcData.folder = settG.value("miriadeProcData/folder", "./").toString();
     miriadeProcData.waitTime = settG.value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
-
-    //settDock->show();
 }
 
 void MainWindow::saveSettings()
@@ -636,7 +580,6 @@ void MainWindow::saveSettings()
 
 void MainWindow::slotViewSettWindow()
 {
-    //QMessageBox::information(0,"debug","view sett",QMessageBox::Ok);
     if(settDock->isHidden())settDock->show();
     else settDock->hide();
 }
@@ -644,6 +587,9 @@ void MainWindow::slotViewSettWindow()
 void MainWindow::slotViewNextObj()
 {
     QList <QTableWidgetItem*> itemsSel;
+
+//    timeUpd->stop();
+//    tabUpd->stop();
 
     itemsSel = mainTable->selectedItems();
 
@@ -710,7 +656,6 @@ void MainWindow::slotViewNextObj()
             }
 
             sz = curTasks.size();
-            tlRecord *tRec = new tlRecord;
             expLen =0;
             for(i=0; i<sz; i++)
             {
@@ -728,6 +673,11 @@ void MainWindow::slotViewNextObj()
             }
             taskName = curTasks.at(i);
             qDebug() << QString("taskName: %1").arg(taskName);
+
+            if(QString().compare(taskName, "Planets")==0)
+            {
+                qDebug() << QString("taskName: %1").arg(taskName);
+            }
 
             sz = indexes.size();
             for(i=sz-1; i>=0; i--)
@@ -748,9 +698,6 @@ void MainWindow::slotViewNextObj()
         srand(time(NULL));
         expRnd = rand() % expLen;
 
-        //qDebug() << QString("expLen: %1\nexpRnd: %2\n").arg(expLen).arg(expRnd);
-
-
         expLen = 0;
         for(i=0; i<sz; i++)
         {
@@ -765,6 +712,8 @@ void MainWindow::slotViewNextObj()
             expLen += expCur;
         }
 
+//        timeUpd->start();
+//        tabUpd->start();
 
 }
 
@@ -785,7 +734,6 @@ void MainWindow::slotViewPrevObj()
 
     mainTable->selectRow(p);
     logItemList.removeLast();
-//    itemList.removeLast();
 }
 
 void MainWindow::sortRa()
@@ -835,7 +783,6 @@ void MainWindow::slotUpdateTime()
     dat2JD_time(&jDay, sysDateTime.date().year(), sysDateTime.date().month(), sysDateTime.date().day(), sysDateTime.time().hour(), sysDateTime.time().minute(), sysDateTime.time().second());
     jdTimeStr = QString("%1 | %2").arg(jDay, 13, 'f', 5).arg(sysDateTime.date().toJulianDay());
 
-    //sa.init_time(jDay);
     sa.initVisualProp(jDay);
 
     UTC2s(jDay, lam, &s);
@@ -861,9 +808,6 @@ void MainWindow::slotUpdateTime()
 
     minMagn = settW->magn0SpinBox->value();
     maxMagn = settW->magn1SpinBox->value();
-
-
-
 
     sz = mainTable->rowCount();
     for(i=0;i<sz;i++)
@@ -892,27 +836,21 @@ void MainWindow::slotUpdateTime()
         mainTable->setRowHidden(i, !res);
     }
 
-
     if(updaterEnabled)
     {
         expTime = settW->expSpinBox->value()*1000;
-        //qDebug() << QString("%1:%2\n").arg(tabEla->elapsed()).arg(expTime);
         ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
     }
 
-    timeUpd->start(1000);
+    timeUpd->start(10000);
 }
 
 void MainWindow::slotUpdateTable()
 {
-    //QMessageBox::information(0,"debug","ok",QMessageBox::Ok);//
-//    double jDay, lam, s;
-
     int i;
     int sz = rFile.recList.size();
     double ra, dec, dT;
     dT = jDay - rFile.jdUTC;
-    qDebug() << QString("dT: %1\n").arg(dT);
     resRecord *rRec;
     QTableWidgetItem *newItem;
     for(i=0; i<sz; i++)
@@ -928,23 +866,17 @@ void MainWindow::slotUpdateTable()
         newItem->setText(QString("%1").arg(mas_to_damas(grad_to_mas(dec), " ", 2)));
     }
 
-
     if(updaterEnabled)
     {
         slotViewNextObj();
         tabUpd->start(settW->expSpinBox->value()*1000);
         tabEla->restart();
     }
-
-
 }
 
 void MainWindow::slotGrade()
 {
     sa.set_opt(settW->ra0SpinBox->value(), settW->ra0SpinBox->value(), settW->dec0SpinBox->value(), settW->dec1SpinBox->value(), settW->magn0SpinBox->value(), settW->magn1SpinBox->value());
-    //sa.initVisualProp(jDay);
-
-//    timeUpd->stop();
     slotClearTable();
     sa.grade(rFile);
     slotInitResTable();
@@ -969,10 +901,8 @@ void MainWindow::slotAdd2Seq()
 {
 }
 
-
 void MainWindow::slotStatBarUpdate()
 {
-        //statusBar()->showMessage(timeStr);
         sysTimeEdit->setText(datetimeStr);
         jdTimeEdit->setText(jdTimeStr);
         starTimeEdit->setText(QString("s: %1").arg(starTimeStr));
@@ -1009,13 +939,9 @@ void MainWindow::slotUpdateMiri()
     sJD = QString("%1").arg(sa.obs_pos->ctime.UTC(), 15, 'f',7);
 
     outerArguments << QString("-ep=%1").arg(sJD);
-    //outerArguments << QString("-ep=%1").arg(time, 15, 'f',7);
-
-
 
     if(QString().compare(catNameLabel->text(), "Planets", Qt::CaseInsensitive)==0) outerArguments << "-type=planet";
     if(QString().compare(catNameLabel->text(), "mpccat", Qt::CaseInsensitive)==0) outerArguments << "-type=aster";
-
 
     outerArguments << QString("-observer=%1").arg(sa.obs_pos->getObsCode());
 
@@ -1051,27 +977,19 @@ void MainWindow::slotUpdateMiri()
             return;
         }
 
-
         raLabel->setText(mas_to_hms(grad_to_mas(mpephR.ra), " ", 1));
         decLabel->setText(mas_to_damas(grad_to_mas(mpephR.de), " ", 2));
         magnLabel->setText(QString("%1").arg(mpephR.Vmag, 6, 'f', 2));
         muraLabel->setText(QString("%1").arg(mpephR.muRaCosDe, 6, 'f', 0));
         mudecLabel->setText(QString("%1").arg(mpephR.muDe, 6, 'f', 0));
-
-
-
-
     }
-
 
     return;
 }
 
 void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QTableWidgetItem *previous)
 {
-    //QMessageBox::information(0, "headerClicked", QString("header num:%1").arg(current->row()));
     if(current==NULL) return;
-    //if(previous!=NULL) itemList << previous;
 
     nameLabel->setText(mainTable->item(current->row(), 1)->text());
     raLabel->setText(mainTable->item(current->row(), 2)->text());
@@ -1088,24 +1006,16 @@ void MainWindow::on_tableWidget_currentItemChanged(QTableWidgetItem *current, QT
 
 void MainWindow::slotAddLog()
 {
-    QString timeStr;
-
-
     logStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(sysTimeEdit->text()).arg(nameLabel->text(), -16).arg(raLabel->text()).arg(decLabel->text()).arg(magnLabel->text()).arg(expLabel->text()).arg(tasksLabel->text()).arg(catNameLabel->text());
     logStm.flush();
 }
 
 void MainWindow::on_tableWidget_itemActivated(QTableWidgetItem *item)
 {
-    //if(item!=NULL) itemList << item;
 }
 
-void MainWindow::slotExit()//auoia ec i?eei?aiey
+void MainWindow::slotExit()
 {
-    //QMessageBox::information(0, "slotExit", QString("slotExit"));
-    //qDebug() << "exit\n";
-    //slotSaveDefaultPanels();
-    //slotSaveSettings();
     saveSettings();
     QApplication::exit();
 };
@@ -1113,5 +1023,4 @@ void MainWindow::slotExit()//auoia ec i?eei?aiey
 void MainWindow::closeEvent(QCloseEvent *event)
  {
     slotExit();
-
  }
