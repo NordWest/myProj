@@ -16,7 +16,7 @@
 
 #ifndef SSCATFB_H
 #define SSCATFB_REC 258
-#define SSCATFB_NAME_KPOS 5
+#define SSCATFB_NAME_KPOS 6
 /*
 #ifndef SSCAT_REC_C
 #define SSCAT_REC_C

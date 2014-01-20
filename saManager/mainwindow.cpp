@@ -294,7 +294,7 @@ void MainWindow::slotAddFromCatObj()
 
     if(sz==0)
     {
-        QMessageBox::warning(this, tr("Del task"), tr("Please, select proper task"), QMessageBox::Ok);
+        QMessageBox::warning(this, tr("AddFromCatObj"), tr("Please, select proper task"), QMessageBox::Ok);
     }
     else
     {
