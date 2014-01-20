@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle("EphA");
     datetimeStr = "";
 
+    tabEla = new QElapsedTimer;
+
     logFile.setFileName("./epha.log");
     logFile.open(QFile::WriteOnly | QFile::Truncate);
     logStm.setDevice(&logFile);
@@ -50,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     timeUpd->setSingleShot(0);
     slotUpdateTime();
 
-    tabEla = new QElapsedTimer;
+
 
     rFile.init("./res.lst");
     slotInitResTable();
@@ -86,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendCurObject()));
 
     slotGrade();
+    tabEla->start();
 }
 
 void MainWindow::sessionOpened()
@@ -795,7 +798,7 @@ void MainWindow::slotUpdateTime()
     int expTime;
 
     QString raStr;
-    QTableWidgetItem *newItem;
+    QTableWidgetItem *tItem;
     lam = sa.obs_pos->obs->record->Long;
 
     sysDateTime = QDateTime().currentDateTime();
@@ -810,11 +813,44 @@ void MainWindow::slotUpdateTime()
     starTimeStr = getStrFromS(s*86400.0/(2.0*PI), ":", 0);
 
     slotStatBarUpdate();
+    if(tabEla->elapsed()>=settW->expSpinBox->value()*1000)
+    {
+        slotUpdateTable();
+        tabEla->restart();
+    }
+
+
+
+
+    if(updaterEnabled)
+    {
+        expTime = settW->expSpinBox->value()*1000;
+        //ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
+    }
+
+    timeUpd->start(1000);
+}
+
+void MainWindow::slotUpdateTable()
+{
+    int i, sz, cs, res;
+    double minRa, maxRa;
+    double minDec, maxDec;
+    double minMagn, maxMagn;
+    double meriDist;
+    double ra, dec, dT, magn;
+    QString raStr;
+    resRecord *rRec;
+    QTableWidgetItem *tItem;
+
+    dT = jDay - rFile.jdUTC;
+
+    minRa = rad2grad(s)/15.0 - settW->dMeriSpinBox->value();
+    maxRa = rad2grad(s)/15.0 + settW->dMeriSpinBox->value();
 
     if(settW->isAutoRA->isChecked())
     {
-        minRa = rad2grad(s)/15.0 - settW->dMeriSpinBox->value();
-        maxRa = rad2grad(s)/15.0 + settW->dMeriSpinBox->value();
+        minRa = rad2grad(s)/15.0 + settW->dMeriSpinBox->value();
         if(minRa<0.0) minRa+=24;
         if(maxRa>24.0) minRa-=24;
     }
@@ -830,12 +866,22 @@ void MainWindow::slotUpdateTime()
     minMagn = settW->magn0SpinBox->value();
     maxMagn = settW->magn1SpinBox->value();
 
-    sz = mainTable->rowCount();
+    sz = rFile.recList.size();//mainTable->rowCount();
     for(i=0;i<sz;i++)
     {
         res = 0;
         cs = 0;
         if(maxRa<=minRa) cs = 1;
+
+        rRec = rFile.at(i);
+        dec = rRec->dec + mas_to_grad(rRec->muDec*86400.0*dT);
+        ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*86400.0*dT);
+        rRec->getRaDec(dT, ra, dec);
+
+        tItem = mainTable->item(i, 2);
+        tItem->setText(QString("%1").arg(mas_to_hms(grad_to_mas(ra), " ", 1)));
+        tItem = mainTable->item(i, 3);
+        tItem->setText(QString("%1").arg(mas_to_damas(grad_to_mas(dec), " ", 2)));
 
         raStr = mainTable->item(i, 2)->text();
         ra = mas_to_grad(hms_to_mas(raStr, " "))/15.0;
@@ -847,8 +893,8 @@ void MainWindow::slotUpdateTime()
         if(meriDist<-12) meriDist+=24;
         if(meriDist>12) meriDist-=24;
 
-        newItem = mainTable->item(i, 6);
-        newItem->setText(QString("%1").arg(meriDist, 6, 'f', 2));
+        tItem = mainTable->item(i, 6);
+        tItem->setText(QString("%1").arg(meriDist, 6, 'f', 2));
 
         res = (dec<=maxDec)&&(dec>=minDec)&&(magn<=maxMagn)&&(magn>=minMagn);
 
@@ -857,42 +903,8 @@ void MainWindow::slotUpdateTime()
         mainTable->setRowHidden(i, !res);
     }
 
-    if(updaterEnabled)
-    {
-        expTime = settW->expSpinBox->value()*1000;
-        //ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
-    }
+    tabEla->restart();
 
-    timeUpd->start(1000);
-}
-
-void MainWindow::slotUpdateTable()
-{
-    int i;
-    int sz = rFile.recList.size();
-    double ra, dec, dT;
-    dT = jDay - rFile.jdUTC;
-    resRecord *rRec;
-    QTableWidgetItem *newItem;
-    for(i=0; i<sz; i++)
-    {
-        rRec = rFile.at(i);
-        dec = rRec->dec + mas_to_grad(rRec->muDec*86400.0*dT);
-        ra = rRec->ra + mas_to_grad(rRec->muRacosD/cos(grad2rad(dec))*86400.0*dT);
-        rRec->getRaDec(dT, ra, dec);
-
-        newItem = mainTable->item(i, 2);
-        newItem->setText(QString("%1").arg(mas_to_hms(grad_to_mas(ra), " ", 1)));
-        newItem = mainTable->item(i, 3);
-        newItem->setText(QString("%1").arg(mas_to_damas(grad_to_mas(dec), " ", 2)));
-    }
-
-    if(updaterEnabled)
-    {
-        //slotViewNextObj();
-        tabUpd->start(settW->expSpinBox->value()*1000);
-        //tabEla->restart();
-    }
 }
 
 void MainWindow::slotGrade()

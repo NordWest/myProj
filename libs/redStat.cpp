@@ -4933,8 +4933,8 @@ int mpephRec::fromMiriStr(QString inStr)
     elS = opers.at(8);Vmag = elS.toDouble();
     elS = opers.at(9);phase=elS.toDouble();//phase [deg]
     elS = opers.at(10);elong=elS.toDouble();//elongation [deg]
-    elS = opers.at(11);muRaCosDe=elS.toDouble()*1000.0*60.0;//mu_ra*cos(dec) [mas/min]
-    elS = opers.at(12);muDe=elS.toDouble()*1000.0*60.0;//mu_de [mas/min]
+    elS = opers.at(11);muRaCosDe=elS.toDouble()*1000.0;//mu_ra*cos(dec) [mas/min]
+    elS = opers.at(12);muDe=elS.toDouble()*1000.0;//mu_de [mas/min]
     elS = opers.at(13);Vr=elS.toDouble();//v_r [km/s]
 
     elS = opers.at(9);num=QString(elS);//object number
