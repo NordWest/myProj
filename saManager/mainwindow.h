@@ -57,6 +57,7 @@ private:
     QAction *catalogsAct;
 
     QPushButton *addTaskBtn;
+    QPushButton *edtTaskBtn;
     QPushButton *delTaskBtn;
     QPushButton *saveBtn;
     QPushButton *closeBtn;
@@ -77,6 +78,7 @@ private slots:
     void slotSaveAsTaskList();
 
     void slotAddTask();
+    void slotEdtTask();
     void slotDelTask();
     void slotViewCatalogs();
 

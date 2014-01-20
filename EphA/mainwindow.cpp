@@ -44,8 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tabUpd, SIGNAL(timeout()), this, SLOT(slotUpdateTable()));
 
     updaterEnabled = 0;
-    ui->expProgBar->setRange(0, 100);
-    ui->expProgBar->setValue(0);
+    //ui->expProgBar->setRange(0, 100);
+    //ui->expProgBar->setValue(0);
 
     timeUpd->setSingleShot(0);
     slotUpdateTime();
@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
         sessionOpened();
     }
 
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendNextObject()));
+    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(sendCurObject()));
 
     slotGrade();
 }
@@ -156,7 +156,13 @@ void MainWindow::sendCurObject()
 
     clientConnection->write(block);
     clientConnection->disconnectFromHost();
+
+    QTableWidgetItem* itemSel = mainTable->item(mainTable->currentRow(), 11);
+    int cVol = itemSel->text().toInt();
+    itemSel->setText(QString("%1").arg(++cVol));
+    if(anextButton->isChecked()) slotViewNextObj();
 //! [5]
+
 }
 
 void MainWindow::sendNextObject()
@@ -228,6 +234,11 @@ void MainWindow::setMenu()
     viewMenu->addAction(clearAct);
     connect(clearAct, SIGNAL(triggered()), this, SLOT(slotClearTable()));
 
+    clrCountersAct = new QAction(tr("&clear counters"), this);
+    clrCountersAct->setStatusTip(tr("clear counters"));//
+    viewMenu->addAction(clrCountersAct);
+    connect(clrCountersAct, SIGNAL(triggered()), this, SLOT(slotClearCounters()));
+
     add2seqAtc = new QAction(tr("&Add to seq list"), this);
     viewMenu->addAction(add2seqAtc);
     connect(add2seqAtc, SIGNAL(triggered()), this, SLOT(slotAdd2Seq()));
@@ -248,7 +259,7 @@ void MainWindow::setMenu()
 void MainWindow::setWidgets()
 {
     mainTable = qFindChild<QTableWidget*>(this, "tableWidget");
-    mainTable->setColumnCount(11);
+    mainTable->setColumnCount(12);
     QStringList vhLabelsT;
     vhLabelsT << QString(tr("   "));
     vhLabelsT << QString(tr("Name"));
@@ -261,6 +272,7 @@ void MainWindow::setWidgets()
     vhLabelsT << QString(tr("mu_dec"));
     vhLabelsT << QString(tr("Exp"));
     vhLabelsT << QString(tr("Catalog"));
+    vhLabelsT << QString(tr("Counter"));
 
     mainTable->setHorizontalHeaderLabels(vhLabelsT);
     mainTable->setColumnWidth(0, 20);
@@ -287,7 +299,7 @@ void MainWindow::setWidgets()
     statusBar()->addWidget(starTimeEdit);
 
     mainToolBar = qFindChild<QToolBar*>(this, "mainToolBar");
-
+/*
     startButton = new QPushButton(tr("start"));
     mainToolBar->addWidget(startButton);
     connect(startButton, SIGNAL(clicked()), this, SLOT(slotStartUpdater()));
@@ -295,6 +307,11 @@ void MainWindow::setWidgets()
     stopButton = new QPushButton(tr("stop"));
     mainToolBar->addWidget(stopButton);
     connect(stopButton, SIGNAL(clicked()), this, SLOT(slotStopUpdater()));
+*/
+    anextButton = new QPushButton(tr("Autonext"));
+    anextButton->setCheckable(1);
+    mainToolBar->addWidget(anextButton);
+    //connect(startButton, SIGNAL(clicked()), this, SLOT(slotStartUpdater()));
 
     mainToolBar->addSeparator();
 
@@ -485,6 +502,10 @@ void MainWindow::slotInitResTable()
         newItem->setTextAlignment(Qt::AlignLeft);
         mainTable->setItem(i, 10, newItem);
 
+        newItem = new QTableWidgetItem(QString("%1").arg(0));
+        newItem->setTextAlignment(Qt::AlignCenter);
+        mainTable->setItem(i, 11, newItem);
+
     }
 
     slotUpdateTable();
@@ -586,23 +607,21 @@ void MainWindow::slotViewSettWindow()
 
 void MainWindow::slotViewNextObj()
 {
-    QList <QTableWidgetItem*> itemsSel;
-
-//    timeUpd->stop();
-//    tabUpd->stop();
-
-    itemsSel = mainTable->selectedItems();
-
     QModelIndex curIndexItem;
     int curRow, i, sz, j;
+    int expLen, expRnd, expCur, taskNum;
+    QString taskName;
+    QString textAt;
+    QStringList curTasks, tTasks;
+    int curCount, mCount, tCount;
+
     sz = mainTable->rowCount();
     curIndexItem = mainTable->currentIndex();
     curRow = curIndexItem.row();
     logListItem *curItem = new logListItem;
-    curItem->item = itemsSel.at(0);
+    curItem->item = mainTable->selectedItems().first();//itemsSel.at(0);
     curItem->timeStamp = QDateTime().currentDateTime();
     logItemList << curItem;
-    //QMessageBox::information(0, "slotViewNextObj", QString("curRow:%1").arg(curRow));
     int ordType = settW->orderCombo->currentIndex();
     QList <int> indexes;
     if(ordType==0)
@@ -610,110 +629,112 @@ void MainWindow::slotViewNextObj()
         for(i=curRow+1; i<sz; i++)
         {
             if(mainTable->isRowHidden(i)) continue;
+            curCount = mainTable->item(i, 11)->text().toInt();
+            tTasks = mainTable->item(i, 5)->text().split(",");
+            mCount = 0;
+            for(j=0; j<tTasks.size(); j++)
+            {
+                tCount = sa.task_list.getTaskName(tTasks.at(j))->NinN;
+                if(mCount<tCount) mCount = tCount;
+            }
+
+            if(curCount>=mCount) continue;
             mainTable->selectRow(i);
             return;
         }
     }
 
-    int expLen, expRnd, expCur, taskNum;
-    QString taskName;
-
-
-        QString textAt;
-        QStringList curTasks, tTasks;
-
-        sz = mainTable->rowCount();
-        for(i=0; i<sz; i++)
+    sz = mainTable->rowCount();
+    for(i=0; i<sz; i++)
+    {
+        if(mainTable->isRowHidden(i)) continue;
+        curCount = mainTable->item(i, 11)->text().toInt();
+        tTasks = mainTable->item(i, 5)->text().split(",");
+        mCount = 0;
+        for(j=0; j<tTasks.size(); j++)
         {
-            if(mainTable->isRowHidden(i)) continue;
-            indexes << i;
-            if(ordType==2)
-            {
-                tTasks = mainTable->item(i, 5)->text().split(",");
-                for(j=0; j<tTasks.size(); j++)
-                {
-                    if(!curTasks.contains(tTasks.at(j))) curTasks << tTasks.at(j);
-                }
-            }
+            tCount = sa.task_list.getTaskName(tTasks.at(j))->NinN;
+            if(mCount<tCount) mCount = tCount;
         }
 
-        sz = logItemList.size();
-        for(i=0; i<sz; i++)
-        {
-            indexes.removeOne(logItemList.at(i)->item->row());
-        }
+        if(curCount>=mCount) continue;
+        indexes << i;
+    }
 
-        if(ordType==2)
-        {
-            sz = indexes.size();
-            for(i=0; i<sz; i++)
-            {
-                tTasks = mainTable->item(indexes.at(i), 5)->text().split(",");
-                for(j=0; j<tTasks.size(); j++)
-                {
-                    if(!curTasks.contains(tTasks.at(j))) curTasks << tTasks.at(j);
-                }
-            }
-
-            sz = curTasks.size();
-            expLen =0;
-            for(i=0; i<sz; i++)
-            {
-                expLen += sa.task_list.getTaskName(curTasks.at(i))->exp;
-            }
-            srand(time(NULL));
-            expRnd = rand() % expLen;
-            expLen = 0;
-            for(i=0; i<sz; i++)
-            {
-                expCur = sa.task_list.getTaskName(curTasks.at(i))->exp;
-                if((expLen+expCur)>expRnd) break;
-                expLen += expCur;
-
-            }
-            taskName = curTasks.at(i);
-            qDebug() << QString("taskName: %1").arg(taskName);
-
-            if(QString().compare(taskName, "Planets")==0)
-            {
-                qDebug() << QString("taskName: %1").arg(taskName);
-            }
-
-            sz = indexes.size();
-            for(i=sz-1; i>=0; i--)
-            {
-                if(!mainTable->item(indexes[i], 5)->text().split(",").contains(taskName)) indexes.removeAt(i);
-            }
-        }
-
-
+    curTasks.clear();
+/*
+    sz = logItemList.size();
+    for(i=0; i<sz; i++)
+    {
+        indexes.removeAt(logItemList.at(i)->item->row());
+    }
+*/
+    if(ordType==2)
+    {
         sz = indexes.size();
-        expLen = 0;
         for(i=0; i<sz; i++)
         {
-            textAt = mainTable->item(indexes.at(i), 9)->text();
-            expLen += textAt.toInt();
+            tTasks = mainTable->item(indexes.at(i), 5)->text().split(",");
+            for(j=0; j<tTasks.size(); j++)
+            {
+                if(!curTasks.contains(tTasks.at(j))) curTasks << tTasks.at(j);
+            }
         }
 
+ //       qDebug() << QString("curTasks: %1\n").arg(curTasks.join(","));
+
+        sz = curTasks.size();
+        expLen =0;
+        for(i=0; i<sz; i++)
+        {
+            expLen += sa.task_list.getTaskName(curTasks.at(i))->exp;
+        }
         srand(time(NULL));
         expRnd = rand() % expLen;
-
         expLen = 0;
         for(i=0; i<sz; i++)
         {
-
-            expCur = mainTable->item(indexes.at(i), 9)->text().toInt();
-            if((expCur+expLen)>expRnd)
-            {
-                qDebug() << QString("selectRow: %1\n").arg(indexes.at(i));
-                mainTable->selectRow(indexes.at(i));
-                break;
-            }
+            expCur = sa.task_list.getTaskName(curTasks.at(i))->exp;
+            if((expLen+expCur)>expRnd) break;
             expLen += expCur;
-        }
 
-//        timeUpd->start();
-//        tabUpd->start();
+        }
+        taskName = curTasks.at(i);
+//        qDebug() << QString("taskName: %1").arg(taskName);
+
+        sz = indexes.size();
+        for(i=sz-1; i>=0; i--)
+        {
+            QString tasks = mainTable->item(indexes[i], 5)->text();
+            if(!tasks.split(",").contains(taskName)) indexes.removeAt(i);
+        }
+    }
+
+
+    sz = indexes.size();
+    expLen = 0;
+    for(i=0; i<sz; i++)
+    {
+        textAt = mainTable->item(indexes.at(i), 9)->text();
+        expLen += textAt.toInt();
+    }
+
+    srand(time(NULL));
+    expRnd = rand() % expLen;
+
+    expLen = 0;
+    for(i=0; i<sz; i++)
+    {
+
+        expCur = mainTable->item(indexes.at(i), 9)->text().toInt();
+        if((expCur+expLen)>expRnd)
+        {
+ //           qDebug() << QString("selectRow: %1\n").arg(indexes.at(i));
+            mainTable->selectRow(indexes.at(i));
+            break;
+        }
+        expLen += expCur;
+    }
 
 }
 
@@ -839,10 +860,10 @@ void MainWindow::slotUpdateTime()
     if(updaterEnabled)
     {
         expTime = settW->expSpinBox->value()*1000;
-        ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
+        //ui->expProgBar->setValue(100.0*tabEla->elapsed()/(expTime*1.0));
     }
 
-    timeUpd->start(10000);
+    timeUpd->start(1000);
 }
 
 void MainWindow::slotUpdateTable()
@@ -868,9 +889,9 @@ void MainWindow::slotUpdateTable()
 
     if(updaterEnabled)
     {
-        slotViewNextObj();
+        //slotViewNextObj();
         tabUpd->start(settW->expSpinBox->value()*1000);
-        tabEla->restart();
+        //tabEla->restart();
     }
 }
 
@@ -897,6 +918,13 @@ void MainWindow::slotClearTable()
     rFile.clear();
 }
 
+void MainWindow::slotClearCounters()
+{
+    int i, sz;
+    sz = mainTable->rowCount();
+    for(i=0; i<sz; i++) mainTable->item(i, 11)->setText("0");
+}
+
 void MainWindow::slotAdd2Seq()
 {
 }
@@ -907,7 +935,7 @@ void MainWindow::slotStatBarUpdate()
         jdTimeEdit->setText(jdTimeStr);
         starTimeEdit->setText(QString("s: %1").arg(starTimeStr));
 }
-
+/*
 void MainWindow::slotStartUpdater()
 {
     updaterEnabled = 1;
@@ -924,7 +952,7 @@ void MainWindow::slotStopUpdater()
     ui->expProgBar->setValue(0.0);
     updaterEnabled = 0;
 }
-
+*/
 void MainWindow::slotUpdateMiri()
 {
     QProcess outerProcess;

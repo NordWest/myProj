@@ -90,6 +90,10 @@ void MainWindow::setupWidgets()
     toolsB->addWidget(delTaskBtn);
     connect(delTaskBtn, SIGNAL(clicked()), this, SLOT(slotDelTask()));
 
+    edtTaskBtn = new QPushButton("Edit Task");
+    toolsB->addWidget(edtTaskBtn);
+    connect(edtTaskBtn, SIGNAL(clicked()), this, SLOT(slotEdtTask()));
+
     toolsB->addSeparator();
 
     saveBtn = new QPushButton("Save");
@@ -530,8 +534,6 @@ void MainWindow::slotUpdateLocalCat()
         outFile.setFileName(locCatName);
         outFile.open(QFile::WriteOnly | QFile::Truncate);
         outStm.setDevice(&outFile);
-        //locCat.init(locCatName.toAscii().data());
-        //locCat.Free();
         sz = objTable->rowCount();
         for(i=0; i<sz; i++)
         {
@@ -546,8 +548,6 @@ void MainWindow::slotUpdateLocalCat()
 
                 continue;
             }
-            //globCat.record->copyTo(locCat.record);
-            //locCat.Insert(QString("%1\n").arg(globCat.str).toAscii().data(), 0);
             outStm << globCat.str;
         }
         outFile.close();
@@ -754,23 +754,80 @@ void MainWindow::slotAddTask()
     }
 }
 
+void MainWindow::slotEdtTask()
+{
+    int i, sz;
+    addTaskDlg addtDlg;
+    sz = sArea.cat_list.size();
+    for(i=0; i<sz; i++)
+    {
+        addtDlg.catName->insertItem(i, sArea.cat_list.at(i)->name);
+    }
+    tlRecord* tlRec;
+    QList <QTableWidgetItem*> itemList;
+    itemList = taskTable->selectedItems();
+    if(itemList.size()==0)
+    {
+        QMessageBox::warning(this, tr("Del task"), tr("Please, select proper task"), QMessageBox::Ok);
+    }
+    else
+    {
+        tlRec = sArea.task_list.recList.at(itemList.at(0)->row());
+        addtDlg.name->setText(tlRec->name);
+        for(i=0; i<addtDlg.catName->count(); i++)
+        {
+            qDebug() << QString("cats: %1 - %2\n").arg(addtDlg.catName->itemText(i)).arg(tlRec->catName);
+            if(QString().compare(addtDlg.catName->itemText(i), tlRec->catName)==0)
+            {
+                addtDlg.catName->setCurrentIndex(i);
+                break;
+            }
+        }
+        addtDlg.expSlider->setValue(tlRec->exp);
+        addtDlg.numN->setValue(tlRec->NinN);
+        addtDlg.numTot->setValue(tlRec->Ntot);
+        addtDlg.meriSlider->setValue(tlRec->dRA);
+        addtDlg.tExc->setValue(tlRec->texc);
+        addtDlg.descText->setText(tlRec->desc);
+
+        if(addtDlg.exec()==QDialog::Accepted)
+        {
+//            tlRec.flag_active = 1;
+            tlRec->name = addtDlg.name->text();
+            tlRec->catName = addtDlg.catName->currentText();
+            tlRec->exp = addtDlg.expSlider->value();
+            tlRec->NinN = addtDlg.numN->value();
+            tlRec->Ntot = addtDlg.numTot->value();
+            tlRec->dRA = addtDlg.meriSlider->value();
+            tlRec->texc = addtDlg.tExc->value();
+            tlRec->desc = addtDlg.descText->text();
+            //tlRec.dirPath = QString("%1/%2").arg(workPath).arg(tlRec.name);
+            //sArea.task_list.addRec(tlRec);
+            slotUpdateTaskList();
+        }
+    }
+}
+
 void MainWindow::slotDelTask()
 {
     QList <QTableWidgetItem*> itemList;
     itemList = taskTable->selectedItems();
     if(itemList.size()==0)
     {
-        QMessageBox::warning(this, tr("Del task"),
-                                                              tr("Please, select proper task"),
-                                                              QMessageBox::Ok);
+        QMessageBox::warning(this, tr("Del task"), tr("Please, select proper task"), QMessageBox::Ok);
     }
     else
     {
-        for(int i=0; i<itemList.size(); i++)
+        if(QMessageBox::warning(this, tr("Remove task"), tr("Are you sure?!!"), QMessageBox::Yes | QMessageBox::No)==QMessageBox::Yes)
         {
-            sArea.task_list.recList.removeAt(itemList.at(i)->row());
+                //QMessageBox::information(this, "Task removed", "Congragulations!", QMessageBox::Ok);
+
+            for(int i=0; i<itemList.size(); i++)
+            {
+                sArea.task_list.recList.removeAt(itemList.at(i)->row());
+            }
+            slotUpdateTaskList();
         }
-        slotUpdateTaskList();
     }
 }
 

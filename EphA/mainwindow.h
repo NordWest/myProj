@@ -86,10 +86,10 @@ private slots:
     void slotUpdLocCats();
 
     void slotAddLog();
-
+/*
     void slotStartUpdater();
     void slotStopUpdater();
-
+*/
     void slotUpdateMiri();
 
     void slotOpenResFileWindow();
@@ -99,6 +99,7 @@ private slots:
     void slotViewNextObj();
     void slotViewPrevObj();
     void slotClearTable();
+    void slotClearCounters();
 
     void slotAdd2Seq();
 
@@ -128,6 +129,7 @@ private:
     QToolBar *mainToolBar;
     QPushButton *nextButton;
     QPushButton *prevButton;
+    QPushButton *anextButton;
     QPushButton *startButton;
     QPushButton *stopButton;
     QPushButton *gradeButton;
@@ -160,6 +162,7 @@ private:
     QMenu *instrMenu;
     QAction *gradeAct;
     QAction *updLocCatsAct;
+    QAction *clrCountersAct;
 
     QDockWidget *infoDock;
     QWidget *infoWidget;

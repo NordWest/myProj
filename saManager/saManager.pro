@@ -6,7 +6,8 @@
 
 QT       += core gui
 
-unix:TARGET = ~/bin/saManager
+#unix:TARGET = ~/bin/saManager
+unix:TARGET = ../../lab/EphA/saManager
 win32:TARGET = ./../../../lab/EphA/saManager
 TEMPLATE = app
 

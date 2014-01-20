@@ -12,7 +12,7 @@
 #endif
 
 #ifndef ASTRO_H
-#include "astro.h"
+#include <astro.h>
 #endif
 
 #ifndef OBSRY_H

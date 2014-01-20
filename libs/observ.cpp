@@ -128,8 +128,8 @@ int observ::setTT(double tTT)
 
 int observ::det_observ()
 {
-    qDebug() << "det_observ\n";
-    qDebug() << "det_state\n";
+    //qDebug() << "det_observ\n";
+    //qDebug() << "det_state\n";
     this->obs->det_state(ctime.UTC());
     int res = 0;
 

@@ -3,4 +3,4 @@ SOURCES       = client.cpp \
                 main.cpp
 QT           += network
 
-TARGET = testclient
+TARGET = ~/bin/testclient
