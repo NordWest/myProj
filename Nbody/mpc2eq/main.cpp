@@ -85,46 +85,84 @@ struct eqObjRec
 
 };
 
-struct particleList
+
+struct tState
 {
-    QString bodyName;
-    QList <ParticleStruct*> parList;
+    double t;
+
 };
 
-struct bodyParList
+struct bodyStates
 {
-    QList <particleList*> psList;
-    int addParticle(ParticleStruct* par);
+    QString name;
+    double mass;
+    void addState(double *X, double *V);
+    QList <stateData*> states;
 };
 
-int bodyParList::addParticle(ParticleStruct* par)
+void bodyStates::addState(double *X, double *V)
+{
+    stateData* st = new stateData;
+
+    st->Position[0] = X[0];
+    st->Position[1] = X[1];
+    st->Position[2] = X[2];
+
+    st->Velocity[0] = V[0];
+    st->Velocity[1] = V[1];
+    st->Velocity[2] = V[2];
+}
+
+struct bodyStateList
+{
+    QList <bodyStates*> bsList;
+    int addParticle(bodyStates* par);
+    int size();
+
+};
+
+int bodyStateList::addParticle(ParticleStruct* par)
 {
     QString bodyName = par->name.data();
 
     int np = 1;
+    stateData *stT;
+    stT = new stateData;
+    stT->Position[0] = par->x;
+    stT->Position[1] = par->y;
+    stT->Position[2] = par->z;
+    stT->Velocity[0] = par->xd;
+    stT->Velocity[1] = par->yd;
+    stT->Velocity[2] = par->zd;
 
-    for(int i=0; i<psList.size(); i++)
+    for(int i=0; i<bsList.size(); i++)
     {
-        if(QString().compare(bodyName, psList.at(i)->bodyName)==0)
+        if(QString().compare(bodyName, bsList.at(i)->name)==0)
         {
             np = 0;
-            psList.at(i)->parList << par;
+            bsList.at(i)->states << stT;
             break;
         }
     }
 
-    particleList* nbd;
+    bodyStates* nbd;
 
     if(np)
     {
-        nbd = new particleList;
-        nbd->bodyName = bodyName;
-        nbd->parList << par;
-        psList << nbd;
+        nbd = new bodyStates;
+        nbd->name = bodyName;
+        nbd->mass = par->mass;
+        nbd->states << stT;
+        bsList << nbd;
     }
 }
 
-int doNbody(double tf, double dt, double nstep, bodyParList &bpList);
+int bodyStateList::size()
+{
+    return(bsList.size());
+}
+
+int doNbody(double tf, double dt, double nstep, bodyStateList &bpList);
 
 
 int main(int argc, char *argv[])
@@ -170,7 +208,7 @@ int main(int argc, char *argv[])
 
     QString cfg_file, part_file, mop_file;
 
-    bodyParList bpList;
+    bodyStateList bsList;
 
     QList <ParticleStruct*> pList;
 //Settings
@@ -238,7 +276,7 @@ int main(int argc, char *argv[])
 
     mpcObjList m_objList;
 
-    int mNum = mpc_file.size();//.nstr();
+    //int mNum = mpc_file.size();//.nstr();
     double tBeg, tEnd;
     tBeg = 9999999999;
     tEnd = 0;
@@ -446,6 +484,7 @@ int main(int argc, char *argv[])
     jdTDB = UTC2TDB(jdUTC);
     qDebug() << QString("test jd: %1 - %2 - %3 - %4\n").arg(time0, 11, 'f',7).arg(jdUTC, 11, 'f',7).arg(jdTDB, 11, 'f',7).arg(jdTDT, 11, 'f',7);
 
+//    int mNum = 0;
 
     for(i=0; i<envSize; i++)
     {
@@ -519,6 +558,12 @@ int main(int argc, char *argv[])
         pList[i]->xd = coefXD*V[0];
         pList[i]->yd = coefXD*V[1];
         pList[i]->zd = coefXD*V[2];
+
+        if(pList.at(i)->identity!=Advisor::collapsorFixed)
+        {
+            bsList.addParticle(pList[i]);
+            //mass[mNum++] = pList[i]->mass;
+        }
     }
 
 
@@ -561,10 +606,11 @@ int main(int argc, char *argv[])
             nPar->zd = V[2];
             nPar->identity = Advisor::planetesimal;
             nPar->interactionPermission = Advisor::interactALL;
+            nPar->mass = -1.0;
 
             pList << nPar;
-            bpList.addParticle(nPar);
-
+            bsList.addParticle(nPar);
+            //mass[mNum++] = -1.0;
         }
     }
 
@@ -575,6 +621,24 @@ int main(int argc, char *argv[])
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
     //double TI, TF, DT;
+    nofzbody = bsList.size();
+    mass = new double[nofzbody];
+//    double *X0, *Y0;
+    X0 = new double[nofzbody*3];
+    V0 = new double[nofzbody*3];
+
+    for(i=0; i<nofzbody; i++)
+    {
+        X0[i*3+0] = bsList.bsList.at(i)->states.at(0)->Position[0];
+        X0[i*3+1] = bsList.bsList.at(i)->states.at(0)->Position[1];
+        X0[i*3+2] = bsList.bsList.at(i)->states.at(0)->Position[2];
+
+        V0[i*3+0] = bsList.bsList.at(i)->states.at(0)->Velocity[0];
+        V0[i*3+1] = bsList.bsList.at(i)->states.at(0)->Velocity[1];
+        V0[i*3+2] = bsList.bsList.at(i)->states.at(0)->Velocity[2];
+
+        mass[i] = bsList.bsList.at(i)->mass;
+    }
 
     switch(intCase)
     {
@@ -595,7 +659,7 @@ int main(int argc, char *argv[])
 
 
 
-*/
+
 
     
     return 0;//a.exec();
@@ -606,13 +670,31 @@ int prepNbody()
 
 }
 
-int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
+int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bsList)
 {
     Everhardt *solSys;
 
     int i, teloi, nt, jday;
     double ti, pday;
     double *X, *V;
+
+    N = (nofzbody)*3;
+
+    X = new double[N];
+    V = new double[N];
+//    X0 = new double[N];
+//    V0 = new double[N];
+//    r = new double[3];
+//    v = new double[3];
+
+
+    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
+
+    for(i=0; i<N; i++)
+    {
+        X[i] = X0[i];
+        V[i] = V0[i];
+    }
 
     for(nt=0; nt<nstep; nt++)
     {
@@ -626,30 +708,11 @@ int doNbody(double tf, double dt, double nstep, bodyParList &bpList)
         qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
 
         solSys->rada27(X, V, 0, fabs(dt));
-/*
-        for(teloi=0; teloi<pList.size(); teloi++)
+
+        for(i=0; i<nofzbody; i++)
         {
-            name = QString(pList[teloi]->name.data());
-            if(useEPM) plaNum = epm_planet_num(name);
-            else plaNum = planet_num(name.toAscii().data());
-
-            i = teloi*3;
-
-
-
-            bpList.addParticle(npar);
-
-            if(plaNum!=-1)
-            {
-                //saveResults(TF, X, V, i, name, resStmBig, dt<0);
-            }
-            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-            {
-                //saveResults(TF, X, V, i, name, resStmSmall, dt<0);
-            }
-
+            bsList.bsList.at(i)->addState(&X[i*3], &V[i*3]);
         }
-*/
-        //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
+
     }
 }
