@@ -14,6 +14,23 @@
 #include "comfunc.h"
 #include <math.h>
 
+int body_num(QString pname)
+{
+    if(QString().compare(pname, "Mercury")==0) return 1;
+    if(QString().compare(pname, "Venus")==0) return 2;
+    if(QString().compare(pname, "Earth")==0) return 3;
+    if(QString().compare(pname, "Mars")==0) return 4;
+    if(QString().compare(pname, "Jupiter")==0) return 5;
+    if(QString().compare(pname, "Saturn")==0) return 6;
+    if(QString().compare(pname, "Uranus")==0) return 7;
+    if(QString().compare(pname, "Neptune")==0) return 8;
+    if(QString().compare(pname, "Pluto")==0) return 9;
+    if(QString().compare(pname, "Sun")==0) return 10;
+
+
+    return -1;
+}
+
 int installDirCut(char *installDir, char* str, char *strCutted)
 {
 	if((installDir==NULL)||(strCutted==NULL)||(str==NULL)) return 1;
