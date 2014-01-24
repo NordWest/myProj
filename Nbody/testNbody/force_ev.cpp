@@ -11,6 +11,26 @@
 #include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
 #include <omp.h>
 
+#define ka 0.017202098955
+double dist3(double X0[], double X1[])
+{
+    return(sqrt(pow(X1[0] - X0[0], 2) + pow(X1[1] - X0[1], 2) + pow(X1[2] - X0[2], 2)));
+}
+
+double norm3(double *v)
+{
+    double nm = 0.0;
+    int len;
+    len = 3;
+
+    for(int i = 0; i<len; i++)
+    {
+            nm += v[i]*v[i];
+    }
+
+    return(sqrt(nm));
+}
+
 #include <QList>
 
 //  #define k2 6.672590000e-8
@@ -94,7 +114,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
           for(int teloi=0; teloi<iNum; teloi++)
           {
               int i=teloi*3;
-              double Ri = norm(&X[i]);// dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
+              double Ri = norm3(&X[i]);// dist(teloi, 0, X);//sqrt(X[i+0]*X[i+0]+X[i+1]*X[i+1]+X[i+2]*X[i+2]);
               //Ri = psR(iList[teloi]);//norm(&X[i]);
 
               if(Ri>(eparam->vout))
@@ -119,7 +139,7 @@ double psDist(ParticleStruct* par0, ParticleStruct* par1)
                              {
                                 double Rij = dist(&X[i], &X[j]);
                                 //Rj = dist(teloj, 0, X);
-                                double Rj = norm(&X[j]);
+                                double Rj = norm3(&X[j]);
 
 
                                 if(Rij<eparam->col)

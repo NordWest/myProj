@@ -16,6 +16,8 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 QT += xml
 
+LIBS += -lgomp
+QMAKE_CXXFLAGS+=-fopenmp
 
 SOURCES += main.cpp \
     ../../libs/orbit.cpp \

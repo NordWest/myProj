@@ -1,20 +1,14 @@
 #include <QtCore/QCoreApplication>
 
-#include "./../libs/dele.h"
-//#include "./../libs/orbcat.h"
-//#include "./../libs/observ.h"
-//#include "./../libs/dele.h"
-#include "./../libs/orbit.h"
-//#include "./../libs/skyarea.h"
-//#include "./../libs/astro.h"
+#include <dele.h>
+#include "./../../libs/orbit.h"
 #include <astro.h>
-#include "./../libs/comfunc.h"
-//#include "./../libs/rada.h"
-#include "./../libs/redStat.h"
-#include "./../libs/mpcs.h"
-#include "./../libs/ephem_util.h"
-#include "./../libs/calc_epm.h"
-#include "./../libs/mpccat.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/redStat.h"
+#include "./../../libs/mpcs.h"
+#include "./../../libs/ephem_util.h"
+#include "./../../libs/calc_epm.h"
+#include "./../../libs/mpccat.h"
 #include <SpiceUsr.h>
 
 #include <QDebug>
@@ -27,11 +21,11 @@
 #include <iostream>
 #include <iomanip>
 
-#include "./../libs/moody/moody.h"
-#include "./../libs/moody/capsule/capsuleBase/particle/Particle.h"
-#include "./../libs/moody/capsule/Capsule.h"
-#include "./../libs/moody/capsule/capsuleBase/CapsuleBase.h"
-#include "./../libs/myDomMoody.h"
+#include "./../../libs/moody/moody.h"
+#include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
+#include "./../../libs/moody/capsule/Capsule.h"
+#include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
+#include "./../../libs/myDomMoody.h"
 
 
 static QDataStream* clog0 = 0;

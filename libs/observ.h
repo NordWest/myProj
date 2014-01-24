@@ -23,7 +23,10 @@
 #endif
 
 //
-
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
 
 #ifndef OBSERV_H
 
@@ -38,75 +41,44 @@ public:
 	double *mass;
 
     QString obsName, obsyCode, centerName, refName;
-//    int ephType;    //0-dele;   1-SPICE;    2-calceph
 
 	int initObservatory(char *fname_obs);
-        //int initDELE(char *fname_dele_h, char *fname_dele_bin);
-        //int init(char *fname_obs, char *fname_dele_h, char *fname_dele_bin);
-
     int initDELE(char *fname_dele_bin);
     int init(char *fname_obs, char *fname_dele_bin);
 
 	int set_obs_parpam(int nplanet, int center, int sk, char *nobsy);
 
+    int det_observ_utc(double jdUTC);
+    int det_observ_tt(double jdTT);
+    int det_observ_tdb(double jdTDB);
 
+//position and velocity of observer
     double pos[3], vel[3];
+    double ox, oy, oz, ovx, ovy, ovz;           //R, Rt
+    double ovxt, ovyt, ovzt;					//Rtt
 
-    double ox, oy, oz, ovx, ovy, ovz;
-    //double jdTDB;
+//obstime
     time_a ctime;
-    double et;
-	double ovxt, ovyt, ovzt;					//Rtt
-	int nplanet, center, sk;
-	char *nobsy;
+    int nplanet, center, sk;
 
 	observ(char *dele_header);
 	observ();
 	~observ();
 
     int detSunRADEC(double *raS, double *decS);
+    int det_vect_radec(double *stateSSB, double *ra, double *dec, double *range = NULL, int corr = 1);
 
     int setUTC(double tUTC);
     int setTDB(double tTDB);
     int setTT(double tTT);
+
     int det_observ();
-    int det_vect_radec(double *stateRV, double *ra, double *dec, double *range = NULL);
 
     QString getObsCode();
 
-/*
-	mpcs *lmpc;
-	int nmpcs;
-	int Fkey;		//0-mpc; 1-gmt; 2-ast
-	FILE *FC;
-	char *hat;
-
-	observatory *obs;
-	
-
-	observ();
-	observ(int type);
-	~observ();
-
-
-	int detFkey(char *fname);
-	int initFile(char *fname);
-	int initFile(char *fname, char *fnobs);
-	int initObs(observ *eobs);
-
-	int getmpc(mpc *n, int nofapp);
-	mpc* getlmpc(int nofmpc);
-
-	int writeMpc(char *fname, int mode, int nofn);	//mode=0 new file, mode=1 add old file	//WORK NOT CORRECT!!!!!//work only mode=0, nofn=*
-
-	int topo2geo(mpc *pos, double SX, double SY, double SZ, double po);
-
-
 private:
-
-	int makeStrPos(mpc *pos, char *str);
-	int makeStrPosGMT(mpc *pos, char *str);
-*/
+    double et;
+    char *nobsy;
 };
 
 #define OBSERV_H
