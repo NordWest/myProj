@@ -817,7 +817,7 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
 
     for(nt=0; nt<nstep; nt++)
     {
-       qDebug() << QString("jd: %1\tprogress: %2\r").arg(tf, 12, 'f', 4).arg(QString("%1").arg((nt/nstep)*100, 5, 'f', 1));
+//       qDebug() << QString("jd: %1\tprogress: %2\r").arg(tf, 12, 'f', 4).arg(QString("%1").arg((nt/nstep)*100, 5, 'f', 1));
 
         ti = tf;
         tf += dt;
@@ -1063,7 +1063,7 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "NONE", "SSB", state, &lt );
             //recrad_c(state, &range, &ra, &dec);
-            opos->setTDB(timei);
+            opos->det_observ_tdb(timei);
             opos->det_vect_radec(state, &ra, &dec);
 
             ra = rad2grad(ra);

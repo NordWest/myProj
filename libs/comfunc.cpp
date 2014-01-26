@@ -1084,115 +1084,27 @@ double fatan(double sinx, double cosx)
 }
 
 
-int rdsys(double *aV, double *dV, double P1, double P2, double P3)
+int rdsys(double *aVrad, double *dVrad, double P1, double P2, double P3)
 {
-/*	if(P1 == 0.0)
-	{
-		if(P2 == 0.0)
-		{
-			*dV = PI/2.0;
-			*aV = 0.0;
-		}
-		else
-		{
-			*aV = PI/2.0;
-			*dV = fatan(P3, P2);
-			if(P2<0.0) *dV += PI;
-		}
-	}
-	else if(P2 == 0.0)
-	{
-		*aV = 0.0;
-		*dV = atan2(P3, P1);
-		if(P1<0.0) *dV += PI;
-	}
-	else
-	{*/
-		*aV = atan2(P2, P1);
-		if(*aV<0.0) *aV += 2.0*PI;
-                if(*aV>2.0*PI) *aV -= 2.0*PI;
-//		P3 *= sin(*aV);
-                *dV = atan2(P3, sqrt(P1*P1 + P2*P2));
-		if(*dV>PI/2.0) *dV -= PI;
-		if(*dV<-PI/2.0) *dV += PI;
-//	}
+    *aVrad = atan2(P2, P1);
+    if(*aVrad<0.0) *aVrad += 2.0*PI;
+            if(*aVrad>2.0*PI) *aVrad -= 2.0*PI;
+            *dVrad = atan2(P3, sqrt(P1*P1 + P2*P2));
+    if(*dVrad>PI/2.0) *dVrad -= PI;
+    if(*dVrad<-PI/2.0) *dVrad += PI;
 
-//	*dV -= PI;
-
-	return 0;
+    return 0;
 }
 
 
 int piNsys(double *p, double *inc, double *Node, double P1, double P2, double P3)
 {
-//	*Node = atan2(P1, P2);
+    *Node = atan2(P1, P2);
+    *inc = atan2(P2, P3*cos(*Node));
+    if(*Node<0.0) *Node+=2.0*PI;
+    if(*inc<0.0) *inc += PI;
 
-//	double sni;
-/*
-	if(fabs(P1)<EPS)
-	{
-		if(fabs(P2)<EPS)
-		{
-			*inc = 0.0;
-			*Node = 0.0;
-			*p = pow(P3/ka, 2.0);
-		}
-		else
-		{
-			*Node = 0.0;
-			if(fabs(P3)<EPS)
-			{
-				*inc = PI/2.0;
-				*p = pow(P2/ka, 2.0);
-				
-			}
-			else
-			{
-				*inc = atan2(P2, P3);
-				*p = pow(P3/(ka*cos(*inc)), 2.0);
-			}
-		}
-	}
-	else
-	{
-		if(fabs(P2)<EPS)
-		{
-			*Node = PI/2.0;
-			if(fabs(P3)<EPS)
-			{
-				*inc = PI/2.0;
-				*p = pow(P1/ka, 2.0);
-			}
-			else
-			{
-				*inc = atan2(P1, P3);
-				*p = pow(P3/(ka*cos(*inc)), 2.0);
-			}
-		}
-		else
-		{*/
-			*Node = atan2(P1, P2);
-			
-/*			if(fabs(P3)<EPS)
-//			{
-				*inc = P1/2.0;
-				*p = pow(P2/(ka*cos(*Node)), 2.0);
-				
-			}
-			else
-			{*/
-				*inc = atan2(P2, P3*cos(*Node));
-				if(*Node<0.0) *Node+=2.0*PI;
-				if(*inc<0.0) *inc += PI;
-				
-				*p = pow(P3/(ka*cos(*inc)), 2.0);
-/*			}
-		}
-	}
-*/
-//	*inc = atan2(P1, P3*sin(*N));
-
-//	*p = pow(P3/(ka*cos(*inc)), 2.0);
+    *p = pow(P3/(ka*cos(*inc)), 2.0);
 
 	return 0;
 }

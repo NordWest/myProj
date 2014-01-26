@@ -71,7 +71,7 @@ class ocRec
 {
 public:
 	double MJday;
-        double ra, de;                  //[mas]
+        double ra, de;                  //[deg]
         float mag0;                     //[mag]
         double ocRaCosDe, ocDe, ocMag;	//OMC [mas]
         double topDist;                 //[au]

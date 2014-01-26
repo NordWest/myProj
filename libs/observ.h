@@ -66,11 +66,7 @@ public:
 	~observ();
 
     int detSunRADEC(double *raS, double *decS);
-    int det_vect_radec(double *stateSSB, double *ra, double *dec, double *range = NULL, int corr = 1);
-
-    int setUTC(double tUTC);
-    int setTDB(double tTDB);
-    int setTT(double tTT);
+    int det_vect_radec(double *stateSSB, double *raRad, double *decRad, double *range = NULL, int corr = 1);
 
     int det_observ();
 

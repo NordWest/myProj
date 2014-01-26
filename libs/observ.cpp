@@ -59,42 +59,23 @@ int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
     return(this->obs->getobsynumO(nobsy));
 }
 
-int observ::setUTC(double tUTC)
+int observ::det_observ_utc(double tUTC)
 {
     ctime.setUTC(tUTC);
     return(det_observ());
 }
 
-int observ::setTDB(double tTDB)
+int observ::det_observ_tdb(double tTDB)
 {
     ctime.setTDB(tTDB);
     return(det_observ());
 }
 
-int observ::setTT(double tTT)
+int observ::det_observ_tt(double tTT)
 {
     ctime.setTDT(tTT);
     return(det_observ());
 }
-
-int observ::det_observ_utc(double jdUTC)
-{
-    setUTC(jdUTC);
-    det_observ();
-}
-
-int observ::det_observ_tt(double jdTT)
-{
-    setTT(jdTT);
-    det_observ();
-}
-
-int observ::det_observ_tdb(double jdTDB)
-{
-    setTDB(jdTDB);
-    det_observ();
-}
-
 
 int observ::det_observ()
 {
@@ -117,7 +98,7 @@ int observ::det_observ()
 
 
 
-int observ::det_vect_radec(double *stateSSB, double *ra, double *dec, double *range, int corr)
+int observ::det_vect_radec(double *stateSSB, double *raRad, double *decRad, double *range, int corr)
 {
     double *R, *X, *V, *X1, *V1, *XE0, *XEB0, *XS0, *VS0, *Q, *Qb, *P;
     R = new double[3];
@@ -174,8 +155,8 @@ int observ::det_vect_radec(double *stateSSB, double *ra, double *dec, double *ra
 
     normR = norm(R);
 
-    if(corr)
-    {
+//    if(corr)
+//    {
         normE = norm(XE0);
         normP = normR;
         normQ = norm(X);
@@ -206,9 +187,9 @@ int observ::det_vect_radec(double *stateSSB, double *ra, double *dec, double *ra
             ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
 
         }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
-    }
+//    }
 
-    rdsys(ra, dec, P[0], P[1], P[2]);
+    rdsys(raRad, decRad, P[0], P[1], P[2]);
 
     if(range!=NULL)
     {

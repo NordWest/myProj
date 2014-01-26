@@ -134,7 +134,7 @@ char* del_end_space(char *str);
 
 double fatan(double sinx, double cosx);
 
-int rdsys(double *aV, double *dV, double P1, double P2, double P3);
+int rdsys(double *aVrad, double *dVrad, double P1, double P2, double P3);
 int piNsys(double *p, double *inc, double *N, double P1, double P2, double P3);
 
 int Ekv2Ecl(double *eclinc, double *eclNode, double *eclPer, double ekvinc, double ekvNode, double ekvPer);
