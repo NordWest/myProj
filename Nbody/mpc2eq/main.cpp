@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 
     if(argc<2) exit(1);
 
-    int SK, CENTER;
+    int sk, center;
     procData miriadeProcData;
     int i, j, sz;
     //dele *nbody;
@@ -274,8 +274,8 @@ int main(int argc, char *argv[])
     int massType = sett->value("general/massType", 0).toInt();
     useEPM = sett->value("general/useEPM", 0).toInt();
 
-    SK = sett->value("general/sk", 0).toInt();
-    CENTER = sett->value("general/center", 0).toInt();
+    sk = sett->value("general/sk", 0).toInt();
+    center = sett->value("general/center", 0).toInt();
 
     bigType = sett->value("general/bigType", 0).toInt();
     smlType = sett->value("general/smlType", 0).toInt();
@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 
     opos = new observ;
     opos->init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    opos->set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
+    opos->set_obs_parpam(EARTH_NUM, center, sk, obsCode.toAscii().data());
 
     int jday;// = (int)time0;
     double pday;// = time0 - jday;
@@ -361,8 +361,8 @@ int main(int argc, char *argv[])
     QList <orbit*> orbList;
     orbit* tOrb;
     int objNum;
-    double T0, T1, DT;
-    double TI, TF;
+    double T0, DT;
+    double TF;
 
     int mNum = mpc_file.size();//.nstr();
     for(i=0;i<mNum;i++)
@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
 
     orbJD /= 1.0*objNum;
     T0 = jd2mjd(orbJD);
-    qDebug() << QString("orb eJD mean: %1\n").arg(orbJD);
+    qDebug() << QString("orb eJD mean: %1\n").arg(orbJD, 15, 'f', 8);
 
     int intCase;    //0-normal; 1-back in time; 2-between
 
@@ -534,7 +534,7 @@ int main(int argc, char *argv[])
     if(useEPM)
     {
         status = !InitTxt(epmDir.toAscii().data());
-        centr_num = 11+!CENTER;
+        centr_num = 11+!center;
     }
     else
     {
@@ -592,12 +592,21 @@ int main(int argc, char *argv[])
 
 //    int mNum = 0;
 
+//sun
+    if(center)
+    {
+        nbody->detState(&Xsun[0], &Xsun[1], &Xsun[2], &Vsun[0], &Vsun[1], &Vsun[2], jdTDB, SUN_NUM, 0, sk);
+    }
+
+
     for(i=0; i<envSize; i++)
     {
         name = QString(pList[i]->name.data());
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
+
+
 
         if(plaNum!=-1)
         {
@@ -612,9 +621,9 @@ int main(int argc, char *argv[])
             }
             else
             {
-                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, CENTER, SK);
+                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, center, sk);
             }
-
+/*
             if(plaNum==SUN_NUM)
             {
                 Xsun[0] = X[0];
@@ -624,7 +633,7 @@ int main(int argc, char *argv[])
                 Vsun[1] = V[1];
                 Vsun[2] = V[2];
             }
-
+*/
         }
         else
         {
@@ -771,7 +780,7 @@ int main(int argc, char *argv[])
 
 
 
-     makeSPK(CENTER, SK, bsList);
+     makeSPK(center, sk, bsList);
 
      spk2eq(eqo_list, resFileName);
 
@@ -922,6 +931,12 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
                          }
                     }
                     else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], timei, SUN_NUM, CENTER_BARY, sk);
+                    XS0[0] *= AUKM;
+                    XS0[1] *= AUKM;
+                    XS0[2] *= AUKM;
+                    VS0[0] *= AUKM/SECINDAY;
+                    VS0[1] *= AUKM/SECINDAY;
+                    VS0[2] *= AUKM/SECINDAY;
                 }
                     break;
                 case 2:
@@ -929,22 +944,17 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
                     sJD = QString("%1 JD").arg(timei, 15, 'f',7);
                     str2et_c(sJD.toAscii().data(), &et);
                     spkezr_c (  "sun", et, ref, "NONE", "ssb", state, &lt );
-                    XS0[0] = state[0]/AUKM;
-                    XS0[1] = state[1]/AUKM;
-                    XS0[2] = state[2]/AUKM;
-                    VS0[0] = state[3]/AUKM*SECINDAY;
-                    VS0[1] = state[4]/AUKM*SECINDAY;
-                    VS0[2] = state[5]/AUKM*SECINDAY;
+                    XS0[0] = state[0];
+                    XS0[1] = state[1];
+                    XS0[2] = state[2];
+                    VS0[0] = state[3];
+                    VS0[1] = state[4];
+                    VS0[2] = state[5];
                 }
                     break;
                 }
 
-                XS0[0] *= AUKM*1000.0;
-                XS0[1] *= AUKM*1000.0;
-                XS0[2] *= AUKM*1000.0;
-                VS0[0] *= AUKM*1000.0/SECINDAY;
-                VS0[1] *= AUKM*1000.0/SECINDAY;
-                VS0[2] *= AUKM*1000.0/SECINDAY;
+
             }
 
             //qDebug() << QString("Sun: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0], 21, 'e',15).arg(XS0[1], 21, 'e',15).arg(XS0[2], 21, 'e',15).arg(VS0[0], 21, 'e',15).arg(VS0[1], 21, 'e',15).arg(VS0[2], 21, 'e',15);
@@ -954,24 +964,24 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
             segmentEphs[i] = et;
             //qDebug() << QString("%1: %2\n").arg(i).arg(et, 15, 'e', 8);
 
-            X[0] = bsList.bsList.at(p)->states.at(i)->X[0] + XS0[0];
-            X[1] = bsList.bsList.at(p)->states.at(i)->X[1] + XS0[1];
-            X[2] = bsList.bsList.at(p)->states.at(i)->X[2] + XS0[2];
+            X[0] = bsList.bsList.at(p)->states.at(i)->X[0]*AUKM + XS0[0];
+            X[1] = bsList.bsList.at(p)->states.at(i)->X[1]*AUKM + XS0[1];
+            X[2] = bsList.bsList.at(p)->states.at(i)->X[2]*AUKM + XS0[2];
 
-            V[0] = bsList.bsList.at(p)->states.at(i)->V[0] + VS0[0];
-            V[1] = bsList.bsList.at(p)->states.at(i)->V[1] + VS0[1];
-            V[2] = bsList.bsList.at(p)->states.at(i)->V[2] + VS0[2];
-
-
-            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bodyName).arg(timei, 15, 'f',7).arg(X[0]/1000.0/AUKM, 21, 'e',15).arg(X[1]/1000.0/AUKM, 21, 'e',15).arg(X[2]/1000.0/AUKM, 21, 'e',15).arg(V[0]/1000.0/AUKM*SECINDAY, 21, 'e',15).arg(V[1]/1000.0/AUKM*SECINDAY, 21, 'e',15).arg(V[2]/1000.0/AUKM*SECINDAY, 21, 'e',15);
+            V[0] = bsList.bsList.at(p)->states.at(i)->V[0]*AUKM/SECINDAY + VS0[0];
+            V[1] = bsList.bsList.at(p)->states.at(i)->V[1]*AUKM/SECINDAY + VS0[1];
+            V[2] = bsList.bsList.at(p)->states.at(i)->V[2]*AUKM/SECINDAY + VS0[2];
 
 
-                segmentState[i*6+0] = X[0]/coefX;
-                segmentState[i*6+1] = X[1]/coefX;
-                segmentState[i*6+2] = X[2]/coefX;
-                segmentState[i*6+3] = V[0]/coefXD;
-                segmentState[i*6+4] = V[1]/coefXD;
-                segmentState[i*6+5] = V[2]/coefXD;
+            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bodyName).arg(timei, 15, 'f',7).arg(X[0]/AUKM, 21, 'e',15).arg(X[1]/AUKM, 21, 'e',15).arg(X[2]/AUKM, 21, 'e',15).arg(V[0]/AUKM*SECINDAY, 21, 'e',15).arg(V[1]/AUKM*SECINDAY, 21, 'e',15).arg(V[2]/AUKM*SECINDAY, 21, 'e',15);
+
+
+                segmentState[i*6+0] = X[0];
+                segmentState[i*6+1] = X[1];
+                segmentState[i*6+2] = X[2];
+                segmentState[i*6+3] = V[0];
+                segmentState[i*6+4] = V[1];
+                segmentState[i*6+5] = V[2];
 
 //qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(segmentState[i*6+0], 21, 'e',15).arg(segmentState[i*6+1], 21, 'e',15).arg(segmentState[i*6+2], 21, 'e',15).arg(segmentState[i*6+3], 21, 'e',15).arg(segmentState[i*6+4], 21, 'e',15).arg(segmentState[i*6+5], 21, 'e',15);
 
@@ -1063,13 +1073,20 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "NONE", "SSB", state, &lt );
             //recrad_c(state, &range, &ra, &dec);
+            state[0] = state[0]/AUKM;
+            state[1] = state[1]/AUKM;
+            state[2] = state[2]/AUKM;
+            state[3] = state[3]/AUKM*SECINDAY;
+            state[4] = state[4]/AUKM*SECINDAY;
+            state[5] = state[5]/AUKM*SECINDAY;
+
             opos->det_observ_tdb(timei);
             opos->det_vect_radec(state, &ra, &dec);
 
             ra = rad2grad(ra);
             dec = rad2grad(dec);
 
-            qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0]/AUKM, 21, 'e',15).arg(state[1]/AUKM, 21, 'e',15).arg(state[2]/AUKM, 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
+            qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0], 21, 'e',15).arg(state[1], 21, 'e',15).arg(state[2], 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
 
             oc_rec->ocRaCosDe = (oc_rec->ra - ra)*cos(dec);
             oc_rec->ocDe = (oc_rec->de - dec);

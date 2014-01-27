@@ -337,8 +337,8 @@ int main(int argc, char *argv[])
                 break;
             case 2:
             {
-                obsPos.setTDB(time);
-                obsPos.det_observ();
+                //obsPos.setTDB(time);
+                obsPos.det_observ_tdb(time);
                 XE0[0] = obsPos.pos[0];
                 XE0[1] = obsPos.pos[1];
                 XE0[2] = obsPos.pos[2];
@@ -415,8 +415,8 @@ int main(int argc, char *argv[])
                 if(!initMpc) mCat.GetRecName(name.toAscii().data());
 
 
-                obsPos.setTDB(time);
-                obsPos.det_observ();
+                //obsPos.setTDB(time);
+                obsPos.det_observ_tdb(time);
 
                 qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.pos[0], 18, 'g', 9).arg(obsPos.pos[1], 18, 'g', 9).arg(obsPos.pos[2], 18, 'g', 9).arg(obsPos.vel[0], 18, 'g', 9).arg(obsPos.vel[1], 18, 'g', 9).arg(obsPos.vel[2], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
 
@@ -638,8 +638,8 @@ int spk2mpc(double time0, double dtime, int nstep)
             spkezr_c (  objName.toAscii().data(), et, "J2000", "LT", "Earth", state, &lt );
 
 //topocentr
-            obsPos.setTDB(timei);
-            obsPos.det_observ();
+            //obsPos.setTDB(timei);
+            obsPos.det_observ_tdb(timei);
             state[0] -= obsPos.obs->state[0]*AUKM;
             state[1] -= obsPos.obs->state[1]*AUKM;
             state[2] -= obsPos.obs->state[2]*AUKM;
