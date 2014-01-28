@@ -204,8 +204,8 @@ int bodyStateList::size()
 }
 
 int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bpList);
-int makeSPK(int center, int sk, bodyStateList &bsList);
-int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName);
+int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName);
+int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName);
 
 
 int main(int argc, char *argv[])
@@ -322,7 +322,6 @@ int main(int argc, char *argv[])
 
 ///////////
 
-
     opos = new observ;
     opos->init(obsFile.toAscii().data(), jplFile.toAscii().data());
     opos->set_obs_parpam(EARTH_NUM, center, sk, obsCode.toAscii().data());
@@ -334,13 +333,17 @@ int main(int argc, char *argv[])
 
     if(mCat.init(mpcCatFile.toAscii().data())) return 1;
 
+//Files names
+
+    QString iniMpcFile, resFileName, spkFileName, xmlFileName;
+
+    iniMpcFile = QString(argv[1]);
+    resFileName = QString("%1.eq").arg(iniMpcFile.section(".", 0, -2));
+    spkFileName = QString("%1.spk").arg(iniMpcFile.section(".", 0, -2));
+    xmlFileName = QString("%1.xml").arg(iniMpcFile.section(".", 0, -2));
+
 //Init MPC file
-
-    QString iniMpcFile = QString(argv[1]);
-    QString resFileName = QString("%1_eq.txt").arg(iniMpcFile.section(".", 0, -2));
-
     mpcFile mpc_file;
-    mpcFile mpcfTemp;
     mpcRec* mpc_rec;
     mpcObjRec* moRec;
     mpc_file.init(iniMpcFile);
@@ -364,18 +367,14 @@ int main(int argc, char *argv[])
     double T0, DT;
     double TF;
 
-    int mNum = mpc_file.size();//.nstr();
+    int mNum = mpc_file.size();
     for(i=0;i<mNum;i++)
     {
         mpc_rec = mpc_file.at(i);
         mpc_rec->getMpNumber(tStr);
 
         tStr.replace(" ", "0");
-
-
         sprintf(tname, "%s", tStr.toAscii().data());
-
-        //qDebug() << QString("tStr: %1\n").arg(tname);
 
         if(mCat.GetProvDest(tname))
         {
@@ -388,14 +387,7 @@ int main(int argc, char *argv[])
         }
         objName = QString(mCat.record->name).simplified();
 
-
-
-        //mCat.GetRecName(objName.toAscii().data());
-
-        //qDebug() << QString("mCat record: %1").arg(mCat.str);
-
         m_objList.addMpcRec(mpc_rec, objName);
-        //if(mpc_rec->mjd()<tBeg)
     }
 
     m_objList.sortByTime();
@@ -432,8 +424,6 @@ int main(int argc, char *argv[])
 
         for(j=0; j<moRec->size(); j++)
         {
-
-            //qDebug() << moRec->mpc_list.at(j)->toStr();
            ocTemp = new ocRec;
            ocTemp->catName = "MPCCAT";
            ocTemp->name = eqoTemp->objName;
@@ -445,17 +435,8 @@ int main(int argc, char *argv[])
            eqoTemp->eq_list->ocList << ocTemp;
         }
 
-        /*
-        for(j=0; j<eqoTemp->eq_list->ocList.size(); j++)
-        {
-            eqoTemp->eq_list->ocList.at(j)->rec2s_short(&tStr);
-            qDebug() << tStr;
-        }*/
-
         if(moRec->mpc_list.at(0)->mjd()<tBeg) tBeg = moRec->mpc_list.at(0)->mjd();
         if(moRec->mpc_list.at(moRec->mpc_list.size()-1)->mjd()>tEnd) tEnd = moRec->mpc_list.at(moRec->mpc_list.size()-1)->mjd();
-
-
     }
 
     tBeg = UTC2TDB(tBeg);
@@ -475,7 +456,6 @@ int main(int argc, char *argv[])
     for(i=0; i<objNum; i++)
     {
         orbJD += orbList.at(i)->elem->eJD;
-        //qDebug() << QString("orb eJD: %1\n").arg(jd2mjd(orbList.at(i)->elem->eJD));
     }
 
     orbJD /= 1.0*objNum;
@@ -488,40 +468,17 @@ int main(int argc, char *argv[])
     if((T0<=tBeg)&&(T0<tEnd))
     {
         intCase = 0;
-/*        sJD = QString("%1 JD TDB").arg(mjd2jd(orbJD), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT0);
-        qDebug() << QString("sJD0: %1\tet0: %2\n").arg(sJD).arg(sgT0, 15, 'f',7);
-
-        sJD = QString("%1 JD TDB").arg(mjd2jd(tEnd), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT1);
-        qDebug() << QString("sJD1: %1\tet1: %2\n").arg(sJD).arg(sgT1, 15, 'f',7);*/
     }
     if((T0>tBeg)&&(T0>=tEnd))
     {
         intCase = 1;
-/*        sJD = QString("%1 JD TDB").arg(mjd2jd(tBeg), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT0);
-        qDebug() << QString("sJD0: %1\tet0: %2\n").arg(sJD).arg(sgT0, 15, 'f',7);
-
-        sJD = QString("%1 JD TDB").arg(mjd2jd(T0), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT1);
-        qDebug() << QString("sJD1: %1\tet1: %2\n").arg(sJD).arg(sgT1, 15, 'f',7);*/
     }
     if((T0>tBeg)&&(T0<tEnd))
     {
         intCase = 2;
-/*        sJD = QString("%1 JD TDB").arg(mjd2jd(tBeg), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT0);
-        qDebug() << QString("sJD0: %1\tet0: %2\n").arg(sJD).arg(sgT0, 15, 'f',7);
-
-        sJD = QString("%1 JD TDB").arg(mjd2jd(tEnd), 15, 'f',7);
-        str2et_c(sJD.toAscii().data(), &sgT1);
-        qDebug() << QString("sJD1: %1\tet1: %2\n").arg(sJD).arg(sgT1, 15, 'f',7);*/
     }
 
     qDebug() << QString("intCase: %1\n").arg(intCase);
-
-
 
     jdTDT = orbJD;
 
@@ -587,17 +544,11 @@ int main(int argc, char *argv[])
     jday = (int)jdTDB;
     pday = jdTDB - jday;
 
-    //jdTDB = UTC2TDB(jdUTC);
-    //qDebug() << QString("test jd: %1 - %2 - %3 - %4\n").arg(time0, 11, 'f',7).arg(jdUTC, 11, 'f',7).arg(jdTDB, 11, 'f',7).arg(jdTDT, 11, 'f',7);
-
-//    int mNum = 0;
-
 //sun
     if(center)
     {
         nbody->detState(&Xsun[0], &Xsun[1], &Xsun[2], &Vsun[0], &Vsun[1], &Vsun[2], jdTDB, SUN_NUM, 0, sk);
     }
-
 
     for(i=0; i<envSize; i++)
     {
@@ -605,8 +556,6 @@ int main(int argc, char *argv[])
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
-
-
 
         if(plaNum!=-1)
         {
@@ -623,17 +572,6 @@ int main(int argc, char *argv[])
             {
                 nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, center, sk);
             }
-/*
-            if(plaNum==SUN_NUM)
-            {
-                Xsun[0] = X[0];
-                Xsun[1] = X[1];
-                Xsun[2] = X[2];
-                Vsun[0] = V[0];
-                Vsun[1] = V[1];
-                Vsun[2] = V[2];
-            }
-*/
         }
         else
         {
@@ -729,16 +667,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    saveParticles("./test.xml", pList);
+    saveParticles(xmlFileName, pList);
 
 /////////////////////////testNB
 
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
-    //double TI, TF, DT;
     nofzbody = bsList.size();
     mass = new double[nofzbody];
-//    double *X0, *Y0;
     X0 = new double[nofzbody*3];
     V0 = new double[nofzbody*3];
 
@@ -778,12 +714,9 @@ int main(int argc, char *argv[])
         break;
     }
 
+     makeSPK(center, sk, bsList, spkFileName);
 
-
-     makeSPK(center, sk, bsList);
-
-     spk2eq(eqo_list, resFileName);
-
+     spk2eq(eqo_list, spkFileName, resFileName);
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
@@ -805,51 +738,59 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
     int i, nt, jday, N;
     double ti, pday;
     double *X, *V;
+    double r[3], v[3];
+    double vmul;
+
+    vmul = pow(-1, dt<0);
 
     N = (nofzbody)*3;
 
     X = new double[N];
     V = new double[N];
-//    X0 = new double[N];
-//    V0 = new double[N];
-//    r = new double[3];
-//    v = new double[3];
 
+    QFile mRecFile("./nbrec.txt");
+    mRecFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream mRecStm(&mRecFile);
 
     solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
 
     for(i=0; i<N; i++)
     {
         X[i] = X0[i];
-        V[i] = V0[i];
+        V[i] = vmul*V0[i];
     }
 
     for(nt=0; nt<nstep; nt++)
     {
-//       qDebug() << QString("jd: %1\tprogress: %2\r").arg(tf, 12, 'f', 4).arg(QString("%1").arg((nt/nstep)*100, 5, 'f', 1));
-
         ti = tf;
         tf += dt;
 
         jday = int(tf);
         pday = tf - jday;
-        //qDebug() << QString("tf: %1\n").arg(tf, 15, 'f', 8);
 
         solSys->rada27(X, V, 0, fabs(dt));
 
         for(i=0; i<nofzbody; i++)
         {
-            bsList.bsList.at(i)->addState(tf, &X[i*3], &V[i*3]);
+            v[0] = vmul*V[i*3];
+            v[1] = vmul*V[i*3+1];
+            v[2] = vmul*V[i*3+2];
+
+            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(tf, 15, 'f',7).arg(X[i*3], 21, 'e',15).arg(X[i*3+1], 21, 'e',15).arg(X[i*3+2], 21, 'e',15).arg(v[0], 21, 'e',15).arg(v[1], 21, 'e',15).arg(v[2], 21, 'e',15);
+
+            bsList.bsList.at(i)->addState(tf, &X[i*3], &v[0]);
         }
 
     }
+
+    mRecFile.close();
 }
 
-int makeSPK(int center, int sk, bodyStateList &bsList)
+int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName)
 {
     qDebug() << "\n\n====makeSPK=====\n\n";
     int i, p, bodyNum;
-    double coefX, coefXD, timei;
+    double timei;
     QString bodyName, sJD;
     SpiceInt       handle;
     SpiceDouble *segmentState;
@@ -859,26 +800,17 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
     double X[3], V[3];
     double XS0[3], VS0[3];
 
-    int ns;// = bsList.bsList.at(0)->states.size();
+    int ns;
     int szObj = bsList.size();
-/*
-    furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
-    furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
-*/
 
+    QDir().remove(spkFileName);
+    spkopn_c(spkFileName.toAscii().data(), "mpc", 0, &handle);
 
+    QString recFileName = QString("%1.rec").arg(spkFileName.section(".", 0, -2));
 
-    QDir().remove("./test.spk");
-    spkopn_c("./test.spk", "mpc", 0, &handle);
-
-
-    coefX = 1000;
-    coefXD = 1000;
-
-    QFile mRecFile("mrec.txt");
+    QFile mRecFile(recFileName);
     mRecFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream mRecStm(&mRecFile);
-
 
     for(p=0; p<szObj; p++)
     {
@@ -889,12 +821,8 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
         bodyNum = body_num(bodyName);
         ns = bsList.bsList.at(p)->states.size();
         if(bodyNum!=-1)continue;
-        //if(bodyNum==-1)
-        //{
-            if(mCat.GetRecName(bodyName.toAscii().data())) continue;
-            bodyNum = 2000000 + mCat.record->getNum();
-        //}
-        //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
+        if(mCat.GetRecName(bodyName.toAscii().data())) continue;
+        bodyNum = 2000000 + mCat.record->getNum();
         qDebug() << QString("%1: %2\n").arg(bodyName).arg(bodyNum);
         qDebug() << QString("%1: %2\n").arg(bsList.bsList.at(p)->states.at(0)->T.TDB(), 15, 'f', 8).arg(bsList.bsList.at(p)->states.at(ns-1)->T.TDB(), 15, 'f', 8);
 
@@ -910,10 +838,7 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
         segmentEphs = new SpiceDouble[ns];
         for(i=0; i<ns; i++)
         {
-            //            qDebug() << "mopSt:" << mopSt << "\n";
-//            sz = mopSt->getItemCount();
             timei = mjd2jd(bsList.bsList.at(p)->states.at(i)->T.TDB());//time0+dtime*i;
-            //qDebug() << QString("timei: %1\n").arg(timei, 15, 'f', 8);
 
             if(center) //helio to barycenter
             {
@@ -957,12 +882,9 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
 
             }
 
-            //qDebug() << QString("Sun: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0], 21, 'e',15).arg(XS0[1], 21, 'e',15).arg(XS0[2], 21, 'e',15).arg(VS0[0], 21, 'e',15).arg(VS0[1], 21, 'e',15).arg(VS0[2], 21, 'e',15);
-
             sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
             str2et_c(sJD.toAscii().data(), &et);
             segmentEphs[i] = et;
-            //qDebug() << QString("%1: %2\n").arg(i).arg(et, 15, 'e', 8);
 
             X[0] = bsList.bsList.at(p)->states.at(i)->X[0]*AUKM + XS0[0];
             X[1] = bsList.bsList.at(p)->states.at(i)->X[1]*AUKM + XS0[1];
@@ -973,26 +895,14 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
             V[2] = bsList.bsList.at(p)->states.at(i)->V[2]*AUKM/SECINDAY + VS0[2];
 
 
-            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bodyName).arg(timei, 15, 'f',7).arg(X[0]/AUKM, 21, 'e',15).arg(X[1]/AUKM, 21, 'e',15).arg(X[2]/AUKM, 21, 'e',15).arg(V[0]/AUKM*SECINDAY, 21, 'e',15).arg(V[1]/AUKM*SECINDAY, 21, 'e',15).arg(V[2]/AUKM*SECINDAY, 21, 'e',15);
+            //mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bodyName).arg(timei, 15, 'f',7).arg(X[0]/AUKM, 21, 'e',15).arg(X[1]/AUKM, 21, 'e',15).arg(X[2]/AUKM, 21, 'e',15).arg(V[0]/AUKM*SECINDAY, 21, 'e',15).arg(V[1]/AUKM*SECINDAY, 21, 'e',15).arg(V[2]/AUKM*SECINDAY, 21, 'e',15);
 
-
-                segmentState[i*6+0] = X[0];
-                segmentState[i*6+1] = X[1];
-                segmentState[i*6+2] = X[2];
-                segmentState[i*6+3] = V[0];
-                segmentState[i*6+4] = V[1];
-                segmentState[i*6+5] = V[2];
-
-//qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(pList[p]->name.data()).arg(bodyNum).arg(timei, 15, 'f',7).arg(segmentState[i*6+0], 21, 'e',15).arg(segmentState[i*6+1], 21, 'e',15).arg(segmentState[i*6+2], 21, 'e',15).arg(segmentState[i*6+3], 21, 'e',15).arg(segmentState[i*6+4], 21, 'e',15).arg(segmentState[i*6+5], 21, 'e',15);
-
-                /*if(*found==false)
-                {
-                    if(mCat.GetRecName(mopIt.name)) continue;
-                    bodyNum = 2000000 + mCat.record->getNum();
-                }*/
-
-                //qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(mopIt.name).arg(bodyNum).arg(time).arg(X[0]).arg(X[1]).arg(X[2]).arg(V[0]).arg(V[1]).arg(V[2]);
-
+            segmentState[i*6+0] = X[0];
+            segmentState[i*6+1] = X[1];
+            segmentState[i*6+2] = X[2];
+            segmentState[i*6+3] = V[0];
+            segmentState[i*6+4] = V[1];
+            segmentState[i*6+5] = V[2];
 
         }
 
@@ -1007,7 +917,7 @@ int makeSPK(int center, int sk, bodyStateList &bsList)
     return 0;
 }
 
-int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
+int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName)
 {
     qDebug() << QString("\n=== spk2mpc ===\n");
     double range, ra, dec, timei;
@@ -1025,7 +935,7 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
 
     furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
     furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
-    furnsh_c ( "./test.spk"  );
+    furnsh_c ( spkFleName.toAscii().data()  );
 
     qDebug() << QString("resFileName: %1\n").arg(resFileName);
     ocFile.setFileName(resFileName);
@@ -1038,20 +948,14 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
 
     QString tstr;
 
-
-
     for(p=0; p<szObj; p++)
     {
         bodyName = eqo_list[p]->objName;
         bodyNum = body_num(bodyName);
 
         if(bodyNum!=-1)continue;
-        //if(bodyNum==-1)
-        //{
-            if(mCat.GetRecName(bodyName.toAscii().data())) continue;
-            bodyNum = 2000000 + mCat.record->getNum();
-        //}
-        //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
+        if(mCat.GetRecName(bodyName.toAscii().data())) continue;
+        bodyNum = 2000000 + mCat.record->getNum();
         qDebug() << QString("%1: %2\n").arg(bodyName).arg(bodyNum);
         objName = QString("%1").arg(bodyNum);
 
@@ -1060,19 +964,13 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
         for(i=0; i<nstep; i++)
         {
             oc_rec = eqo_list.at(p)->eq_list->ocList.at(i);
-//            mopSt = mopFile.readCyclingState();
-//            qDebug() << "mopSt:" << mopSt << "\n";
-//            sz = mopSt->getItemCount();
-//            timei = time0+dtime*(i);
 
             timei = mjd2jd(UTC2TDB(oc_rec->MJday));
 
             sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);
             str2et_c(sJD.toAscii().data(), &et);
-            //qDebug() << QString("sJD: %1\tet: %2\n").arg(sJD).arg(et, 15, 'f',7);
 
             spkezr_c (  objName.toAscii().data(), et, "J2000", "NONE", "SSB", state, &lt );
-            //recrad_c(state, &range, &ra, &dec);
             state[0] = state[0]/AUKM;
             state[1] = state[1]/AUKM;
             state[2] = state[2]/AUKM;
@@ -1086,14 +984,14 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString resFileName)
             ra = rad2grad(ra);
             dec = rad2grad(dec);
 
-            qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0], 21, 'e',15).arg(state[1], 21, 'e',15).arg(state[2], 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
+            //qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0], 21, 'e',15).arg(state[1], 21, 'e',15).arg(state[2], 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
 
             oc_rec->ocRaCosDe = (oc_rec->ra - ra)*cos(dec);
             oc_rec->ocDe = (oc_rec->de - dec);
 
             oc_rec->rec2sBase(&tstr);
 
-
+            qDebug() << tstr << "\n";
             ocStm << tstr << "\n";
 
         }
