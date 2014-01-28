@@ -778,7 +778,7 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
 
             mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(tf, 15, 'f',7).arg(X[i*3], 21, 'e',15).arg(X[i*3+1], 21, 'e',15).arg(X[i*3+2], 21, 'e',15).arg(v[0], 21, 'e',15).arg(v[1], 21, 'e',15).arg(v[2], 21, 'e',15);
 
-            bsList.bsList.at(i)->addState(tf, &X[i*3], &v[0]);
+            bsList.bsList.at(i)->addState(mjd2jd(tf), &X[i*3], &v[0]);
         }
 
     }
@@ -826,11 +826,11 @@ int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName)
         qDebug() << QString("%1: %2\n").arg(bodyName).arg(bodyNum);
         qDebug() << QString("%1: %2\n").arg(bsList.bsList.at(p)->states.at(0)->T.TDB(), 15, 'f', 8).arg(bsList.bsList.at(p)->states.at(ns-1)->T.TDB(), 15, 'f', 8);
 
-        sJD = QString("%1 JD TDB").arg(mjd2jd(bsList.bsList.at(p)->states.at(0)->T.TDB()), 15, 'f',7);
+        sJD = QString("%1 JD TDB").arg(bsList.bsList.at(p)->states.first()->T.TDB(), 15, 'f',7);
         str2et_c(sJD.toAscii().data(), &sgT0);
         qDebug() << QString("sJD0: %1\tet0: %2\n").arg(sJD).arg(sgT0, 15, 'f',7);
 
-        sJD = QString("%1 JD TDB").arg(mjd2jd(bsList.bsList.at(p)->states.at(ns-1)->T.TDB()), 15, 'f',7);
+        sJD = QString("%1 JD TDB").arg(bsList.bsList.at(p)->states.last()->T.TDB(), 15, 'f',7);
         str2et_c(sJD.toAscii().data(), &sgT1);
         qDebug() << QString("sJD1: %1\tet1: %2\n").arg(sJD).arg(sgT1, 15, 'f',7);
 
@@ -838,7 +838,7 @@ int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName)
         segmentEphs = new SpiceDouble[ns];
         for(i=0; i<ns; i++)
         {
-            timei = mjd2jd(bsList.bsList.at(p)->states.at(i)->T.TDB());//time0+dtime*i;
+            timei = bsList.bsList.at(p)->states.at(i)->T.TDB();//time0+dtime*i;
 
             if(center) //helio to barycenter
             {
