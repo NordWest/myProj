@@ -443,8 +443,8 @@ int main(int argc, char *argv[])
     tEnd = UTC2TDB(tEnd);
     qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
 
-    tBeg = floor(tBeg-1);
-    tEnd = floor(tEnd+1);
+    tBeg = floor(tBeg-2);
+    tEnd = floor(tEnd+2);
     qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
 
 
@@ -636,6 +636,14 @@ int main(int argc, char *argv[])
         }
         if(isObj)
         {
+            if(mCat.GetRecName(moRec->objName.simplified().toAscii().data()))
+            {
+               qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+               break;
+            }
+
+            orbRec.get(&mCat);
+
             orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
             orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
 
