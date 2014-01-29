@@ -203,7 +203,7 @@ int bodyStateList::size()
     return(bsList.size());
 }
 
-int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bpList);
+int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bpList, double tBeg, double tEnd);
 int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName);
 int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName);
 
@@ -455,8 +455,8 @@ int main(int argc, char *argv[])
     tEnd = UTC2TDB(tEnd);
     qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
 
-    tBeg = floor(tBeg-2);
-    tEnd = floor(tEnd+2);
+    tBeg = floor(tBeg-2*dtime);
+    tEnd = floor(tEnd+2*dtime);
     qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
 
 
@@ -697,7 +697,11 @@ int main(int argc, char *argv[])
     mass = new double[nofzbody];
     X0 = new double[nofzbody*3];
     V0 = new double[nofzbody*3];
-
+/*
+    QFile mRecFile("./pnbrec.txt");
+    mRecFile.open(QFile::Truncate | QFile::WriteOnly);
+    QTextStream mRecStm(&mRecFile);
+*/
     for(i=0; i<nofzbody; i++)
     {
         X0[i*3+0] = bsList.bsList.at(i)->states.at(0)->X[0];
@@ -709,7 +713,11 @@ int main(int argc, char *argv[])
         V0[i*3+2] = bsList.bsList.at(i)->states.at(0)->V[2];
 
         mass[i] = bsList.bsList.at(i)->mass;
+
+        //mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(T0, 15, 'f',7).arg(X0[i*3], 21, 'e',15).arg(X0[i*3+1], 21, 'e',15).arg(X0[i*3+2], 21, 'e',15).arg(V0[0], 21, 'e',15).arg(V0[1], 21, 'e',15).arg(V0[2], 21, 'e',15);
     }
+
+  //  mRecFile.close();
 
     qDebug() << QString("intCase: %1\n").arg(intCase);
     switch(intCase)
@@ -718,19 +726,19 @@ int main(int argc, char *argv[])
         TF = tEnd;
         DT = dtime;
         nstep = ((tEnd-T0)/dtime);
-        doNbody(X0, V0, T0, dtime, nstep, bsList);
+        doNbody(X0, V0, T0, dtime, nstep, bsList, tBeg, tEnd);
         break;
     case 1:
         TF = tBeg;
         DT = -dtime;
         nstep = ((T0-tBeg)/dtime);
-        doNbody(X0, V0, T0, -dtime, nstep, bsList);
+        doNbody(X0, V0, T0, -dtime, nstep, bsList, tBeg, tEnd);
         break;
     case 2:
         nstep = ((tEnd-T0)/dtime);
-        doNbody(X0, V0, T0, dtime, nstep, bsList);
+        doNbody(X0, V0, T0, dtime, nstep, bsList, tBeg, tEnd);
         nstep = ((T0-tBeg)/dtime);
-        doNbody(X0, V0, T0, -dtime, nstep, bsList);
+        doNbody(X0, V0, T0, -dtime, nstep, bsList, tBeg, tEnd);
         break;
     }
 
@@ -749,7 +757,7 @@ int prepNbody()
 
 }
 
-int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bsList)
+int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bsList, double tBeg, double tEnd)
 {
     QTextStream cout(stdout);
     qDebug() << QString("\n=== doNbody ===\n\n");
@@ -783,11 +791,24 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
     qDebug() << QString("nstep= %1\n").arg(nstep);
 
     char *str = new char[256];
+    int p=0;
 
     for(nt=0; nt<nstep; nt++)
     {
-        dat2YMD_str(tf, str);
-        qDebug() << QString("step= %1\tti= %2\r").arg(nt).arg(str);
+        /*
+        for(i=0; i<nofzbody; i++)
+        {
+            v[0] = vmul*V[i*3];
+            v[1] = vmul*V[i*3+1];
+            v[2] = vmul*V[i*3+2];
+        mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(tf, 15, 'f',7).arg(X[i*3], 21, 'e',15).arg(X[i*3+1], 21, 'e',15).arg(X[i*3+2], 21, 'e',15).arg(v[0], 21, 'e',15).arg(v[1], 21, 'e',15).arg(v[2], 21, 'e',15);
+        }*/
+        if(nt/nstep>0.1*p)
+        {
+            dat2YMD_str(mjd2jd(tf), str);
+            qDebug() << QString("\rstep= %1\%\tti= %2").arg(nt/nstep*100).arg(str);
+            p++;
+        }
 
         ti = tf;
         tf += dt;
@@ -797,15 +818,18 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
 
         solSys->rada27(X, V, 0, fabs(dt));
 
-        for(i=0; i<nofzbody; i++)
+        if(tf<=tEnd&&tf>=tBeg)
         {
-            v[0] = vmul*V[i*3];
-            v[1] = vmul*V[i*3+1];
-            v[2] = vmul*V[i*3+2];
+            for(i=0; i<nofzbody; i++)
+            {
+                v[0] = vmul*V[i*3];
+                v[1] = vmul*V[i*3+1];
+                v[2] = vmul*V[i*3+2];
 
-            mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(tf, 15, 'f',7).arg(X[i*3], 21, 'e',15).arg(X[i*3+1], 21, 'e',15).arg(X[i*3+2], 21, 'e',15).arg(v[0], 21, 'e',15).arg(v[1], 21, 'e',15).arg(v[2], 21, 'e',15);
+                mRecStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(bsList.bsList.at(i)->name, 16).arg(tf, 15, 'f',7).arg(X[i*3], 21, 'e',15).arg(X[i*3+1], 21, 'e',15).arg(X[i*3+2], 21, 'e',15).arg(v[0], 21, 'e',15).arg(v[1], 21, 'e',15).arg(v[2], 21, 'e',15);
 
-            bsList.bsList.at(i)->addState(mjd2jd(tf), &X[i*3], &v[0]);
+                bsList.bsList.at(i)->addState(mjd2jd(tf), &X[i*3], &v[0]);
+            }
         }
 
     }
