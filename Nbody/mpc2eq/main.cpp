@@ -782,8 +782,13 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
 
     qDebug() << QString("nstep= %1\n").arg(nstep);
 
+    char *str = new char[256];
+
     for(nt=0; nt<nstep; nt++)
     {
+        dat2YMD_str(tf, str);
+        qDebug() << QString("step= %1\tti= %2\r").arg(nt).arg(str);
+
         ti = tf;
         tf += dt;
 
