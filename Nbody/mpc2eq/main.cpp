@@ -218,7 +218,11 @@ int main(int argc, char *argv[])
         clog0 = new QDataStream(logFile);
     QTextStream logstr(logFile);
 
-    if(argc<2) exit(1);
+    if(argc<2)
+    {
+        qDebug() << "\nError: mpc file needed\n";
+        exit(1);
+    }
 
     int sk, center;
     procData miriadeProcData;
@@ -323,7 +327,11 @@ int main(int argc, char *argv[])
 ///////////
 
     opos = new observ;
-    opos->init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    if(opos->init(obsFile.toAscii().data(), jplFile.toAscii().data()))
+    {
+        qDebug() << "\nError opos init\n\n";
+        exit(1);
+    }
     opos->set_obs_parpam(EARTH_NUM, center, sk, obsCode.toAscii().data());
 
     int jday;// = (int)time0;
@@ -331,7 +339,11 @@ int main(int argc, char *argv[])
 
     time1 = time0+dtime*nstep;
 
-    if(mCat.init(mpcCatFile.toAscii().data())) return 1;
+    if(mCat.init(mpcCatFile.toAscii().data()))
+    {
+        qDebug() << "\nError MPCCAT init\n\n";
+        return 1;
+    }
 
 //Files names
 
