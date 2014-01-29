@@ -768,6 +768,8 @@ int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStat
         V[i] = vmul*V0[i];
     }
 
+    qDebug() << QString("nstep= %1\n").arg(nstep);
+
     for(nt=0; nt<nstep; nt++)
     {
         ti = tf;

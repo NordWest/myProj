@@ -90,5 +90,5 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/time_a.h \
     ../../libs/mpcfile.h
 
-unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro -lephem_read -ldele -lrada
+#unix:LIBS+=./../../libs/unix/cspice.a
+LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice
