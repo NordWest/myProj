@@ -84,6 +84,7 @@ public:
         double expTime;                  //[sec]
         QString catName, catMagName;     //name of catalog and name of magnitude param used
         QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
+        QString obsCode;
 	
 	ocRec();
 	~ocRec();
