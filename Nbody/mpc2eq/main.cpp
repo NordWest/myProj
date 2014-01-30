@@ -205,7 +205,7 @@ int bodyStateList::size()
 
 int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bpList, double tBeg, double tEnd);
 int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName);
-int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName);
+int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName, QString obsCode);
 
 
 int main(int argc, char *argv[])
@@ -744,7 +744,7 @@ int main(int argc, char *argv[])
 
      makeSPK(center, sk, bsList, spkFileName);
 
-     spk2eq(eqo_list, spkFileName, resFileName);
+     spk2eq(eqo_list, spkFileName, resFileName, obsCode);
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
@@ -968,7 +968,7 @@ int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName)
     return 0;
 }
 
-int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName)
+int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName, QString obsCode)
 {
     qDebug() << QString("\n=== spk2mpc ===\n");
     double range, ra, dec, timei;
@@ -977,11 +977,11 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName)
 
     mpc mrec;
     double jdUTC;
-    QFile ocFile;
-    QTextStream ocStm;
+    QFile ocFile, mpcFile;
+    QTextStream ocStm, mpcStm;
     QString bodyName;
     char *astr = new char[256];
-    QString objName, sJD;
+    QString objName, sJD, objNum;
     double state[6], lt;
 
     furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
@@ -992,6 +992,11 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName)
     ocFile.setFileName(resFileName);
     ocFile.open(QFile::WriteOnly | QFile::Truncate);
     ocStm.setDevice(&ocFile);
+
+    QString mpcFileName = QString("%1_mpc.txt").arg(resFileName.section(".", 0, -2));
+    mpcFile.setFileName(mpcFileName);
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    mpcStm.setDevice(&mpcFile);
 
     int szObj = eqo_list.size();
 
@@ -1045,11 +1050,19 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName)
             qDebug() << tstr << "\n";
             ocStm << tstr << "\n";
 
+            mCat.GetRecName(oc_rec->name.toAscii().data());
+            mCat.record->getNumStr(astr);
+            objNum = QString(astr);
+
+            oc_rec->rec2MPC(&tstr, obsCode, objNum);
+
+            mpcStm << tstr << "\n";
         }
 
 
     }
 
     ocFile.close();
+    mpcFile.close();
     return 0;
 }
