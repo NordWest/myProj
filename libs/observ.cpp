@@ -98,7 +98,7 @@ int observ::det_observ()
 
 
 
-int observ::det_vect_radec(double *stateSSB, double *raRad, double *decRad, double *range, int corr)
+int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range, int corr)
 {
     double *R, *X, *V, *X1, *V1, *XE0, *XEB0, *XS0, *VS0, *Q, *Qb, *P;
     R = new double[3];
@@ -119,13 +119,13 @@ int observ::det_vect_radec(double *stateSSB, double *raRad, double *decRad, doub
 
     muc2 = 9.8704e-9;
 
-    X[0] = stateSSB[0];
-    X[1] = stateSSB[1];
-    X[2] = stateSSB[2];
+    X1[0] = state2sun[0];
+    X1[1] = state2sun[1];
+    X1[2] = state2sun[2];
 
-    V[0] = stateSSB[3];
-    V[1] = stateSSB[4];
-    V[2] = stateSSB[5];
+    V1[0] = state2sun[3];
+    V1[1] = state2sun[4];
+    V1[2] = state2sun[5];
 
     XE0[0] = pos[0];
     XE0[1] = pos[1];

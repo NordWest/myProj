@@ -204,27 +204,33 @@ int bodyStateList::size()
     return(bsList.size());
 }
 
-void sortMPCdtime(mpcFile mpc_file, double T0)
+void sortEQdtime(eqFile *eq_file, double T0)
 {
     int i, j, sz;
     int pMin;
     double vMin, val;
-    sz = mpc_file.size();
+    sz = eq_file->ocList.size();
+    QString tstr;
+
+    //qDebug() << QString("T0= %1\n").arg(T0);
 
     for(i=0; i<sz-1; i++)
     {
         pMin=i;
-        vMin = fabs(mpc_file.at(i)->mjd()-T0);
+        vMin = fabs(eq_file->ocList.at(i)->MJday-T0);
         for(j=i+1; j<sz; j++)
         {
-            val = fabs(mpc_file.at(j)->mjd()-T0);
+            val = fabs(eq_file->ocList.at(j)->MJday-T0);
             if(val<vMin)
             {
                 vMin = val;
                 pMin = j;
             }
         }
-        if(pMin!=i) mpc_file.recList.swap(i, pMin);
+        if(pMin!=i) eq_file->ocList.swap(i, pMin);
+        //qDebug() << QString("pMin= %1\tVnim= %2\n").arg(pMin).arg(vMin);
+        //eq_file->ocList.at(i)->rec2sBase(&tstr);
+        //qDebug() << QString("%1\n").arg(tstr);
     }
 }
 
@@ -400,8 +406,8 @@ int main(int argc, char *argv[])
     mpc_file.init(iniMpcFile);
     mNum = mpc_file.size();
 
-    tBeg = UTC2TDB(mjd2jd(mpc_file.recList.first()->mjd));
-    tEnd = UTC2TDB(mjd2jd(mpc_file.recList.last()->mjd));
+    tBeg = UTC2TDB(mjd2jd(mpc_file.recList.first()->mjd()));
+    tEnd = UTC2TDB(mjd2jd(mpc_file.recList.last()->mjd()));
     //tBeg = UTC2TDB(tBeg);
     //tEnd = UTC2TDB(tEnd);
     qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
@@ -460,14 +466,15 @@ int main(int argc, char *argv[])
     int isObj;
 
 //append environment
+    double orbJD;
     ParticleStruct *nPar;
-    sortMPCtime(mpc_file);
-    int mNum = mpc_file.size();
+    //sortMPCdtime(mpc_file);
+    mNum = mpc_file.size();
     orbJD = 0;
 
     eqFile eq_file;
     QList <eqFile*> eqList;
-    eqFile* eqTemp;
+    //eqFile* eqTemp;
     ocRec *oc_rec;
 
     for(i=0;i<mNum;i++)
@@ -496,14 +503,14 @@ int main(int argc, char *argv[])
         oc_rec->ra = mpc_rec->ra();
         oc_rec->de = mpc_rec->dec();
         oc_rec->mag0 = mpc_rec->magn();
-        oc_rec->obsCode = mpc_rec->getObsCode();
-        eqFile.ocList << oc_rec;
+        mpc_rec->getObsCode(oc_rec->obsCode);
+        eq_file.ocList << oc_rec;
 
         isObj = 1;
 
         for(j=0; j<envSize; j++)
         {
-            if(QString().compare(objName, pList[j]->name)==0)
+            if(QString().compare(objName, pList[j]->name.data())==0)
             {
                 isObj=0;
                 break;
@@ -512,7 +519,7 @@ int main(int argc, char *argv[])
         if(isObj)
         {
             nPar = new ParticleStruct;
-            nPar->name = objName;
+            nPar->name = objName.toAscii().data();
             nPar->identity = Advisor::planetesimal;
             nPar->interactionPermission = Advisor::interactALL;
             nPar->mass = -1.0;
@@ -525,6 +532,8 @@ int main(int argc, char *argv[])
     jdTDT = orbJD/(1.0*mNum);
     jdTDB = TDT2TDB(jdTDT);
     jdUTC = TDT2UTC(jdTDT);
+
+    qDebug() << QString("orb jdTDB: %1\n").arg(jdTDB, 15, 'f', 8);
 
     sJD = QString("%1").arg(jdUTC, 11, 'f',7);
 
@@ -544,6 +553,7 @@ int main(int argc, char *argv[])
     X0 = new double[nofzbody*3];
     V0 = new double[nofzbody*3];
 
+    int p=0;
     for(i=0; i<envSize; i++)
     {
         if(pList.at(i)->identity==Advisor::collapsorFixed) continue;
@@ -611,15 +621,16 @@ int main(int argc, char *argv[])
         //{
             //bsList.addParticle(jdTDB, pList[i]);
             //mass[mNum++] = pList[i]->mass;
-            X0[i*3+0] = pList[i]->x;
-            X0[i*3+1] = pList[i]->y;
-            X0[i*3+2] = pList[i]->z;
+            X0[p*3+0] = pList[i]->x;
+            X0[p*3+1] = pList[i]->y;
+            X0[p*3+2] = pList[i]->z;
 
-            V0[i*3+0] = pList[i]->xd;
-            V0[i*3+1] = pList[i]->yd;
-            V0[i*3+2] = pList[i]->zd;
+            V0[p*3+0] = pList[i]->xd;
+            V0[p*3+1] = pList[i]->yd;
+            V0[p*3+2] = pList[i]->zd;
 
-            mass[i] = pList[i]->mass;
+            mass[p] = pList[i]->mass;
+            p++;
         //}
     }
 
@@ -709,8 +720,17 @@ int main(int argc, char *argv[])
 
   //  mRecFile.close();
 
+    int nt, N;
+    double ti, tf, dT, ra, dec;
+    double vmul;
+    Everhardt *solSys;
+    QString tstr, objNumStr;
+    char* astr = new char[256];
+
     N = (nofzbody)*3;
 
+    delete [] X;
+    delete [] V;
     X = new double[N];
     V = new double[N];
 
@@ -718,7 +738,36 @@ int main(int argc, char *argv[])
 
     double dTmin;
 
-    sortMPCdtime(mpc_file, jdUTC);
+    sortEQdtime(&eq_file, jd2mjd(jdUTC));
+    //eq_file.saveAs(resFileName);
+
+    QFile ocFile, mpcFile;
+    QTextStream ocStm, mpcStm;
+
+    qDebug() << QString("resFileName: %1\n").arg(resFileName);
+    ocFile.setFileName(resFileName);
+    ocFile.open(QFile::WriteOnly | QFile::Truncate);
+    ocStm.setDevice(&ocFile);
+
+    QString mpcFileName = QString("%1_mpc.txt").arg(resFileName.section(".", 0, -2));
+    mpcFile.setFileName(mpcFileName);
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    mpcStm.setDevice(&mpcFile);
+
+    vmul = 1;
+    for(j=0;j<nofzbody;j++)
+    {
+        X[j*3] = X0[j*3];
+        X[j*3+1] = X0[j*3+1];
+        X[j*3+2] = X0[j*3+2];
+
+        V[j*3] = V0[j*3];
+        V[j*3+1] = V0[j*3+1];
+        V[j*3+2] = V0[j*3+2];
+    }
+
+    T0 = jd2mjd(jdTDB);
+
 
 
     for(i=0; i<mNum; i++)
@@ -726,43 +775,91 @@ int main(int argc, char *argv[])
         oc_rec = eq_file.ocList.at(i);
         tBeg = T0;
         tEnd = oc_rec->MJday;
-        ti = tBeg;
-        dT = tEnd - ti;
+        tf = tBeg;
+        dT = tEnd - tf;
+
+        qDebug() << QString("tBeg= %1\ttEnd= %2\n").arg(tBeg).arg(tEnd);
+
+        qDebug() << QString("dT= %1\tvmul= %2\n").arg(dT).arg(vmul);
+
+        if(dT*vmul<0)
+        {
+            vmul = -vmul;
+
+
+            for(j=0;j<nofzbody;j++)
+            {
+                V[j*3] = -V[j*3];
+                V[j*3+1] = -V[j*3+1];
+                V[j*3+2] = -V[j*3+2];
+            }
+        }
+
+
+
         while((fabs(dT)/dtime)>1)
         {
-            solSys->rada27(X0, V0, 0, fabs(dt));
+            ti = tf;
+            tf = tf+vmul*dtime;
+            //qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
+            solSys->rada27(X, V, 0, fabs(dtime));
+            dT = tEnd - tf;
         }
+
+        if(fabs(tf-tEnd)>1e-9)
+        {
+            ti = tf;
+            tf = tEnd;
+            qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
+            solSys->rada27(X, V, 0, fabs(tf-ti));
+        }
+
+        T0 = tEnd;
+
+        for(j=0;j<nofzbody;j++)
+        {
+            if(QString().compare(oc_rec->name, pList.at(j+1)->name.data())==0)
+            {
+
+                state[0] = X[j*3];
+                state[1] = X[j*3+1];
+                state[2] = X[j*3+2];
+
+                state[3] = vmul*V[j*3];
+                state[4] = vmul*V[j*3+1];
+                state[5] = vmul*V[j*3+2];
+
+                opos->det_observ_tdb(tEnd);
+                opos->det_vect_radec(state, &ra, &dec);
+
+                ra = rad2grad(ra);
+                dec = rad2grad(dec);
+
+                //qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0], 21, 'e',15).arg(state[1], 21, 'e',15).arg(state[2], 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
+
+                oc_rec->ocRaCosDe = (oc_rec->ra - ra)*cos(dec);
+                oc_rec->ocDe = (oc_rec->de - dec);
+
+                oc_rec->rec2sBase(&tstr);
+
+                qDebug() << tstr << "\n";
+                ocStm << tstr << "\n";
+
+                mCat.GetRecName(oc_rec->name.toAscii().data());
+                mCat.record->getNumStr(astr);
+                objNumStr = QString(astr);
+
+                oc_rec->rec2MPC(&tstr, obsCode, objNumStr);
+
+                mpcStm << tstr << "\n";
+            }
+        }
+
     }
 
+    ocFile.close();
+    mpcFile.close();
 
-    qDebug() << QString("intCase: %1\n").arg(intCase);
-
-
-    switch(intCase)
-    {
-    case 0:
-        TF = tEnd;
-        DT = dtime;
-        nstep = ((tEnd-T0)/dtime);
-        doNbody(X0, V0, T0, dtime, nstep, bsList, tBeg, tEnd);
-        break;
-    case 1:
-        TF = tBeg;
-        DT = -dtime;
-        nstep = ((T0-tBeg)/dtime);
-        doNbody(X0, V0, T0, -dtime, nstep, bsList, tBeg, tEnd);
-        break;
-    case 2:
-        nstep = ((tEnd-T0)/dtime);
-        doNbody(X0, V0, T0, dtime, nstep, bsList, tBeg, tEnd);
-        nstep = ((T0-tBeg)/dtime);
-        doNbody(X0, V0, T0, -dtime, nstep, bsList, tBeg, tEnd);
-        break;
-    }
-
-     makeSPK(center, sk, bsList, spkFileName);
-
-     spk2eq(eqo_list, spkFileName, resFileName, obsCode);
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
