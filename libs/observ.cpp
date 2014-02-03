@@ -119,13 +119,15 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
 
     muc2 = 9.8704e-9;
 
-    X1[0] = state2sun[0];
-    X1[1] = state2sun[1];
-    X1[2] = state2sun[2];
 
-    V1[0] = state2sun[3];
-    V1[1] = state2sun[4];
-    V1[2] = state2sun[5];
+//X - sun
+    X[0] = state2sun[0];
+    X[1] = state2sun[1];
+    X[2] = state2sun[2];
+
+    V[0] = state2sun[3];
+    V[1] = state2sun[4];
+    V[2] = state2sun[5];
 
     XE0[0] = pos[0];
     XE0[1] = pos[1];
@@ -135,7 +137,7 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
     if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
     if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
 
-
+//X1 - ssb
     X1[0] = X[0] + XS0[0];
     X1[1] = X[1] + XS0[1];
     X1[2] = X[2] + XS0[2];

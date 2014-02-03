@@ -226,12 +226,16 @@ void Vmul3(double *vectRes, double *vect0, double *vect1);
 
 
 void detABC(double *A, double *B, double *C, double R);
-
+/*
 double grad2rad(double grad);
 double rad2grad(double rad);
 
 double rad2mas(double rad);
 double mas2rad(double mas);
+*/
+double grad2mas(double grad);
+double mas2grad(double mas);
+
 
 int interp(double x1, double *x, double x2, double t1, double t, double t2);
 

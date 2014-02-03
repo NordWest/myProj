@@ -1,6 +1,6 @@
 #include <QtCore>
 
-#include "./../../libs/dele.h"
+#include <dele.h>
 //#include "./../../libs/astro.h"
 #include <astro.h>
 #include "./../../libs/comfunc.h"
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
 
             qDebug() << QString("XS0: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
-//Q
+//ssb
             X1[0] = X[0] + XS0[0];
             X1[1] = X[1] + XS0[1];
             X1[2] = X[2] + XS0[2];

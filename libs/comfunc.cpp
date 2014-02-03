@@ -4066,3 +4066,12 @@ void redRefraction(double *ra, double *dec, refractionParam refParam)
 
 }
 
+double grad2mas(double grad)
+{
+    return(grad*3600000);
+}
+
+double mas2grad(double mas)
+{
+    return(mas/3600000.0);
+}

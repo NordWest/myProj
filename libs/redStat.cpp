@@ -2,6 +2,37 @@
 
 #define REDSTAT_LOG_LEVEL 0
 
+void eqSplitObjects(eqFile *eq_file, QList<eqFile*> &eqList)
+{
+    int i, sz, j, szj, nObj;
+    eqFile *neq_file;
+    ocRec *oc_rec;
+
+    sz = eq_file->ocList.size();
+
+    for(i=0; i<sz; i++)
+    {
+        oc_rec = eq_file->ocList.at(i);
+        szj = eqList.size();
+        nObj=1;
+        for(j=0;j<szj; j++)
+        {
+            if(QString().compare(oc_rec->name, eqList.at(j)->ocList.first()->name)==0)
+            {
+                nObj=0;
+                eqList.at(j)->ocList << oc_rec;
+                break;
+            }
+        }
+        if(nObj)
+        {
+            neq_file = new eqFile;
+            neq_file->ocList << oc_rec;
+            eqList << neq_file;
+        }
+    }
+}
+
 void detOrSeriesList(QList <objResRec*> orList, QList <objResidualFile*> *orSeriesList, double expMax, double expMin)
 {
     int i, szi;
