@@ -13,13 +13,6 @@ class mpccatL;
 #define MPCCAT_NUM_KPOS 166
 #define MPCCAT_PDEST_KPOS 1
 
-
-#include "comfunc.h"
-#include "orbcat.h"
-#include "fbStream.h"
-
-
-
 class mpcrec
 {
 public:

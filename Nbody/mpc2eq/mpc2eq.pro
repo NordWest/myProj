@@ -49,7 +49,8 @@ SOURCES += main.cpp \
 #    ../../libs/ephem_util.cpp \
     ../../libs/calc_epm.cpp \
     ../../libs/time_a.cpp \
-    ../../libs/mpcfile.cpp
+    ../../libs/mpcfile.cpp \
+    ../../libs/filedynstr.cpp
 
 HEADERS += ../../libs/orbit.h \
     ../../libs/orbcat.h \
@@ -88,7 +89,8 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/myDomMoody.h \
     ../../libs/calc_epm.h \
     ../../libs/time_a.h \
-    ../../libs/mpcfile.h
+    ../../libs/mpcfile.h \
+    ../../libs/filedynstr.h
 
 #unix:LIBS+=./../../libs/unix/cspice.a
 LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice

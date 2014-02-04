@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "comfunc.h"
 
 class FileDynStr

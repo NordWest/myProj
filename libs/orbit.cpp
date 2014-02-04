@@ -783,7 +783,7 @@ int findOrb(orbElem *orb, double *R0, double *V0, double t0)
 
 	if(fabs(h)<EPS)
 	{
-		printf("\nporabola\n");
+        printf("\nporabola\n");
 
         orb->q = 0.5*p;
         orb->ec = 1.0;
@@ -831,7 +831,7 @@ int findOrb(orbElem *orb, double *R0, double *V0, double t0)
 	else if(h<0.0)
 	{
 		
-        //printf("\nellips\n");
+		printf("\nellips\n");
 
 		resin = sqrt(p)*r0rt0/ka;
 		recos = p - r0;

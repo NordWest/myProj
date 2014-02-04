@@ -1,4 +1,3 @@
-//#pragma once
 #ifndef OBSRY_H
 #define OBSRY_H
 
