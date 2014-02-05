@@ -1,38 +1,29 @@
-//#pragma once
+#ifndef ORB_H
+#define ORB_H
 
-#ifndef COMF_H
+struct orbElem;
+class orbit;
+struct OrbitsParams;
+
+
 #include "comfunc.h"
-#endif
+/*
 #ifndef DA_H
 #include "DynArr.h"
 #endif
+*/
 //#include <iostream.h>
-#ifndef OBSRY_H
 #include "observatory.h"
-#endif
-
-#ifndef ORBCAT_H
 #include "orbcat.h"
-#endif
-
-#ifndef MPCCAT_H
 #include "mpccat.h"
-#endif
-
-#ifndef COMMETORBCAT_H
 #include "commetorbcat.h"
-#endif
-
-#ifndef DELE_H
 #include <dele.h>
-#endif
-
-#ifndef REC_H
 #include "rec.h"
-#endif
+#include "orbit.h"
 
 
-#ifndef ORB_H
+
+
 //#define rs 1.000000000000e+9	//scaling radius [cm]
 
 #define VAR_SIZE 100
@@ -42,8 +33,10 @@
 #define OBJ_VARS_LEN 13
 #define NAME_VARS_LEN 32
 
-int FindOrb(myvector *R0, myvector *V0, double t0, int log);
 
+
+int findOrb(orbElem *orb, double *R0, double *V0, double t0);
+int findOrbEkv(orbElem *orb, double *R0ekv, double *V0ekv, double t0);
 
 /*
 class orbCat
@@ -116,15 +109,6 @@ struct orbElem
 
 };
 
-class a_time
-{
-public:
-	double value;
-	int type;
-
-
-
-};
 
 class orbit
 {
@@ -261,5 +245,4 @@ public:
 };
 */
 
-#define ORB_H
 #endif

@@ -1,10 +1,8 @@
-#include <stdio.h>
-
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
 #ifndef REC_H
+#define REC_H
+
+#include <stdio.h>
+#include "comfunc.h"
 
 class note
 {
@@ -22,7 +20,6 @@ public:
 	int copyTo(note *target);
 	int interpNote(note *nbuttom, note *ntop);
 };
-
 
 struct notes
 {
@@ -62,6 +59,5 @@ private:
 int detEthGelioCentr(note *Rec, char *fname);
 int detObsEthCentr(note *Obs);
 
-#define REC_H
 #endif
 

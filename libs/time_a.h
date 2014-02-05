@@ -1,10 +1,7 @@
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
-
 #ifndef TIMEA_H
+#define TIMEA_H
 
+#include "comfunc.h"
 
 class time_a
 {
@@ -35,5 +32,5 @@ public:
     void setTDT(double jdTime);
 };
 
-#define TIMEA_H
+
 #endif

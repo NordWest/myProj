@@ -56,6 +56,28 @@ void eposrec::copyTo(eposrec *nrec)
 	strcpy(nrec->tail, this->tail);
 }
 
+void eposrec::getOrbElem(orbElem *orb)
+{
+    orb->ec = ec;
+    orb->eJD = eJD;
+    orb->inc = inc;
+    orb->M0 = M0;
+    orb->Node = Node;
+    orb->q = q;
+    orb->w = w;
+}
+
+void eposrec::setOrbElem(orbElem orb)
+{
+    ec = orb.ec;
+    eJD = orb.eJD;
+    inc = orb.inc;
+    M0 = orb.M0;
+    Node = orb.Node;
+    q = orb.q;
+    w = orb.w;
+}
+
 void eposrec::set_number(int numb)
 {
 	this->number = numb;

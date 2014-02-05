@@ -1,5 +1,7 @@
 //#pragma once
 #ifndef DA_H
+#define DA_H
+
 #define MSIZE 1000
 #define MRSIZE 1000
 #define MCSIZE 1000
@@ -204,7 +206,6 @@ double VectAng(myvector *V1, myvector *V2);
 */
 
 //////////////////////////////////////////////
-#define DA_H
 
 #endif
 

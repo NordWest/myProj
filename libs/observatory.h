@@ -1,18 +1,15 @@
 //#pragma once
+#ifndef OBSRY_H
+#define OBSRY_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef COMF_H
 #include "comfunc.h"
-#endif
-
-
-//#include "..\classes\observatory.h"
-
-#ifndef OBSRY_H
+#include "filedynstr.h"
 
 #define OBS_SIZE 255
 
@@ -34,13 +31,7 @@ public:
 	~obsy();
         int copyTo(obsy *dest);
 };
-/*
-struct obsys
-{
-	obsy *pos;
-	obsys *next;
-};
-*/
+
 class observatory : public FileDynStr
 {
 public:
@@ -69,4 +60,4 @@ public:
 	int det_state(double tUTC);
 };
 #endif
-#define OBSRY_H
+

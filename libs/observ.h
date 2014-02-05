@@ -1,35 +1,18 @@
-//#pragma once
+#ifndef OBSERV_H
+#define OBSERV_H
+
 #include <stdio.h>
 #include <QtCore>
 
-#ifndef OBSRY_H
 #include "observatory.h"
-#endif
-
-#ifndef COMF_H
 #include "comfunc.h"
-#endif
-
-#ifndef MPCS_H
 #include "mpcs.h"
-#endif
-
-#ifndef DELE_H
 #include <dele.h>
-#endif
-
-#ifndef TIMEA_H
 #include "time_a.h"
-#endif
-
-//
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-
-#ifndef OBSERV_H
-
 
 class observ
 {
@@ -77,5 +60,4 @@ private:
     char *nobsy;
 };
 
-#define OBSERV_H
 #endif

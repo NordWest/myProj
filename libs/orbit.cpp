@@ -751,69 +751,57 @@ int orbit::detRecEkvVel(double *Vx, double *Vy, double *Vz, double t)
 
 
 //Find
-/*
-int orbit::FindOrb(myvector *R0, myvector *V0, double t0, int log)
-{
-//	rt = new myvector(3);
-//	int n;
-//	n = this->comvaR0->last;
-/*	R0->set(0, rpos[0]);
-	R0->set(1, rpos[1]);
-	R0->set(2, rpos[2]);
-	V0->set(0, vel[0]);
-	V0->set(1, vel[1]);
-	V0->set(2, vel[2]);/
 
+int findOrb(orbElem *orb, double *R0, double *V0, double t0)
+{
 	char *pv;
 	pv = new char[100];
 
 
-	double h;
-	double p, inc, Node, TT;
-	double E0, M0, eJD, ss, n;
-	double a, ecc, q, B, sg0, r0rt0, v0, r0, vel0;
+    double h, p, TT;
+    double E0, ss, n;
+    double a, B, sg0, r0rt0, v0, r0, vel0;
 	double P1, P2, P3;
 	double u0;
-	double w;
-	double resin, recos, pa;
-	double rsinu, rcosu;
+    double resin, recos, pa;
+    double rsinu, rcosu;
+    double Sign, dT;
 
-	r0 = R0->norm();
-	vel0 = V0->norm();
-	r0rt0 = Smul(R0, V0);
+    r0 = norm(R0);
+    vel0 = norm(V0);
+    r0rt0 = Smul3(R0, V0);
 
 	h = vel0*vel0 - 2.0*ka*ka/r0;
-	printf("\nh	%f\n", h);
+    //printf("\nh	%f\n", h);
 
-	P1 = R0->get(1)*V0->get(2) - R0->get(2)*V0->get(1);
-	P2 = R0->get(0)*V0->get(2) - R0->get(2)*V0->get(0);
-	P3 = R0->get(0)*V0->get(1) - R0->get(1)*V0->get(0);
+    P1 = R0[1]*V0[2] - R0[2]*V0[1];
+    P2 = R0[0]*V0[2] - R0[2]*V0[0];
+    P3 = R0[0]*V0[1] - R0[1]*V0[0];
 
 
-	piNsys(&p, &inc, &Node, P1, P2, P3);
-//	piNsys(&p, &inc, &Node, P1, P2, P3);
+    piNsys(&p, &orb->inc, &orb->Node, P1, P2, P3);
 
 	if(fabs(h)<EPS)
 	{
 		printf("\nporabola\n");
 
-		q = 0.5*p;
-		ecc = 1.0;
+        orb->q = 0.5*p;
+        orb->ec = 1.0;
 
-		sg0 = r0rt0/(ka*sqrt(2.0*q));
+        sg0 = r0rt0/(ka*sqrt(2.0*orb->q));
 
-		v0 = 2.0*atan2(r0rt0, ka*sqrt(2.0*q));
+        v0 = 2.0*atan2(r0rt0, ka*sqrt(2.0*orb->q));
 
 		B = sqrt(2.0)*(sg0 + sg0*sg0*sg0/3.0)/ka;
 
-		TT = t0 - pow(q, 1.5)*B;
+        TT = t0 - pow(orb->q, 1.5)*B;
 
-		P1 = R0->get(2)/sin(inc);
-		P2 = R0->get(0)*cos(Node) + R0->get(1)*sin(Node);
+        P1 = R0[2]/sin(orb->inc);
+        P2 = R0[0]*cos(orb->Node) + R0[1]*sin(orb->Node);
 
 		u0 = atan2(P1, P2);
 
-		w = u0 - v0;
+        orb->w = u0 - v0;
 /*
 		M0 = 0.0;
 		eJD = (double)(int)TT;
@@ -821,14 +809,14 @@ int orbit::FindOrb(myvector *R0, myvector *V0, double t0, int log)
 		B = pow(q, -1.5)*TT;
 		pKepler(&ss, B);
 		M0 = 2.0*atan(ss);
-/
-		double Sign, dT;
-		M0 = 0.0;
+*/
+
+        orb->M0 = 0.0;
 		Sign = 1.0;
 //		eJD = (double)(int)this->appcnt->t;
-		eJD = (double)(int)TT;
-		dT = eJD - TT;
-		B = pow(q, -1.5)*dT;
+        orb->eJD = (double)(int)TT;
+        dT = orb->eJD - TT;
+        B = pow(orb->q, -1.5)*dT;
 		if(B<0.0) 
 		{
 			B = fabs(B);
@@ -836,56 +824,49 @@ int orbit::FindOrb(myvector *R0, myvector *V0, double t0, int log)
 		}
 		pKepler(&ss, B);
 		ss = Sign*ss;
-		M0 = 2.0*atan(ss);
-		if(M0<0.0) M0+=2.0*PI;
+        orb->M0 = 2.0*atan(ss);
 
-
-		if(w<0.0) w+=2.0*PI;
-//		if(Node<0.0) Node+=2.0*PI;
-//		if(inc<0.0) inc+=2.0*PI;
 
 	}
 	else if(h<0.0)
 	{
 		
-		printf("\nellips\n");
+        //printf("\nellips\n");
 
 		resin = sqrt(p)*r0rt0/ka;
 		recos = p - r0;
 		v0 = atan2(resin, recos);
-		ecc = sqrt((resin*resin + recos*recos)/(r0*r0));
+        orb->ec = sqrt((resin*resin + recos*recos)/(r0*r0));
 
 		
-		if(fabs(inc)<EPS) w = -v0;
+        if(fabs(orb->inc)<EPS) orb->w = -v0;
 		else
 		{
-			rsinu = R0->get(2)/sin(inc);
-			rcosu = R0->get(0)*cos(Node) + R0->get(1)*sin(Node);
+            rsinu = R0[2]/sin(orb->inc);
+            rcosu = R0[0]*cos(orb->Node) + R0[1]*sin(orb->Node);
 			u0 = atan2(rsinu, rcosu);
-			w = u0 - v0;
-		}
+            orb->w = u0 - v0;
+        }
 
-		pa = sqrt((1.0 - ecc)/(1.0 + ecc))*tan(v0/2.0);
-		E0 = 2.0*atan(pa);
+        pa = sqrt((1.0 - orb->ec)/(1.0 + orb->ec))*tan(v0/2.0);
+        E0 = 2.0*atan(pa);
 
-		M0 = E0 - ecc*sin(E0);
+        orb->M0 = E0 - orb->ec*sin(E0);
 
-		a = p/(1.0 - ecc*ecc);
+        a = p/(1.0 - orb->ec*orb->ec);
 
 		n = ka*pow(a, -1.5);
 
-		eJD = t0 - M0/n;
+        orb->eJD = t0 - orb->M0/n;
 
-		q = a*(1.0 - ecc);
+        orb->q = a*(1.0 - orb->ec);
 
-		if(M0<0.0) M0 += 2.0*PI;
+        if(orb->M0<0.0) orb->M0+=2.0*PI;
 
-		double dT;
+        dT = fmod(orb->eJD*2.0, 1.0)/2.0;
+        orb->eJD -= dT;
 
-		dT = fmod(eJD*2.0, 1.0)/2.0;
-		eJD -= dT;
-
-		M0 = n*dT + M0;
+        orb->M0 = n*dT + orb->M0;
 
 		
 
@@ -905,27 +886,117 @@ int orbit::FindOrb(myvector *R0, myvector *V0, double t0, int log)
 		if(fabs(inc)<EPS) w = -v0;
 		else
 		{
-			rsinu = r->get(2)/sin(inc);
-			rcosu = r->get(0)*cos(Node) + r->get(1)*sin(Node);
+            rsinu = r[2)/sin(inc);
+            rcosu = r[0)*cos(Node) + r[1)*sin(Node);
 			u0 = atan2(rsinu, rcosu);
 			w = u0 - v0;
 		}
 
 		pa = sqrt((1.0 - ecc)/(1.0 + ecc))*tan(v0/2.0);
 //		E0 asin((();
-/
+*/
 		
 	}
 
-	if(w<0.0) w+=2.0*PI;
-	if(inc<0.0) inc+=2.0*PI;
-	if(Node<0.0) Node+=2.0*PI;
-
-	this->initElem(eJD, M0, w, Node, inc, ecc, q);
+    if(orb->w<0.0) orb->w+=2.0*PI;
+    if(orb->inc<0.0) orb->inc+=2.0*PI;
+    if(orb->Node<0.0) orb->Node+=2.0*PI;
+    if(orb->M0<0.0) orb->M0+=2.0*PI;
 
 	return 0;
 }
+
+
+int findOrbEkv(orbElem *orb, double *R0ekv, double *V0ekv, double t0) //Duboshin-Sprav_Ruk p.270
+{
+    char *pv;
+    pv = new char[100];
+
+
+    double h, p, p1, TT;
+    double a1, inc, Node, w;
+    double E0, ss, n;
+    double a, B, sg0, r0rt0, v0, r0, vel0;
+    double P1, P2, P3, P4, P5, d;
+    double u0;
+    double resin, recos, pa;
+    double rsinu, rcosu;
+    double Sign, dT;
+//1
+    r0 = norm(R0ekv);
+    vel0 = norm(V0ekv);
+    r0rt0 = Smul3(R0ekv, V0ekv);
+
+    h = 2.0/r0 - vel0*vel0/ka*ka;
+    printf("\nh	%f\n", h);
+
+//3
+    P1 = R0ekv[1]*V0ekv[2] - R0ekv[2]*V0ekv[1];
+    P2 = R0ekv[0]*V0ekv[2] - R0ekv[2]*V0ekv[0];
+    P3 = R0ekv[0]*V0ekv[1] - R0ekv[1]*V0ekv[0];
+
+
+    piNsys(&p, &inc, &Node, P1, P2, P3);
+
+//2
+    if(h>EPS) //ellips
+    {
+        a1 = 1.0/fabs(h);
+        P1 = r0rt0/ka/sqrt(a1);
+        P2 = 1.0 - r0/a1;
+        orb->ec = sqrt(P1*P1 + P2*P2);
+        E0 = atan2(P1/orb->ec, P2/orb->ec);
+
+        orb->M0 = E0 - P1;
+
+        p1 = a1*(1.0 - orb->ec*orb->ec);
+        printf("dp: %f", p1-p);
+    }
+    if(h<-EPS) //hiperbola
+    {
+        a1 = 1.0/fabs(h);
+        P1 = r0rt0/ka/sqrt(a1);
+        P2 = r0/a1 + 1;
+        orb->ec = sqrt(-P1*P1 + P2*P2);
+        E0 = atanh(P1/P2);//H0
+        orb->M0 = t0 - (orb->ec*sinh(E0) - E0)/(ka*pow(a1, -1.5));
+        p1 = a1*(orb->ec*orb->ec - 1.0);
+        printf("dp: %f", p1-p);
+    }
+    if(fabs(h)<EPS) //parabola
+    {
+
+    }
+
+
+//4
+    v0 = atan2(sqrt(p)*r0rt0, ka*(p - r0));
+    u0 = atan2(R0ekv[2]/sin(inc), R0ekv[0]*cos(Node)+R0ekv[1]*sin(Node));
+
+    w = u0-v0;
+
+//5
+    P1 = sin(inc)*sin(Node);
+    P2 = -cos(inc)*sin(EKV) + sin(inc)*cos(EKV)*cos(Node);
+    P3 = cos(inc)*cos(EKV) + sin(inc)*sin(EKV)*cos(Node);
+    P4 = sin(EKV)*sin(Node);
+    P5 = sin(inc)*cos(EKV) - cos(inc)*sin(EKV)*cos(Node);
+
+    orb->Node = atan2(P1, P2);
+    orb->inc = atan2(P1, P3)/sin(orb->Node);
+    d = atan2(P4, P5);
+    orb->w = w - d;
+
+    orb->q = p;
+/*
+    if(orb->w<0.0) orb->w+=2.0*PI;
+    if(orb->inc<0.0) orb->inc+=2.0*PI;
+    if(orb->Node<0.0) orb->Node+=2.0*PI;
+    if(orb->M0<0.0) orb->M0+=2.0*PI;
 */
+    return 0;
+}
+
 ///////////////// class orbs //////////////////////////////
 /*
 orbs::orbs()

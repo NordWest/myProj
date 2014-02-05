@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FBSTREAM_H
+#define FBSTREAM_H
 
 #include "stdlib.h"
 #include "math.h"
@@ -13,8 +14,6 @@
 #include "comfunc.h"
 #endif
 
-#ifndef FBSTREAM_H
-#define FBSTREAM_H
 
 class fbStream;				//Базовый класс потокового буферезированного файла
 class fbStreamStr;			//Расширенный класс с поддержкой строк данных с ключевыми записями

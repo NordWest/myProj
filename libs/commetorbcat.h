@@ -1,8 +1,8 @@
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
 #ifndef COMETORBCAT_H
+#define COMETORBCAT_H
+
+#include "comfunc.h"
+#include "filedynstr.h"
 
 #define COMET_E5_CAT 195
 
@@ -87,5 +87,4 @@ public:
 //	int init(char *fname);
 };
 
-#define COMETORBCAT_H
 #endif

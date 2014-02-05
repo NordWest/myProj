@@ -1,9 +1,9 @@
 //#pragma once
 //	class Ccoord
+#ifndef COORD_H
+#define COORD_H
 
 #include <string.h>
-
-#ifndef COORD_H
 
 class record4L
 {
@@ -80,5 +80,5 @@ class ComCoords
 	~ComCoords();
 };
 */
-#define COORD_H
+
 #endif

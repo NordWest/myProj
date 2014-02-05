@@ -1,22 +1,13 @@
-#include <stdio.h>
-
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
-#ifndef COORD_H
-#include "coord.h"
-#endif
-
-#ifndef DA_H
-#include "DynArr.h"
-#endif
-
 #ifndef MPCS_H
+#define MPCS_H
 
+#include <stdio.h>
+#include "comfunc.h"
+#include "coord.h"
+#include "DynArr.h"
+#include "filedynstr.h"
 
 #define MPC_SIZE 81
-
 
 class mpc_head
 {
@@ -189,5 +180,4 @@ public:
 	~mpcsL();
 };
 
-#define MPCS_H
 #endif

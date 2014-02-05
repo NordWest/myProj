@@ -1,20 +1,10 @@
-#pragma once
+#ifndef FBUFFER_H
+#define FBUFFER_H
 
 #include "string.h"
 #include "stdlib.h"
 #include "math.h"
-//#include "conio.h"
-
-
-
-
-#ifndef COMF_H
 #include "comfunc.h"
-#endif
-
-#ifndef FBUFFER_H
-#define FBUFFER_H
-
 //#define STRLENBUFF 1024
 
 class bufStrRec

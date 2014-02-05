@@ -1,25 +1,24 @@
-//#pragma once
-#include <QtCore>
-
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
-#ifndef ORBCAT_H
-#include "orbcat.h"
-#endif
-
-#ifndef FBSTREAM_H
-#include "fbStream.h"
-#endif
-
 #ifndef MPCCAT_H
+#define MPCCAT_H
+
+class mpcrec;
+class mpccat;
+class mpccatL;
+
+#include <QtCore>
 
 #define MPCCAT_LEN 203
 #define MPCCAT_NAME_KPOS 176
 #define MPCCAT_NAME_BPOS 2106
 #define MPCCAT_NUM_KPOS 166
 #define MPCCAT_PDEST_KPOS 1
+
+
+#include "comfunc.h"
+#include "orbcat.h"
+#include "fbStream.h"
+
+
 
 class mpcrec
 {
@@ -192,7 +191,6 @@ public:
 };
 
 
-#define MPCCAT_H
 #endif
 
 

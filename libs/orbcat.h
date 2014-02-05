@@ -1,14 +1,13 @@
-#pragma once
-
-#ifndef COMF_H
-#include "comfunc.h"
-#endif
-
-#ifndef FBUFFER_H
-#include "fBuffer.h"
-#endif
-
 #ifndef ORBCAT_H
+#define ORBCAT_H
+
+class eposrec;
+class OrbCat;
+
+#include "comfunc.h"
+#include "fBuffer.h"
+#include "orbit.h"
+
 
 #define EPOS5_CAT 192
 
@@ -68,6 +67,9 @@ public:
 
 	void set_default();
 
+    void getOrbElem(orbElem *orb);
+    void setOrbElem(orbElem orb);
+
 };
 
 class OrbCat : public fBuffer
@@ -93,7 +95,6 @@ public:
 //	int init(char *fname);
 };
 
-#define ORBCAT_H
 #endif
 
 
