@@ -15,7 +15,7 @@ public:
 	double M0;		//эпоха перицентра, TT
 	double w;		//долгота перицентра
 	double Node;	//долгота восх узла
-	double ec;		//эксцентриситет
+    double ecc;		//эксцентриситет
 	double inc;		//наклон орбиты
 	double q;		//перигелийное растояние
 	float H;		//абсолютная зв. величина
@@ -44,7 +44,7 @@ public:
 	void set_M0(double m0);
 	void set_w(double w);
 	void set_Node(double node);
-	void set_ec(double ec);
+    void set_ecc(double ecc);
 	void set_inc(double inc);
 	void set_q(double q);
 	void set_H(float H);

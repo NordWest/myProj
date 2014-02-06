@@ -370,6 +370,7 @@ int main(int argc, char *argv[])
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
 
 ///////////
+    observ opos5;
 
     opos = new observ;
     if(opos->init(obsFile.toAscii().data(), jplFile.toAscii().data()))
@@ -378,6 +379,9 @@ int main(int argc, char *argv[])
         exit(1);
     }
     opos->set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
+
+    opos5.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    opos->set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
 
     int jday;// = (int)time0;
     double pday;// = time0 - jday;

@@ -36,7 +36,7 @@ struct OrbitsParams;
 
 
 int findOrb(orbElem *orb, double *R0, double *V0, double t0);
-int findOrbEkv(orbElem *orb, double *R0ekv, double *V0ekv, double t0);
+//int findOrbEkv(orbElem *orb, double *R0ekv, double *V0ekv, double t0);
 
 /*
 class orbCat
@@ -85,7 +85,7 @@ struct orbElem
 	double q;
 	double w;
 	double Node;
-	double ec;
+    double ecc;
 	double inc;
 
 //	int set_from_cat(OrbCatE5 *ocat);
@@ -104,6 +104,13 @@ struct orbElem
 	int isNPorabola();
 	int isGiperbola();
 
+    void get(mpcrec *mrec);
+    void get(eposrec *erec);
+    void set(eposrec *erec);
+    void get(come5_rec *crec);
+    void set(come5_rec *crec);
+
+
 //	int findT(double *T, double M, double t);
 //	int FindOrb(myvector *R0, myvector *V0, double t0, int log);	//nahozgdenie orbity po polozgeniju i skorosti v opred. moment vremeni
 
@@ -113,7 +120,7 @@ struct orbElem
 class orbit
 {
 public:
-	orbElem *elem;
+    orbElem *elem;      //[rad]
 //	orbCat *line;
 
 	orbit();
@@ -125,13 +132,14 @@ public:
 
 //	int setElem(double eJD, double M0, double w, double N, double inc, double ecc, double q);
 
-	int get(OrbCat *ocat);
-	int get(mpccat *ocat);
-	int get(eposrec *erec);
-	int set(OrbCat *ocat);
+    void get(OrbCat *ocat);
+    void get(mpccat *ocat);
+    void get(eposrec *erec);
+    void set(eposrec *erec);
+    void set(OrbCat *ocat);
 
-	int get(CommetOrbCat *ocat);
-	int set(CommetOrbCat *ocat);
+    void get(CommetOrbCat *ocat);
+    void set(CommetOrbCat *ocat);
 
 //	int setCat(char *number, char *epoha, char *eJD, char *M0, char *w, char *N, char *inc, char *ec, char *q, char *H, char *G, char *perturb, char *opp, char *obs, char *obsY, char *regY, char *un, char *name, char *makeD);
 //	int setLCat(char *number, char *epoha, char *H, char *G, char *perturb, char *opp, char *obs, char *obsY, char *regY, char *un, char *name, char *makeD);

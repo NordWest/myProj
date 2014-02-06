@@ -6,6 +6,8 @@ class mpccat;
 class mpccatL;
 
 #include <QtCore>
+#include "fbStream.h"
+#include "orbcat.h"
 
 #define MPCCAT_LEN 203
 #define MPCCAT_NAME_KPOS 176

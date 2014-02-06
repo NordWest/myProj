@@ -36,7 +36,7 @@ void eposrec::copyTo(eposrec *nrec)
 	nrec->w = this->w;
 	nrec->Node = this->Node;
 	nrec->inc = this->inc;
-	nrec->ec = this->ec;
+    nrec->ecc = this->ecc;
 	nrec->q = this->q;
 	nrec->H = this->H;
 	nrec->G = this->G;
@@ -55,10 +55,10 @@ void eposrec::copyTo(eposrec *nrec)
 
 	strcpy(nrec->tail, this->tail);
 }
-
+/*
 void eposrec::getOrbElem(orbElem *orb)
 {
-    orb->ec = ec;
+    orb->ecc = ecc;
     orb->eJD = eJD;
     orb->inc = inc;
     orb->M0 = M0;
@@ -69,7 +69,7 @@ void eposrec::getOrbElem(orbElem *orb)
 
 void eposrec::setOrbElem(orbElem orb)
 {
-    ec = orb.ec;
+    ecc = orb.ecc;
     eJD = orb.eJD;
     inc = orb.inc;
     M0 = orb.M0;
@@ -77,7 +77,7 @@ void eposrec::setOrbElem(orbElem orb)
     q = orb.q;
     w = orb.w;
 }
-
+*/
 void eposrec::set_number(int numb)
 {
 	this->number = numb;
@@ -103,9 +103,9 @@ void eposrec::set_Node(double node)
 {
 	this->Node = Node;
 }
-void eposrec::set_ec(double ec)
+void eposrec::set_ecc(double ecc)
 {
-	this->ec = ec;
+    this->ecc = ecc;
 }
 void eposrec::set_inc(double inc)
 {
@@ -169,7 +169,7 @@ void eposrec::set_diam(float diam)
 void eposrec::set_default()
 {
 	this->set_diam(0.0);
-	this->set_ec(0.0);
+    this->set_ecc(0.0);
 	this->set_eJD(JDEPO);
 	this->set_epoha(2000);
 	this->set_G(0.0);
@@ -316,7 +316,7 @@ void OrbCat::rec2s(char *str_out)
 	sprintf(tstr, "%10.6f", this->record->inc);
 	strncat(str_out, tstr, 10);
 
-	sprintf(tstr, "%010.8f", this->record->ec);
+    sprintf(tstr, "%010.8f", this->record->ecc);
 	strncat(str_out, tstr, 10);
 
 	sprintf(tstr, "%16.9f", this->record->q);
@@ -390,7 +390,7 @@ void OrbCat::s2rec(char *str_in)
 	this->record->inc = atof(tstr);
 
 	slovoG(str_in, tstr, 61, 71);
-	this->record->ec = atof(tstr);
+    this->record->ecc = atof(tstr);
 
 	slovoG(str_in, tstr, 71, 87);
 	this->record->q = atof(tstr);

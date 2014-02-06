@@ -35,7 +35,7 @@ void come5_rec::copyTo(come5_rec *nrec)
 	nrec->w = this->w;
 	nrec->Node = this->Node;
 	nrec->inc = this->inc;
-	nrec->ec = this->ec;
+    nrec->ecc = this->ecc;
 	nrec->q = this->q;
 	nrec->H = this->H;
 	nrec->G = this->G;
@@ -80,9 +80,9 @@ void come5_rec::set_Node(double node)
 {
 	this->Node = Node;
 }
-void come5_rec::set_ec(double ec)
+void come5_rec::set_ecc(double ecc)
 {
-	this->ec = ec;
+    this->ecc = ecc;
 }
 void come5_rec::set_inc(double inc)
 {
@@ -146,7 +146,7 @@ void come5_rec::set_diam(float diam)
 void come5_rec::set_default()
 {
 	this->set_diam(0.0);
-	this->set_ec(0.0);
+    this->set_ecc(0.0);
 	this->set_eJD(JDEPO);
 	this->set_epoha(2000);
 	this->set_G(0.0);
@@ -290,7 +290,7 @@ void CommetOrbCat::rec2s(char *str_out)
 	sprintf(tstr, "%10.6f", this->record->inc);
 	strncat(str_out, tstr, 10);
 
-	sprintf(tstr, "%010.8f", this->record->ec);
+    sprintf(tstr, "%010.8f", this->record->ecc);
 	strncat(str_out, tstr, 10);
 
 	sprintf(tstr, "%16.9f", this->record->q);
@@ -365,7 +365,7 @@ void CommetOrbCat::s2rec(char *str_in)
 	this->record->inc = atof(tstr);
 
 	slovoG(str_in, tstr, 64, 74);
-	this->record->ec = atof(tstr);
+    this->record->ecc = atof(tstr);
 
 	slovoG(str_in, tstr, 74, 90);
 	this->record->q = atof(tstr);
