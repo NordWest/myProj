@@ -378,10 +378,10 @@ int main(int argc, char *argv[])
         qDebug() << "\nError opos init\n\n";
         exit(1);
     }
-    opos->set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
+    opos->set_obs_parpam(GEOCENTR_NUM, 0, sk, obsCode.toAscii().data());
 
     opos5.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    opos->set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
+    opos5.set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
 
     int jday;// = (int)time0;
     double pday;// = time0 - jday;
@@ -698,6 +698,7 @@ int main(int argc, char *argv[])
     T0 = jdTDB;
 
 mpc mrec;
+double cosD;
 
     for(i=0; i<mNum; i++)
     {
@@ -756,8 +757,9 @@ mpc mrec;
                 state[5] = vmul*V[j*3+2];
 
                 opos->det_observ_tdb(tEnd);
-                opos->det_vect_radec(state, &ra, &dec);
+                opos->det_vect_radec_ssb(state, &ra, &dec);
 
+                cosD = cos(dec);
 //                mrec.r = ra;// + dRa;
 //                mrec.d = dec;// + dDec;
 
@@ -766,7 +768,7 @@ mpc mrec;
 
                 //qDebug() << QString("%1-%2: %3:%4\t%5\t%6\t%7\t%8\t%9\n").arg(bodyName).arg(bodyNum).arg(timei, 15, 'f',7).arg(state[0], 21, 'e',15).arg(state[1], 21, 'e',15).arg(state[2], 21, 'e',15).arg(state[3], 21, 'e',15).arg(state[4], 21, 'e',15).arg(state[5], 21, 'e',15);
 
-                oc_rec->ocRaCosDe = grad2mas(oc_rec->ra - ra)*cos(mrec.d);
+                oc_rec->ocRaCosDe = grad2mas(oc_rec->ra - ra)*cosD;
                 oc_rec->ocDe = grad2mas(oc_rec->de - dec);
 /*
                 oc_rec->rec2sBase(&tstr);

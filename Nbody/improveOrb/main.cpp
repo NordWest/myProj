@@ -15,8 +15,29 @@ int main(int argc, char *argv[])
     eposrec erec;
     double X[3], V[3], t0;
 
+
+
+
+//
+//Settings
+        QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
+
+        QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+        QString epmDir = sett->value("general/epmDir", "./").toString();
+        QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
+        QString obsCode = sett->value("general/obsCode", "500").toString();
+        QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
+        QString confFile = sett->value("general/confFile", "particles.xml").toString();
+        QString moodyDir = QDir(sett->value("general/moodyDir", "./testProject").toString()).absolutePath();
+
+
+        sk = sett->value("general/sk", 0).toInt();
+        center = sett->value("general/center", 0).toInt();
+
+//////////////////////////////
+
     observ opos;
-    opos.init("Obs.txt", "")
+    opos.init(obsFile, jplFile);
 
     OrbCat ocat;
     ocat.init(argv[1]);

@@ -42,8 +42,9 @@ public:
 	int rec2s(char *arec);
 	int s2rec(char *arec);
 
-	double stime, dcx, dcy, dcz, h;
-    double vx, vy, vz;
+    double stime, h;
+    double x, y, z;     //obs pos from geocentr
+    double vx, vy, vz;  //obs vel from geocentr
     double state[6];
 
 	obsy *record;

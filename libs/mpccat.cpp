@@ -162,7 +162,7 @@ void mpcrec::copyTo(eposrec *nrec)
 	nrec->w = this->w;
 	nrec->Node = this->Node;
 	nrec->inc = this->inc;
-	nrec->ec = this->ecc;
+    nrec->ecc = this->ecc;
 	nrec->q = this->a*(1.0 - this->ecc);
 	nrec->H = this->H;
 	nrec->G = this->G;

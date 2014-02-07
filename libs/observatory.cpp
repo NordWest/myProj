@@ -210,18 +210,18 @@ int observatory::det_state(double tUTC)
     //UTC2s(mjd2jd(refParam.utc), refParam.Long, &s);
     stime = 2.0*PI*gm1 + this->record->Long;
 
-	this->dcx = this->h*this->record->Cos*cos(this->stime);
-	this->dcy = this->h*this->record->Cos*sin(this->stime);
-	this->dcz = this->h*this->record->Sin;
+    this->x = this->h*this->record->Cos*cos(this->stime);
+    this->y = this->h*this->record->Cos*sin(this->stime);
+    this->z = this->h*this->record->Sin;
 
-    double R = sqrt(dcx*dcx + dcy*dcy);
-    vx = 2.0*PI*dcx;
-    vy = 2.0*PI*dcy;
+    double R = sqrt(x*x + y*y);
+    vx = 2.0*PI*x;
+    vy = 2.0*PI*y;
     vz = 0.0;
 
-    state[0] = dcx;
-    state[1] = dcy;
-    state[2] = dcz;
+    state[0] = x;
+    state[1] = y;
+    state[2] = z;
     state[3] = vx;
     state[4] = vy;
     state[5] = vz;
