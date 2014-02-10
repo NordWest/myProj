@@ -699,6 +699,9 @@ int main(int argc, char *argv[])
 
 mpc mrec;
 double cosD;
+QFile impFile(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
+impFile.open(QFile::Truncate | QFile::WriteOnly);
+QTextStream impStm(&impFile);
 
     for(i=0; i<mNum; i++)
     {
@@ -770,6 +773,8 @@ double cosD;
 
                 oc_rec->ocRaCosDe = grad2mas(oc_rec->ra - ra)*cosD;
                 oc_rec->ocDe = grad2mas(oc_rec->de - dec);
+
+                impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);
 /*
                 oc_rec->rec2sBase(&tstr);
 
@@ -796,6 +801,8 @@ double cosD;
         }
 
     }
+
+impFile.close();
 
     //QList <eqFile*> eqList;
     eqSplitObjects(&eq_file, eqList);
