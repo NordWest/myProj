@@ -36,7 +36,7 @@ public:
     int det_observ_tdb(double jdTDB);
 
 //position and velocity of observer
-    double pos[3], vel[3];
+    double state[6];
     double ox, oy, oz, ovx, ovy, ovz;           //R, Rt
     double ovxt, ovyt, ovzt;					//Rtt
 

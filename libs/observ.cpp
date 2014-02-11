@@ -85,13 +85,12 @@ int observ::det_observ()
     if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
     if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
 
-    pos[0] = ox+obs->x;
-    pos[1] = oy+obs->y;
-    pos[2] = oz+obs->z;
-
-    vel[0] = ovx+obs->vx;
-    vel[1] = ovy+obs->vy;
-    vel[2] = ovz+obs->vz;
+    state[0] = ox+obs->x;
+    state[1] = oy+obs->y;
+    state[2] = oz+obs->z;
+    state[3] = ovx+obs->vx;
+    state[4] = ovy+obs->vy;
+    state[5] = ovz+obs->vz;
 
     return res;
 }
@@ -130,9 +129,9 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
     V[2] = state2sun[5];
 
 //sun?
-    XE0[0] = pos[0];
-    XE0[1] = pos[1];
-    XE0[2] = pos[2];
+    XE0[0] = state[0];
+    XE0[1] = state[1];
+    XE0[2] = state[2];
 
 
     if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
@@ -234,9 +233,9 @@ int observ::det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad,
     V[2] = state2ssb[5];
 
 //ssb
-    XE0[0] = pos[0];
-    XE0[1] = pos[1];
-    XE0[2] = pos[2];
+    XE0[0] = state[0];
+    XE0[1] = state[1];
+    XE0[2] = state[2];
 
 
     if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
