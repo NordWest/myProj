@@ -10,7 +10,7 @@
 //#include "./../../libs/skyarea.h"
 #include <astro.h>
 #include "./../../libs/comfunc.h"
-#include "./rada.h"
+#include <rada.h>
 #include "./../../libs/redStat.h"
 #include "./../../libs/mpcs.h"
 #include "./../../libs/mpccat.h"
@@ -90,7 +90,7 @@ ever_params *eparam;
 int SK, CENTER;
 int centr_num;
 int useEPM;
-//double *mass;
+double *mass;
 QList <ParticleStruct*> pList;
 //QList <ParticleStruct*> iList;
 //QList <ParticleStruct*> jList;
@@ -324,10 +324,13 @@ int main(int argc, char *argv[])
     //int iNum, jNum;
     //nofzbody=0;
     //nofjbody=0;
+    p=0;
+    mass = new double[iniList.size()-1];
     for(i=0; i<iniList.size(); i++)
     {
         if(iniList.at(i)->identity==Advisor::collapsorFixed) continue;
         pList << iniList.at(i);
+        mass[p++] = iniList.at(i)->mass;
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
         //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }

@@ -718,8 +718,8 @@ int findOrb(orbElem *orb, double *R0, double *V0, double t0)//R0, V0 - ekvatoria
 
     orb->eJD = t0;
 
-    r0 = norm(R0);
-    vel0 = norm(V0);
+    r0 = norm3(R0);
+    vel0 = norm3(V0);
     r0rt0 = Smul3(R0, V0);
 
 	h = vel0*vel0 - 2.0*ka*ka/r0;

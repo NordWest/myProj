@@ -44,7 +44,8 @@ SOURCES += main.cpp \
     ./../../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
 #    ../../libs/ephem_util.cpp \
     ../../libs/calc_epm.cpp \
-    ../../libs/time_a.cpp
+    ../../libs/time_a.cpp \
+    ../../libs/filedynstr.cpp
 
 
 HEADERS += ../../libs/orbit.h \
@@ -83,12 +84,13 @@ HEADERS += ../../libs/orbit.h \
 #    ../../libs/ephem_util.h \
     ../../libs/myDomMoody.h \
     ../../libs/calc_epm.h \
-    ../../libs/time_a.h
+    ../../libs/time_a.h \
+    ../../libs/filedynstr.h
 
 #unix:LIBS+=./../../libs/unix/libmb.a
 #win32:LIBS+=./../../libs/win32/libmb.a
 #unix:LIBS+=./../../libs/unix/libastro.a
 #win32:LIBS+=./../../libs/win32/libastro.a
-unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro -lephem_read -ldele -lrada
+#unix:LIBS+=./../../libs/unix/cspice.a
+LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice
 #LIBS += cspice.a

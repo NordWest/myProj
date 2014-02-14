@@ -155,13 +155,13 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
     R[1] = X[1] - XE0[1];
     R[2] = X[2] - XE0[2];
 
-    normR = norm(R);
+    normR = norm3(R);
 
 //    if(corr)
 //    {
-        normE = norm(XE0);
+        normE = norm3(XE0);
         normP = normR;
-        normQ = norm(X);
+        normQ = norm3(X);
 
         ct1 = normP;
 
@@ -178,13 +178,13 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
             P[1] = Qb[1] - XEB0[1];
             P[2] = Qb[2] - XEB0[2];
 
-            normP = norm(P);
+            normP = norm3(P);
 
             Q[0] = Qb[0] - XS0[0];
             Q[1] = Qb[1] - XS0[1];
             Q[2] = Qb[2] - XS0[2];
 
-            normQ = norm(Q);
+            normQ = norm3(Q);
 
             ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
 
@@ -260,13 +260,13 @@ int observ::det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad,
     R[1] = X1[1] - XE0[1];
     R[2] = X1[2] - XE0[2];
 
-    normR = norm(R);
+    normR = norm3(R);
 
 //    if(corr)
 //    {
-        normE = norm(XE0);
+        normE = norm3(XE0);
         normP = normR;
-        normQ = norm(X);
+        normQ = norm3(X);
 
         ct1 = normP;
 
@@ -283,13 +283,13 @@ int observ::det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad,
             P[1] = Q[1] - XE0[1];
             P[2] = Q[2] - XE0[2];
 
-            normP = norm(P);
+            normP = norm3(P);
 /*
             Q[0] = Qb[0] - XS0[0];
             Q[1] = Qb[1] - XS0[1];
             Q[2] = Qb[2] - XS0[2];
 */
-            normQ = norm(Q);
+            normQ = norm3(Q);
 
             ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
 

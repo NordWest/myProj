@@ -1,6 +1,9 @@
 #ifndef FILEDYNSTR_H
 #define FILEDYNSTR_H
 
+class FileDynStr;
+class FileDynStrBin;
+
 #include <QString>
 #include <QStringList>
 #include <stdio.h>

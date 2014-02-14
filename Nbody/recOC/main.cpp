@@ -339,12 +339,12 @@ int main(int argc, char *argv[])
             {
                 //obsPos.setTDB(time);
                 obsPos.det_observ_tdb(time);
-                XE0[0] = obsPos.pos[0];
-                XE0[1] = obsPos.pos[1];
-                XE0[2] = obsPos.pos[2];
-                VE0[0] = obsPos.vel[0];
-                VE0[1] = obsPos.vel[1];
-                VE0[2] = obsPos.vel[2];
+                XE0[0] = obsPos.state[0];
+                XE0[1] = obsPos.state[1];
+                XE0[2] = obsPos.state[2];
+                VE0[0] = obsPos.state[3];
+                VE0[1] = obsPos.state[4];
+                VE0[2] = obsPos.state[5];
             }
                 break;
             }
@@ -418,7 +418,7 @@ int main(int argc, char *argv[])
                 //obsPos.setTDB(time);
                 obsPos.det_observ_tdb(time);
 
-                qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.pos[0], 18, 'g', 9).arg(obsPos.pos[1], 18, 'g', 9).arg(obsPos.pos[2], 18, 'g', 9).arg(obsPos.vel[0], 18, 'g', 9).arg(obsPos.vel[1], 18, 'g', 9).arg(obsPos.vel[2], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
+                qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.state[0], 18, 'g', 9).arg(obsPos.state[1], 18, 'g', 9).arg(obsPos.state[2], 18, 'g', 9).arg(obsPos.state[3], 18, 'g', 9).arg(obsPos.state[4], 18, 'g', 9).arg(obsPos.state[5], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
 
                 state[0] = X[0];
                 state[1] = X[1];

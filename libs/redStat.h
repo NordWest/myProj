@@ -73,7 +73,7 @@ class ocRec
 public:
 	double MJday;
         double ra, de;                  //[deg]
-        float mag0;                     //[mag]
+        float mag;                     //[mag]
         double ocRaCosDe, ocDe, ocMag;	//OMC [mas]
         double topDist;                 //[au]
         double muRaCosDe;                    //mu_ra*cos(dec) [mas/min]
@@ -86,12 +86,14 @@ public:
         QString catName, catMagName;     //name of catalog and name of magnitude param used
         QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
         QString obsCode;
+
 	
 	ocRec();
 	~ocRec();
 	ocRec(QString str);
 	void rec2s(QString *str);
         void rec2sBase(QString *str);
+        QString rec2sBase1();
         void rec2sSeries(QString *str);
         void s2rec(QString str);
         void rec2s_short(QString *str);
@@ -103,8 +105,8 @@ public:
         void fromMpeph(mpephRec *meRec);
 	
         int vers;
-        //0 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
-        //1 - MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|ra_oc|de_oc|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
+        //0 - MJday|ra|de|mag|ocRaCosDe|ocDe|ocMag|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
+        //1 - MJday|ra|de|mag|ocRaCosDe|ocDe|ocMag|ra_oc|de_oc|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
 	
 };
 
@@ -118,10 +120,10 @@ public:
 };
 
 //ocRec
-//MJday		    |ra		         |de		   |mag0    |ocRaCosDe    |ocDe  |ocMag|ra_oc	       |de_oc		  |topDist	       |muRaCosDec	   |muDe     |Vr      |phase   |elong       |name   |catNum|expTime
+//MJday		    |ra		         |de		   |mag    |ocRaCosDe    |ocDe  |ocMag|ra_oc	       |de_oc		  |topDist	       |muRaCosDec	   |muDe     |Vr      |phase   |elong       |name   |catNum|expTime
 //2008 05 01.93212|14 26 14.5889|+00 05 12.342|13.279|  -113.6|    28.7|    -1.6|14 26 15.2930|+00 04 53.780| 1.906076352|  -467.40|   219.00|  2.21|   5.420| 164.300|00890|0	   | 180.000
 
-//MJday|ra|de|mag0|ocRaCosDe|ocDe|ocMag|x|y|pixmag|Dx|Dy|Dpixmag|topDist|muRaCosDe|muDe|Vr|phase|elong|expTime|name|catName|catMagName|mesureTimeCode
+//MJday|ra|de|mag|ocRaCosDe|ocDe|ocMag|x|y|pixmag|Dx|Dy|Dpixmag|topDist|muRaCosDe|muDe|Vr|phase|elong|expTime|name|catName|catMagName|mesureTimeCode
 //2009 01 01.86517|07 58 32.9669|+56 55 15.006|13.883|   169.7|  -284.8|    -0.1|  640.2616|  727.4599|   1.122200e+05|  0.317784|  0.307834|        791.333| 0.032179483| -4032.00|  6960.00|  3.29|  35.130| 143.790|  30.000|        2008 EV5|   mpeph|    Vmag|20110118043313937
 
 

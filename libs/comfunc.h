@@ -217,7 +217,9 @@ double detRfromM(double M, double A, double Sdist);
 
 double VectAng(double *v1, double *v2);
 double Smul3(double *V1, double *V2);
-double norm(double *v);
+double norm(double *v, int len);
+double norm3(double *v);
+double dist3(double *v1, double *v2);
 void RotX(double *targ, double *sour, double angr);
 void RotX(double *vect, double angr);
 void Vmul3(double *vectRes, double *vect0, double *vect1);

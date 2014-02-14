@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
     double *ai, *bi, *C;
     double *La, *Lb, *Lc;
     double *Ea, *Eb, *Ec;
+    double *Wa, *Wb, *Wc;
     double uweA, uweB, uweC;
     double *Da, *Db, *Dc;
     double P[3], Q[3], R[3], Recl[3];
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
     Da = new double[6*6];
     Db = new double[6*6];
     Dc = new double[6*6];
+    //Wc = new double[sz*2];
 
     for(p=0; p<oNum; p++)
     {
@@ -190,7 +192,7 @@ int main(int argc, char *argv[])
             dT = impSt->jdTDB - TDT2TDB(elem->eJD);
             //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
             //P??
-            /*
+
             P[0] = cos(elem->w)*cos(elem->Node) - sin(elem->w)*sin(elem->Node)*cos(elem->inc);
             P[1] = (cos(elem->w)*sin(elem->Node) + sin(elem->w)*cos(elem->Node)*cos(elem->inc))*cos(EKV) - sin(elem->w)*sin(elem->inc)*sin(EKV);
             P[2] = (cos(elem->w)*sin(elem->Node) + sin(elem->w)*cos(elem->Node)*cos(elem->inc))*sin(EKV) + sin(elem->w)*sin(elem->inc)*cos(EKV);
@@ -198,8 +200,9 @@ int main(int argc, char *argv[])
             Q[0] = -sin(elem->w)*cos(elem->Node) - cos(elem->w)*sin(elem->Node)*cos(elem->inc);
             Q[1] = (-sin(elem->w)*sin(elem->Node) + cos(elem->Node)*cos(elem->inc))*cos(EKV) - cos(elem->w)*sin(elem->inc)*sin(EKV);
             Q[2] = (-sin(elem->w)*sin(elem->Node) + cos(elem->w)*cos(elem->Node)*cos(elem->inc))*sin(EKV) + cos(elem->w)*sin(elem->inc)*cos(EKV);
-            */
+
             //P
+            /*
             Ecl2Ekv(&elem_ekv->inc, &elem_ekv->Node, &elem_ekv->w, elem->inc, elem->Node, elem->w);
             P[0] = cos(elem_ekv->w)*cos(elem_ekv->Node) - sin(elem_ekv->w)*sin(elem_ekv->Node)*cos(elem_ekv->inc);
             P[1] = cos(elem_ekv->w)*sin(elem_ekv->Node) + sin(elem_ekv->w)*cos(elem_ekv->Node)*cos(elem_ekv->inc);
@@ -209,7 +212,7 @@ int main(int argc, char *argv[])
             Q[1] = -sin(elem_ekv->w)*sin(elem_ekv->Node) + cos(elem_ekv->Node)*cos(elem_ekv->inc);
             Q[2] = cos(elem_ekv->w)*sin(elem_ekv->inc);
             //R
-
+*/
             R[0] = sin(elem_ekv->inc)*sin(elem_ekv->Node);
             R[1] = -sin(elem_ekv->inc)*cos(elem_ekv->Node);
             R[2] = cos(elem_ekv->inc);
@@ -260,29 +263,34 @@ int main(int argc, char *argv[])
 
 
         }
-        /*
+/*
 //ai
         lsm(6, sz, Ea, ai, La, uweA, Da);
 
-        //ostm << QString("Ea: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ea[0]).arg(Ea[1]).arg(Ea[2]).arg(Ea[3]).arg(Ea[4]).arg(Ea[5]);
+        ostm << QString("Ea: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ea[0]).arg(Ea[1]).arg(Ea[2]).arg(Ea[3]).arg(Ea[4]).arg(Ea[5]);
         elemI = impObj->impOrb.elem;
 
         E2elem(Ea, &dElem, elem);
 
-        ostm << QString("dElemA\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+        //ostm << QString("dElemA\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 
 //bi
         lsm(6, sz, Eb, bi, Lb, uweB, Db);
 
-        //ostm << QString("Eb: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Eb[0]).arg(Eb[1]).arg(Eb[2]).arg(Eb[3]).arg(Eb[4]).arg(Eb[5]);
+        ostm << QString("Eb: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Eb[0]).arg(Eb[1]).arg(Eb[2]).arg(Eb[3]).arg(Eb[4]).arg(Eb[5]);
         elemI = impObj->impOrb.elem;
 
         E2elem(Eb, &dElem, elem);
 
-        ostm << QString("dElemB\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+        //ostm << QString("dElemB\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 */
 //C
-        lsm(6, sz*2, Ec, C, Lc, uweC, Dc);
+        for(int l=0; l<6; l++) Ec[l]=0;
+        //for(int l=0; l<sz*2; l++) Wc[l]=1.0;
+        //slsm(6, sz*2, Ec, C, Lc, uweC, Dc);
+        slsm(6, sz*2, Ec, C, Lc);
+
+//        ostm << QString("uweC: %1\n").arg(uweC);
 
         //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
         elemI = impObj->impOrb.elem;
@@ -304,7 +312,7 @@ int main(int argc, char *argv[])
 
         ocatI.record->set_author("Berezhnoy");
         ocatI.record->set_name(impObj->name.toAscii().data());
-        ocatI.record->set_number(p);
+        ocatI.record->set_number(p+1);
         ocatI.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
 
         ocatI.AddRec();

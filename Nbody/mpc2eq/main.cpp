@@ -100,7 +100,36 @@ struct eqObjRec
     }
 
 };
-
+/*
+struct eqObjList
+{
+    QList <eqObjRec*> eqrList;
+    void addEQ(ocRec *oc_rec)
+    {
+        int i, sz, nObj;
+        eqObjRec *eqoTemp;
+        sz = eqrList.size();
+        nObj=1;
+        for(i=0;i<sz;i++)
+        {
+            eqoTemp = eqrList.at(i);
+            if(QString().compare(oc_rec->name, eqoTemp->objName)==0)
+            {
+                nObj=0;
+                eqoTemp->eq_list << oc_rec;
+                break;
+            }
+        }
+        if(nObj)
+        {
+            eqoTemp = new eqObjRec;
+            eqoTemp->objName = oc_rec->name;
+            eqoTemp->eq_list << oc_rec;
+            eqrList << eqoTemp;
+        }
+    };
+};
+*/
 
 struct tState
 {
@@ -141,15 +170,14 @@ void bodyStates::sortTime()
 
     for(int i=0; i<sz-1; i++)
     {
-            nMin = states[i]->T.TDB();
-            pMin = i;
-            for(int j=i+1; j<sz; j++)
-            {
-                    if(states[j]->T.TDB()<nMin){pMin = j; nMin = states[j]->T.TDB();}
-            }
+        nMin = states[i]->T.TDB();
+        pMin = i;
+        for(int j=i+1; j<sz; j++)
+        {
+                if(states[j]->T.TDB()<nMin){pMin = j; nMin = states[j]->T.TDB();}
+        }
 
-            states.swap(i, pMin);
-
+        states.swap(i, pMin);
     }
 }
 
@@ -228,11 +256,37 @@ void sortEQdtime(eqFile *eq_file, double T0)
             }
         }
         if(pMin!=i) eq_file->ocList.swap(i, pMin);
-        //qDebug() << QString("pMin= %1\tVnim= %2\n").arg(pMin).arg(vMin);
-        //eq_file->ocList.at(i)->rec2sBase(&tstr);
-        //qDebug() << QString("%1\n").arg(tstr);
     }
 }
+
+void sortMPCdtime(mpcFile *mpc_file, double T0)
+{
+    int i, j, sz;
+    int pMin;
+    double vMin, val;
+    sz = mpc_file->size();
+    QString tstr;
+
+    //qDebug() << QString("T0= %1\n").arg(T0);
+
+    for(i=0; i<sz-1; i++)
+    {
+        pMin=i;
+        vMin = fabs(mpc_file->at(i)->mjd()-T0);
+        for(j=i+1; j<sz; j++)
+        {
+            val = fabs(mpc_file->at(j)->mjd()-T0);
+            if(val<vMin)
+            {
+                vMin = val;
+                pMin = j;
+            }
+        }
+        if(pMin!=i) mpc_file->recList.swap(i, pMin);
+    }
+}
+
+
 
 int doNbody(double *X0, double *V0, double tf, double dt, double nstep, bodyStateList &bpList, double tBeg, double tEnd);
 int makeSPK(int center, int sk, bodyStateList &bsList, QString spkFileName);
@@ -285,9 +339,9 @@ int main(int argc, char *argv[])
     QString tStr, objName;
     char *tname = new char[256];
 
-    QList <eqObjRec*> eqo_list;
-    eqObjRec* eqoTemp;
-    eqFile* eqTemp;
+    //eqObjList eqo_list;
+    //eqObjRec* eqoTemp;
+    //eqFile* eqTemp;
     ocRec *ocTemp;
     int nObj;
     QList <orbit*> orbList;
@@ -518,7 +572,7 @@ int main(int argc, char *argv[])
         oc_rec->MJday = mpc_rec->mjd();
         oc_rec->ra = mpc_rec->ra();
         oc_rec->de = mpc_rec->dec();
-        oc_rec->mag0 = mpc_rec->magn();
+        oc_rec->mag = mpc_rec->magn();
         mpc_rec->getObsCode(oc_rec->obsCode);
         eq_file.ocList << oc_rec;
 
@@ -597,6 +651,13 @@ int main(int argc, char *argv[])
         else
         {
             isObj = 0;
+
+            if(mCat.GetRecName(name.simplified().toAscii().data()))
+            {
+               qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+               break;
+            }
+
             if(useOrbCat)
             {
                 if(ocat.GetRecName(name.simplified().toAscii().data())==-1)
@@ -604,15 +665,11 @@ int main(int argc, char *argv[])
                    qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
                    break;
                 }
-                orbRec.get(ocat);
+                orbRec.get(ocat.record);
             }
             else
             {
-                if(mCat.GetRecName(name.simplified().toAscii().data()))
-                {
-                   qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
-                   break;
-                }
+
 
             //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
                 orbRec.get(&mCat);
@@ -635,6 +692,7 @@ int main(int argc, char *argv[])
             orb_cat.AddRec();
 
 
+            pList[i]->theta = mCat.record->H;
         }
 
         xVect << X;
@@ -691,7 +749,7 @@ int main(int argc, char *argv[])
 
     sortEQdtime(&eq_file, jd2mjd(jdUTC));
 
-    QFile ocFile, mpcFile;
+    QFile ocFile, mpcFile1;
     QTextStream ocStm, mpcStm;
 
     qDebug() << QString("resFileName: %1\n").arg(resFileName);
@@ -700,9 +758,9 @@ int main(int argc, char *argv[])
     ocStm.setDevice(&ocFile);
 
     QString mpcFileName = QString("%1_mpc.txt").arg(resFileName.section(".", 0, -2));
-    mpcFile.setFileName(mpcFileName);
-    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
-    mpcStm.setDevice(&mpcFile);
+    mpcFile1.setFileName(mpcFileName);
+    mpcFile1.open(QFile::WriteOnly | QFile::Truncate);
+    mpcStm.setDevice(&mpcFile1);
 
     vmul = 1;
     for(j=0;j<nofzbody;j++)
@@ -720,6 +778,7 @@ int main(int argc, char *argv[])
 
 mpc mrec;
 double cosD;
+double sDist, eDist, magC;
 QFile impFile(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
 impFile.open(QFile::Truncate | QFile::WriteOnly);
 QTextStream impStm(&impFile);
@@ -732,9 +791,9 @@ QTextStream impStm(&impFile);
         tf = tBeg;
         dT = tEnd - tf;
 
-        qDebug() << QString("tBeg= %1\ttEnd= %2\n").arg(tBeg).arg(tEnd);
+        qDebug() << QString("tBeg= %1\ttEnd= %2\n").arg(tBeg, 15, 'f', 7).arg(tEnd, 15, 'f', 7);
 
-        qDebug() << QString("dT= %1\tvmul= %2\n").arg(dT).arg(vmul);
+        //qDebug() << QString("dT= %1\tvmul= %2\n").arg(dT).arg(vmul);
 
         if(dT*vmul<0)
         {
@@ -761,7 +820,7 @@ QTextStream impStm(&impFile);
         {
             ti = tf;
             tf = tEnd;
-            qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
+            //qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
             solSys->rada27(X, V, 0, fabs(tf-ti));
         }
 
@@ -795,6 +854,15 @@ QTextStream impStm(&impFile);
                 oc_rec->ocRaCosDe = grad2mas(oc_rec->ra - ra)*cosD;
                 oc_rec->ocDe = grad2mas(oc_rec->de - dec);
 
+                sDist = norm3(state);
+                eDist = dist3(opos->state, state);//sqrt((obs_pos->ox - x)*(obs_pos->ox - x) + (obs_pos->oy - y)*(obs_pos->oy - y) + (obs_pos->oz - z)*(obs_pos->oz - z));
+
+                magC = det_m(pList[j+1]->theta, sDist, eDist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, state[0], state[1], state[2]));
+
+                oc_rec->ocMag = oc_rec->mag - magC;
+
+//                eqo_list.addEQ(oc_rec);
+
                 impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);
 /*
                 oc_rec->rec2sBase(&tstr);
@@ -826,6 +894,7 @@ QTextStream impStm(&impFile);
 impFile.close();
 
     //QList <eqFile*> eqList;
+    eqFile* eqTemp;
     eqSplitObjects(&eq_file, eqList);
 
     int szi, szj;
@@ -833,22 +902,29 @@ impFile.close();
     qDebug() << QString("eqList size: %1\n").arg(szi);
     for(i=0; i<szi; i++)
     {
-        eqList.at(i)->sortOClist();
-        szj = eqList.at(i)->ocList.size();
+        eqTemp = eqList.at(i);
+        eqTemp->sortOClist();
+        szj = eqTemp->ocList.size();
         for(j=0;j<szj;j++)
         {
             oc_rec = eqList.at(i)->ocList.at(j);
-            oc_rec->rec2sBase(&tstr);
+            tstr = oc_rec->rec2sBase1();
 
             qDebug() << tstr << "\n";
             ocStm << tstr << "\n";
-
-
+        }
+        eqTemp->countCols("4,5,6");
+        szj = eqTemp->colList.size();
+        for(j=0; j<szj; j++)
+        {
+            eqTemp->colList.at(j)->rec2s(&tstr);
+            qDebug() << tstr << "\n";
+            ocStm << tstr << "\n";
         }
     }
 
     ocFile.close();
-    mpcFile.close();
+    mpcFile1.close();
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 

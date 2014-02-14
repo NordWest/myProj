@@ -38,7 +38,8 @@ SOURCES += main.cpp \
     ../../libs/mpcs.cpp \
 #    ../../libs/ephem_util.cpp \
     ../../libs/calc_epm.cpp \
-    ../../libs/time_a.cpp
+    ../../libs/time_a.cpp \
+    ../../libs/filedynstr.cpp
 
 HEADERS += ../../libs/orbit.h \
     ../../libs/orbcat.h \
@@ -64,7 +65,8 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/mpcs.h \
 #    ../../libs/ephem_util.h \
     ../../libs/calc_epm.h \
-    ../../libs/time_a.h
+    ../../libs/time_a.h \
+    ../../libs/filedynstr.h
 
 #unix:LIBS+=./../../libs/unix/libmb.a
 win32:LIBS+=./../../libs/win32/libmb.a

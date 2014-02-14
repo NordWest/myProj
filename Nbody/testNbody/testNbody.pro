@@ -32,9 +32,9 @@ SOURCES += main.cpp \
     ./../../libs/rec.cpp \
     ./../../libs/commetorbcat.cpp \
 #    ../libs/force_ev.cpp \
-    ./force_ev.cpp \
+#    ./force_ev.cpp \
 #    ../libs/rada.cpp \
-    ./rada.cpp \
+#    ./rada.cpp \
 #    ./../../libs/dele.cpp \
 #    dele.cpp \
     ./../../libs/redStat.cpp \
@@ -45,9 +45,10 @@ SOURCES += main.cpp \
     ./../../libs/moody/capsule/capsuleBase/tinyxml/tinyxmlparser.cpp \
     ./../../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
     ./../../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
-    ./../../libs/ephem_util.cpp \
+#    ./../../libs/ephem_util.cpp \
     ./../../libs/calc_epm.cpp \
-    ./../../libs/time_a.cpp
+    ./../../libs/time_a.cpp \
+    ../../libs/filedynstr.cpp
 
 HEADERS += ../../libs/orbit.h \
     ./../../libs/orbcat.h \
@@ -65,12 +66,12 @@ HEADERS += ../../libs/orbit.h \
     ./../../libs/rec.h \
     ./../../libs/commetorbcat.h \
 #    ../libs/mb.h \
-    ./../../libs/ephem_types.h \
+#    ./../../libs/ephem_types.h \
 #    ./../../libs/dele.h \
 #    dele.h \
-    ./../../libs/ephem_types.h \
+#    ephem_types.h \
 #    ../libs/rada.h \
-    ./rada.h \
+#    ./rada.h \
     ./../../libs/redStat.h \
     ./../../libs/mpcs.h \
     ./../../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \
@@ -85,15 +86,16 @@ HEADERS += ../../libs/orbit.h \
     ./../../libs/moody/moody.h \
     ./../../libs/moody/capsule/Capsule.h \
     ./../../libs/myDomMoody.h \
-    ./../../libs/ephem_util.h \
+#    ./../../libs/ephem_util.h \
     ./../../libs/calc_epm.h \
-    ./../../libs/time_a.h
+    ./../../libs/time_a.h \
+    ../../libs/filedynstr.h
 
 #unix:LIBS+=./../../libs/unix/libmb.a
 win32:LIBS+=./../../libs/win32/libmb.a
 #unix:LIBS+=./../../libs/unix/libastro.a
 win32:LIBS+=./../../libs/win32/libastro.a
 
-unix:LIBS += -lmb -lastro -ldele -lephem_read
+unix:LIBS += -lmb -lastro -ldele -lephem_read -lrada
 unix:LIBS+= ./../../libs/unix/cspice.a
 #INCLUDEPATH += /usr/local/cuda/include

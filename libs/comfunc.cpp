@@ -2045,14 +2045,12 @@ double detPhase(double X, double Y, double Z, double x, double y, double z)
 
 double VectAng(double *V1, double *V2)
 {
-        return(acos(Smul3(V1, V2)/(norm(V1)*norm(V2))));
+        return(acos(Smul3(V1, V2)/(norm3(V1)*norm3(V2))));
 }
 
-double norm(double *v)
+double norm(double *v, int len)
 {
         double nm = 0.0;
-        int len;
-        len = 3;
 
         for(int i = 0; i<len; i++)
         {
@@ -2060,6 +2058,11 @@ double norm(double *v)
         }
 
         return(sqrt(nm));
+}
+
+double norm3(double *v)
+{
+    return(norm(v, 3));
 }
 
 double Smul3(double *V1, double *V2)
@@ -2078,6 +2081,17 @@ double Smul3(double *V1, double *V2)
                 val += V1[i]*V2[i];
         }
         return(val);
+}
+
+double dist3(double *v1, double *v2)
+{
+    double *v3 = new double[3];
+    v3[0] = v1[0]-v2[0];
+    v3[1] = v1[1]-v2[1];
+    v3[2] = v1[2]-v2[2];
+    double res = norm3(v3);
+    delete [] v3;
+    return(res);
 }
 
 double detElong(double X, double Y, double Z, double x, double y, double z)

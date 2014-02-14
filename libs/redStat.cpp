@@ -326,7 +326,7 @@ int doWeghts(QList <double> valList, QList <double> weList, double *mean, double
 ocRec::ocRec()
 {
         MJday = ra = de = ocRaCosDe = ocDe = ocMag = topDist = muRaCosDe = muDe = Vr = 0.0;
-	mag0 = phase = elong = expTime = 0.0;
+    mag = phase = elong = expTime = 0.0;
 	catNum = -1;
 	vers = 0;
 	name.clear();
@@ -341,7 +341,7 @@ ocRec::ocRec()
 ocRec::~ocRec()
 {
         MJday = ra = de = ocRaCosDe = ocDe = ocMag = topDist = muRaCosDe = muDe = Vr = 0.0;
-	mag0 = phase = elong = expTime = 0.0;
+    mag = phase = elong = expTime = 0.0;
 	catNum = -1;
 	vers = -1;
 	name.clear();
@@ -367,7 +367,7 @@ void ocRec::rec2s(QString *str)
 
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
         /*
-        str->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13|%14|%15|%16|%17").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 15, 'e', 6).arg(Dx, 11, 'g', 7).arg(Dy, 11, 'g', 7).arg(Dpixmag, 15, 'g', 7).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
+        str->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13|%14|%15|%16|%17").arg(mag, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(x, 10, 'f', 4, QLatin1Char(' ')).arg(y, 10, 'f', 4, QLatin1Char(' ')).arg(pixmag, 15, 'e', 6).arg(Dx, 11, 'g', 7).arg(Dy, 11, 'g', 7).arg(Dpixmag, 15, 'g', 7).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
 */
 };
 
@@ -376,7 +376,7 @@ void ocRec::rec2sSeries(QString *str)
         str->clear();
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
 
-        str->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
+        str->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11").arg(mag, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 8).arg(catMagName, 8).arg(mesureTimeCode));
 
 };
 
@@ -388,12 +388,30 @@ void ocRec::rec2sBase(QString *recStr)
     recStr->insert(0, QString("%1 %2 ").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5) + getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6) + " " + deg_to_hms(ra, " ", 3) + " "+ deg_to_damas(de, " ", 2) + " " + QString("%1 %2").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')));//+QString(" %1").arg(catName, 8));
 }
 
+QString ocRec::rec2sBase1()
+{
+    QStringList rList;
+
+    rList << QString("%1").arg(name, 16);
+    rList << QString("%1").arg(mjd2jd(MJday), 15, 'f', 7);
+    rList << getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 7);
+    rList << deg_to_hms(ra, " ", 3);
+    rList << deg_to_damas(de, " ", 2);
+    rList << QString("%1").arg(mag, 6, 'f', 2);
+    rList << QString("%1").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' '));
+    rList << QString("%1").arg(ocDe, 8, 'f', 1, QLatin1Char(' '));
+    rList << QString("%1").arg(ocMag, 6, 'f', 2);
+
+    //recStr = rList.join("|");
+    return(rList.join("|"));
+}
+
 void ocRec::rec2s_short(QString *recStr)
 {
     recStr->clear();
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
 
-    recStr->insert(0, QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5).arg(getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6)).arg(deg_to_hms(ra, " ", 3)).arg(deg_to_damas(de, " ", 2)).arg(mag0, 6, 'f', 3, QLatin1Char(' ')));
+    recStr->insert(0, QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5).arg(getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6)).arg(deg_to_hms(ra, " ", 3)).arg(deg_to_damas(de, " ", 2)).arg(mag, 6, 'f', 3, QLatin1Char(' ')));
 }
 
 void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, QString objType)
@@ -413,7 +431,7 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     outstr = outstr +getStrFromDATEOBS(dateObs," ", 0, 6);
     outstr = outstr +deg_to_hms(ra, " ",3);
     outstr = outstr + deg_to_damas(de, " ",2)+"         ";
-    outstr = outstr  +QString( "%1" ).arg(mag0,5,'f',2);
+    outstr = outstr  +QString( "%1" ).arg(mag,5,'f',2);
     outstr = outstr  +"       "+obsName;
     str->append(outstr);
     /*msgstr = QString( "%1" ).arg(mObj->mpcObj->name);
@@ -446,7 +464,7 @@ void ocRec::s2rec(QString str)
         MJday = getMJDfromYMD(tstr);
         ra = hms_to_deg(sL[1], " ");
         de = damas_to_deg(sL[2], " ");
-	mag0 = sL[3].toFloat(); 
+    mag = sL[3].toFloat();
         ocRaCosDe = sL[4].toDouble();
 	ocDe = sL[5].toDouble();
 	ocMag = sL[6].toDouble();
@@ -499,7 +517,7 @@ void ocRec::copy(const ocRec &source)
     MJday = source.MJday;
     ra = source.ra;
     de = source.de;
-    mag0 = source.mag0;
+    mag = source.mag;
     ocRaCosDe = source.ocRaCosDe;
     ocDe = source.ocDe;
     ocMag = source.ocMag;
@@ -530,7 +548,7 @@ ocRec& ocRec::operator=(const ocRec &source)
  /*   MJday = source.MJday;
     ra = source.ra;
     de = source.de;
-    mag0 = source.mag0;
+    mag = source.mag;
     ocRaCosDe = source.ocRaCosDe;
     ocDe = source.ocDe;
     ocMag = source.ocMag;
@@ -1044,7 +1062,7 @@ void objResRec::toOcRec(ocRec *rec)
     /*rec->Dpixmag = Dpixmag;
     rec->Dx = Dx;
     rec->Dy = Dy;*/
-    rec->mag0 = mag;
+    rec->mag = mag;
     rec->mesureTimeCode = mesureTimeCode;
     //rec->muDe = etaOC;
     //rec->muRaCosDe = ksiOC*cos(de);
@@ -2815,7 +2833,7 @@ int eqFile::countCols(QString colNums)
                                     cols[k]->num++;
                                     break;
                                     case 3:
-                                    cols[k]->mean += ocList[j]->mag0;
+                                    cols[k]->mean += ocList[j]->mag;
                                     cols[k]->num++;
                                     break;
                                     case 4:
@@ -2908,7 +2926,7 @@ int eqFile::countCols(QString colNums)
                                     cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->de, 2.0);
                                     break;
                                     case 3:
-                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag0, 2.0);
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag, 2.0);
                                     break;
                                     case 4:
                                     cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocRaCosDe, 2.0);
@@ -3273,7 +3291,7 @@ void eqFile::getSeriesRec(eqSeriesRec *eqsRec)
     if(cRec!=NULL) eqsRec->de = cRec->mean;
 
     cRec = getColNum(3);
-    if(cRec!=NULL) eqsRec->mag0 = cRec->mean;
+    if(cRec!=NULL) eqsRec->mag = cRec->mean;
 
     cRec = getColNum(4);
     if(cRec!=NULL) eqsRec->ocDe = cRec->mean;
@@ -3363,8 +3381,8 @@ void eqFile::getSeriesRec(ocRec *eqsRec)
     else eqsRec->de = 0.0;
 
     cRec = getColNum(3);
-    if(cRec!=NULL) eqsRec->mag0 = cRec->mean;
-    else eqsRec->mag0 = 0.0;
+    if(cRec!=NULL) eqsRec->mag = cRec->mean;
+    else eqsRec->mag = 0.0;
 
     cRec = getColNum(4);
     if(cRec!=NULL) eqsRec->ocDe = cRec->mean;
@@ -4574,7 +4592,7 @@ void objSeries::getMoveModel(QList <ocRec*> *ocList)
 
             if(!orTemp->getColNum(&cRec, 5));
             {
-                ocR->mag0 = cRec.mean;
+                ocR->mag = cRec.mean;
             }
 
 
@@ -5890,7 +5908,7 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
             mkNew->copy(u3List.at(posMin));
             mkNew->resRec->copy(*resList.at(i));
    /*         if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
-            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag);
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
             /*mkNew->mEkv[0] = mgEkv->marks.at(posMin)->mEkv[0];
             mkNew->mEkv[1] = mgEkv->marks.at(posMin)->mEkv[1];
@@ -5901,7 +5919,7 @@ void measurementRec::detMarksList(QList <marksP*> u3List)
             //if(REDSTAT_LOG_LEVEL>0) qDebug() << "mgIP->marks.at(i)->P: " << mgIP->marks.at(i)->P << "\n";
 //            mkNew->copyImg(*mgIP->marks.at(i));
       /*      if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("mkNewEkv: %1\t%2\t%3\n").arg(mkNew->mEkv[0]).arg(mkNew->mEkv[1]).arg(mkNew->mEkv[2]);
-            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag0);
+            if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("ocObj: %1\t%2\t%3\n").arg(mkNew->ocObj->ra).arg(mkNew->ocObj->de).arg(mkNew->ocObj->mag);
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("resUcac2: %1\t%2\t%3\n").arg(mkNew->resUcac2->ra).arg(mkNew->resUcac2->de).arg(mkNew->resUcac2->mag);*/
          /*   mkNew->mTanImg[0] = mgIP->marks.at(i)->mTanImg[0];
             mkNew->mTanImg[1] = mgIP->marks.at(i)->mTanImg[1];
@@ -7084,7 +7102,7 @@ void eqSeriesRec::rec2sS(QString *recStr)
 
     recStr->append(QString("|%1|%2|%3|%4\n"))
 
-   // recStr->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4\n").arg(name, 16).arg(catName, 8).arg(catEphName, 8).arg(catMagName, 8));
+   // recStr->insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13").arg(mag, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4\n").arg(name, 16).arg(catName, 8).arg(catEphName, 8).arg(catMagName, 8));
 }
 /
 void eqSeriesRec::rec2sBase(QString *recStr)
@@ -7115,7 +7133,7 @@ void eqSeriesRec::s2rec(QString recStr)
     MJday = getMJDfromYMD(tstr);
     ra = hms_to_deg(sL[1], " ");
     de = damas_to_deg(sL[2], " ");
-    mag0 = sL[3].toFloat();
+    mag = sL[3].toFloat();
     ocRaCosDe = sL[4].toDouble();
     ocDe = sL[5].toDouble();
     ocMag = sL[6].toDouble();
@@ -7160,7 +7178,7 @@ void eqSeriesRec::s2recBase(QString recStr)
     MJday = jd2mjd(sL[1].toDouble());//getMJDfromYMD(tstr);
     hms2rad(&ra, sL[5].toInr(), sL[6].toInr(), sL[7].toDouble());
     de = damas_to_deg(sL[2], " ");
-    mag0 = sL[3].toFloat();
+    mag = sL[3].toFloat();
     ocRaCosDe = sL[4].toDouble();
     ocDe = sL[5].toDouble();
     ocMag = sL[6].toDouble();
@@ -7516,7 +7534,7 @@ int eqSeriesFile::countCols(QString colNums)
                                     cols[k]->num++;
                                     break;
                                     case 3:
-                                    cols[k]->mean += ocList[j]->mag0;
+                                    cols[k]->mean += ocList[j]->mag;
                                     cols[k]->num++;
                                     break;
                                     case 4:
@@ -7607,7 +7625,7 @@ int eqSeriesFile::countCols(QString colNums)
                                     cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->de, 2.0);
                                     break;
                                     case 3:
-                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag0, 2.0);
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag, 2.0);
                                     break;
                                     case 4:
                                     cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocRaCosDe, 2.0);
@@ -7927,7 +7945,7 @@ void eqSeriesFile::getSeriesRec(eqSeriesRec *eqsRec)
     if(cRec!=NULL) eqsRec->de = cRec->mean;
 
     cRec = getColNum(3);
-    if(cRec!=NULL) eqsRec->mag0 = cRec->mean;
+    if(cRec!=NULL) eqsRec->mag = cRec->mean;
 
     cRec = getColNum(4);
     if(cRec!=NULL) eqsRec->ocDe = cRec->mean;
@@ -8031,7 +8049,7 @@ void ocRecO::rec2s(QString &str)
         str.clear();
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
 
-        str.insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12").arg(mag0, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(obsCode, 3).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 12).arg(catMagName, 8).arg(mesureTimeCode));
+        str.insert(0, getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 5) + "|" + deg_to_hms(ra, " ", 4) + "|"+ deg_to_damas(de, " ", 3) + "|" + QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12").arg(mag, 6, 'f', 3, QLatin1Char(' ')).arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocDe, 8, 'f', 1, QLatin1Char(' ')).arg(ocMag, 8, 'f', 1, QLatin1Char(' ')).arg(obsCode, 3).arg(topDist, 12, 'f', 9, QLatin1Char(' ')).arg(muRaCosDe, 9, 'f', 2, QLatin1Char(' ')).arg(muDe, 9, 'f', 2, QLatin1Char(' ')).arg(Vr, 6, 'f', 2, QLatin1Char(' ')).arg(phase, 8, 'f', 3, QLatin1Char(' ')).arg(elong, 8, 'f', 3, QLatin1Char(' ')).arg(expTime, 8, 'f', 3, QLatin1Char(' ') )+QString("|%1|%2|%3|%4").arg(name, 16).arg(catName, 12).arg(catMagName, 8).arg(mesureTimeCode));
 
 }
 
@@ -8053,7 +8071,7 @@ void ocRecO::s2rec(QString str)
         MJday = getMJDfromYMD(tstr);
         ra = hms_to_deg(sL[1], " ");
         de = damas_to_deg(sL[2], " ");
-    mag0 = sL[3].toFloat();
+    mag = sL[3].toFloat();
         ocRaCosDe = sL[4].toDouble();
     ocDe = sL[5].toDouble();
     ocMag = sL[6].toDouble();
