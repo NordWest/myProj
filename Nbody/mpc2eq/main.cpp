@@ -298,6 +298,7 @@ int main(int argc, char *argv[])
     int mNum;
 
     mpcrec mRec;
+    OrbCat ocat;
     orbit orbRec;
 
     ref = new SpiceChar[256];
@@ -322,6 +323,9 @@ int main(int argc, char *argv[])
     int useMoody = sett->value("general/useMoody", 0).toInt();
     int massType = sett->value("general/massType", 0).toInt();
     useEPM = sett->value("general/useEPM", 0).toInt();
+
+    QString orbCatFile = sett->value("general/orbCatFile", "./res.ocat").toString();
+    int useOrbCat = sett->value("general/useOrbCat", 0).toInt();
 
     sk = sett->value("general/sk", 0).toInt();
     center = sett->value("general/center", 0).toInt();
@@ -388,6 +392,7 @@ int main(int argc, char *argv[])
 
     time1 = time0+dtime*nstep;
 
+    if(useOrbCat)ocat.init(orbCatFile.toAscii().data());
     if(mCat.init(mpcCatFile.toAscii().data()))
     {
         qDebug() << "\nError MPCCAT init\n\n";
@@ -492,6 +497,8 @@ int main(int argc, char *argv[])
         tStr.replace(" ", "0");
         sprintf(tname, "%s", tStr.toAscii().data());
 
+
+
         if(mCat.GetProvDest(tname))
         {
             mpc_rec->getProvDest(tStr);
@@ -503,6 +510,8 @@ int main(int argc, char *argv[])
         }
         orbJD += mCat.record->getEpoch();
         objName = QString(mCat.record->name).simplified();
+
+
 
         oc_rec = new ocRec;
         oc_rec->name = objName;
@@ -588,14 +597,26 @@ int main(int argc, char *argv[])
         else
         {
             isObj = 0;
-
-            if(mCat.GetRecName(name.simplified().toAscii().data()))
+            if(useOrbCat)
             {
-               qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
-               break;
+                if(ocat.GetRecName(name.simplified().toAscii().data())==-1)
+                {
+                   qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+                   break;
+                }
+                orbRec.get(ocat);
             }
+            else
+            {
+                if(mCat.GetRecName(name.simplified().toAscii().data()))
+                {
+                   qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+                   break;
+                }
+
             //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
-            orbRec.get(&mCat);
+                orbRec.get(&mCat);
+            }
 
             orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
             orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);

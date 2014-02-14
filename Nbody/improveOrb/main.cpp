@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
     ocat.init(argv[1]);
     sz = ocat.nstr;
 
+    QDir().remove("res.ocat");
     ocatI.init("res.ocat");
 
     QTextStream ostm(stdout);
@@ -300,6 +301,11 @@ int main(int argc, char *argv[])
 
 
         impObj->impOrb.set(&ocatI);
+
+        ocatI.record->set_author("Berezhnoy");
+        ocatI.record->set_name(impObj->name.toAscii().data());
+        ocatI.record->set_number(p);
+        ocatI.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
 
         ocatI.AddRec();
 
