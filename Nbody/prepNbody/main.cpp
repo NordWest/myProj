@@ -6,7 +6,7 @@
 #include "./../../libs/comfunc.h"
 #include "./../../libs/redStat.h"
 #include "./../../libs/mpcs.h"
-#include "./../../libs/ephem_util.h"
+//#include "./../../libs/ephem_util.h"
 #include "./../../libs/calc_epm.h"
 #include "./../../libs/mpccat.h"
 #include <SpiceUsr.h>
