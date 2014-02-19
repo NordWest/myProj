@@ -390,7 +390,7 @@ int main(int argc, char *argv[])
     time0 = sett->value("time/time0", 2455201.0).toDouble();
     dtime = sett->value("time/dtime", 0).toDouble();
     nstep = sett->value("time/nstep", 0).toInt();
-    timestep = sett->value("time/timestep", 0).toDouble();
+    //timestep = sett->value("time/timestep", 0).toDouble();
 
     miriadeProcData.name = sett->value("miriadeProcData/name", "./mpeph.exe").toString();
     miriadeProcData.folder = sett->value("miriadeProcData/folder", "./").toString();
@@ -477,6 +477,7 @@ int main(int argc, char *argv[])
 
 //
     OrbCat orb_cat;
+    OrbCat orb_cat0;
 
 //////////////prepNB
 
@@ -662,10 +663,10 @@ int main(int argc, char *argv[])
             {
                 if(ocat.GetRecName(name.simplified().toAscii().data())==-1)
                 {
-                   qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
-                   break;
+                   //qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
+                   orbRec.get(&mCat);
                 }
-                orbRec.get(ocat.record);
+                else orbRec.get(ocat.record);
             }
             else
             {
@@ -783,6 +784,10 @@ QFile impFile(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
 impFile.open(QFile::Truncate | QFile::WriteOnly);
 QTextStream impStm(&impFile);
 
+int dOrb = 1;
+int k;
+double tdo;
+
     for(i=0; i<mNum; i++)
     {
         oc_rec = eq_file.ocList.at(i);
@@ -806,7 +811,7 @@ QTextStream impStm(&impFile);
                 V[j*3+2] = -V[j*3+2];
             }
         }
-
+/*
         while((fabs(dT)/dtime)>1)
         {
             ti = tf;
@@ -818,14 +823,56 @@ QTextStream impStm(&impFile);
 
         //orb
 
+*/
 
-        if(fabs(tf-tEnd)>1e-9)
+//det Local orbits
+
+        if(dOrb&&(dT>10))
+        {
+            tdo = floor(tEnd) - vmul;
+            solSys->rada27(X, V, 0, fabs(tf-tdo));
+            for(k=0;k<orb_cat.nstr;k++)
+            {
+                orb_cat.GetRec(k);
+                for(j=0;j<nofzbody;j++)
+                {
+                    if(QString().compare(QString(orb_cat.record->name).simplified(), pList.at(j+1)->name.data())==0)
+                    {
+                        state[0] = X[j*3];
+                        state[1] = X[j*3+1];
+                        state[2] = X[j*3+2];
+
+                        state[3] = vmul*V[j*3];
+                        state[4] = vmul*V[j*3+1];
+                        state[5] = vmul*V[j*3+2];
+
+                        findOrb(orbRec.elem, &state[0], &state[3], tdo);
+                        orbRec.set(&orb_cat0);
+                        orb_cat0.record->set_number(orb_cat.record->number);
+                        orb_cat0.record->set_name(QString(orb_cat.record->name).simplified().toAscii().data());
+                        orb_cat0.record->set_author("Berezhnoy");
+                        orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
+                        orb_cat0.AddRec();
+                    }
+                }
+
+            }
+            orb_cat0.SaveAs(QString("%1_ocat0.txt").arg(iniMpcFile.section(".", 0, -2)).toAscii().data());
+
+            dOrb = 0;
+            tf = tdo;
+        }
+
+
+        if(fabs(tf-tEnd)>1e-7)
         {
             ti = tf;
             tf = tEnd;
             //qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
             solSys->rada27(X, V, 0, fabs(tf-ti));
         }
+
+
 
         T0 = tEnd;
 

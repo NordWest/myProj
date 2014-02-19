@@ -849,7 +849,7 @@ int findOrb(orbElem *orb, double *R0, double *V0, double t0)//R0, V0 - ekvatoria
 		
     }
 
-    Ekv2Ecl(&orb->inc, &orb->Node, &orb->w, orb->inc, orb->Node, orb->w);
+    //Ekv2Ecl(&orb->inc, &orb->Node, &orb->w, orb->inc, orb->Node, orb->w);
 
     if(orb->w<0.0) orb->w+=2.0*PI;
     //if(orb->inc<-PI) orb->inc+=2.0*PI;

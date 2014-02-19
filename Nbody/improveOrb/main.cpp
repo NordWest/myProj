@@ -23,6 +23,7 @@ struct inproveObject
 };
 
 void E2elem(double *E, orbElem *dElem, orbElem *elem);
+void E2elem1(double *E, orbElem *dElem, orbElem *elem);
 
 
 int main(int argc, char *argv[])
@@ -135,7 +136,7 @@ int main(int argc, char *argv[])
     double *Wa, *Wb, *Wc;
     double uweA, uweB, uweC;
     double *Da, *Db, *Dc;
-    double P[3], Q[3], R[3], Recl[3];
+    double P[3], Q[3], R[3], N[3], Recl[3];
     double stateE[3], po, a1;
     double H, K, r, ss, aval, nn, dT;
     double psi[3];
@@ -201,7 +202,14 @@ int main(int argc, char *argv[])
             Q[0] = -sin(elem->w)*cos(elem->Node) - cos(elem->w)*sin(elem->Node)*cos(elem->inc);
             Q[1] = (-sin(elem->w)*sin(elem->Node) + cos(elem->Node)*cos(elem->inc))*cos(EKV) - cos(elem->w)*sin(elem->inc)*sin(EKV);
             Q[2] = (-sin(elem->w)*sin(elem->Node) + cos(elem->w)*cos(elem->Node)*cos(elem->inc))*sin(EKV) + cos(elem->w)*sin(elem->inc)*cos(EKV);
+            //r
+            R[0] = sin(elem->inc)*sin(elem->Node);
+            R[1] = -sin(elem->inc)*cos(elem_ekv->Node)*cos(EKV) - cos(elem->inc)*sin(EKV);
+            R[2] = -sin(elem->inc)*cos(elem_ekv->Node)*sin(EKV) + cos(elem_ekv->inc)*cos(EKV);
 
+            N[0] = cos(elem->Node);
+            N[1] = sin(elem->Node)*cos(EKV);
+            N[1] = cos(elem->Node)*sin(EKV);
             //ostm << QString("P: %1\t%2\t%3\n").arg(P[0]).arg(P[1]).arg(P[2]);
             //ostm << QString("Q: %1\t%2\t%3\n").arg(Q[0]).arg(Q[1]).arg(Q[2]);
 
@@ -219,7 +227,7 @@ int main(int argc, char *argv[])
             Q[1] = -sin(elem_ekv->w)*sin(elem_ekv->Node) + cos(elem_ekv->Node)*cos(elem_ekv->inc);
             Q[2] = cos(elem_ekv->w)*sin(elem_ekv->inc);
             //R
-*/
+/
             R[0] = sin(elem_ekv->inc)*sin(elem_ekv->Node);
             R[1] = -sin(elem_ekv->inc)*cos(elem_ekv->Node);
             R[2] = cos(elem_ekv->inc);
@@ -227,6 +235,7 @@ int main(int argc, char *argv[])
             tgw0 = tan(elem_ekv->w);
             tgw1 = atan2((P[1]/cos(EKV) - P[0]*tan(elem_ekv->Node)), (Q[1]/cos(EKV) - Q[0]*tan(elem_ekv->Node)));
             //ostm << QString("%1 ?= %2\n").arg(elem_ekv->w).arg(tgw1);
+            */
             //
             k1 = -sin(impSt->raC)/po;
             k2 = cos(impSt->raC)/po;
@@ -234,6 +243,65 @@ int main(int argc, char *argv[])
             k4 = -sin(impSt->decC)*sin(impSt->raC)/po;
             k5 = cos(impSt->decC)/po;
 
+//  Node,inc,w
+            if(elem->ecc<=0.25)
+            {
+                kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
+                kEx[1] = -impSt->state[0]/nn + R[1]*impSt->state[2] - R[2]*impSt->state[1];
+                kEx[2] = N[1]*impSt->state[3] - N[2]*impSt->state[1];
+
+                kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
+                kEx[4] = H*impSt->state[0]+K*impSt->state[3];
+                kEx[5] = impSt->state[3]/nn;
+
+
+                kEy[0] = impSt->state[0]*cos(EKV);
+                kEy[1] = -impSt->state[1]/nn + R[2]*impSt->state[0] - R[0]*impSt->state[2];
+                kEy[2] = N[2]*impSt->state[0] - N[0]*impSt->state[2];
+
+                kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
+                kEy[4] = H*impSt->state[1]+K*impSt->state[4];
+                kEy[5] = impSt->state[4]/nn;
+
+
+                kEz[0] = impSt->state[0]*sin(EKV);
+                kEz[1] = -impSt->state[2]/nn + R[0]*impSt->state[1] - R[1]*impSt->state[0];
+                kEz[2] = N[0]*impSt->state[1] - N[1]*impSt->state[0];
+
+                kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
+                kEz[4] = H*impSt->state[2]+K*impSt->state[5];
+                kEz[5] = impSt->state[5]/nn;
+            }
+            if(elem->ecc>0.25&&elem->ecc<0.75)
+            {
+                kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
+                kEx[1] = R[1]*impSt->state[2] - R[2]*impSt->state[1];
+                kEx[2] = N[1]*impSt->state[3] - N[2]*impSt->state[1];
+
+                kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
+                kEx[4] = H*impSt->state[0]+K*impSt->state[3];
+                kEx[5] = impSt->state[3]/nn;
+
+
+                kEy[0] = impSt->state[0]*cos(EKV);
+                kEy[1] = R[2]*impSt->state[0] - R[0]*impSt->state[2];
+                kEy[2] = N[2]*impSt->state[0] - N[0]*impSt->state[2];
+
+                kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
+                kEy[4] = H*impSt->state[1]+K*impSt->state[4];
+                kEy[5] = impSt->state[4]/nn;
+
+
+                kEz[0] = impSt->state[0]*sin(EKV);
+                kEz[1] = R[0]*impSt->state[1] - R[1]*impSt->state[0];
+                kEz[2] = N[0]*impSt->state[1] - N[1]*impSt->state[0];
+
+                kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
+                kEz[4] = H*impSt->state[2]+K*impSt->state[5];
+                kEz[5] = impSt->state[5]/nn;
+            }
+/*
+//  lowecc
             kEx[0] = 0.0;
             kEx[1] = impSt->state[2];
             kEx[2] = -impSt->state[3]/nn - impSt->state[1];
@@ -254,7 +322,7 @@ int main(int argc, char *argv[])
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
             kEz[5] = impSt->state[5]/nn;
-
+*/
 //arb ecc
 /*
             kEx[0] = P[1]*impSt->state[2] - P[2]*impSt->state[1];
@@ -277,7 +345,7 @@ int main(int argc, char *argv[])
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
             kEz[5] = impSt->state[5]/nn;
-            */
+*/
             for(j=0;j<6;j++)
             {
                 ai[i*6+j] = k1*kEx[j] + k2*kEy[j];
@@ -287,10 +355,11 @@ int main(int argc, char *argv[])
             }
 
             La[i] = (impSt->raO - impSt->raC)*cos(impSt->decC);
-            Lb[i] = impSt->decO - impSt->decC;
+            Lb[i] = (impSt->decO - impSt->decC);
             Lc[i] = La[i];
             Lc[sz+i] = Lb[i];
 
+            //ostm << QString("La: %1\tLb: %2\n").arg(rad2mas(La[i])).arg(rad2mas(Lb[i]));
 
         }
 /*
@@ -325,19 +394,19 @@ int main(int argc, char *argv[])
         //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
         elemI = impObj->impOrb.elem;
 
-        //for(int l=0; l<6; l++) Ec[l]=1e-6;
+        //for(int l=0; l<6; l++) Ec[l]=mas2rad(Ec[l]);
 
         E2elem(Ec, &dElem, elem);
 
         ostm << QString("dElemC\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 
-        elemI->ecc = elem->ecc + dElem.ecc;
-        elemI->eJD = elem->eJD + dElem.eJD;
-        elemI->inc = elem->inc + dElem.inc;
-        elemI->M0 = elem->M0 + dElem.M0;
-        elemI->Node = elem->Node + dElem.Node;
-        elemI->q = elem->q + dElem.q;
-        elemI->w = elem->w + dElem.w;
+        elemI->ecc = elem->ecc - dElem.ecc;
+        elemI->eJD = elem->eJD - dElem.eJD;
+        elemI->inc = elem->inc - dElem.inc;
+        elemI->M0 = elem->M0 - dElem.M0;
+        elemI->Node = elem->Node - dElem.Node;
+        elemI->q = elem->q - dElem.q;
+        elemI->w = elem->w - dElem.w;
 
          //ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(elemI->M0, 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(elemI->inc, 10, 'f', 7).arg(elemI->w, 10, 'f', 7).arg(elemI->Node, 10, 'f', 7);
 
@@ -399,6 +468,20 @@ void E2elem(double *E, orbElem *dElem, orbElem *elem)
     dElem->w = dr - cos(elem->inc)*dElem->Node;
 
     dElem->M0 = E[5] - dr;
+    a1 = E[3]/(elem->q/(1.0-elem->ecc));
+    qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(elem->q/(1.0-elem->ecc));
+    dElem->q = a1*(1.0-elem->ecc);
+}
+
+void E2elem1(double *E, orbElem *dElem, orbElem *elem)
+{
+    double a1;
+    dElem->ecc = E[4];
+    dElem->inc = E[2];
+    dElem->Node = E[0];
+    dElem->w = E[1];
+
+    dElem->M0 = E[5] - E[1];
     a1 = E[3]/(elem->q/(1.0-elem->ecc));
     qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(elem->q/(1.0-elem->ecc));
     dElem->q = a1*(1.0-elem->ecc);
