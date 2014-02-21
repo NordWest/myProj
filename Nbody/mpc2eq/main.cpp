@@ -563,8 +563,29 @@ int main(int argc, char *argv[])
                 continue;
             }
         }
-        orbJD += mCat.record->getEpoch();
-        objName = QString(mCat.record->name).simplified();
+
+objName = QString(mCat.record->name).simplified();
+
+        if(useOrbCat)
+        {
+            if(ocat.GetRecName(objName.toAscii().data())==-1)
+            {
+               qDebug() << QString("ocat\'t find object |%1|\n").arg(objName);
+               orbJD += mCat.record->getEpoch();
+            }
+            else orbJD += ocat.record->eJD;
+        }
+        else
+        {
+
+
+        //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
+            orbJD += mCat.record->getEpoch();
+        }
+
+
+
+
 
 
 
@@ -787,6 +808,7 @@ QTextStream impStm(&impFile);
 int dOrb = 1;
 int k;
 double tdo;
+double state0[6];
 
     for(i=0; i<mNum; i++)
     {
@@ -853,6 +875,11 @@ double tdo;
                         orb_cat0.record->set_author("Berezhnoy");
                         orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
                         orb_cat0.AddRec();
+                        orbRec.detRecEkv(&state0[0],&state0[1],&state0[2],tdo);
+                        orbRec.detRecEkvVel(&state0[3],&state0[4],&state0[5],tdo);
+                        qDebug() << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]).arg(state[1]).arg(state[2]).arg(state[3]).arg(state[4]).arg(state[5]);
+                        qDebug() << QString("state0: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state0[0]).arg(state0[1]).arg(state0[2]).arg(state0[3]).arg(state0[4]).arg(state0[5]);
+                        qDebug() << QString("dstate: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]-state[0]).arg(state[1]-state[1]).arg(state[2]-state[2]).arg(state[3]-state[3]).arg(state[4]-state[4]).arg(state[5]-state[5]);
                     }
                 }
 
