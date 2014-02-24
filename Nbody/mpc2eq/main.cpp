@@ -645,6 +645,10 @@ objName = QString(mCat.record->name).simplified();
     X0 = new double[nofzbody*3];
     V0 = new double[nofzbody*3];
 
+    srand (time(NULL));
+    double decVol = 0.000005;//*(rand()%1)-0.0000005;
+
+
     int p=0;
     for(i=0; i<envSize; i++)
     {
@@ -696,6 +700,28 @@ objName = QString(mCat.record->name).simplified();
             //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
                 orbRec.get(&mCat);
             }
+
+//decrease orbits
+            if(!useOrbCat)
+            {
+
+
+                qDebug() << QString("decVol: %1\n").arg(decVol);
+
+                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
+
+                orbRec.elem->ecc = orbRec.elem->ecc + orbRec.elem->ecc*decVol;
+                orbRec.elem->inc = orbRec.elem->inc + orbRec.elem->inc*decVol;
+                orbRec.elem->M0 = orbRec.elem->M0 + orbRec.elem->M0*decVol;
+                orbRec.elem->Node = orbRec.elem->Node + orbRec.elem->Node*decVol;
+                orbRec.elem->q = orbRec.elem->q + orbRec.elem->q*decVol;
+                orbRec.elem->w = orbRec.elem->w + orbRec.elem->w*decVol;
+
+                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
+            }
+
+
+/////////////////
 
             orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
             orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
@@ -818,7 +844,8 @@ double state0[6];
         tf = tBeg;
         dT = tEnd - tf;
 
-        qDebug() << QString("tBeg= %1\ttEnd= %2\n").arg(tBeg, 15, 'f', 7).arg(tEnd, 15, 'f', 7);
+        //qDebug() << QString("i: %1/%2\n").arg(i).arg(mNum);
+        //qDebug() << QString("tBeg= %1\ttEnd= %2\ndT= %3").arg(tBeg, 15, 'f', 7).arg(tEnd, 15, 'f', 7).arg(dT);
 
         //qDebug() << QString("dT= %1\tvmul= %2\n").arg(dT).arg(vmul);
 
@@ -849,10 +876,12 @@ double state0[6];
 
 //det Local orbits
 
-        if(dOrb&&(dT>10))
+        if(dOrb&&(fabs(dT)>10))
         {
             tdo = floor(tEnd) - vmul;
             solSys->rada27(X, V, 0, fabs(tf-tdo));
+
+            qDebug() << "###############det Local orbits###############\n\n";
             for(k=0;k<orb_cat.nstr;k++)
             {
                 orb_cat.GetRec(k);
@@ -875,11 +904,11 @@ double state0[6];
                         orb_cat0.record->set_author("Berezhnoy");
                         orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
                         orb_cat0.AddRec();
-                        orbRec.detRecEkv(&state0[0],&state0[1],&state0[2],tdo);
-                        orbRec.detRecEkvVel(&state0[3],&state0[4],&state0[5],tdo);
-                        qDebug() << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]).arg(state[1]).arg(state[2]).arg(state[3]).arg(state[4]).arg(state[5]);
-                        qDebug() << QString("state0: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state0[0]).arg(state0[1]).arg(state0[2]).arg(state0[3]).arg(state0[4]).arg(state0[5]);
-                        qDebug() << QString("dstate: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]-state[0]).arg(state[1]-state[1]).arg(state[2]-state[2]).arg(state[3]-state[3]).arg(state[4]-state[4]).arg(state[5]-state[5]);
+                        //orbRec.detRecEkv(&state0[0],&state0[1],&state0[2],tdo);
+                        //orbRec.detRecEkvVel(&state0[3],&state0[4],&state0[5],tdo);
+                        //qDebug() << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]).arg(state[1]).arg(state[2]).arg(state[3]).arg(state[4]).arg(state[5]);
+                        //qDebug() << QString("state0: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state0[0]).arg(state0[1]).arg(state0[2]).arg(state0[3]).arg(state0[4]).arg(state0[5]);
+                        //qDebug() << QString("dstate: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]-state[0]).arg(state[1]-state[1]).arg(state[2]-state[2]).arg(state[3]-state[3]).arg(state[4]-state[4]).arg(state[5]-state[5]);
                     }
                 }
 
