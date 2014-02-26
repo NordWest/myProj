@@ -10,10 +10,10 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 
     mpcRec mpR;
-    int obsNum, objNum, cfNum;
-    int isObs, isObj, isTime, isCF, isMag;
+    int obsNum, objNum, cfNum, otNum;
+    int isObs, isObj, isTime, isCF, isMag, isOT;
     int k, r, i, j, sz;
-    QString mpNum, obsCode, catFlag;
+    QString mpNum, obsCode, catFlag, obsType;
     double mjd0, mjd1, mjd, tMag;
     QStringList objNumList;
     QStringList obsCodeList;
@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     QString objFileName = sett->value("general/objFileName", "").toString();
     obsCodeList << sett->value("general/obsCodeList", "").toString().split("|", QString::SkipEmptyParts);
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
+    QStringList obsTypeList = sett->value("general/obsTypeList", "").toString().split("|");
     QString timeS0 = sett->value("general/time0", "").toString();
     QString timeS1 = sett->value("general/time1", "").toString();
 
@@ -140,7 +141,8 @@ int main(int argc, char *argv[])
     obsNum = obsCodeList.size();
     objNum = objNumList.size();
     cfNum = catFlagList.size();
-    qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\n").arg(obsNum).arg(objNum).arg(cfNum);
+    otNum = obsTypeList.size();
+    qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\totNum=%4\n").arg(obsNum).arg(objNum).arg(cfNum).arg(otNum);
 
     k=0; r=0;
     while(!inFile.atEnd())
@@ -152,6 +154,7 @@ int main(int argc, char *argv[])
         isTime = 1;
         isCF = 1;
         isMag = 1;
+        isOT = 1;
 
         mpR.getMpNumber(mpNum);
         if(!isObj) isObj = objNumList.indexOf(mpNum)!=-1;
@@ -190,14 +193,22 @@ int main(int argc, char *argv[])
             if(isObs) break;
         }
 */
+//time
         mjd = mpR.mjd();
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
-
+//catFlag
         mpR.getCatFlag(catFlag);
         for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
         {
             isCF = (QString().compare(catFlag, catFlagList.at(i))==0);
             if(isCF) break;
+        }
+//obsType
+        mpR.getNote2(obsType);
+        for(i=0; i<otNum && obsTypeList.at(i).size()>0;i++)
+        {
+            isCF = (QString().compare(obsType, obsTypeList.at(i))==0);
+            if(isOT) break;
         }
 
         tMag = mpR.magn();

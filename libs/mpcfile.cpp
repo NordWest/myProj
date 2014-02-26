@@ -81,7 +81,7 @@ void mpcRec::getNote1(QString &note1)
     note1.insert(0, dataStr.mid(13, 1));
 }
 
-void mpcRec::getNote2(QString &note2)
+void mpcRec::getNote2(QString &note2)//obsType
 {
     note2.clear();
     note2.insert(0, dataStr.mid(14, 1));

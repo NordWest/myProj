@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include <mgl2/mgl.h>
-//#include <mgl/mgl_zb.h>
+//#include <mgl/mgl.h>
 
 void loadDataFile(QString filename, QStringList& outList)
 {

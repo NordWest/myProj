@@ -8,7 +8,7 @@
 
 //#include "conio.h"
 #include "math.h"
-#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/mpcfile.h"
 #include "./../libs/comfunc.h"
 #include "./../libs/ringpix.h"
@@ -218,7 +218,7 @@ srand(time(NULL));
         while(!inStm.atEnd())
         {
             mpR.fromStr(inStm.readLine());
-dRa = dDe = 0.0;
+            dRa = dDe = 0.0;
             dect = grad2rad(mpR.dec());
             rat = grad2rad(mpR.ra());
             mpR.getMpNumber(mpNum);
@@ -306,7 +306,7 @@ dRa = dDe = 0.0;
 
 //////////////////////
                 if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam, %1\n").arg(obsCode);
-                oPos.det_observ(mjd2jd(mjd));
+                oPos.det_observ_utc(mjd2jd(mjd));
                 detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
                 zet = PI/2.0 - hVal;
                 disp1 = kParUB*sin(zet) + bParUB;
