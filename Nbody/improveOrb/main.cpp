@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
             po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
             H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
             K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+            //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
             dT = impSt->jdTDB - TDT2TDB(elem->eJD);
             //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
             //P??
@@ -209,7 +210,7 @@ int main(int argc, char *argv[])
 
             N[0] = cos(elem->Node);
             N[1] = sin(elem->Node)*cos(EKV);
-            N[1] = cos(elem->Node)*sin(EKV);
+            N[2] = cos(elem->Node)*sin(EKV);
             //ostm << QString("P: %1\t%2\t%3\n").arg(P[0]).arg(P[1]).arg(P[2]);
             //ostm << QString("Q: %1\t%2\t%3\n").arg(Q[0]).arg(Q[1]).arg(Q[2]);
 
@@ -237,18 +238,18 @@ int main(int argc, char *argv[])
             //ostm << QString("%1 ?= %2\n").arg(elem_ekv->w).arg(tgw1);
             */
             //
-            k1 = -sin(impSt->raC)/po;
-            k2 = cos(impSt->raC)/po;
-            k3 = -sin(impSt->decC)*cos(impSt->raC)/po;
-            k4 = -sin(impSt->decC)*sin(impSt->raC)/po;
-            k5 = cos(impSt->decC)/po;
-
+            k1 = -sin(impSt->raC);///po;
+            k2 = cos(impSt->raC);///po;
+            k3 = -sin(impSt->decC)*cos(impSt->raC);///po;
+            k4 = -sin(impSt->decC)*sin(impSt->raC);///po;
+            k5 = cos(impSt->decC);///po;
+/*
 //  Node,inc,w
             if(elem->ecc<=0.25)
             {
                 kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
                 kEx[1] = -impSt->state[0]/nn + R[1]*impSt->state[2] - R[2]*impSt->state[1];
-                kEx[2] = N[1]*impSt->state[3] - N[2]*impSt->state[1];
+                kEx[2] = N[1]*impSt->state[2] - N[2]*impSt->state[1];
 
                 kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
                 kEx[4] = H*impSt->state[0]+K*impSt->state[3];
@@ -272,11 +273,11 @@ int main(int argc, char *argv[])
                 kEz[4] = H*impSt->state[2]+K*impSt->state[5];
                 kEz[5] = impSt->state[5]/nn;
             }
-            if(elem->ecc>0.25&&elem->ecc<0.75)
+            if(elem->ecc>0.25&&elem->ecc<0.85)
             {
                 kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
                 kEx[1] = R[1]*impSt->state[2] - R[2]*impSt->state[1];
-                kEx[2] = N[1]*impSt->state[3] - N[2]*impSt->state[1];
+                kEx[2] = N[1]*impSt->state[2] - N[2]*impSt->state[1];
 
                 kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
                 kEx[4] = H*impSt->state[0]+K*impSt->state[3];
@@ -300,7 +301,7 @@ int main(int argc, char *argv[])
                 kEz[4] = H*impSt->state[2]+K*impSt->state[5];
                 kEz[5] = impSt->state[5]/nn;
             }
-/*
+
 //  lowecc
             kEx[0] = 0.0;
             kEx[1] = impSt->state[2];
@@ -324,7 +325,7 @@ int main(int argc, char *argv[])
             kEz[5] = impSt->state[5]/nn;
 */
 //arb ecc
-/*
+
             kEx[0] = P[1]*impSt->state[2] - P[2]*impSt->state[1];
             kEx[1] = Q[1]*impSt->state[2] - Q[2]*impSt->state[1];
             kEx[2] = -impSt->state[3]/nn + R[1]*impSt->state[2] - R[2]*impSt->state[1];
@@ -345,7 +346,7 @@ int main(int argc, char *argv[])
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
             kEz[5] = impSt->state[5]/nn;
-*/
+
             for(j=0;j<6;j++)
             {
                 ai[i*6+j] = k1*kEx[j] + k2*kEy[j];
@@ -354,8 +355,8 @@ int main(int argc, char *argv[])
                 C[6*sz+i*6+j] = bi[i*6+j];
             }
 
-            La[i] = (impSt->raO - impSt->raC)*cos(impSt->decC);
-            Lb[i] = (impSt->decO - impSt->decC);
+            La[i] = po*(impSt->raO - impSt->raC)*cos(impSt->decC);
+            Lb[i] = po*(impSt->decO - impSt->decC);
             Lc[i] = La[i];
             Lc[sz+i] = Lb[i];
 
@@ -389,12 +390,12 @@ int main(int argc, char *argv[])
         lsm(6, sz*2, Ec, C, Lc, uweC, Dc);
         //slsm(6, sz*2, Ec, C, Lc);
 
-//        ostm << QString("uweC: %1\n").arg(uweC);
+        ostm << QString("uweC: %1\n").arg(uweC);
 
         //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
         elemI = impObj->impOrb.elem;
 
-        //for(int l=0; l<6; l++) Ec[l]=mas2rad(Ec[l]);
+        //for(int l=0; l<6; l++) Ec[l]=0.0;
 
         E2elem(Ec, &dElem, elem);
 
@@ -426,32 +427,6 @@ int main(int argc, char *argv[])
     ocatI.Save();
 
 
-
-/*
-    ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
-    ostm << QString("==============================================================================\n");
-
-    for(i=0;i<sz;i++)
-    {
-        ocat.GetRec(i);
-        orb.get(&ocat);
-        ostm << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(ocat.record->name).arg(ocat.record->eJD, 15, 'f', 8).arg(ocat.record->M0, 10, 'f', 7).arg(ocat.record->q, 10, 'f', 7).arg(ocat.record->ecc, 10, 'f', 7).arg(ocat.record->inc, 10, 'f', 7).arg(ocat.record->w, 10, 'f', 7).arg(ocat.record->Node, 10, 'f', 7);
-
-        t0 = orb.elem->eJD;
-        orb.detRecEkv(&X[0], &X[1], &X[2], t0);
-        orb.detRecEkvVel(&V[0], &V[1], &V[2], t0);
-
-        findOrb(&elem, X, V, t0);
-
-        elem.set(&erec);
-
-        ostm << QString("elem\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(erec.eJD, 15, 'f', 8).arg(erec.M0, 10, 'f', 7).arg(erec.q, 10, 'f', 7).arg(erec.ecc, 10, 'f', 7).arg(erec.inc, 10, 'f', 7).arg(erec.w, 10, 'f', 7).arg(erec.Node, 10, 'f', 7);
-
-        ostm << QString("elem\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(erec.eJD-ocat.record->eJD, 15, 'f', 8).arg(erec.M0-ocat.record->M0, 10, 'f', 7).arg(erec.q-ocat.record->q, 10, 'f', 7).arg(erec.ecc-ocat.record->ecc, 10, 'f', 7).arg(erec.inc-ocat.record->inc, 10, 'f', 7).arg(erec.w-ocat.record->w, 10, 'f', 7).arg(erec.Node-ocat.record->Node, 10, 'f', 7);
-
-
-    }
-  */
     return 0;//a.exec();
 }
 
