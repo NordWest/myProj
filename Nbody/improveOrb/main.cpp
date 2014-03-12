@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 //////////////////////////////
 
     opos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    opos.set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
+    opos.set_obs_parpam(SUN_NUM, 0, 0, obsCode.toAscii().data());
 
     ocat.init(argv[1]);
     sz = ocat.nstr;
@@ -101,12 +101,13 @@ int main(int argc, char *argv[])
         impSt->decO = grad2rad(opers[3].toDouble());
         impSt->raC = grad2rad(opers[4].toDouble());
         impSt->decC = grad2rad(opers[5].toDouble());
-        impSt->state[0] = opers[6].toDouble();
-        impSt->state[1] = opers[7].toDouble();
-        impSt->state[2] = opers[8].toDouble();
-        impSt->state[3] = opers[9].toDouble();
-        impSt->state[4] = opers[10].toDouble();
-        impSt->state[5] = opers[11].toDouble();
+        opos.det_observ_tdb(impSt->jdTDB);
+        impSt->state[0] = opers[6].toDouble() + opos.state[0];
+        impSt->state[1] = opers[7].toDouble() + opos.state[1];
+        impSt->state[2] = opers[8].toDouble() + opos.state[2];
+        impSt->state[3] = opers[9].toDouble() + opos.state[3];
+        impSt->state[4] = opers[10].toDouble() + opos.state[4];
+        impSt->state[5] = opers[11].toDouble() + opos.state[5];
 
         nObj = 1;
         sz = impObjList.size();
@@ -161,6 +162,8 @@ int main(int argc, char *argv[])
     Dc = new double[6*6];
     //Wc = new double[sz*2];
 */
+    opos.set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
+
     for(p=0; p<oNum; p++)
     {
         impObj = impObjList.at(p);

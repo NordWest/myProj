@@ -2,7 +2,7 @@
 #include <QtCore>
 #include "math.h"
 //#include "astro.h"
-#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/redStat.h"
 
 //#include "./../libs/redStat.h"
