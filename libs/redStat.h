@@ -682,6 +682,8 @@ public:
         void saveAs(QString fName, int saveType = 0);
         //void saveAsMpc(QString fName, QString obsName, int objNum);
 	void clear();
+    int size();
+    ocRec* at(int pos);
 
         void sortOClist();
 	

@@ -2534,7 +2534,18 @@ void eqFile::clear()
 	{
 		delete mmRec;
 		mmRec = NULL;
-	}
+    }
+}
+
+int eqFile::size()
+{
+    return(ocList.size());
+}
+
+ocRec *eqFile::at(int pos)
+{
+    if(pos>=0&&pos<size()) return(ocList.at(pos));
+    return NULL;
 }
 
 void eqFile::init(const char *fname)
