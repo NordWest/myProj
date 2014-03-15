@@ -57,5 +57,5 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/filedynstr.h
 
 #unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro
+LIBS += -lmb -lastro -ldele -lephem_read
 

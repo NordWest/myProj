@@ -46,6 +46,40 @@ struct eqObjList
     };
 };
 
+struct eqObsRec
+{
+    QString obsCode;
+    eqObjList objList;
+};
+
+struct eqObsList
+{
+    QList <eqObsRec*> eqoList;
+    void addEQ(ocRec *oc_rec)
+    {
+        int i, sz, nObs;
+        eqObsRec *eqoTemp;
+        sz = eqoList.size();
+        nObs=1;
+        for(i=0;i<sz;i++)
+        {
+            eqoTemp = eqoList.at(i);
+            if(QString().compare(oc_rec->obsCode, eqoTemp->obsCode)==0)
+            {
+                nObs=0;
+                eqoTemp->objList.addEQ(oc_rec);
+                break;
+            }
+        }
+        if(nObs)
+        {
+            eqoTemp = new eqObsRec;
+            eqoTemp->obsCode = oc_rec->name;
+            eqoTemp->objList.addEQ(oc_rec);
+            eqoList << eqoTemp;
+        }
+    };
+};
 
 int main(int argc, char *argv[])
 {
@@ -60,11 +94,16 @@ int main(int argc, char *argv[])
 
     int sz, i, j, szj;
 
+    eqObsList obs_list;
+
     sz =eq_ini.size();
     for(i=0;i<sz;i++)
     {
-
+        obs_list.addEQ(eq_ini.at(i));
     }
+
+    sz = obs_list.eqoList.size();
+    qDebug() << QString("Observatories num: %1\n");
     
     return a.exec();
 }
