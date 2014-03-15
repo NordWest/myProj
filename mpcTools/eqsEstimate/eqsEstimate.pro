@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = eqsEstimate
+TARGET = ./../../../lab/testNbody/eqsEstimate
 CONFIG   += console
 CONFIG   -= app_bundle
 
