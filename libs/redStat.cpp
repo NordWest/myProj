@@ -393,7 +393,7 @@ QString ocRec::rec2sBase1()
     QStringList rList;
 
     rList << QString("%1").arg(name, -16);
-    rList << QString("%1").arg(mjd2jd(MJday), 15, 'f', 7);
+//    rList << QString("%1").arg(mjd2jd(MJday), 15, 'f', 7);
     rList << getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 7);
     rList << deg_to_hms(ra, " ", 3);
     rList << deg_to_damas(de, " ", 2);
@@ -446,71 +446,59 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     mpcFile.close();*/
 }
 
-void ocRec::s2rec(QString str)
+int ocRec::s2rec(QString str)
 {
-//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\n" << str << "\n";
+    return(s2recBase1(str));
+}
+
+int ocRec::s2recBase1(QString str)
+{
+    QStringList sL = str.split("|");
+    if(sL.size()!=9) return 1;
+
+    name = sL[0].simplified();
+    MJday = getMJDfromYMD(sL[1]);
+
+    ra = hms_to_deg(sL[2], " ");
+    de = damas_to_deg(sL[3], " ");
+    mag = sL[4].toFloat();
+    ocRaCosDe = sL[5].toDouble();
+    ocDe = sL[6].toDouble();
+    ocMag = sL[7].toDouble();
+
+    obsCode = sL[8];
+
+    return 0;
+}
+
+int ocRec::s2rec0(QString str)
+{
 	QStringList sL = str.split("|");
-//	//if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nsize=" << sL.size() << "\n";
-        /*if(sL.size()!=16&&sL.size()!=18) return;
-	if(sL.size()==16)
-	{
-		vers = 0;
-	}
-        else if(sL.size()==18){vers = 1;}*/
-        int szl = sL.size();
-        int k;
+
+    if(sL.size()!=18) return 1;
 	
 	QString tstr = sL[0];
 	
-        MJday = getMJDfromYMD(tstr);
-        ra = hms_to_deg(sL[1], " ");
-        de = damas_to_deg(sL[2], " ");
+    MJday = getMJDfromYMD(tstr);
+    ra = hms_to_deg(sL[1], " ");
+    de = damas_to_deg(sL[2], " ");
     mag = sL[3].toFloat();
-        ocRaCosDe = sL[4].toDouble();
+    ocRaCosDe = sL[4].toDouble();
 	ocDe = sL[5].toDouble();
 	ocMag = sL[6].toDouble();
+    topDist = sL[7].toDouble();
+    muRaCosDe = sL[8].toDouble();
+    muDe = sL[9].toDouble();
+    Vr = sL[10].toDouble();
+    phase = sL[11].toFloat();
+    elong = sL[12].toFloat();
+    expTime = sL[13].toDouble();
+    name = sL.at(14).simplified();
+    catName = sL.at(15).simplified();
+    catMagName = sL.at(16).simplified();
+    mesureTimeCode = sL.at(17).simplified();
 
-        k=7;
-        /*
-        if(szl==24)
-        {
-            x = sL[k++].toDouble();
-            y = sL[k++].toDouble();
-            pixmag = sL[k++].toDouble();
-            Dx = sL[k++].toDouble();
-            Dy = sL[k++].toDouble();
-            Dpixmag = sL[k++].toDouble();
-        }
-*/
-/*	if(vers==0)
-        {*/
-                topDist = sL[k++].toDouble();
-                muRaCosDe = sL[k++].toDouble();
-                muDe = sL[k++].toDouble();
-                Vr = sL[k++].toDouble();
-                phase = sL[k++].toFloat();
-                elong = sL[k++].toFloat();
-                expTime = sL[k++].toDouble();
-                name = sL.at(k++).simplified();
-                catName = sL.at(k++).simplified();
-                catMagName = sL.at(k++).simplified();
-                mesureTimeCode = sL.at(k++).simplified();
-//		expTime = sL[15].toFloat();
-/*	}
-	if(vers==1)
-	{
-		ra_oc = hms_to_mas(sL[7], " ");
-		dec_oc = damas_to_mas(sL[8], " ");
-		topDist = sL[9].toDouble();
-                muRaCosDe = sL[10].toDouble();
-		muDe = sL[11].toDouble();
-		Vr = sL[12].toDouble();
-		phase = sL[13].toFloat();
-		elong = sL[14].toFloat();
-		name = sL[15];
-		catNum = sL[16].toInt();
-		expTime = sL[17].toFloat();
-        }*/
+    return 0;
 };
 
 void ocRec::copy(const ocRec &source)
@@ -2686,7 +2674,7 @@ void eqFile::initOld(const char *fname)
 void eqFile::save(int saveType)
 {
 	QString tstr;
-	sortColList();
+    sortColList(colList);
 	QFile dataFile(fName);
 	dataFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 	QTextStream dataStream;
@@ -2732,7 +2720,7 @@ void eqFile::save(int saveType)
 
 void eqFile::saveAs(QString fname, int saveType)
 {
-	sortColList();
+    sortColList(colList);
 	fName.clear();
 	fName.insert(0, fname);
         save(saveType);
@@ -2777,7 +2765,7 @@ int eqFile::setColRec(colRec* cRec)
 	return 0;
 }
 
-void eqFile::sortColList()
+void sortColList(QList <colRec*> colList)
 {
 	int sz = colList.size();
 	int nMin, pMin;
@@ -3004,7 +2992,7 @@ int eqFile::countCols(QString colNums)
                     setColRec(cols[k]);
             }
 
-    sortColList();
+    sortColList(colList);
     return 0;
 }
 
@@ -3219,7 +3207,7 @@ int eqFile::countMM(int fp, int ft, int vflag)
         return 0;
 
 }
-void eqFile::sortOClist()
+void sortOClist(QList <ocRec*> ocList)
 {
     int sz = ocList.size();
     int nMin, pMin;
@@ -3244,7 +3232,7 @@ void eqFile::findSeries(QList <eqFile*> *eqList)
     int i, szi, j;
     szi = ocList.size();
 
-    sortOClist();
+    sortOClist(ocList);
 
     double timeT = 0.0;
     double timeC, dt0, dt1;
@@ -3373,7 +3361,7 @@ void eqFile::getSeriesRec(eqSeriesRec *eqsRec)
 void eqFile::getSeriesRec(ocRec *eqsRec)
 {
     countCols("0,1,2,3,4,5,6,13,14,15,16,17,18,19");
-    sortColList();
+    sortColList(colList);
     countMM();
     if(REDSTAT_LOG_LEVEL>0) qDebug() << "mmRec: " << mmRec << "\n";
 

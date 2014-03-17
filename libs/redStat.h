@@ -95,9 +95,12 @@ public:
         void rec2sBase(QString *str);
         QString rec2sBase1();
         void rec2sSeries(QString *str);
-        void s2rec(QString str);
         void rec2s_short(QString *str);
         void rec2MPC(QString *str, QString obsName, QString objNum, int provNum = 0, QString obsType = " ");
+
+        int s2rec(QString str);
+        int s2rec0(QString str);
+        int s2recBase1(QString str);
 
         void copy(const ocRec &source);
         ocRec& operator=(const ocRec &source);
@@ -661,6 +664,8 @@ public:
 
 
 ////////////////////////////////////////////////////////////
+void sortOClist(QList <ocRec*> ocList);
+void sortColList(QList <colRec*> colList);
 
 class eqFile
 {
@@ -685,11 +690,11 @@ public:
     int size();
     ocRec* at(int pos);
 
-        void sortOClist();
+//        void sortOClist();
 	
 	int getColRecNum(int colNum);
 	int setColRec(colRec* cRec);
-	void sortColList();
+    //void sortColList();
 
         colRec* getColNum(int cNum);
 

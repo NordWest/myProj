@@ -5,14 +5,14 @@
 struct eqObjRec
 {
     QString objName;
-    eqFile* eq_list;
+    QList <ocRec*> eq_list;
     void sortByTime()
     {
-        eq_list->sortOClist();
+        sortOClist(eq_list);
     }
     int size()
     {
-        return eq_list->ocList.size();
+        return eq_list.size();
     }
 
 };
@@ -32,7 +32,7 @@ struct eqObjList
             if(QString().compare(oc_rec->name, eqoTemp->objName)==0)
             {
                 nObj=0;
-                eqoTemp->eq_list->ocList << oc_rec;
+                eqoTemp->eq_list << oc_rec;
                 break;
             }
         }
@@ -40,7 +40,7 @@ struct eqObjList
         {
             eqoTemp = new eqObjRec;
             eqoTemp->objName = oc_rec->name;
-            eqoTemp->eq_list->ocList << oc_rec;
+            eqoTemp->eq_list << oc_rec;
             eqrList << eqoTemp;
         }
     };
@@ -106,5 +106,5 @@ int main(int argc, char *argv[])
     sz = obs_list.eqoList.size();
     qDebug() << QString("Observatories num: %1\n").arg(sz);
     
-    return a.exec();
+    return 0;//a.exec();
 }
