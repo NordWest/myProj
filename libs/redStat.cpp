@@ -392,7 +392,7 @@ QString ocRec::rec2sBase1()
 {
     QStringList rList;
 
-    rList << QString("%1").arg(name, 16);
+    rList << QString("%1").arg(name, -16);
     rList << QString("%1").arg(mjd2jd(MJday), 15, 'f', 7);
     rList << getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 7);
     rList << deg_to_hms(ra, " ", 3);
@@ -401,6 +401,7 @@ QString ocRec::rec2sBase1()
     rList << QString("%1").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' '));
     rList << QString("%1").arg(ocDe, 8, 'f', 1, QLatin1Char(' '));
     rList << QString("%1").arg(ocMag, 6, 'f', 2);
+    rList << QString("%1").arg(obsCode);
 
     //recStr = rList.join("|");
     return(rList.join("|"));

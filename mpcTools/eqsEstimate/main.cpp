@@ -97,13 +97,14 @@ int main(int argc, char *argv[])
     eqObsList obs_list;
 
     sz =eq_ini.size();
+    qDebug() << QString("eq num: %1\n").arg(sz);
     for(i=0;i<sz;i++)
     {
         obs_list.addEQ(eq_ini.at(i));
     }
 
     sz = obs_list.eqoList.size();
-    qDebug() << QString("Observatories num: %1\n");
+    qDebug() << QString("Observatories num: %1\n").arg(sz);
     
     return a.exec();
 }
