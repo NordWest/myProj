@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 
 #include "./../../libs/redStat.h"
-
+/*
 struct eqObjRec
 {
     QString objName;
@@ -80,7 +80,7 @@ struct eqObsList
         }
     };
 };
-
+*/
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     QString resFolder = "./eqStat";
     QDir resDir(resFolder);
 
-    int sz, i, j, szj;
+    int sz, i, j, szj, k, szk;
 
     eqObsList obs_list;
 
@@ -105,6 +105,24 @@ int main(int argc, char *argv[])
 
     sz = obs_list.eqoList.size();
     qDebug() << QString("Observatories num: %1\n").arg(sz);
+
+    eqObsRec* obs_rec;
+    eqObjRec* obj_rec;
+    QList <colRec*> colList;
+
+    for(i=0;i<sz;i++)
+    {
+        obs_rec = obs_list.eqoList.at(i);
+        //qDebug() << QString("obsCode: %1\n").arg(obs_rec->obsCode);
+        szj = obs_rec->objList.eqrList.size();
+        //qDebug() << QString("objNum: %1\n").arg(szj);
+        for(j=0;j<szj;j++)
+        {
+            obj_rec = obs_rec->objList.eqrList.at(j);
+            if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
+            qDebug() << QString("%1@%8:\t%2\t%3\t%4 : %5\t%6\t%7\n").arg(obj_rec->objName).arg(colList.at(0)->mean).arg(colList.at(0)->rmsMean).arg(colList.at(0)->rmsOne).arg(colList.at(1)->mean).arg(colList.at(1)->rmsMean).arg(colList.at(1)->rmsOne).arg(obs_rec->obsCode);
+        }
+    }
     
     return 0;//a.exec();
 }

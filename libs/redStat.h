@@ -90,7 +90,7 @@ public:
 	
 	ocRec();
 	~ocRec();
-	ocRec(QString str);
+    ocRec(QString str);
 	void rec2s(QString *str);
         void rec2sBase(QString *str);
         QString rec2sBase1();
@@ -666,6 +666,7 @@ public:
 ////////////////////////////////////////////////////////////
 void sortOClist(QList <ocRec*> ocList);
 void sortColList(QList <colRec*> colList);
+int countCols(QList <ocRec*> ocList, QList <colRec*> &colList, QString colNums);
 
 class eqFile
 {
@@ -1011,6 +1012,87 @@ struct objectsStat
    QList <objStatRec*> objList;
    void init(reductionStat *redStat, int plNameType);
 
+};
+
+///////////////////////////////////////////////////////////////
+
+struct eqObjRec
+{
+    QString objName;
+    QList <ocRec*> eq_list;
+    void sortByTime()
+    {
+        sortOClist(eq_list);
+    }
+    int size()
+    {
+        return eq_list.size();
+    }
+
+};
+
+struct eqObjList
+{
+    QList <eqObjRec*> eqrList;
+    void addEQ(ocRec *oc_rec)
+    {
+        int i, sz, nObj;
+        eqObjRec *eqoTemp;
+        sz = eqrList.size();
+        nObj=1;
+        for(i=0;i<sz;i++)
+        {
+            eqoTemp = eqrList.at(i);
+            if(QString().compare(oc_rec->name, eqoTemp->objName)==0)
+            {
+                nObj=0;
+                eqoTemp->eq_list << oc_rec;
+                break;
+            }
+        }
+        if(nObj)
+        {
+            eqoTemp = new eqObjRec;
+            eqoTemp->objName = oc_rec->name;
+            eqoTemp->eq_list << oc_rec;
+            eqrList << eqoTemp;
+        }
+    };
+};
+
+struct eqObsRec
+{
+    QString obsCode;
+    eqObjList objList;
+};
+
+struct eqObsList
+{
+    QList <eqObsRec*> eqoList;
+    void addEQ(ocRec *oc_rec)
+    {
+        int i, sz, nObs;
+        eqObsRec *eqoTemp;
+        sz = eqoList.size();
+        nObs=1;
+        for(i=0;i<sz;i++)
+        {
+            eqoTemp = eqoList.at(i);
+            if(QString().compare(oc_rec->obsCode, eqoTemp->obsCode)==0)
+            {
+                nObs=0;
+                eqoTemp->objList.addEQ(oc_rec);
+                break;
+            }
+        }
+        if(nObs)
+        {
+            eqoTemp = new eqObsRec;
+            eqoTemp->obsCode = oc_rec->obsCode;
+            eqoTemp->objList.addEQ(oc_rec);
+            eqoList << eqoTemp;
+        }
+    };
 };
 /*
 struct eqStatRec

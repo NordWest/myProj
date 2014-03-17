@@ -356,13 +356,13 @@ ocRec::~ocRec()
 ocRec::ocRec(QString str)
 {
 	ocRec();
-	s2rec(str);
+    s2rec(str);
 };
 
 void ocRec::rec2s(QString *str)
 {
-    rec2sSeries(str);
-
+    //rec2sSeries(str);
+    *str = rec2sBase1();
     //str->clear();
 
 //	DATEOBS dobs = getDATEOBSfromMJD(MJday);
@@ -454,7 +454,8 @@ int ocRec::s2rec(QString str)
 int ocRec::s2recBase1(QString str)
 {
     QStringList sL = str.split("|");
-    if(sL.size()!=9) return 1;
+    int sLsz = sL.size();
+    if(sLsz!=9) return 1;
 
     name = sL[0].simplified();
     MJday = getMJDfromYMD(sL[1]);
@@ -2579,8 +2580,8 @@ void eqFile::init(const char *fname)
 		else						//oc-string
 		{
                        // if(REDSTAT_LOG_LEVEL>0) qDebug() << "\nline\n";
-			ocr = new ocRec(dataLine);
-//			ocr->s2rec(dataLine);
+            ocr = new ocRec;//(dataLine);
+            ocr->s2rec(dataLine);
 			ocList << ocr;
 		}
 	}
@@ -2990,6 +2991,212 @@ int eqFile::countCols(QString colNums)
                     cols[k]->rec2s(&str);
 //                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
                     setColRec(cols[k]);
+            }
+
+    sortColList(colList);
+    return 0;
+}
+
+int countCols(QList <ocRec*> ocList, QList <colRec*> &colList, QString colNums)
+{
+    colList.clear();
+    QStringList columns = colNums.split(",");
+    int i, j, k, sz, sz1;
+    QList <colRec *> cols;
+    colRec *cRec;
+    QString str;
+
+    sz = ocList.size();
+    if(sz<=2) return 1;
+
+            sz1 = columns.count();
+            for(j=0;j<sz1;j++)
+            {
+                    str = columns[j];
+                    cRec = new colRec;
+                    cRec->colNum = str.toInt();
+    //							means<<0;
+    //							serrors<<0;
+                    cols << cRec;
+            }
+
+
+            for(j=0;j<sz;j++)
+            {
+                    for(k=0;k<sz1;k++)
+                    {
+                            switch(cols[k]->colNum)
+                            {
+                                    case 0:
+                                    cols[k]->mean += ocList[j]->MJday;
+                                    cols[k]->num++;
+                                    break;
+                                    case 1:
+                                    cols[k]->mean += ocList[j]->ra;
+                                    cols[k]->num++;
+                                    break;
+                                    case 2:
+                                    cols[k]->mean += ocList[j]->de;
+                                    cols[k]->num++;
+                                    break;
+                                    case 3:
+                                    cols[k]->mean += ocList[j]->mag;
+                                    cols[k]->num++;
+                                    break;
+                                    case 4:
+                                    cols[k]->mean += ocList[j]->ocRaCosDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 5:
+                                    cols[k]->mean += ocList[j]->ocDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 6:
+                                    cols[k]->mean += ocList[j]->ocMag;
+                                    cols[k]->num++;
+                                    break;
+
+                            /*case 7:
+                            cols[k]->mean += ocList[j]->x;
+                            cols[k]->num++;
+                            break;
+                            case 8:
+                            cols[k]->mean += ocList[j]->y;
+                            cols[k]->num++;
+                            break;
+                            case 9:
+                            cols[k]->mean += ocList[j]->pixmag;
+                            cols[k]->num++;
+                            break;
+                            case 10:
+                            cols[k]->mean += ocList[j]->Dx;
+                            cols[k]->num++;
+                            break;
+                            case 11:
+                            cols[k]->mean += ocList[j]->Dy;
+                            cols[k]->num++;
+                            break;
+                            case 12:
+                            cols[k]->mean += ocList[j]->Dpixmag;
+                            cols[k]->num++;
+                            break;*/
+
+
+                                    case 7:
+                                    cols[k]->mean += ocList[j]->topDist;
+                                    cols[k]->num++;
+                                    break;
+                                    case 8:
+                                    cols[k]->mean += ocList[j]->muRaCosDe;
+
+
+                                    cols[k]->num++;
+                                    break;
+                                    case 9:
+                                    cols[k]->mean += ocList[j]->muDe;
+                                    cols[k]->num++;
+                                    break;
+                                    case 10:
+                                    cols[k]->mean += ocList[j]->Vr;
+                                    cols[k]->num++;
+                                    break;
+                                    case 11:
+                                    cols[k]->mean += ocList[j]->phase;
+                                    cols[k]->num++;
+                                    break;
+                                    case 12:
+                                    cols[k]->mean += ocList[j]->elong;
+                                    cols[k]->num++;
+                                    break;
+                                    case 13:
+                                    cols[k]->mean += ocList[j]->expTime;
+                                    cols[k]->num++;
+                                    break;
+                            }
+                    }
+            }
+            for(k=0;k<sz1;k++) cols[k]->mean /= cols[k]->num;
+
+            for(j=0;j<sz;j++)
+            {
+                    for(k=0;k<sz1;k++)
+                    {
+                            switch(cols[k]->colNum)
+                            {
+                                    case 0:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->MJday, 2.0);
+                                    break;
+                                    case 1:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ra, 2.0);
+                                    break;
+                                    case 2:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->de, 2.0);
+                                    break;
+                                    case 3:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->mag, 2.0);
+                                    break;
+                                    case 4:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocRaCosDe, 2.0);
+                                    break;
+                                    case 5:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocDe, 2.0);
+                                    break;
+                                    case 6:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->ocMag, 2.0);
+                                    break;
+/*
+                            case 7:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->x, 2.0);
+                            break;
+                            case 8:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->y, 2.0);
+                            break;
+                            case 9:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->pixmag, 2.0);
+                            break;
+                            case 10:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dx, 2.0);
+                            break;
+                            case 11:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dx, 2.0);
+                            break;
+                            case 12:
+                            cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Dpixmag, 2.0);
+                            break;
+*/
+                                    case 7:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->topDist, 2.0);
+                                    break;
+                                    case 8:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->muRaCosDe, 2.0);
+                                    break;
+                                    case 9:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->muDe, 2.0);
+                                    break;
+                                    case 10:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->Vr, 2.0);
+                                    break;
+                                    case 11:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->phase, 2.0);
+                                    break;
+                                    case 12:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->elong, 2.0);
+                                    break;
+                                    case 13:
+                                    cols[k]->rmsOne += pow(cols[k]->mean-ocList[j]->expTime, 2.0);
+                                    break;
+                            }
+                    }
+            }
+
+            for(k=0;k<sz1;k++)
+            {
+                    cols[k]->rmsOne = sqrt(cols[k]->rmsOne/(cols[k]->num-1.0));
+                    cols[k]->rmsMean = cols[k]->rmsOne/sqrt(cols[k]->num);
+                    str.clear();
+                    cols[k]->rec2s(&str);
+//                    //if(REDSTAT_LOG_LEVEL>0) qDebug() << k << ": " << str << "\n";
+                    colList << cols[k];
             }
 
     sortColList(colList);

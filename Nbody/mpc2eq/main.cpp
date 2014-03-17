@@ -85,7 +85,7 @@ SpiceDouble             sgT0, sgT1, lt;
 QString bspName, leapName;
 
 observ *opos;
-
+/*
 struct eqObjRec
 {
     QString objName;
@@ -1009,7 +1009,7 @@ impFile.close();
     for(i=0; i<szi; i++)
     {
         eqTemp = eqList.at(i);
-        eqTemp->sortOClist();
+        sortOClist(eqTemp->ocList);
         szj = eqTemp->ocList.size();
         for(j=0;j<szj;j++)
         {
@@ -1305,7 +1305,7 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName, 
 
         for(i=0; i<nstep; i++)
         {
-            oc_rec = eqo_list.at(p)->eq_list->ocList.at(i);
+            oc_rec = eqo_list.at(p)->eq_list.at(i);
 
             timei = mjd2jd(UTC2TDB(oc_rec->MJday));
 
