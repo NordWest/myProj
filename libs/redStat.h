@@ -667,6 +667,7 @@ public:
 void sortOClist(QList <ocRec*> ocList);
 void sortColList(QList <colRec*> colList);
 int countCols(QList <ocRec*> ocList, QList <colRec*> &colList, QString colNums);
+void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocRec*> *rejList = NULL);
 
 class eqFile
 {

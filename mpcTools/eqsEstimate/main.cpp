@@ -86,13 +86,15 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+    QString eqFileName(argv[1]);
     eqFile eq_ini;
-    eq_ini.init(argv[1]);
+    eq_ini.init(eqFileName.toAscii().data());
 
     QString resFolder = "./eqStat";
     QDir resDir(resFolder);
 
     int sz, i, j, szj, k, szk;
+    QString tStr;
 
     eqObsList obs_list;
 
@@ -109,6 +111,13 @@ int main(int argc, char *argv[])
     eqObsRec* obs_rec;
     eqObjRec* obj_rec;
     QList <colRec*> colList;
+    QFile wFile(QString("%1.we").arg(eqFileName.section(".", 0, -2)));
+    wFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream wStm(&wFile);
+
+    QFile resFile(QString("%1.res").arg(eqFileName.section(".", 0, -2)));
+    resFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream resStm(&resFile);
 
     for(i=0;i<sz;i++)
     {
@@ -119,10 +128,27 @@ int main(int argc, char *argv[])
         for(j=0;j<szj;j++)
         {
             obj_rec = obs_rec->objList.eqrList.at(j);
+
+            do3sigma(obj_rec->eq_list, 0.0, 3.0);
+
             if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
-            qDebug() << QString("%1@%8:\t%2\t%3\t%4 : %5\t%6\t%7\n").arg(obj_rec->objName).arg(colList.at(0)->mean).arg(colList.at(0)->rmsMean).arg(colList.at(0)->rmsOne).arg(colList.at(1)->mean).arg(colList.at(1)->rmsMean).arg(colList.at(1)->rmsOne).arg(obs_rec->obsCode);
+            wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(obj_rec->objName, 16).arg(obs_rec->obsCode, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);
+            szk = obj_rec->eq_list.size();
+            for(k=0;k<szk;k++)
+            {
+                obj_rec->eq_list.at(k)->rec2s(&tStr);
+                resStm << tStr << "\n";
+            }
+
+            colList.at(0)->rec2s(&tStr);
+            resStm << tStr << "\n";
+            colList.at(1)->rec2s(&tStr);
+            resStm << tStr << "\n";
+            resStm << "\n";
         }
     }
-    
+
+    wFile.close();
+    resFile.close();
     return 0;//a.exec();
 }

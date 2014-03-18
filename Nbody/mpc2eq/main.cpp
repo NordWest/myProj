@@ -19,13 +19,13 @@
 
 #include <iostream>
 #include <iomanip>
-
+/*
 #include "./../../libs/moody/moody.h"
 #include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
 #include "./../../libs/moody/capsule/Capsule.h"
 #include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
 #include "./../../libs/myDomMoody.h"
-
+*/
 static QDataStream* clog0 = 0;
 
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -85,51 +85,7 @@ SpiceDouble             sgT0, sgT1, lt;
 QString bspName, leapName;
 
 observ *opos;
-/*
-struct eqObjRec
-{
-    QString objName;
-    eqFile* eq_list;
-    void sortByTime()
-    {
-        eq_list->sortOClist();
-    }
-    int size()
-    {
-        return eq_list->ocList.size();
-    }
 
-};
-/*
-struct eqObjList
-{
-    QList <eqObjRec*> eqrList;
-    void addEQ(ocRec *oc_rec)
-    {
-        int i, sz, nObj;
-        eqObjRec *eqoTemp;
-        sz = eqrList.size();
-        nObj=1;
-        for(i=0;i<sz;i++)
-        {
-            eqoTemp = eqrList.at(i);
-            if(QString().compare(oc_rec->name, eqoTemp->objName)==0)
-            {
-                nObj=0;
-                eqoTemp->eq_list << oc_rec;
-                break;
-            }
-        }
-        if(nObj)
-        {
-            eqoTemp = new eqObjRec;
-            eqoTemp->objName = oc_rec->name;
-            eqoTemp->eq_list << oc_rec;
-            eqrList << eqoTemp;
-        }
-    };
-};
-*/
 
 struct tState
 {
