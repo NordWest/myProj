@@ -1,86 +1,8 @@
 #include <QCoreApplication>
 
 #include "./../../libs/redStat.h"
-/*
-struct eqObjRec
-{
-    QString objName;
-    QList <ocRec*> eq_list;
-    void sortByTime()
-    {
-        sortOClist(eq_list);
-    }
-    int size()
-    {
-        return eq_list.size();
-    }
+#include "./../../libs/mpccat.h"
 
-};
-
-struct eqObjList
-{
-    QList <eqObjRec*> eqrList;
-    void addEQ(ocRec *oc_rec)
-    {
-        int i, sz, nObj;
-        eqObjRec *eqoTemp;
-        sz = eqrList.size();
-        nObj=1;
-        for(i=0;i<sz;i++)
-        {
-            eqoTemp = eqrList.at(i);
-            if(QString().compare(oc_rec->name, eqoTemp->objName)==0)
-            {
-                nObj=0;
-                eqoTemp->eq_list << oc_rec;
-                break;
-            }
-        }
-        if(nObj)
-        {
-            eqoTemp = new eqObjRec;
-            eqoTemp->objName = oc_rec->name;
-            eqoTemp->eq_list << oc_rec;
-            eqrList << eqoTemp;
-        }
-    };
-};
-
-struct eqObsRec
-{
-    QString obsCode;
-    eqObjList objList;
-};
-
-struct eqObsList
-{
-    QList <eqObsRec*> eqoList;
-    void addEQ(ocRec *oc_rec)
-    {
-        int i, sz, nObs;
-        eqObsRec *eqoTemp;
-        sz = eqoList.size();
-        nObs=1;
-        for(i=0;i<sz;i++)
-        {
-            eqoTemp = eqoList.at(i);
-            if(QString().compare(oc_rec->obsCode, eqoTemp->obsCode)==0)
-            {
-                nObs=0;
-                eqoTemp->objList.addEQ(oc_rec);
-                break;
-            }
-        }
-        if(nObs)
-        {
-            eqoTemp = new eqObsRec;
-            eqoTemp->obsCode = oc_rec->name;
-            eqoTemp->objList.addEQ(oc_rec);
-            eqoList << eqoTemp;
-        }
-    };
-};
-*/
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -93,10 +15,24 @@ int main(int argc, char *argv[])
     QString resFolder = "./eqStat";
     QDir resDir(resFolder);
 
-    int sz, i, j, szj, k, szk;
-    QString tStr;
+    int sz, i, j, szj, k, szk, is_mcat;
+    QString tStr, tStr1;
+    char *tstr = new char[256];
 
     eqObsList obs_list;
+    mpccat mCat;
+
+//Settings
+    QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
+    QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
+
+/////////////////////////
+
+    if(mCat.init(mpcCatFile.toAscii().data()))
+    {
+        qDebug() << "\nError MPCCAT init\n\n";
+        return 1;
+    }
 
     sz =eq_ini.size();
     qDebug() << QString("eq num: %1\n").arg(sz);
@@ -110,6 +46,7 @@ int main(int argc, char *argv[])
 
     eqObsRec* obs_rec;
     eqObjRec* obj_rec;
+    ocRec *oc_rec;
     QList <colRec*> colList;
     QFile wFile(QString("%1.we").arg(eqFileName.section(".", 0, -2)));
     wFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -118,6 +55,10 @@ int main(int argc, char *argv[])
     QFile resFile(QString("%1.res").arg(eqFileName.section(".", 0, -2)));
     resFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream resStm(&resFile);
+
+    QFile mpcFile(QString("%1.mpc").arg(eqFileName.section(".", 0, -2)));
+    mpcFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream mpcStm(&mpcFile);
 
     for(i=0;i<sz;i++)
     {
@@ -129,6 +70,8 @@ int main(int argc, char *argv[])
         {
             obj_rec = obs_rec->objList.eqrList.at(j);
 
+            is_mcat = !mCat.GetRecName(obj_rec->objName.toAscii().data());
+
             do3sigma(obj_rec->eq_list, 0.0, 3.0);
 
             if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
@@ -136,8 +79,16 @@ int main(int argc, char *argv[])
             szk = obj_rec->eq_list.size();
             for(k=0;k<szk;k++)
             {
-                obj_rec->eq_list.at(k)->rec2s(&tStr);
+                oc_rec = obj_rec->eq_list.at(k);
+                oc_rec->rec2s(&tStr);
                 resStm << tStr << "\n";
+
+                if(is_mcat)
+                {
+                    mCat.record->getNumStr(tstr);
+                    oc_rec->rec2MPC(&tStr, tstr);
+                    mpcStm << tStr << "\n";
+                }
             }
 
             colList.at(0)->rec2s(&tStr);
@@ -150,5 +101,6 @@ int main(int argc, char *argv[])
 
     wFile.close();
     resFile.close();
+    mpcFile.close();
     return 0;//a.exec();
 }

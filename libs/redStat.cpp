@@ -415,7 +415,7 @@ void ocRec::rec2s_short(QString *recStr)
     recStr->insert(0, QString("%1|%2|%3|%4|%5|%6").arg(name, 16).arg(mjd2jd(MJday), 13, 'f', 5).arg(getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 6)).arg(deg_to_hms(ra, " ", 3)).arg(deg_to_damas(de, " ", 2)).arg(mag, 6, 'f', 3, QLatin1Char(' ')));
 }
 
-void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, QString objType)
+void ocRec::rec2MPC(QString *str, QString objNum, int provNum, QString objType)
 {
     //int obj_num;
     str->clear();
@@ -433,7 +433,7 @@ void ocRec::rec2MPC(QString *str, QString obsName, QString objNum, int provNum, 
     outstr = outstr +deg_to_hms(ra, " ",3);
     outstr = outstr + deg_to_damas(de, " ",2)+"         ";
     outstr = outstr  +QString( "%1" ).arg(mag,5,'f',2);
-    outstr = outstr  +"       "+obsName;
+    outstr = outstr  +"       "+obsCode;
     str->append(outstr);
     /*msgstr = QString( "%1" ).arg(mObj->mpcObj->name);
     //msgstr = msgstr.trimmed();

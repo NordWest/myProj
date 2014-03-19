@@ -19,13 +19,13 @@
 
 #include <iostream>
 #include <iomanip>
-/*
+
 #include "./../../libs/moody/moody.h"
 #include "./../../libs/moody/capsule/capsuleBase/particle/Particle.h"
 #include "./../../libs/moody/capsule/Capsule.h"
 #include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
 #include "./../../libs/myDomMoody.h"
-*/
+
 static QDataStream* clog0 = 0;
 
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -1296,7 +1296,7 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName, 
             mCat.record->getNumStr(astr);
             objNum = QString(astr);
 
-            oc_rec->rec2MPC(&tstr, obsCode, objNum);
+            oc_rec->rec2MPC(&tstr, objNum);
 
             mpcStm << tstr << "\n";
         }

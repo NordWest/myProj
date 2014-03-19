@@ -185,13 +185,16 @@ int main(int argc, char *argv[])
         if(elem->ecc<0.1) detE2(impObj, opos, elem, dElem);
         else detE3(impObj, opos, elem, dElem);
 
-        elemI->ecc = elem->ecc + dElem.ecc;
-        elemI->eJD = elem->eJD + dElem.eJD;
-        elemI->inc = elem->inc + dElem.inc;
-        elemI->M0 = elem->M0 + dElem.M0;
-        elemI->Node = elem->Node + dElem.Node;
-        elemI->q = elem->q + dElem.q;
-        elemI->w = elem->w + dElem.w;
+
+        elemI->eJD = elem->eJD - dElem.eJD;
+
+        elemI->M0 = elem->M0 - dElem.M0;
+        elemI->q = elem->q; - dElem.q;
+        elemI->ecc = elem->ecc - dElem.ecc;
+
+        elemI->Node = elem->Node - dElem.Node;
+        elemI->inc = elem->inc - dElem.inc;
+        elemI->w = elem->w - dElem.w;
 
          //ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(elemI->M0, 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(elemI->inc, 10, 'f', 7).arg(elemI->w, 10, 'f', 7).arg(elemI->Node, 10, 'f', 7);
 
@@ -869,6 +872,7 @@ void detE1(inproveObject *impObj, observ &opos, orbElem *elem, orbElem *elemI)
     aval = elem->q/(1.0-elem->ecc);
     nn = ka*pow(aval, -1.5);
 
+ostm << QString("nn: %1\n").arg(nn);
     for(i=0; i<sz; i++)
     {
         impSt = impObj->impList.at(i);
@@ -1003,7 +1007,7 @@ void detE1(inproveObject *impObj, observ &opos, orbElem *elem, orbElem *elemI)
 
 void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 {
-    ostm << QString("detE0: elem tab48 low ecc\n");
+    ostm << QString("detE2: elem tab48 low ecc\n");
     orbElem *elem_ekv;
     int i, j, sz;
     double *ai, *bi, *C;
@@ -1041,8 +1045,9 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
 
     aval = elem->q/(1.0-elem->ecc);
-    nn = ka*pow(aval, -1.5);
-
+    //nn = grad2rad(kaGRAD*pow(aval, -1.5));
+    nn = ka/pow(aval, 1.5);
+//ostm << QString("nn: %1\n").arg(nn);
     for(i=0; i<sz; i++)
     {
         impSt = impObj->impList.at(i);
@@ -1058,7 +1063,7 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         ss = impSt->state[0]*impSt->state[3] + impSt->state[1]*impSt->state[4] + impSt->state[2]*impSt->state[5];
         po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
         H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
-        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        K = (aval*ss/(ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         dT = impSt->jdTDB - TDT2TDB(elem->eJD);
         //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
@@ -1247,7 +1252,7 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         ss = impSt->state[0]*impSt->state[3] + impSt->state[1]*impSt->state[4] + impSt->state[2]*impSt->state[5];
         po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
         H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
-        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        K = (aval*ss/(ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         dT = impSt->jdTDB - TDT2TDB(elem->eJD);
         //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);

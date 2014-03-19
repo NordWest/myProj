@@ -96,7 +96,7 @@ public:
         QString rec2sBase1();
         void rec2sSeries(QString *str);
         void rec2s_short(QString *str);
-        void rec2MPC(QString *str, QString obsName, QString objNum, int provNum = 0, QString obsType = " ");
+        void rec2MPC(QString *str, QString objNum, int provNum = 0, QString obsType = " ");
 
         int s2rec(QString str);
         int s2rec0(QString str);
