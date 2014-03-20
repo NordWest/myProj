@@ -1136,7 +1136,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
             kEx[4] = H*impSt->state[0]+K*impSt->state[3];
-            kEx[5] = impSt->state[3]/nn;
+            //kEx[5] = impSt->state[3]/nn;
+            kEx[5] = -impSt->state[3]/nn - impSt->state[1];
 
 
             kEy[0] = impSt->state[0]*cos(EKV);
@@ -1145,7 +1146,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
             kEy[4] = H*impSt->state[1]+K*impSt->state[4];
-            kEy[5] = impSt->state[4]/nn;
+            //kEy[5] = impSt->state[4]/nn;
+            kEy[5] = -impSt->state[4]/nn + impSt->state[0];
 
 
             kEz[0] = impSt->state[0]*sin(EKV);
@@ -1154,7 +1156,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
-            kEz[5] = impSt->state[5]/nn;
+            //kEz[5] = impSt->state[5]/nn;
+            kEz[5] = -impSt->state[5]/nn;
 
 
         for(j=0;j<6;j++)
