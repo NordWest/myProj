@@ -540,11 +540,6 @@ objName = QString(mCat.record->name).simplified();
         }
 
 
-
-
-
-
-
         oc_rec = new ocRec;
         oc_rec->name = objName;
         oc_rec->MJday = mpc_rec->mjd();
