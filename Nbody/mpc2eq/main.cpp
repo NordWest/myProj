@@ -568,6 +568,7 @@ objName = QString(mCat.record->name).simplified();
             nPar->mass = -1.0;
 
             pList << nPar;
+            envSize++;
         }
     }
 

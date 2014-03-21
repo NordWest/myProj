@@ -1136,8 +1136,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
             kEx[4] = H*impSt->state[0]+K*impSt->state[3];
-            //kEx[5] = impSt->state[3]/nn;
-            kEx[5] = -impSt->state[3]/nn - impSt->state[1];
+            kEx[5] = impSt->state[3]/nn;
+            //kEx[5] = -impSt->state[3]/nn - impSt->state[1];
 
 
             kEy[0] = impSt->state[0]*cos(EKV);
@@ -1146,8 +1146,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
             kEy[4] = H*impSt->state[1]+K*impSt->state[4];
-            //kEy[5] = impSt->state[4]/nn;
-            kEy[5] = -impSt->state[4]/nn + impSt->state[0];
+            kEy[5] = impSt->state[4]/nn;
+            //kEy[5] = -impSt->state[4]/nn + impSt->state[0];
 
 
             kEz[0] = impSt->state[0]*sin(EKV);
@@ -1156,8 +1156,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
-            //kEz[5] = impSt->state[5]/nn;
-            kEz[5] = -impSt->state[5]/nn;
+            kEz[5] = impSt->state[5]/nn;
+            //kEz[5] = -impSt->state[5]/nn;
 
 
         for(j=0;j<6;j++)
@@ -1186,7 +1186,7 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     //ostm << QString("uweC: %1\n").arg(uweC);
 
     //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
-    //ostm << QString("dEc: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Dc[0]).arg(Ec[6*1+1]).arg(Ec[6*2+2]).arg(Ec[6*3+3]).arg(Ec[6*4+4]).arg(Ec[6*5+5]);
+    //ostm << QString("dEc: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Dc[0]).arg(Dc[6*1+1]).arg(Dc[6*2+2]).arg(Dc[6*3+3]).arg(Dc[6*4+4]).arg(Dc[6*5+5]);
 
     double ecSum = 0.0;
     for(int l=0; l<6; l++) ecSum += fabs(Ec[l]);
@@ -1249,6 +1249,9 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     aval = elem->q/(1.0-elem->ecc);
     nn = ka*pow(aval, -1.5);
     pval = aval*(1.0 - elem->ecc*elem->ecc);
+
+    QStringList aiList, biList;
+
     for(i=0; i<sz; i++)
     {
         impSt = impObj->impList.at(i);
@@ -1293,7 +1296,7 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         k2 = cos(impSt->raC);///po;
         k3 = -sin(impSt->decC)*cos(impSt->raC);///po;
         k4 = -sin(impSt->decC)*sin(impSt->raC);///po;
-        k5 = cos(impSt->decC);///po;
+        k5 = cos(impSt->decC);//po;
 //[0-2]:tab47
 //[3-5]:tab44
             kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
@@ -1323,19 +1326,25 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
             kEz[5] = impSt->state[5]/nn;
 
 
+            aiList.clear(); biList.clear();
         for(j=0;j<6;j++)
         {
             ai[i*6+j] = k1*kEx[j] + k2*kEy[j];
             bi[i*6+j] = k3*kEx[j] + k4*kEy[j] + k5*kEz[j];
             C[i*6+j] = ai[i*6+j];
             C[6*sz+i*6+j] = bi[i*6+j];
-            //ostm << QString("ai: %1\nbi: %2\n").arg(ai[i*6+j]).arg(bi[i*6+j]);
+            aiList << QString("%1").arg(ai[i*6+j]);
+            biList << QString("%1").arg(bi[i*6+j]);
+            //ostm << QString("ai: %1\nbi: %2\n").arg(bi[i*6+j]);
         }
 
         La[i] = po*(impSt->raO - impSt->raC)*cos(impSt->decC);
         Lb[i] = po*(impSt->decO - impSt->decC);
         Lc[i] = La[i];
         Lc[sz+i] = Lb[i];
+
+        //ostm << QString("La: %1 = %2\n").arg(aiList.join(" + ")).arg(La[i]);
+        //ostm << QString("Lb: %1 = %2\n").arg(biList.join(" + ")).arg(Lb[i]);
 
         //ostm << QString("La: %1\nLb: %2\n").arg(La[i]).arg(Lb[i]);
 
@@ -1344,12 +1353,13 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     for(int l=0; l<6; l++) Ec[l]=0;
     //for(int l=0; l<sz*2; l++) Wc[l]=1.0;
     lsm(6, sz*2, Ec, C, Lc, uweC, Dc);
+    //for(int l=0; l<6; l++) Ec[l]=mas2rad(Ec[l]);
     //slsm(6, sz*2, Ec, C, Lc);
 
     //ostm << QString("uweC: %1\n").arg(uweC);
 
     //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
-    //ostm << QString("dEc: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Dc[0]).arg(Ec[6*1+1]).arg(Ec[6*2+2]).arg(Ec[6*3+3]).arg(Ec[6*4+4]).arg(Ec[6*5+5]);
+    //ostm << QString("dEc: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Dc[0]).arg(Dc[6*1+1]).arg(Dc[6*2+2]).arg(Dc[6*3+3]).arg(Dc[6*4+4]).arg(Dc[6*5+5]);
 
     double ecSum = 0.0;
     for(int l=0; l<6; l++) ecSum += fabs(Ec[l]);
