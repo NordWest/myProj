@@ -422,7 +422,11 @@ int main(int argc, char *argv[])
     mpcFile mpc_file;
     mpcRec* mpc_rec;
     mpcObjRec* moRec;
-    mpc_file.init(iniMpcFile);
+    if(mpc_file.init(iniMpcFile))
+    {
+        qDebug() << QString("error: Can't open file %1\n").arg(iniMpcFile);
+        exit(1);
+    }
     mNum = mpc_file.size();
 
     tBeg = UTC2TDB(mjd2jd(mpc_file.recList.first()->mjd()));
