@@ -658,25 +658,25 @@ objName = QString(mCat.record->name).simplified();
             }
 
 //decrease orbits
-/*
+
             if(!useOrbCat)
             {
 
-
+/*
                 qDebug() << QString("decVol: %1\n").arg(decVol);
 
                 qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
-
-                orbRec.elem->ecc = orbRec.elem->ecc + decVol;
-                orbRec.elem->inc = orbRec.elem->inc + decVol;
-                orbRec.elem->M0 = orbRec.elem->M0 + decVol;
-                orbRec.elem->Node = orbRec.elem->Node + decVol;
-                orbRec.elem->q = orbRec.elem->q + decVol;
-                orbRec.elem->w = orbRec.elem->w + decVol;
-
-                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
-            }
 */
+                //orbRec.elem->ecc = orbRec.elem->ecc + decVol;
+                orbRec.elem->inc = orbRec.elem->inc + decVol;
+                //orbRec.elem->M0 = orbRec.elem->M0 + decVol;
+                /*orbRec.elem->Node = orbRec.elem->Node + decVol;
+                orbRec.elem->q = orbRec.elem->q + decVol;
+                orbRec.elem->w = orbRec.elem->w + decVol;*/
+
+//                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
+            }
+
 /////////////////
 
             orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
