@@ -185,7 +185,12 @@ int main(int argc, char *argv[])
         //detE00(impObj, opos, elem, elemI);
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
+
+        //detE0(impObj, opos, elem, dElem);
+        //detE1(impObj, opos, elem, dElem);
+        //detE2(impObj, opos, elem, dElem);
         //detE3(impObj, opos, elem, dElem);
+
         if(elem->ecc<0.1) detE2(impObj, opos, elem, dElem);
         else detE3(impObj, opos, elem, dElem);
 
@@ -280,10 +285,10 @@ void E2elem_low(double *E, orbElem *dElem, orbElem *elem)
     double a1, da1;
     dElem->ecc = E[4];
     dElem->inc = E[2];
-    dElem->Node = E[0];
-    dElem->w = E[1];
+    dElem->Node = E[0]/sin(elem->inc);
+    dElem->w = E[1]/elem->ecc - dElem->Node;
 
-    dElem->M0 = E[5] - E[1];
+    dElem->M0 = E[5] - dElem->w - dElem->Node;
     a1 = elem->q/(1.0-elem->ecc);
     da1 = E[3]*a1;
     qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(da1);
@@ -1051,6 +1056,7 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     double tgw0, tgw1;
     double k1, k2, k3, k4, k5;
     double kEx[6], kEy[6], kEz[6];
+    double kEx1[6], kEy1[6], kEz1[6];
     double PQ[3];
     improveState* impSt;
 
@@ -1182,12 +1188,33 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
             kEz[5] = impSt->state[5]/nn;
             //kEz[5] = -impSt->state[5]/nn;
+//////////////////////////////////////  substitution
+            kEx1[0] = (kEx[1] - kEx[0])/sin(elem->inc);
+            kEx1[1] = (kEx[0] - kEx[5])/elem->ecc;
+            kEx1[2] = kEx[2];
+            kEx1[3] = kEx[3];
+            kEx1[4] = kEx[4];
+            kEx1[5] = kEx[5];
 
+            kEy1[0] = (kEy[1] - kEy[0])/sin(elem->inc);
+            kEy1[1] = (kEy[0] - kEy[5])/elem->ecc;
+            kEy1[2] = kEy[2];
+            kEy1[3] = kEy[3];
+            kEy1[4] = kEy[4];
+            kEy1[5] = kEy[5];
 
+            kEz1[0] = (kEz[1] - kEz[0])/sin(elem->inc);
+            kEz1[1] = (kEz[0] - kEz[5])/elem->ecc;
+            kEz1[2] = kEz[2];
+            kEz1[3] = kEz[3];
+            kEz1[4] = kEz[4];
+            kEz1[5] = kEz[5];
+
+///////////////////////////////////////
         for(j=0;j<6;j++)
         {
-            ai[i*6+j] = k1*kEx[j] + k2*kEy[j];
-            bi[i*6+j] = k3*kEx[j] + k4*kEy[j] + k5*kEz[j];
+            ai[i*6+j] = k1*kEx1[j] + k2*kEy1[j];
+            bi[i*6+j] = k3*kEx1[j] + k4*kEy1[j] + k5*kEz1[j];
             C[i*6+j] = ai[i*6+j];
             C[6*sz+i*6+j] = bi[i*6+j];
             //ostm << QString("ai: %1\nbi: %2\n").arg(ai[i*6+j]).arg(bi[i*6+j]);
@@ -1295,10 +1322,11 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         ss = impSt->state[0]*impSt->state[3] + impSt->state[1]*impSt->state[4] + impSt->state[2]*impSt->state[5];
         po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
 
-        H = (r + pval - 2.0*aval)/(elem->ecc*pval);
-        K = ((r+pval)/pval)*(ss/(aval*aval*elem->ecc*nn))/nn;
-        //H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
-        //K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        ostm << QString("po: %1\n").arg(po);
+        //H = (r + pval - 2.0*aval)/(elem->ecc*pval);
+        //K = ((r+pval)/pval)*(ss/(aval*aval*elem->ecc*nn))/nn;
+        H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
+        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         dT = impSt->jdTDB - TDT2TDB(elem->eJD);
         //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
@@ -1374,8 +1402,8 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         //ostm << QString("La: %1 = %2\n").arg(aiList.join(" + ")).arg(La[i]);
         //ostm << QString("Lb: %1 = %2\n").arg(biList.join(" + ")).arg(Lb[i]);
 
-        ostm << QString("dpar0: %1\t\t%2\n\n").arg(ai[i*6+2]).arg(La[i]/0.000001);
-        ostm << QString("dpar1: %1\t\t%2\n\n").arg(bi[i*6+2]).arg(Lb[i]/0.000001);
+        //ostm << QString("dpar0: %1\t\t%2\n\n").arg(ai[i*6+2]).arg(La[i]/0.000001);
+        //ostm << QString("dpar1: %1\t\t%2\n\n").arg(bi[i*6+2]).arg(Lb[i]/0.000001);
 
         //ostm << QString("La: %1\nLb: %2\n").arg(La[i]).arg(Lb[i]);
 
