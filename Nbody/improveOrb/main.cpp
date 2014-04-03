@@ -186,8 +186,8 @@ int main(int argc, char *argv[])
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
 
-        //detE00(impObj, opos, elem, dElem);
-        detE0(impObj, opos, elem, dElem);
+        detE00(impObj, opos, elem, dElem);
+        //detE0(impObj, opos, elem, dElem);
         //detE1(impObj, opos, elem, dElem);
         //detE2(impObj, opos, elem, dElem);
         //detE3(impObj, opos, elem, dElem);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
         //else detE3(impObj, opos, elem, dElem);
 
 
-        elemI->eJD = elem->eJD - dElem.eJD;
+        elemI->eJD = elem->eJD + dElem.eJD;
 
         elemI->M0 = elem->M0 + dElem.M0;
         elemI->q = elem->q + dElem.q;
@@ -282,10 +282,10 @@ void E2elem_arb(double *E, orbElem *dElem, orbElem *elem)
     dElem->Node = E[0];
     dElem->w = E[1];
 
-    dElem->M0 = E[5];
+    dElem->M0 = E[5] - E[1];
     a1 = elem->q/(1.0-elem->ecc);
     da1 = E[3]*a1;
-    qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(da1);
+    //qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(da1);
     dElem->q = da1*(1.0-elem->ecc);
 }
 
@@ -511,12 +511,13 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     double *ai, *bi, *C;
     double *La, *Lb, *Lc;
     double *Ea, *Eb, *Ec;
+    double *dEc;
     double *Wa, *Wb, *Wc;
     double uweA, uweB, uweC;
     double *Da, *Db, *Dc;
     double P[3], Q[3], R[3], N[3], Recl[3];
     double stateE[3], po, a1;
-    double H, K, r, ss, aval, nn, dT, pval, Eval;
+    double H, K, rval, ss, aval, nn, dT, pval, Eval;
     double psi[3];
     double tgw0, tgw1;
     double k1, k2, k3, k4, k5;
@@ -529,9 +530,12 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     Ea = new double[6];
     Eb = new double[6];
     Ec = new double[6];
+
     Da = new double[6*6];
     Db = new double[6*6];
     Dc = new double[6*6];
+
+    dEc = new double[6];
 
     sz = impObj->impList.size();
     ai = new double[6*sz];
@@ -560,15 +564,15 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         stateE[4] = impSt->state[4] - opos.state[4];
         stateE[5] = impSt->state[5] - opos.state[5];
 
-        r = sqrt(impSt->state[0]*impSt->state[0] + impSt->state[1]*impSt->state[1] + impSt->state[2]*impSt->state[2]);
+        rval = sqrt(impSt->state[0]*impSt->state[0] + impSt->state[1]*impSt->state[1] + impSt->state[2]*impSt->state[2]);
         ss = impSt->state[0]*impSt->state[3] + impSt->state[1]*impSt->state[4] + impSt->state[2]*impSt->state[5];
         po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
 
         //ostm << QString("proove: %1\t?=\t%2\n").arg(ss/nn).arg(aval*aval*elem->ecc*sin(Eval));
         //H = (r + pval - 2.0*aval)/(elem->ecc*pval);
         //K = ((r+pval)/pval)*(ss/(aval*aval*elem->ecc*nn))/nn;
-        H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
-        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        H = (rval-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
+        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + rval/(aval*(1.0 - elem->ecc*elem->ecc)));
         //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         dT = impSt->jdTDB - TDT2TDB(elem->eJD);
         //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
@@ -623,89 +627,9 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         k3 = -sin(impSt->decC)*cos(impSt->raC);///po;
         k4 = -sin(impSt->decC)*sin(impSt->raC);///po;
         k5 = cos(impSt->decC);///po;
-/*
-//  Node,inc,w
-        if(elem->ecc<=0.25)
-        {
-            kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
-            kEx[1] = -impSt->state[0]/nn + R[1]*impSt->state[2] - R[2]*impSt->state[1];
-            kEx[2] = N[1]*impSt->state[2] - N[2]*impSt->state[1];
 
-            kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
-            kEx[4] = H*impSt->state[0]+K*impSt->state[3];
-            kEx[5] = impSt->state[3]/nn;
-
-
-            kEy[0] = impSt->state[0]*cos(EKV);
-            kEy[1] = -impSt->state[1]/nn + R[2]*impSt->state[0] - R[0]*impSt->state[2];
-            kEy[2] = N[2]*impSt->state[0] - N[0]*impSt->state[2];
-
-            kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
-            kEy[4] = H*impSt->state[1]+K*impSt->state[4];
-            kEy[5] = impSt->state[4]/nn;
-
-
-            kEz[0] = impSt->state[0]*sin(EKV);
-            kEz[1] = -impSt->state[2]/nn + R[0]*impSt->state[1] - R[1]*impSt->state[0];
-            kEz[2] = N[0]*impSt->state[1] - N[1]*impSt->state[0];
-
-            kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
-            kEz[4] = H*impSt->state[2]+K*impSt->state[5];
-            kEz[5] = impSt->state[5]/nn;
-        }
-        if(elem->ecc>0.25&&elem->ecc<0.85)
-        {
-            kEx[0] = -impSt->state[2]*sin(EKV) - impSt->state[1]*cos(EKV);
-            kEx[1] = R[1]*impSt->state[2] - R[2]*impSt->state[1];
-            kEx[2] = N[1]*impSt->state[2] - N[2]*impSt->state[1];
-
-            kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
-            kEx[4] = H*impSt->state[0]+K*impSt->state[3];
-            kEx[5] = impSt->state[3]/nn;
-
-
-            kEy[0] = impSt->state[0]*cos(EKV);
-            kEy[1] = R[2]*impSt->state[0] - R[0]*impSt->state[2];
-            kEy[2] = N[2]*impSt->state[0] - N[0]*impSt->state[2];
-
-            kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
-            kEy[4] = H*impSt->state[1]+K*impSt->state[4];
-            kEy[5] = impSt->state[4]/nn;
-
-
-            kEz[0] = impSt->state[0]*sin(EKV);
-            kEz[1] = R[0]*impSt->state[1] - R[1]*impSt->state[0];
-            kEz[2] = N[0]*impSt->state[1] - N[1]*impSt->state[0];
-
-            kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
-            kEz[4] = H*impSt->state[2]+K*impSt->state[5];
-            kEz[5] = impSt->state[5]/nn;
-        }
-
-//  lowecc
-        kEx[0] = 0.0;
-        kEx[1] = impSt->state[2];
-        kEx[2] = -impSt->state[3]/nn - impSt->state[1];
-        kEx[3] = impSt->state[0] - 1.5*dT*impSt->state[3];
-        kEx[4] = H*impSt->state[0]+K*impSt->state[3];
-        kEx[5] = impSt->state[3]/nn;
-
-        kEy[0] = -impSt->state[2];
-        kEy[1] = 0.0;
-        kEy[2] = -impSt->state[4]/nn+impSt->state[0];
-        kEy[3] = impSt->state[1] - 1.5*dT*impSt->state[4];
-        kEy[4] = H*impSt->state[1]+K*impSt->state[4];
-        kEy[5] = impSt->state[4]/nn;
-
-        kEz[0] = impSt->state[1];
-        kEz[1] = -impSt->state[0];
-        kEz[2] = -impSt->state[5]/nn;
-        kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
-        kEz[4] = H*impSt->state[2]+K*impSt->state[5];
-        kEz[5] = impSt->state[5]/nn;
-*/
 //arb ecc
-
+//tab44
         kEx[0] = P[1]*impSt->state[2] - P[2]*impSt->state[1];
         kEx[1] = Q[1]*impSt->state[2] - Q[2]*impSt->state[1];
         kEx[2] = -impSt->state[3]/nn + R[1]*impSt->state[2] - R[2]*impSt->state[1];

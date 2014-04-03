@@ -512,11 +512,12 @@ int main(int argc, char *argv[])
         tStr.replace(" ", "0");
         sprintf(tname, "%s", tStr.toAscii().data());
 
-
+//qDebug() << QString("MpNumber: %1\n").arg(tname);
 
         if(mCat.GetProvDest(tname))
         {
             mpc_rec->getProvDest(tStr);
+            qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
             if(mCat.GetProvDest(tStr.toAscii().data()))
             {
                 qDebug() << QString("not found: %1\n").arg(mpc_rec->toStr());
@@ -925,7 +926,7 @@ double state0[6];
 
 //                eqo_list.addEQ(oc_rec);
 
-                impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 15, 'e', 10).arg(state[1], 15, 'e', 10).arg(state[2], 15, 'e', 10).arg(state[3], 15, 'e', 10).arg(state[4], 15, 'e', 10).arg(state[5], 15, 'e', 10);
+                impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 17, 'e', 12).arg(state[1], 17, 'e', 12).arg(state[2], 17, 'e', 12).arg(state[3], 17, 'e', 12).arg(state[4], 17, 'e', 12).arg(state[5], 17, 'e', 12).arg(oc_rec->obsCode);
 /*
                 oc_rec->rec2sBase(&tstr);
 
