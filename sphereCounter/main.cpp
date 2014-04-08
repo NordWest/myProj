@@ -6,9 +6,9 @@
 #include <QList>
 
 
-#include "./../libs/astro.h"
+#include <astro.h>
 #include "./../libs/comfunc.h"
-#include "./../libs/mb.h"
+#include <mb.h>
 #include "./../libs/ringpix.h"
 
 #include "./../libs/vsfFunc.h"

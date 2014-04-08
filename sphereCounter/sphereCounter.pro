@@ -20,13 +20,12 @@ SOURCES += main.cpp \
     ../libs/comfunc.cpp \
     ../libs/vsfFunc.cpp
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
-    ../libs/ringpix.h \
+HEADERS += ../libs/ringpix.h \
     ../libs/comfunc.h \
     ../libs/vsfFunc.h
 
 win32:LIBS += ./../libs/win32/cfitsio.lib
-unix:LIBS += ./../libs/unix/libcfitsio.a
-unix:LIBS += ./../libs/unix/libastro.a
-unix:LIBS += ./../libs/unix/libmb.a
+#unix:LIBS += ./../libs/unix/libcfitsio.a
+#unix:LIBS += ./../libs/unix/libastro.a
+#unix:LIBS += ./../libs/unix/libmb.a
+unix:LIBS += -lastro -lmb
