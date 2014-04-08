@@ -52,7 +52,17 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
+struct improveState
+{
+    double jdTDB;
+    double raO, decO;
+    double raC, decC;
+    double state[6];
+    QString obsCode;
+};
+
 int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps);
+int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps);
 int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum, double &sigmaVal);
 int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum, int coefNum, double *sCoef, double *tCoef, double *sCoefSg, double *tCoefSg);
 
@@ -70,7 +80,7 @@ int main(int argc, char *argv[])
 
     QSettings *sett = new QSettings("sphC.ini", QSettings::IniFormat);
 
-    int solMode = sett->value("general/solutionMode", 0).toInt();
+    int solMode = sett->value("general/solutionMode", 0).toInt();   //0 - LSM; 1- VSF.
     int isZonal = sett->value("general/isZonal", 0).toInt();
     double dMin = grad2rad(sett->value("general/dMin", -90).toDouble());
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
@@ -82,6 +92,8 @@ int main(int argc, char *argv[])
     int cdx = sett->value("general/cdx", 2).toInt();
     int cdy = sett->value("general/cdy", 3).toInt();
 
+    double time0 = sett->value("general/time0", 2450000.5).toDouble();
+
     double coef1 = sett->value("vsf/coef1", 2.89).toDouble();
     double coef2 = sett->value("vsf/coef2", 2.89).toDouble();
     double coef3 = sett->value("vsf/coef3", 2.89).toDouble();
@@ -91,7 +103,7 @@ int main(int argc, char *argv[])
 
     QString fileName = QString(argv[1]);
 
-    double *ra, *de, *dRa, *dDe, de1;
+    double *ra, *de, *dRa, *dDe, de1, *dTime;
     int i, dSize;
 
     QVector <double*> dataVect;
@@ -105,33 +117,46 @@ int main(int argc, char *argv[])
     double *data;
     double Eps[3];
     double sgEps[3];
+    double EpsVel[6], sgEpsVel[6];
     int res;
 
     QFile resFile("resCoef.txt");
     resFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream resStm(&resFile);
+    int dataLen = 5;
+    double tMean = 0.0;
 
     while(!inpStm.atEnd())
     {
         tStr = inpStm.readLine();
-        data = new double[4];
+        data = new double[dataLen];
         /*data[0] = grad2rad(tStr.section(" ", 2, 2).toDouble());
         data[1] = grad2rad(tStr.section(" ", 3, 3).toDouble());
         data[2] = grad2rad(tStr.section(" ", 4, 4).toDouble());
         data[3] = grad2rad(tStr.section(" ", 5, 5).toDouble());*/
+        /*
         data[0] = tStr.section(colSep, cx, cx).toDouble();
         data[1] = tStr.section(colSep, cy, cy).toDouble();
         data[2] = tStr.section(colSep, cdx, cdx).toDouble();
-        data[3] = tStr.section(colSep, cdy, cdy).toDouble();
-        if(isZonal&&(data[1]<dMin||data[1]>dMax)) continue;
+        data[3] = tStr.section(colSep, cdy, cdy).toDouble();*/
+        data[0] = tStr.section(colSep, 1, 1).toDouble();
+        data[1] = grad2rad(tStr.section(colSep, 2, 2).toDouble());
+        data[2] = grad2rad(tStr.section(colSep, 3, 3).toDouble());
+        data[3] = grad2rad(tStr.section(colSep, 4, 4).toDouble());
+        data[4] = grad2rad(tStr.section(colSep, 5, 5).toDouble());
+        //qDebug() << QString("data: %1\t%2\t%3\t%4\t%5\n").arg(data[0],12, 'f', 8).arg(data[1],12, 'f', 8).arg(data[2],12, 'f', 8).arg(data[3],12, 'f', 8).arg(data[4],12, 'f', 8);
+        if(isZonal&&(data[2]<dMin||data[2]>dMax)) continue;
+
+        tMean += data[0];
 
         dataVect << data;
     }
 
     dSize = dataVect.size();
+    dTime = new double[dSize];
     ra = new double[dSize];
     de = new double[dSize];
-    dRa = new double[dSize];
+    dRa = new double[dSize];//cosD
     dDe = new double[dSize];
 
     int N, K, P;
@@ -141,15 +166,19 @@ int main(int argc, char *argv[])
     double *tCoefSg = new double[coefNum];
     double sigmaVal;
 
+    time0 = floor(tMean/dSize);
+    qDebug() << QString("time0: %1\n").arg(time0,12, 'f', 8);
+
     qDebug() << QString("point num: %1\n").arg(dSize);
 
     for(i=0; i<dSize; i++)
     {
-        ra[i] = dataVect[i][0];
-
-        de[i] = dataVect[i][1];
-        dRa[i] = dataVect[i][2];
-        dDe[i] = dataVect[i][3];
+        dTime[i] = (dataVect[i][0]-time0)/(36524.25);
+        ra[i] = dataVect[i][1];
+        de[i] = dataVect[i][2];
+        dRa[i] = (ra[i]-dataVect[i][3])*cos(de[i]);
+        dDe[i] = de[i] - dataVect[i][4];
+        //qDebug() << QString("ini: %1\t%2\t%3\t%4\t%5\n").arg(dTime[i],12, 'f', 8).arg(ra[i],12, 'f', 8).arg(de[i],12, 'f', 8).arg(dRa[i],12, 'f', 8).arg(dDe[i],12, 'f', 8);
         if(isZonal&&(solMode==1))
         {
             de1 = de[i]+dDe[i];
@@ -203,6 +232,8 @@ int main(int argc, char *argv[])
             qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
         }
         break;
+    case 3:
+        res = lsmCountVel(dTime, ra, de, dRa, dDe, dSize, &EpsVel[0], &sgEpsVel[0]);
     }
 
     for(i=0; i<3; i++)
@@ -293,6 +324,112 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     sgEps[0] = sqrt(Dde[0][0]);
     sgEps[1] = sqrt(Dde[1][1]);
     sgEps[2] = sqrt(Dra[2][2]);
+
+    return 0;
+}
+
+int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps)
+{
+    int i;
+
+    double *A = new double[6*pointNum*2];
+    double *r = new double[pointNum*2];
+    double *W = new double[pointNum*2];
+    double *Z = new double[6];
+
+    double *Ara = new double[6*pointNum];
+    double *rRa = new double[pointNum];
+    double *Wra = new double[pointNum];
+    double *Zra = new double[6];
+
+    double *Ade = new double[4*pointNum];
+    double *rDe = new double[pointNum];
+    double *Wde = new double[pointNum];
+    double *Zde = new double[4];
+
+    double Dx[6][6];
+    double Dra[6][6];
+    double Dde[4][4];
+    double uwe, uweRa, uweDe;
+
+    for(i=0; i<pointNum; i++)
+    {
+
+//        obj = new double[2];
+//        objR = new double[2];
+        rRa[i] = r[i] = dRa[i];
+        rDe[i] = r[pointNum+i] = dDe[i];
+
+        Ara[i*6] = A[i*6] = -(sin(dec[i])*cos(ra[i]));
+        Ara[i*6+1] = A[i*6+1] = -(sin(dec[i])*sin(ra[i]));
+        Ara[i*6+2] = A[i*6+2] = cos(dec[i]);
+        Ara[i*6+3] = A[i*6+3] = -(sin(dec[i])*cos(ra[i]))*dTime[i];
+        Ara[i*6+4] = A[i*6+4] = -(sin(dec[i])*sin(ra[i]))*dTime[i];
+        Ara[i*6+5] = A[i*6+5] = cos(dec[i])*dTime[i];
+
+        Ade[i*4] = A[pointNum+i*6] = sin(ra[i]);
+        Ade[i*4+1] = A[pointNum+i*6+1] = -cos(ra[i]);
+        A[pointNum+i*6+2] = 0.0;
+        Ade[i*4+2] = A[pointNum+i*6+3] = sin(ra[i])*dTime[i];
+        Ade[i*4+3] = A[pointNum+i*6+4] = -cos(ra[i])*dTime[i];
+        A[pointNum+i*3+5] = 0.0;
+
+        Wra[i] = Wde[i] = W[i] = 1.0;
+        W[pointNum+i] = 1.0;
+
+        //qDebug() << QString("dTime = %1\n").arg(dTime[i],12, 'f', 8);
+
+        //qDebug() << QString("%1\t%2\t%3\t %4\t%5\t%6 = %7\n").arg((A[i*6]),12, 'f', 8).arg((A[i*6+1]),12, 'f', 8).arg((A[i*6+2]),12, 'f', 8).arg((A[i*6+3]),12, 'f', 8).arg((A[i*6+4]),12, 'f', 8).arg((A[i*6+5]),12, 'f', 8).arg((r[i]),12, 'f', 8);
+        //qDebug() << QString("%1\t%2\t%3\t %4\t%5\t%6 = %7\n").arg(rad2mas(A[pointNum+i*6]),12, 'f', 8).arg(rad2mas(A[pointNum+i*6+1]),12, 'f', 8).arg(rad2mas(A[pointNum+i*6+2]),12, 'f', 8).arg(rad2mas(A[pointNum+i*6+3]),12, 'f', 8).arg(rad2mas(A[pointNum+i*6+4]),12, 'f', 8).arg(rad2mas(A[pointNum+i*6+5]),12, 'f', 8).arg(rad2mas(r[pointNum+i]),12, 'f', 8);
+    }
+
+
+////////////////////////////////////////////////////////////////////
+//    qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0]),12, 'f', 8).arg(rad2mas(Eps[1]),12, 'f', 8).arg(rad2mas(Eps[2]),12, 'f', 8);
+
+    lsm(6, pointNum*2, Z, A, r, uwe, &Dx[0][0], W);
+
+//    slsm(3, pointNum, Z, A, r, W);
+//    iLSM(3, pointNum, 0.6, &exclind[0], Z, A, r, uwe, &Dx[0][0], -1, rn, W);
+    qDebug() << QString("Z: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Z[0]),12, 'f', 8).arg(rad2mas(sqrt(Dx[0][0])),12, 'f', 8).arg(rad2mas(Z[1]),12, 'f', 8).arg(rad2mas(sqrt(Dx[1][1])),12, 'f', 8).arg(rad2mas(Z[2]),12, 'f', 8).arg(rad2mas(sqrt(Dx[2][2])),12, 'f', 8);
+    qDebug() << QString("Zvel: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Z[3]),12, 'f', 8).arg(rad2mas(sqrt(Dx[3][3])),12, 'f', 8).arg(rad2mas(Z[4]),12, 'f', 8).arg(rad2mas(sqrt(Dx[4][4])),12, 'f', 8).arg(rad2mas(Z[5]),12, 'f', 8).arg(rad2mas(sqrt(Dx[5][5])),12, 'f', 8);
+    qDebug() << QString("uwe: %1\n").arg(rad2mas(sqrt(uwe)),12, 'f', 8);
+//    slsm(2, pointNum, Zd, Ad, rd, Wd);
+  //  qDebug() << "Zd: " << Zd[0] << "\t" << Zd[1] << "\n";
+//    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
+
+    lsm(6, pointNum, Zra, Ara, rRa, uweRa, &Dra[0][0], Wra);
+    qDebug() << QString("Zra: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[0]),12, 'f', 8).arg(rad2mas(sqrt(Dra[0][0])),12, 'f', 8).arg(rad2mas(Zra[1]),12, 'f', 8).arg(rad2mas(sqrt(Dra[1][1])),12, 'f', 8).arg(rad2mas(Zra[2]),12, 'f', 8).arg(rad2mas(sqrt(Dra[2][2])),12, 'f', 8);
+    qDebug() << QString("ZraVel: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[3]),12, 'f', 8).arg(rad2mas(sqrt(Dra[3][3])),12, 'f', 8).arg(rad2mas(Zra[4]),12, 'f', 8).arg(rad2mas(sqrt(Dra[4][4])),12, 'f', 8).arg(rad2mas(Zra[5]),12, 'f', 8).arg(rad2mas(sqrt(Dra[5][5])),12, 'f', 8);
+    qDebug() << QString("uweRa: %1\n").arg(rad2mas(sqrt(uweRa)),12, 'f', 8);
+
+    lsm(4, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
+    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
+    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[2]),12, 'f', 8).arg(rad2mas(sqrt(Dde[2][2])),12, 'f', 8).arg(rad2mas(Zde[3]),12, 'f', 8).arg(rad2mas(sqrt(Dde[3][3])),12, 'f', 8);
+    qDebug() << QString("uweDe: %1\n").arg(rad2mas(sqrt(uweDe)),12, 'f', 8);
+
+/*
+    Eps[0] = Zde[0];
+    Eps[1] = Zde[1];
+    Eps[2] = Zra[2];
+
+    sgEps[0] = sqrt(Dde[0][0]);
+    sgEps[1] = sqrt(Dde[1][1]);
+    sgEps[2] = sqrt(Dra[2][2]);
+*/
+    Eps[0] = Z[0];
+    Eps[1] = Z[1];
+    Eps[2] = Z[2];
+    Eps[3] = Z[3];
+    Eps[4] = Z[4];
+    Eps[5] = Z[5];
+
+    sgEps[0] = sqrt(Dde[0][0]);
+    sgEps[1] = sqrt(Dde[1][1]);
+    sgEps[2] = sqrt(Dra[2][2]);
+    sgEps[3] = sqrt(Dra[3][3]);
+    sgEps[4] = sqrt(Dra[4][4]);
+    sgEps[5] = sqrt(Dra[5][5]);
 
     return 0;
 }
