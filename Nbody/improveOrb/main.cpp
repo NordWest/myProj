@@ -12,6 +12,7 @@ struct improveState
     double raO, decO;
     double raC, decC;
     double state[6];
+    QString obsCode;
 };
 
 struct inproveObject
@@ -109,6 +110,7 @@ int main(int argc, char *argv[])
         impSt->state[3] = opers[9].toDouble();// + opos.state[3];
         impSt->state[4] = opers[10].toDouble();// + opos.state[4];
         impSt->state[5] = opers[11].toDouble();// + opos.state[5];
+        impSt->obsCode = opers.at(12).simplified();
 
         //ostm << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(impSt->state[0]).arg(impSt->state[1]).arg(impSt->state[2]).arg(impSt->state[3]).arg(impSt->state[4]).arg(impSt->state[5]);
 
@@ -701,7 +703,7 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     //ostm << QString("uweC: %1\n").arg(uweC);
 
     //ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0]).arg(Ec[1]).arg(Ec[2]).arg(Ec[3]).arg(Ec[4]).arg(Ec[5]);
-
+//qDebug() << QString("Z: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Z[0]),12, 'f', 8).arg(rad2mas(sqrt(Dx[0][0])),12, 'f', 8).arg(rad2mas(Z[1]),12, 'f', 8).arg(rad2mas(sqrt(Dx[1][1])),12, 'f', 8).arg(rad2mas(Z[2]),12, 'f', 8).arg(rad2mas(sqrt(Dx[2][2])),12, 'f', 8);
 
     double ecSum = 0.0;
     for(int l=0; l<6; l++) ecSum += fabs(Ec[l]);

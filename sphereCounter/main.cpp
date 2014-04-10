@@ -166,14 +166,14 @@ int main(int argc, char *argv[])
     double *tCoefSg = new double[coefNum];
     double sigmaVal;
 
-    time0 = floor(tMean/dSize);
+    //time0 = floor(tMean/dSize);
     qDebug() << QString("time0: %1\n").arg(time0,12, 'f', 8);
 
     qDebug() << QString("point num: %1\n").arg(dSize);
 
     for(i=0; i<dSize; i++)
     {
-        dTime[i] = (dataVect[i][0]-time0)/(36524.25);
+        dTime[i] = (dataVect[i][0]-time0)/(365.2425);
         ra[i] = dataVect[i][1];
         de[i] = dataVect[i][2];
         dRa[i] = (ra[i]-dataVect[i][3])*cos(de[i]);
@@ -293,6 +293,9 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
 
         Wra[i] = Wde[i] = W[i] = 1.0;
         W[pointNum+i] = 1.0;
+
+        //qDebug() << QString("%1\t%2\t%3\t = %7\n").arg((A[i*3]),12, 'f', 8).arg((A[i*3+1]),12, 'f', 8).arg((A[i*3+2]),12, 'f', 8).arg(r[i],12, 'f', 8);
+        //qDebug() << QString("%1\t%2\t%3\t = %7\n").arg((A[pointNum+i*3]),12, 'f', 8).arg((A[pointNum+i*3+1]),12, 'f', 8).arg((A[pointNum+i*3+2]),12, 'f', 8).arg(r[pointNum+i],12, 'f', 8);
     }
 
 

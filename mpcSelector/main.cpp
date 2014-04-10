@@ -9,6 +9,12 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
+    if(argc<3)
+    {
+        qDebug() << QString("error ini file\nmpcSelector ini.txt res.txt\n");
+        return 1;
+    }
+
     mpcRec mpR;
     int obsNum, objNum, cfNum, otNum;
     int isObs, isObj, isTime, isCF, isMag, isOT;
