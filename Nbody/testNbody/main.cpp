@@ -148,7 +148,7 @@ void saveResults(double t0, double *X, double *V, int pos, QString name, QTextSt
 
     Ri = sqrt(X[pos+0]*X[pos+0] + X[pos+1]*X[pos+1] + X[pos+2]*X[pos+2]);
     Vi = sqrt(V[pos+0]*V[pos+0] + V[pos+1]*V[pos+1] + V[pos+2]*V[pos+2])*AUKM/86400.0;
-    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(name).arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(V[pos]*vmul, 22, 'e', 15).arg(V[pos+1]*vmul, 22, 'e', 15).arg(V[pos+2]*vmul, 22, 'e', 15);
+    resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(name, -16).arg(t0, 13, 'f', 4).arg(X[pos], 22, 'e', 15).arg(X[pos+1], 22, 'e', 15).arg(X[pos+2], 22, 'e', 15).arg(V[pos]*vmul, 22, 'e', 15).arg(V[pos+1]*vmul, 22, 'e', 15).arg(V[pos+2]*vmul, 22, 'e', 15);
 
     resStm.flush();
 
