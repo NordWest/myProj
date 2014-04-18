@@ -712,8 +712,8 @@ void makeParamIn(double time0, double time1, double dtime, double timestep)
     cfgStm << " algorithm (MVS, BS, BS2, RADAU, HYBRID etc) = bs\n";
     cfgStm << QString(" start time (days) = %1\n").arg(time0, 15, 'f', 8);
     cfgStm << QString(" stop time (days) = %1\n").arg(time1, 15, 'f', 8);
-    cfgStm << QString(" output interval (days) = %1\n").arg(dtime, 15, 'f', 8);
-    cfgStm << QString(" timestep (days) = %1\n").arg(timestep, 15, 'f', 8);
+    cfgStm << QString(" output interval (days) = %1\n").arg(fabs(dtime), 15, 'f', 8);
+    cfgStm << QString(" timestep (days) = %1\n").arg(fabs(timestep), 15, 'f', 8);
     cfgStm << " accuracy parameter=1.d-12\n";
     cfgStm << ")---------------------------------------------------------------------\n";
     cfgStm << ") Integration options:\n";

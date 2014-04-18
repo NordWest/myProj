@@ -204,7 +204,7 @@ int observ::det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad,
     }
 }
 
-int observ::det_vect_radec_sun(double *state2sun, double *raRad, double *decRad, double *range, int corr)
+int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range, int corr)
 {
     double *R, *X, *V, *X1, *V1, *XE0, *XEB0, *XS0, *VS0, *Q, *Qb, *P;
     R = new double[3];
@@ -295,6 +295,7 @@ int observ::det_vect_radec_sun(double *state2sun, double *raRad, double *decRad,
             normQ = norm3(Q);
 
             ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+            qDebug() << QString("ct1: %1\n").arg(ct1);
 
         }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
 //    }
