@@ -903,7 +903,7 @@ double state0[6];
                 state[5] = vmul*V[j*3+2];
 
                 opos->det_observ_tdb(tEnd);
-                opos->det_vect_radec_ssb(state, &ra, &dec);
+                opos->det_vect_radec(state, &ra, &dec);
 
                 cosD = cos(dec);
 //                mrec.r = ra;// + dRa;

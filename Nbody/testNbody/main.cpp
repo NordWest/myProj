@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
 
     //time
     t0 = sett->value("time/time0", 0).toDouble();
-    dt = sett->value("time/dtime", 1).toDouble();
+    dt = sett->value("time/timestep", 1).toDouble();
     nstep = sett->value("time/nstep", 1).toDouble();
 
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
