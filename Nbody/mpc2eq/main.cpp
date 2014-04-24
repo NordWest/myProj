@@ -1278,7 +1278,7 @@ int spk2eq(QList <eqObjRec*> eqo_list, QString spkFleName, QString resFileName, 
             state[5] = state[5]/AUKM*SECINDAY;
 
             opos->det_observ_tdb(timei);
-            opos->det_vect_radec_ssb(state, &ra, &dec);
+            opos->det_vect_radec(state, &ra, &dec);
 
             ra = rad2grad(ra);
             dec = rad2grad(dec);
