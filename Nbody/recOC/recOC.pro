@@ -73,4 +73,4 @@ win32:LIBS+=./../../libs/win32/libmb.a
 #unix:LIBS+=./../../libs/unix/libastro.a
 win32:LIBS+=./../../libs/win32/libastro.a
 #unix:LIBS+=./../../libs/unix/cspice.a
-unix:LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice
+unix:LIBS += -lmb -lastro -lephem_read -ldele -lcspice
