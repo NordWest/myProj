@@ -92,5 +92,5 @@ HEADERS += ../../libs/orbit.h \
 #unix:LIBS+=./../../libs/unix/libastro.a
 #win32:LIBS+=./../../libs/win32/libastro.a
 #unix:LIBS+=./../../libs/unix/cspice.a
-LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice
+LIBS += -lmb -lastro -lephem_read -ldele -lcspice
 #LIBS += cspice.a

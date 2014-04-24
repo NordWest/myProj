@@ -30,7 +30,8 @@
 #define kaGRAD1 0.071014884
 #define kaSEC 3548.1876
 #define Xi ka*sqrt((double)MS)
-#define EKV 0.409092804
+//#define EKV 0.409092804
+#define EKV 0.409092628
 #define EPS 1.0e-8
 
 #define SUN_MAGNITUDE -26.8
