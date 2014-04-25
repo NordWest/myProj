@@ -96,7 +96,7 @@ int observ::det_observ()
 }
 
 
-int observ::det_vect_radec1(double *state2sun, double *raRad, double *decRad, double *range, int corr)
+int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range, int corr)
 {
     double *R, *X, *V, *X1, *V1, *xE0, *xEB0, *XS0, *VS0, *Q, *Qb, *Qb0, *P;
     R = new double[3];
@@ -127,12 +127,6 @@ int observ::det_vect_radec1(double *state2sun, double *raRad, double *decRad, do
     Q[4] = state2sun[4];
     Q[5] = state2sun[5];
 
-//ssb
-    xE0[0] = state[0];
-    xE0[1] = state[1];
-    xE0[2] = state[2];
-
-
     if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
     if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
 
@@ -146,9 +140,22 @@ int observ::det_vect_radec1(double *state2sun, double *raRad, double *decRad, do
     Qb[4] = Q[4] + VS0[1];
     Qb[5] = Q[5] + VS0[2];
 
-    xEB0[0] = xE0[0] + XS0[0];
-    xEB0[1] = xE0[1] + XS0[1];
-    xEB0[2] = xE0[2] + XS0[2];
+    if(center)
+    {
+        xE0[0] = state[0];
+        xE0[1] = state[1];
+        xE0[2] = state[2];
+
+        xEB0[0] = xE0[0] + XS0[0];
+        xEB0[1] = xE0[1] + XS0[1];
+        xEB0[2] = xE0[2] + XS0[2];
+    }
+    else
+    {
+        xEB0[0] = state[0];
+        xEB0[1] = state[1];
+        xEB0[2] = state[2];
+    }
 
 
     P[0] = Qb[0] - xEB0[0];
@@ -192,7 +199,7 @@ int observ::det_vect_radec1(double *state2sun, double *raRad, double *decRad, do
     }
 }
 
-int observ::det_vect_radec1_ssb(double *state2ssb, double *raRad, double *decRad, double *range, int corr)
+int observ::det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad, double *range, int corr)
 {
     double *R, *X, *V, *X1, *V1, *xE0, *xEB0, *XS0, *VS0, *Q, *Qb, *Qb0, *P;
     R = new double[3];
