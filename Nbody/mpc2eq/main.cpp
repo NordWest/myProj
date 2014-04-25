@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
         qDebug() << "\nError opos init\n\n";
         exit(1);
     }
-    opos->set_obs_parpam(GEOCENTR_NUM, 0, sk, obsCode.toAscii().data());
+    opos->set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
 
     opos5.init(obsFile.toAscii().data(), jplFile.toAscii().data());
     opos5.set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
@@ -903,7 +903,7 @@ double state0[6];
                 state[5] = vmul*V[j*3+2];
 
                 opos->det_observ_tdb(tEnd);
-                opos->det_vect_radec(state, &ra, &dec);
+                opos->det_vect_radec1(state, &ra, &dec);
 
                 cosD = cos(dec);
 //                mrec.r = ra;// + dRa;

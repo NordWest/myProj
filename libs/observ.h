@@ -50,7 +50,9 @@ public:
 
     int detSunRADEC(double *raS, double *decS);
     int det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range = NULL, int corr = 1);
+    int det_vect_radec1(double *state2sun, double *raRad, double *decRad, double *range = NULL, int corr = 1);
     int det_vect_radec_ssb(double *state2ssb, double *raRad, double *decRad, double *range = NULL, int corr = 1);
+    int det_vect_radec1_ssb(double *state2ssb, double *raRad, double *decRad, double *range = NULL, int corr = 1);
     //int det_vect_radec_sun(double *state2sun, double *raRad, double *decRad, double *range = NULL, int corr = 1);
 
 

@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
                 state[3] = V[0];
                 state[4] = V[1];
                 state[5] = V[2];
-                obsPos.det_vect_radec(state, &ra, &de, &range);
+                obsPos.det_vect_radec1(state, &ra, &de, &range);
 
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;

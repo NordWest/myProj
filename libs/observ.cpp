@@ -96,6 +96,197 @@ int observ::det_observ()
 }
 
 
+int observ::det_vect_radec1(double *state2sun, double *raRad, double *decRad, double *range, int corr)
+{
+    double *R, *X, *V, *X1, *V1, *xE0, *xEB0, *XS0, *VS0, *Q, *Qb, *Qb0, *P;
+    R = new double[3];
+    P = new double[3];
+    X = new double[3];
+    V = new double[3];
+    X1 = new double[3];
+    V1 = new double[3];
+    xE0 = new double[3];
+    xEB0 = new double[3];
+    XS0 = new double[3];
+    VS0 = new double[3];
+    Q = new double[6];
+    Qb = new double[6];
+    Qb0 = new double[3];
+
+    double normE, normP, normQ;
+    double ct0, ct1, tau, muc2;
+
+    muc2 = 9.8704e-9;
+
+//X - sun
+    Q[0] = state2sun[0];
+    Q[1] = state2sun[1];
+    Q[2] = state2sun[2];
+
+    Q[3] = state2sun[3];
+    Q[4] = state2sun[4];
+    Q[5] = state2sun[5];
+
+//ssb
+    xE0[0] = state[0];
+    xE0[1] = state[1];
+    xE0[2] = state[2];
+
+
+    if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
+    if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
+
+//X1 - ssb
+
+    Qb[0] = Q[0] + XS0[0];
+    Qb[1] = Q[1] + XS0[1];
+    Qb[2] = Q[2] + XS0[2];
+
+    Qb[3] = Q[3] + VS0[0];
+    Qb[4] = Q[4] + VS0[1];
+    Qb[5] = Q[5] + VS0[2];
+
+    xEB0[0] = xE0[0] + XS0[0];
+    xEB0[1] = xE0[1] + XS0[1];
+    xEB0[2] = xE0[2] + XS0[2];
+
+
+    P[0] = Qb[0] - xEB0[0];
+    P[1] = Qb[1] - xEB0[1];
+    P[2] = Qb[2] - xEB0[2];
+
+    normP = norm3(P);
+    normE = norm3(xEB0);
+    normQ = norm3(Qb);
+
+    ct1 = normP;
+
+    do
+    {
+        ct0 = ct1;
+        tau = ct1/CAU;
+
+        Qb0[0] = Qb[0] - Qb[3]*tau;
+        Qb0[1] = Qb[1] - Qb[4]*tau;
+        Qb0[2] = Qb[2] - Qb[5]*tau;
+
+        P[0] = Qb0[0] - xEB0[0];
+        P[1] = Qb0[1] - xEB0[1];
+        P[2] = Qb0[2] - xEB0[2];
+
+        normP = norm3(P);
+
+        normQ = norm3(Qb0);
+
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
+
+    rdsys(raRad, decRad, P[0], P[1], P[2]);
+
+    if(range!=NULL)
+    {
+        range[0] = R[0];
+        range[1] = R[1];
+        range[2] = R[2];
+    }
+}
+
+int observ::det_vect_radec1_ssb(double *state2ssb, double *raRad, double *decRad, double *range, int corr)
+{
+    double *R, *X, *V, *X1, *V1, *xE0, *xEB0, *XS0, *VS0, *Q, *Qb, *Qb0, *P;
+    R = new double[3];
+    P = new double[3];
+    X = new double[3];
+    V = new double[3];
+    X1 = new double[3];
+    V1 = new double[3];
+    xE0 = new double[3];
+    xEB0 = new double[3];
+    XS0 = new double[3];
+    VS0 = new double[3];
+    Q = new double[6];
+    Qb = new double[6];
+    Qb0 = new double[3];
+
+    double normE, normP, normQ;
+    double ct0, ct1, tau, muc2;
+
+    muc2 = 9.8704e-9;
+
+//X - sun
+    Qb[0] = state2ssb[0];
+    Qb[1] = state2ssb[1];
+    Qb[2] = state2ssb[2];
+
+    Qb[3] = state2ssb[3];
+    Qb[4] = state2ssb[4];
+    Qb[5] = state2ssb[5];
+
+//ssb
+    xE0[0] = state[0];
+    xE0[1] = state[1];
+    xE0[2] = state[2];
+
+
+    if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
+    if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
+
+//X1 - ssb
+/*
+    Qb[0] = Q[0] + XS0[0];
+    Qb[1] = Q[1] + XS0[1];
+    Qb[2] = Q[2] + XS0[2];
+
+    Qb[3] = Q[3] + VS0[0];
+    Qb[4] = Q[4] + VS0[1];
+    Qb[5] = Q[5] + VS0[2];
+*/
+    xEB0[0] = xE0[0] + XS0[0];
+    xEB0[1] = xE0[1] + XS0[1];
+    xEB0[2] = xE0[2] + XS0[2];
+
+
+    P[0] = Qb[0] - xEB0[0];
+    P[1] = Qb[1] - xEB0[1];
+    P[2] = Qb[2] - xEB0[2];
+
+    normP = norm3(P);
+    normE = norm3(xEB0);
+    normQ = norm3(Qb);
+
+    ct1 = normP;
+
+    do
+    {
+        ct0 = ct1;
+        tau = ct1/CAU;
+
+        Qb0[0] = Qb[0] - Qb[3]*tau;
+        Qb0[1] = Qb[1] - Qb[4]*tau;
+        Qb0[2] = Qb[2] - Qb[5]*tau;
+
+        P[0] = Qb0[0] - xEB0[0];
+        P[1] = Qb0[1] - xEB0[1];
+        P[2] = Qb0[2] - xEB0[2];
+
+        normP = norm3(P);
+
+        normQ = norm3(Qb0);
+
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
+
+    rdsys(raRad, decRad, P[0], P[1], P[2]);
+
+    if(range!=NULL)
+    {
+        range[0] = R[0];
+        range[1] = R[1];
+        range[2] = R[2];
+    }
+}
 
 int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range, int corr)
 {
