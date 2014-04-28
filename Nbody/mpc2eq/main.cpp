@@ -353,6 +353,10 @@ int main(int argc, char *argv[])
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
+//mpc2eq
+    int isCountCols = sett->value("mpc2eq/isCountCols", 1).toInt();
+    QString colsNums = sett->value("mpc2eq/colsNums", "4,5,6").toString();
+
     /*moody
     cfg_file = sett->value("moody/cfg_file").toString();
     part_file = sett->value("moody/part_file").toString();
@@ -976,7 +980,7 @@ impFile.close();
             qDebug() << tstr << "\n";
             ocStm << tstr << "\n";
         }
-        eqTemp->countCols("4,5,6");
+        if(isCountCols) eqTemp->countCols(colsNums);
         szj = eqTemp->colList.size();
         for(j=0; j<szj; j++)
         {

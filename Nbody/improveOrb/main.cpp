@@ -35,7 +35,7 @@ void detE1(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])    //improveOrb ocat imp
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
@@ -188,11 +188,11 @@ int main(int argc, char *argv[])
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
 
-        detE00(impObj, opos, elem, dElem);
+        //detE00(impObj, opos, elem, dElem);
         //detE0(impObj, opos, elem, dElem);
         //detE1(impObj, opos, elem, dElem);
         //detE2(impObj, opos, elem, dElem);
-        //detE3(impObj, opos, elem, dElem);
+        detE3(impObj, opos, elem, dElem);
 
         //if(elem->ecc<0.1) detE2(impObj, opos, elem, dElem);
         //else detE3(impObj, opos, elem, dElem);
