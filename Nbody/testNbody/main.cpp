@@ -328,7 +328,10 @@ int main(int argc, char *argv[])
     mass = new double[iniList.size()-1];
     for(i=0; i<iniList.size(); i++)
     {
-        if(iniList.at(i)->identity==Advisor::collapsorFixed) continue;
+        if(iniList.at(i)->identity==Advisor::collapsorFixed)
+        {
+            if((QString().compare(QString(iniList.at(i)->name), "Sun", Qt::CaseInsensitive))|(QString().compare(QString(iniList.at(i)->name), "Sol", Qt::CaseInsensitive)))continue;
+        }
         pList << iniList.at(i);
         mass[p++] = iniList.at(i)->mass;
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
