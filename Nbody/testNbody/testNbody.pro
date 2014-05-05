@@ -96,6 +96,7 @@ win32:LIBS+=./../../libs/win32/libmb.a
 #unix:LIBS+=./../../libs/unix/libastro.a
 win32:LIBS+=./../../libs/win32/libastro.a
 
-unix:LIBS += -lmb -lastro -ldele -lephem_read -lrada
+unix:LIBS += -lmb -lastro -ldele -lephem_read
+unix:LIBS += -lrada
 unix:LIBS+= ./../../libs/unix/cspice.a
 #INCLUDEPATH += /usr/local/cuda/include

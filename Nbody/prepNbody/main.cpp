@@ -647,9 +647,17 @@ int main(int argc, char *argv[])
                 pList[i]->yd = coefXD*V[1];
                 pList[i]->zd = coefXD*V[2];
 
-                smlStm << QString("%1\n").arg(name);//.arg(1.0/pList[i]->mass);
-                smlStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
-                qDebug() << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+                if(pList[i]->identity==Advisor::ordinary)
+                {
+                    bigStm << QString(" %1   m=%2 r=20.D0\n").arg(pList[i]->name.data(), 10).arg(pList[i]->mass);
+                    bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+                }
+                else if(pList.at(i)->identity==Advisor::planetesimal)
+                {
+                    smlStm << QString("%1\n").arg(name);//.arg(1.0/pList[i]->mass);
+                    smlStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+                    qDebug() << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+                }
             }
         }
 
