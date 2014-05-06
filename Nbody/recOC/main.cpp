@@ -180,9 +180,9 @@ int main(int argc, char *argv[])
 
     QString inFileName(argv[1]);
     QFileInfo fi(inFileName);
-    QString dxFileName = QString("%1_dr.txt").arg(fi.absoluteFilePath());
-    QString mpcFileName = QString("%1_mpc.txt").arg(fi.absoluteFilePath());
-    QString spkFileName = QString("%1_spk.txt").arg(fi.absoluteFilePath());
+    QString dxFileName = QString("%1_dr.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
+    QString mpcFileName = QString("%1_mpc.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
+    QString spkFileName = QString("%1_spk.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
 
     //QString inFileName("small.log");
     QFile inFile(inFileName);

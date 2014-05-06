@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
-
+    eparam->NI = esett->value("general/ppn", 0).toInt();
 
 
 
@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
     //nofzbody=0;
     //nofjbody=0;
     p=0;
-    mass = new double[iniList.size()-1];
+    //mass = new double[iniList.size()-1];
     nbobjStruct* nb_rec;
 
     for(i=0; i<iniList.size(); i++)
