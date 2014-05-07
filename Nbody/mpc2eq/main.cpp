@@ -821,7 +821,7 @@ double state0[6];
                 V[j*3+2] = -V[j*3+2];
             }
         }
-/*
+
         while((fabs(dT)/dtime)>1)
         {
             ti = tf;
@@ -833,7 +833,7 @@ double state0[6];
 
         //orb
 
-*/
+
 
 //det Local orbits
 
