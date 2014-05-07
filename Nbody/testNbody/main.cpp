@@ -333,33 +333,35 @@ int main(int argc, char *argv[])
     //nofzbody=0;
     //nofjbody=0;
     p=0;
-    //mass = new double[iniList.size()-1];
+    mass = new double[iniList.size()-1];
     nbobjStruct* nb_rec;
 
     for(i=0; i<iniList.size(); i++)
     {
         if(iniList.at(i)->identity==Advisor::collapsorFixed)
-        {
-            if((QString().compare(QString(iniList.at(i)->name.data()), "Sun", Qt::CaseInsensitive))|(QString().compare(QString(iniList.at(i)->name.data()), "Sol", Qt::CaseInsensitive)))continue;
+        {/*
+            if((QString().compare(QString(iniList.at(i)->name.data()), "Sun", Qt::CaseInsensitive))||(QString().compare(QString(iniList.at(i)->name.data()), "Sol", Qt::CaseInsensitive)))continue;
             nb_rec = new nbobjStruct;
             nb_rec->mass = iniList.at(i)->mass;
             nb_rec->planet_num = planet_num((char*)iniList.at(i)->name.data());
-            pls << nb_rec;
+            pls << nb_rec;*/
+            continue;
         }
-        else
-        {
+        //else
+        //{
             pList << iniList.at(i);
+            mass[p++] = iniList.at(i)->mass;
 
-        }
+        //}
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
         //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }
 
     nofzbody=pList.size();
-    mass = new double[nofzbody];
+    /*mass = new double[nofzbody];
 
     for(i=0; i<nofzbody; i++) mass[i] = pList.at(i)->mass;
-
+*/
 
 
     N = (nofzbody)*3;
@@ -523,160 +525,15 @@ int main(int argc, char *argv[])
         else
         {
             saveResults(t0, X, V, p, name, resStmSmall, dt<0);
-    /*
-            if(initMpc) break;
-            mCat.GetRecName(name.simplified().toAscii().data());
 
-            TDB2UTC(t0, &jdUTC);
-
-            if(useEPM)
-            {
-                status = calc_EPM(EARTH, centr_num, (int)t0, t0 - (int)t0, XE0, VE0);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else eph->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], t0, GEOCENTR_NUM, CENTER, SK);
-
-            qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
-
-            if(useMiriade)
-            {
-                outerArguments << QString("-name=\"%1\"").arg(name.simplified());
-                sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-                outerArguments << QString("-ep=%1").arg(sJD);
-
-                outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                outerProcess.start(miriadeProcData.name, outerArguments);
-
-                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                {
-                    qDebug() << "\nmiriadeProc finish error\n";
-                    break;
-                }
-
-                QTextStream objStream(outerProcess.readAllStandardOutput());
-
-                while (!objStream.atEnd())
-                {
-                    objDataStr = objStream.readLine();
-                    qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                    if(objDataStr.size()<1) continue;
-                    if(objDataStr.at(0)=='#') continue;
-
-                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                    if(resSL.size()<10) continue;
-                    X0[p+0] = resSL.at(1).toDouble();
-                    X0[p+1] = resSL.at(2).toDouble();
-                    X0[p+2] = resSL.at(3).toDouble();
-                    V0[p+0] = resSL.at(8).toDouble();
-                    V0[p+1] = resSL.at(9).toDouble();
-                    V0[p+2] = resSL.at(10).toDouble();
-
-                    X0[p+0] += XE0[0];
-                    X0[p+1] += XE0[1];
-                    X0[p+2] += XE0[2];
-                    V0[p+0] += VE0[0];
-                    V0[p+1] += VE0[1];
-                    V0[p+2] += VE0[2];
-
-
-                }
-                saveResults(t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
-            }
-            else saveResults(t0, X, V, NULL, NULL, p, name, resStm, dxStm, deStm);
-
-            detRDnumGC(&ra, &de, X[p], X[p+1], X[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-            //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
-
-
-            //ra = ra - ra0;
-            //de = de - de0;
-            mrec.r = ra;
-            mrec.d = de;
-            mrec.eJD = jdUTC;
-            mrec.num = 1;
-            mCat.record->getNumStr(mrec.head->Snum);
-            //strcpy(mrec.head->Snum, mCat.record->number);
-            mrec.tail->set_numOfObs("500");
-            mrec.toString(astr);
-
-            mpcStm << astr << "\n";
-*/
-/*
-            if(useMoody)
-            {
-                detRDnumGC(&ra, &de, Xm[p], Xm[p+1], Xm[p+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
-
-                //TDB2UTC(t0, &jdUTC);
-                //ra = ra - ra0;
-                //de = de - de0;
-                mrec.r = ra;
-                mrec.d = de;
-                mrec.eJD = jdUTC;
-                mrec.num = 1;
-                mCat.record->getNumStr(mrec.head->Snum);
-                //strcpy(mrec.head->Snum, mCat.record->number);
-                mrec.tail->set_numOfObs("500");
-                mrec.toString(astr);
-
-                mpcStmM << astr << "\n";
-            }*/
         }
 
 
 
-/*        else
-        {
-            if(useMiriade)
-            {
-                resMiri = getMiriadeObject(&mpcObj, jd2mjd(t0), name, miriadeProcData, objType);
-                if(!resMiri)
-                {
 
-                }
-            }
-        }
-*/
-
-/*
-
-
-*/
-
-
-/*
-        Ri = sqrt(X[i*3+0]*X[i*3+0] + X[i*3+1]*X[i*3+1] + X[i*3+2]*X[i*3+2]);
-        Vi = sqrt(V[i*3+0]*V[i*3+0] + V[i*3+1]*V[i*3+1] + V[i*3+2]*V[i*3+2])*AUKM/86400.0;
-        resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 13, 'f', 4).arg(X[i*3], 13, 'f', 9).arg(X[i*3+1], 13, 'f', 9).arg(X[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i*3], 13, 'f', 9).arg(V[i*3+1], 13, 'f', 9).arg(V[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
-
-
-
-        r[0] = X[i*3]-X0[i*3];
-        r[1] = X[i*3+1]-X0[i*3+1];
-        r[2] = X[i*3+2]-X0[i*3+2];
-
-        Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-
-        v[0] = V[i*3]-V0[i*3];
-        v[1] = V[i*3+1]-V0[i*3+1];
-        v[2] = V[i*3+2]-V0[i*3+2];
-
-        dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(t0, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[i]->name.data());
-
-        Ri = sqrt(X0[i*3+0]*X0[i*3+0] + X0[i*3+1]*X0[i*3+1] + X0[i*3+2]*r[i*3+2]);
-
-        deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(t0, 12, 'f', 4).arg(X0[i*3], 13, 'f', 9).arg(X0[i*3+1], 13, 'f', 9).arg(X0[i*3+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i*3], 13, 'f', 9).arg(V0[i*3+1], 13, 'f', 9).arg(V0[i*3+2], 13, 'f', 9).arg(pList[i]->name.data());
-        */
     }
 
-    //if(useMoody) mState = mFile->readState();
+
 /*
     CM_int(CM, X, V);
     qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
