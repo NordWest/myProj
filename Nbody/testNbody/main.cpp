@@ -85,7 +85,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 }
 
 
-dele *eph;
+dele *nbody;
 int nofzbody;
 double *mass;
 //double *massF;
@@ -237,8 +237,8 @@ int main(int argc, char *argv[])
     Everhardt *solSys;
 
     //QList <ParticleStruct*> pList;
-    //dele *eph;
-    eph = new dele();
+    //dele *nbody;
+    nbody = new dele();
 
     double t0, nstep, ti, dt;
     mpc mrec;
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
-    eparam->NI = esett->value("general/ppn", 0).toInt();
+    eparam->ppn = esett->value("general/ppn", 0).toInt();
 
 
 
@@ -322,8 +322,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        status = eph->init(jplFile.toAscii().data());
-        //status = eph->init_jpl_bin(jplFile.toAscii().data());
+        status = nbody->init(jplFile.toAscii().data());
+        //status = nbody->init_jpl_bin(jplFile.toAscii().data());
     }
 
     if(status) return 1;
@@ -334,31 +334,46 @@ int main(int argc, char *argv[])
     //nofjbody=0;
     p=0;
     mass = new double[iniList.size()-1];
-    nbobjStruct* nb_rec;
 
     for(i=0; i<iniList.size(); i++)
     {
-        if(iniList.at(i)->identity==Advisor::collapsorFixed)
-        {/*
-            if((QString().compare(QString(iniList.at(i)->name.data()), "Sun", Qt::CaseInsensitive))||(QString().compare(QString(iniList.at(i)->name.data()), "Sol", Qt::CaseInsensitive)))continue;
-            nb_rec = new nbobjStruct;
-            nb_rec->mass = iniList.at(i)->mass;
-            nb_rec->planet_num = planet_num((char*)iniList.at(i)->name.data());
-            pls << nb_rec;*/
-            continue;
-        }
-        //else
-        //{
-            pList << iniList.at(i);
-            mass[p++] = iniList.at(i)->mass;
-
-        //}
+        if(iniList.at(i)->identity==Advisor::collapsorFixed)continue;
+        /*{
+            if((QString().compare(QString(iniList.at(i)->name), "Sun", Qt::CaseInsensitive))|(QString().compare(QString(iniList.at(i)->name), "Sol", Qt::CaseInsensitive)))continue;
+        }*/
+        pList << iniList.at(i);
+        mass[p++] = iniList.at(i)->mass;
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
         //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }
 
     nofzbody=pList.size();
-    /*mass = new double[nofzbody];
+/*
+    nbobjStruct* nb_rec;
+
+    for(i=0; i<iniList.size(); i++)
+    {
+        if(iniList.at(i)->identity==Advisor::collapsorFixed)
+        {
+            if((QString().compare(QString(iniList.at(i)->name.data()), "Sun", Qt::CaseInsensitive))||(QString().compare(QString(iniList.at(i)->name.data()), "Sol", Qt::CaseInsensitive)))continue;
+            nb_rec = new nbobjStruct;
+            nb_rec->mass = iniList.at(i)->mass;
+            nb_rec->planet_num = planet_num((char*)iniList.at(i)->name.data());
+            pls << nb_rec;
+            //continue;
+        }
+        else
+        {
+            pList << iniList.at(i);
+            mass[p++] = iniList.at(i)->mass;
+
+        }
+        //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
+        //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
+    }
+
+    nofzbody=pList.size();
+    mass = new double[nofzbody];
 
     for(i=0; i<nofzbody; i++) mass[i] = pList.at(i)->mass;
 */
@@ -511,9 +526,9 @@ int main(int argc, char *argv[])
             }
             else
             {
-                //eph->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
-                //eph->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
-                eph->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
+                //nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
+                //nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
+                nbody->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
             }*/
 
             saveResults(t0, X, V, p, name, resStmBig, dt<0);
@@ -610,8 +625,8 @@ int main(int argc, char *argv[])
                  }
             }
     /*
-            eph->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
-            eph->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
+            nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
+            nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
             qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
     */
  /*           muis = 0;
@@ -700,9 +715,9 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        //eph->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-                        //eph->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
-                        eph->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, CENTER, SK);
+                        //nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
+                        //nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
+                        nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, CENTER, SK);
                     }
 /*
 
@@ -788,8 +803,8 @@ int main(int argc, char *argv[])
                              return 1;
                          }
                     }
-                    else eph->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
-                    //eph->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
+                    //nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
                     qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
 
                     if(useMiriade)
@@ -949,8 +964,8 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        eph->detR(&X[p+0], &X[p+1], &X[p+2], TF, plaNum, 0, CENTER, SK);
-                        eph->detR(&V[p+0], &V[p+1], &V[p+2], TF, plaNum, 1, CENTER, SK);
+                        nbody->detR(&X[p+0], &X[p+1], &X[p+2], TF, plaNum, 0, CENTER, SK);
+                        nbody->detR(&V[p+0], &V[p+1], &V[p+2], TF, plaNum, 1, CENTER, SK);
                     }
 
                     //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
