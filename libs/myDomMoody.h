@@ -11,7 +11,9 @@ struct cfgStruct
     int states, steps, stepSize;
 };
 
-int readParticles(QString fileName, QList <ParticleStruct*> &pList)
+int readParticles(QString fileName, QList <ParticleStruct*> &pList, int *massType=NULL);
+
+int readParticles(QString fileName, QList <ParticleStruct*> &pList, int *massType)
 {
     QString errorStr;
     int errorLine;
@@ -43,7 +45,9 @@ int readParticles(QString fileName, QList <ParticleStruct*> &pList)
      std::string srep;
      std::string irep;
 
-     QDomElement child = root.firstChildElement("particle");
+     QDomElement child = root.firstChildElement("massType");
+     if(massType!=NULL)*massType = child.text().toInt();
+     child = root.firstChildElement("particle");
      QDomElement vector;
      QDomElement rgb;
           while (!child.isNull()) {

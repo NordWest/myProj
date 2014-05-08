@@ -1,5 +1,81 @@
 #include "observ.h"
 
+int det_vect_radec(double *obj2ssb, double *obs2ssb, double *raRad, double *decRad, double *range)
+{
+    double *R, *X, *V, *X1, *V1, *xE0, *xEB0, *XS0, *VS0, *Q, *Qb, *Qb0, *P;
+    R = new double[3];
+    P = new double[3];
+    X = new double[3];
+    V = new double[3];
+    X1 = new double[3];
+    V1 = new double[3];
+    xEB0 = new double[3];
+    XS0 = new double[3];
+    VS0 = new double[3];
+    Q = new double[6];
+    Qb = new double[6];
+    Qb0 = new double[3];
+
+    double normE, normP, normQ;
+    double ct0, ct1, tau, muc2;
+
+    muc2 = 9.8704e-9;
+
+//X - sun
+    Qb[0] = obj2ssb[0];
+    Qb[1] = obj2ssb[1];
+    Qb[2] = obj2ssb[2];
+
+    Qb[3] = obj2ssb[3];
+    Qb[4] = obj2ssb[4];
+    Qb[5] = obj2ssb[5];
+
+//X1 - ssb
+
+    xEB0[0] = obs2ssb[0];
+    xEB0[1] = obs2ssb[1];
+    xEB0[2] = obs2ssb[2];
+
+    P[0] = Qb[0] - xEB0[0];
+    P[1] = Qb[1] - xEB0[1];
+    P[2] = Qb[2] - xEB0[2];
+
+    normP = norm3(P);
+    normE = norm3(xEB0);
+    normQ = norm3(Qb);
+
+    ct1 = normP;
+
+    do
+    {
+        ct0 = ct1;
+        tau = ct1/CAU;
+
+        Qb0[0] = Qb[0] - Qb[3]*tau;
+        Qb0[1] = Qb[1] - Qb[4]*tau;
+        Qb0[2] = Qb[2] - Qb[5]*tau;
+
+        P[0] = Qb0[0] - xEB0[0];
+        P[1] = Qb0[1] - xEB0[1];
+        P[2] = Qb0[2] - xEB0[2];
+
+        normP = norm3(P);
+
+        normQ = norm3(Qb0);
+
+        ct1 = normP+2.0*muc2*log((normE+normQ+normP)/(normE+normQ-normP));
+
+    }while((fabs(ct1-ct0)/fabs(ct1))>1e-12);
+
+    rdsys(raRad, decRad, P[0], P[1], P[2]);
+
+    if(range!=NULL)
+    {
+        range[0] = Qb[0] - xEB0[0];
+        range[1] = Qb[1] - xEB0[1];
+        range[2] = Qb[2] - xEB0[2];
+    }
+}
 ////////////////////////////////////observ
 
 ////////////public

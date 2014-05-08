@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
 
 
-    if(readParticles(confFile, pList))
+    if(readParticles(confFile, pList, &massType))
     {
         qDebug() << QString("readCFG error\n");
         return 1;
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
 
                 case 1:
                 {
-
+/*
                     outerArguments.clear();
 
 
@@ -391,6 +391,21 @@ int main(int argc, char *argv[])
                         V[2] = resSL.at(7).toDouble();
                         break;
                     }
+                    */
+
+                calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
+                qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+                tii+=state[0];
+                calceph_scompute((int)tii, tii-(int)tii, plaNumEPM, centr_num, state);
+                X0[0] = state[0];
+                X0[1] = state[1];
+                X0[2] = state[2];
+                V0[0] = state[3];
+                V0[1] = state[4];
+                V0[2] = state[5];
+
+
+
                     break;
                 }
                 case 2:

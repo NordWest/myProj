@@ -288,10 +288,6 @@ int main(int argc, char *argv[])
     eparam->NV = esett->value("general/NV", 6).toInt();     //Number of dependent Variable
     eparam->LL = esett->value("general/LL", 9).toInt();
     eparam->XL = esett->value("general/XL", 1.0e-9).toDouble();
-    //eparam->t0 = esett->value("t0", 0.0).toDouble();
-    //eparam->te = esett->value("te", 3.0e+3).toDouble();
-    //eparam->stp = esett->value("stp", 100.0).toDouble();
-    //eparam->shag = esett->value("shag", 10.0).toDouble();
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
@@ -332,7 +328,7 @@ int main(int argc, char *argv[])
     //int iNum, jNum;
     //nofzbody=0;
     //nofjbody=0;
-    p=0;
+/*    p=0;
     mass = new double[iniList.size()-1];
 
     for(i=0; i<iniList.size(); i++)
@@ -340,15 +336,15 @@ int main(int argc, char *argv[])
         if(iniList.at(i)->identity==Advisor::collapsorFixed)continue;
         /*{
             if((QString().compare(QString(iniList.at(i)->name), "Sun", Qt::CaseInsensitive))|(QString().compare(QString(iniList.at(i)->name), "Sol", Qt::CaseInsensitive)))continue;
-        }*/
+        }/
         pList << iniList.at(i);
         mass[p++] = iniList.at(i)->mass;
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
         //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
     }
 
-    nofzbody=pList.size();
-/*
+    nofzbody=pList.size();*/
+
     nbobjStruct* nb_rec;
 
     for(i=0; i<iniList.size(); i++)
@@ -365,7 +361,8 @@ int main(int argc, char *argv[])
         else
         {
             pList << iniList.at(i);
-            mass[p++] = iniList.at(i)->mass;
+            //if(pList.at(i)->identity==Advisor::ordinary) mass[p++] = iniList.at(i)->mass;
+            //else
 
         }
         //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
@@ -375,8 +372,12 @@ int main(int argc, char *argv[])
     nofzbody=pList.size();
     mass = new double[nofzbody];
 
-    for(i=0; i<nofzbody; i++) mass[i] = pList.at(i)->mass;
-*/
+    for(i=0; i<nofzbody; i++)
+    {
+        if(pList.at(i)->identity==Advisor::ordinary) mass[i] = pList.at(i)->mass;
+        else mass[i] = -1.0;
+    }
+
 
 
     N = (nofzbody)*3;

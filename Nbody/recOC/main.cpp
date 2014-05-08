@@ -13,6 +13,46 @@
 #include "./../../libs/observ.h"
 #include "./../../libs/myDomMoody.h"
 
+static QDataStream* clog0 = 0;
+void customMessageHandler(QtMsgType type, const char* msg)
+{
+    static const char* msgType[] =
+    {
+        "Debug    : ",
+        "Warning  : ",
+        "Critical : ",
+        "Fatal    : "
+    };
+
+    static QTextStream cout(stdout);
+    static QTextStream cerr(stderr);
+
+    cerr << msgType[type] << msg << endl;
+    if(clog0 && clog0->device())
+        *clog0 << type << msg;
+    if(type == QtFatalMsg)
+    {
+        cerr << "aborting..." << endl;
+
+#if defined(Q_CC_MSVC) && defined(QT_DEBUG) && defined(_CRT_ERROR) && defined(_DEBUG)
+        int reportMode = _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_WNDW);
+        _CrtSetReportMode(_CRT_ERROR, reportMode);
+        int ret = _CrtDbgReport(_CRT_ERROR, __FILE__, __LINE__, QT_VERSION_STR, msg);
+        if(ret == 0 && reportMode & _CRTDBG_MODE_WNDW)
+            return;
+        else if(ret == 1)
+            _CrtDbgBreak();
+#endif
+
+#if defined(Q_OS_UNIX) && defined(QT_DEBUG)
+        abort();
+#else
+        exit(1);
+#endif
+    }
+}
+
+
 
 
 QString bspName, leapName;
@@ -30,6 +70,12 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    QFile* logFile = new QFile("recoc.log");
+    if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
+        clog0 = new QDataStream(logFile);
+    QTextStream logstr(logFile);
+
+    setlocale(LC_NUMERIC, "C");
 
     double timei, time0, time1, dtime;
     int nstep;
@@ -72,7 +118,6 @@ int main(int argc, char *argv[])
 
     spkRecord *spkRec;
     QList <spkRecord *> spkList;
-
 
     QString part_file, mop_file;
 
@@ -176,25 +221,21 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
-
     QString inFileName(argv[1]);
+    QString bigFileName;
     QFileInfo fi(inFileName);
     QString dxFileName = QString("%1_dr.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
     QString mpcFileName = QString("%1_mpc.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
     QString spkFileName = QString("%1_spk.txt").arg(fi.absoluteFilePath().section(".", 0, -2));
 
-    //QString inFileName("small.log");
     QFile inFile(inFileName);
     inFile.open(QFile::ReadOnly);
     QTextStream inStm(&inFile);
 
-    QString bigFileName("big.log");
     QFile bigFile(bigFileName);
     bigFile.open(QFile::ReadOnly);
     QTextStream bigStm(&bigFile);
 
-    //QString dxFileName("small_dr.txt");
     QFile dxFile(dxFileName);
     dxFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream dxStm(&dxFile);
@@ -236,7 +277,6 @@ int main(int argc, char *argv[])
         V[2] = dataSL.at(7).toDouble();
 
         qDebug() << QString("X: %1\t%2\t%3\nV: %4\t%5\t%6\n").arg(X[0]).arg(X[1]).arg(X[2]).arg(V[0]).arg(V[1]).arg(V[2]);
-
 
         jdUTC = TDB2UTC(time);
         sJD = QString("%1").arg(jdUTC, 15, 'f',7);
@@ -301,6 +341,7 @@ int main(int argc, char *argv[])
                      }
                 }
                 else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER_SUN, SK);
+                /*
                 if(useEPM)
                 {
                     status = calc_EPM(3, epm_planet_num("Sun"), (int)time, time-(int)time, XEB0, VEB0);
@@ -311,6 +352,7 @@ int main(int argc, char *argv[])
                      }
                 }
                 else nbody->detState(&XEB0[0], &XEB0[1], &XEB0[2], &VEB0[0], &VEB0[1], &VEB0[2], time, GEOCENTR_NUM, CENTER_BARY, SK);
+                */
             }
                 break;
             case 1:
@@ -350,7 +392,6 @@ int main(int argc, char *argv[])
             }
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
-
 
             switch(bigType)
             {
@@ -402,13 +443,9 @@ int main(int argc, char *argv[])
             spkStm.setDevice(&spkFile);
             qDebug() << QString("name: %1\n").arg(spkFileName);
 
-
-
-
             spkStm << QString("%1, %2, %3, %4, %5, %6, %7\n").arg(time, 15, 'f', 8).arg(X1[0], 18, 'g', 12).arg(X1[1], 18, 'g', 12).arg(X1[2], 18, 'g', 12).arg(V1[0]/SECINDAY, 18, 'g', 12).arg(V1[1]/SECINDAY, 18, 'g', 12).arg(V1[2]/SECINDAY, 18, 'g', 12);
 
             spkFile.close();
-
 
             if(detMPC)
             {
@@ -439,8 +476,6 @@ int main(int argc, char *argv[])
 
                 mpcStm << astr << "\n";
             }
-
-
         }
 
         dX[0] = X[0] - X0[0];
@@ -462,8 +497,6 @@ int main(int argc, char *argv[])
 
     mpcFile.close();
 
-//    exit(0);
-
 ////////////////////////////////sort SPK
     double tmin, pmin;
     int sz, j, p;
@@ -472,6 +505,8 @@ int main(int argc, char *argv[])
     SpiceDouble sgT0, sgT1;
     SpiceDouble *segmentState;
     SpiceDouble *segmentEphs;
+
+    qDebug() << QString("\n////////////////////////////////sort SPK\n\n");
 
     QDir().remove("./smp.spk");
 
@@ -528,7 +563,6 @@ int main(int argc, char *argv[])
         if(!initMpc) mCat.GetRecName(name.toAscii().data());
         bodyNum = 2000000 + mCat.record->getNum();
 
-
         sJD = QString("%1 JD TDB").arg(spkList.first()->time, 15, 'f',7);
         str2et_c(sJD.toAscii().data(), &sgT0);
         sJD = QString("%1 JD TDB").arg(spkList.last()->time, 15, 'f',7);
@@ -565,8 +599,6 @@ int main(int argc, char *argv[])
 
     spkcls_c(handle);
 ////////////////////////////////////////////////////////////////////
-
-
 
     inFile.close();
     bigFile.close();
@@ -610,25 +642,18 @@ int spk2mpc(double time0, double dtime, int nstep)
 
     for(p=0; p<szObj; p++)
     {
-
-
         bodyNum = body_num(pList[p]->name.data());
 
         if(bodyNum!=-1)continue;
-        //if(bodyNum==-1)
-        //{
-            if(mCat.GetRecName((char*)pList[p]->name.data())) continue;
-            bodyNum = 2000000 + mCat.record->getNum();
-        //}
-        //bods2c_c(pList[p]->name.data(), &bodyNum, &found);
+
+        if(mCat.GetRecName((char*)pList[p]->name.data())) continue;
+        bodyNum = 2000000 + mCat.record->getNum();
+
         qDebug() << QString("%1: %2\n").arg(pList[p]->name.data()).arg(bodyNum);
         objName = QString("%1").arg(bodyNum);
 
         for(i=1; i<nstep-1; i++)
         {
-//            mopSt = mopFile.readCyclingState();
-//            qDebug() << "mopSt:" << mopSt << "\n";
-//            sz = mopSt->getItemCount();
             timei = time0+dtime*(i+0.5);
 
             sJD = QString("%1 JD TDB").arg(timei, 15, 'f',7);

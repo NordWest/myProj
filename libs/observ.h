@@ -14,6 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+int det_vect_radec(double *obj2ssb, double *obs2ssb, double *raRad, double *decRad, double *range);
+
 class observ
 {
 public:

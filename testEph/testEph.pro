@@ -14,7 +14,6 @@ CONFIG   -= app_bundle
 QT           += xml
 TEMPLATE = app
 
-
 SOURCES += main.cpp \
     ../libs/orbit.cpp \
     ../libs/orbcat.cpp \
@@ -31,9 +30,9 @@ SOURCES += main.cpp \
 #    ../libs/astro.cpp \
     ../libs/rec.cpp \
     ../libs/commetorbcat.cpp \
-    ../libs/force_ev.cpp \
-    ../libs/dele.cpp \
-    ../libs/rada.cpp \
+#    ../libs/force_ev.cpp \
+#    ../libs/dele.cpp \
+#    ../libs/rada.cpp \
     ../libs/redStat.cpp \
     ../libs/mpcs.cpp \
     ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.cpp \
@@ -43,9 +42,10 @@ SOURCES += main.cpp \
     ./../libs/moody/capsule/capsuleBase/mopfile/MopState.cpp \
     ./../libs/moody/capsule/capsuleBase/particle/Particle.cpp \
     ../libs/calc_epm.cpp \
-    ../libs/time_a.cpp \
-    ../libs/EphemUtil/ephem_util.c \
-    ../libs/EphemUtil/ephem_read.cpp
+    ../libs/time_a.cpp  \
+    ../libs/filedynstr.cpp
+#    ../libs/EphemUtil/ephem_util.c \
+#    ../libs/EphemUtil/ephem_read.cpp
 
 HEADERS += ../libs/orbit.h \
     ../libs/orbcat.h \
@@ -59,14 +59,14 @@ HEADERS += ../libs/orbit.h \
     ../libs/coord.h \
     ../libs/sscat.h \
     ../libs/sscatFB.h \
-    ../libs/astro.h \
+#    ../libs/astro.h \
     ../libs/rec.h \
     ../libs/commetorbcat.h \
-    ../libs/mb.h \
-    ../libs/ephem_types.h \
-    ../libs/dele.h \
-    ../libs/ephem_types.h \
-    ../libs/rada.h \
+#    ../libs/mb.h \
+#    ../libs/ephem_types.h \
+#    ../libs/dele.h \
+#    ../libs/ephem_types.h \
+#    ../libs/rada.h \
     ../libs/redStat.h \
     ../libs/mpcs.h \
     ./../libs/moody/capsule/capsuleBase/tinyxml/ticpp.h \
@@ -109,9 +109,10 @@ HEADERS += ../libs/orbit.h \
     ../libs/cspice/f2cMang.h \
     ../libs/cspice/f2c.h \
     ../libs/time_a.h \
-    ../libs/EphemUtil/ephem_util.h \
-    ../libs/EphemUtil/ephem_types.h \
-    ../libs/EphemUtil/ephem_read.h
+    ../libs/filedynstr.h
+#    ../libs/EphemUtil/ephem_util.h \
+#    ../libs/EphemUtil/ephem_types.h \
+#    ../libs/EphemUtil/ephem_read.h
 
 #unix:LIBS+=./../libs/unix/libmb.a
 win32:LIBS+=./../libs/win32/libmb.a
@@ -121,4 +122,4 @@ win32:LIBS+=./../libs/win32/libastro.a
 unix:LIBS+=-lcalceph
 
 unix:LIBS+= ./../libs/unix/cspice.a
-unix:LIBS += -lmb -lastro
+unix:LIBS += -lmb -lastro -lephem_read -ldele -lcspice
