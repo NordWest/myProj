@@ -11,6 +11,8 @@
 #include "./../../libs/mpccat.h"
 #include <SpiceUsr.h>
 
+#include <calceph.h>
+
 #include <QDebug>
 #include <QSettings>
 #include <QDataStream>
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
     QString sJD;
 
     double dist, vel, jdUTC, jdTDB, jdTDT, et;
-    double time0, time1, dtime, timestep;
+    double time0, timei, time1, dtime, timestep;
     int nstep;
     mpccat mCat;
     mpcrec mRec;
@@ -392,11 +394,10 @@ int main(int argc, char *argv[])
                         break;
                     }
                     */
-
                 calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
                 qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
-                tii+=state[0];
-                calceph_scompute((int)tii, tii-(int)tii, plaNumEPM, centr_num, state);
+                timei = time0 + state[0];
+                calceph_scompute((int)timei, timei-(int)timei, epm_planet_num(name), centr_num, state);
                 X0[0] = state[0];
                 X0[1] = state[1];
                 X0[2] = state[2];
@@ -421,9 +422,9 @@ int main(int argc, char *argv[])
                         X[0] = state[0]/AUKM;
                         X[1] = state[1]/AUKM;
                         X[2] = state[2]/AUKM;
-                        V[0] = state[3]/AUKM;
-                        V[1] = state[4]/AUKM;
-                        V[2] = state[5]/AUKM;
+                        V[0] = state[3]/AUKM*SECINDAY;
+                        V[1] = state[4]/AUKM*SECINDAY;
+                        V[2] = state[5]/AUKM*SECINDAY;
                     }
                 }
                     break;

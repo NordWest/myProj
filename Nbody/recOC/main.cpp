@@ -203,7 +203,11 @@ int main(int argc, char *argv[])
     obsPos.init(obsFile, bspName, leapName);
     obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
 */
-    obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    if(obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data()))
+    {
+        qDebug() << "\n\nError init obsPos\n\n";
+        exit(1);
+    }
     obsPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data());
 
     //mpccat mCat;

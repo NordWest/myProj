@@ -265,6 +265,7 @@ int main(int argc, char *argv[])
     t0 = sett->value("time/time0", 0).toDouble();
     dt = sett->value("time/timestep", 1).toDouble();
     nstep = sett->value("time/nstep", 1).toDouble();
+    int printstep = sett->value("time/printstep", 1).toInt();
 
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
 
@@ -475,17 +476,13 @@ int main(int argc, char *argv[])
     double vmul;
     vmul = pow(-1, dt<0);
 
-   // p = 0;
+    //p = 0;
     for(i=0; i<nofzbody; i++)
     {
-        //mass[i] = pList[i]->mass;
-//        if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
-
         name = QString(pList[i]->name.data());
 
         if(useEPM) plaNum = epm_planet_num(name);
         else plaNum = planet_num(name.toAscii().data());
-        //if(plaNum==10) continue;
         p = i*3;
 
         X[p] = pList[i]->x;
@@ -496,57 +493,15 @@ int main(int argc, char *argv[])
         V[p+2] = pList[i]->zd*vmul;
 
 
-/*
-        if(useMoody)
-        {
-            if(getMopName(mState, mItem, name)!=-1)
-            {
-                //mItem = mState->getMopItem(i);
-                Xm[i*3] = mItem.x/AUKM/1000;
-                Xm[i*3+1] = mItem.y/AUKM/1000;
-                Xm[i*3+2] = mItem.z/AUKM/1000;
-                Vm[i*3] = mItem.xd*SECINDAY/1000/AUKM;
-                Vm[i*3+1] = mItem.yd*SECINDAY/1000/AUKM;
-                Vm[i*3+2] = mItem.zd*SECINDAY/1000/AUKM;
 
-                //saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
-            }
-        }
-*/
         if(plaNum!=-1)
         {
-            /*
-            if(useEPM)
-            {
-                status = calc_EPM(plaNum, centr_num, (int)t0, t0 - (int)t0, &X0[p], &V0[p]);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else
-            {
-                //nbody->detR(&X0[p+0], &X0[p+1], &X0[p+2], t0, plaNum, 0, CENTER, SK);
-                //nbody->detR(&V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, 1, CENTER, SK);
-                nbody->detState(&X0[p+0], &X0[p+1], &X0[p+2], &V0[p+0], &V0[p+1], &V0[p+2], t0, plaNum, CENTER, SK);
-            }*/
-
             saveResults(t0, X, V, p, name, resStmBig, dt<0);
-
-            //if(useMoody) saveResultsM(t0, Xm, Vm, X0, V0, i*3, name, resmStm, dxmStm);
-
-
         }
         else
         {
             saveResults(t0, X, V, p, name, resStmSmall, dt<0);
-
         }
-
-
-
-
     }
 
 
@@ -577,16 +532,12 @@ int main(int argc, char *argv[])
     int jday;
     double pday;
 
-
-
-
-    //QTime timeStart = QTime.currentTime();
-    //qDebug() << QString("Time start: %1\n").arg(timeStart.toString("hh:mm:ss.zzz"));
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
 
     do
     {
+        p=0;
         for(nt=0; nt<nstep; nt++)
         {
 
@@ -615,375 +566,49 @@ int main(int argc, char *argv[])
             LF_int(&LF, X, V);
             qDebug() << QString("LF: %1\n").arg(LF);
             */
-/*
-            if(useEPM)
-            {
-                status = calc_EPM(3, 13, (int)TF, TF - (int)TF, emb, embv);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-    /*
-            nbody->detR(&ssb[0], &ssb[1], &ssb[2], TF, SS_BARY, 0, CENTER, SK);
-            nbody->detR(&ssbv[0], &ssbv[1], &ssbv[2], TF, SS_BARY, 1, CENTER, SK);
-            qDebug() << QString("ssb: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
-    */
- /*           muis = 0;
 
-            for(teloi=0, i=0; teloi<nofzbody; teloi++, i+=3)
-            {
-                mui1=0.0;
-
-                for(teloj=0, j=0; teloj<nofzbody; teloj++, j+=3)
-                {
-                    if(teloi!=teloj) mui1+=pow(pList[teloj]->mass, -1.0)/sqrt(pow(X[j+0] - X[i+0], 2) + pow(X[j+1] - X[i+1], 2) + pow(X[j+2] - X[i+2], 2));
-                }
-                mui1 *= 1.0/(2.0*CAU*CAU);
-                mui1 = 1.0 + (V[i]*V[i]+V[i+1]*V[i+1]+V[i+2]*V[i+2])/(2.0*CAU*CAU) - mui1;
-
-                mui = pow(pList[teloi]->mass, -1.0)*mui1;
-
-                ssb[0] += mui*X[i];
-                ssb[1] += mui*X[i+1];
-                ssb[2] += mui*X[i+2];
-                muis += mui;
-            }
-
-            ssb[0] /= muis;
-            ssb[1] /= muis;
-            ssb[2] /= muis;
-*/
             //i=0;
-            for(teloi=0; teloi<pList.size(); teloi++)
+            if(p++==printstep)
             {
-                //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
-                name = QString(pList[teloi]->name.data());
-                if(useEPM) plaNum = epm_planet_num(name);
-                else plaNum = planet_num(name.toAscii().data());
-    /*
-                X[i]+=ssb[0];
-                X[i+1]+=ssb[1];
-                X[i+2]+=ssb[2];
-    */
-                i = teloi*3;
-                if(useMoody)
+                for(teloi=0; teloi<pList.size(); teloi++)
                 {
-                    if(getMopName(mState, mItem, name)!=-1)
-                    {
-                        //mItem = mState->getMopItem(teloi);
-
-                        Xm[i] = mItem.x/AUKM/1000;
-                        Xm[i+1] = mItem.y/AUKM/1000;
-                        Xm[i+2] = mItem.z/AUKM/1000;
-                        Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
-                        Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
-                        Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
-
-                        //saveResultsM(TF-t0, Xm, Vm, X, V, i, name, resmStm, dxmStm);
-
-
-                    }
-                }
-
-
-                if(plaNum!=-1)
-                {
-                    saveResults(TF, X, V, i, name, resStmBig, dt<0);
-                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
-/*
-                    if(useEPM)
-                    {
-                        status = calc_EPM(plaNum, centr_num, jday, pday, &X0[i], &V0[i]);
-                         if(!status)
-                         {
-                             qDebug() << QString("error EPM\n");
-                             return 1;
-                         }
-                         /*if(plaNum==3)
-                         {
-                             for(int k=0; k<3; k++)
-                             {
-                                 X0[i+0] -= emb[0];
-                                 X0[i+1] -= emb[1];
-                                 X0[i+2] -= emb[2];
-                                 V0[i+0] -= embv[0];
-                                 V0[i+1] -= embv[1];
-                                 V0[i+2] -= embv[2];
-                             }
-                         }/
-                    }
-                    else
-                    {
-                        //nbody->detR(&X0[i+0], &X0[i+1], &X0[i+2], TF, plaNum, 0, CENTER, SK);
-                        //nbody->detR(&V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, 1, CENTER, SK);
-                        nbody->detState(&X0[i+0], &X0[i+1], &X0[i+2], &V0[i+0], &V0[i+1], &V0[i+2], TF, plaNum, CENTER, SK);
-                    }
-/*
-
-                    X[i]-=ssb[0];
-                    X[i+1]-=ssb[1];
-                    X[i+2]-=ssb[2];
-                    V[i]-=ssbv[0];
-                    V[i+1]-=ssbv[1];
-                    V[i+2]-=ssbv[2];
-*/
-                    /*
-                    if(plaNum==EARTH_NUM)
-                    {
-                        T = (TF - 2451545)/36525.0;
-                        ksi = mas2rad((2306.2181*T + 0.30188*T*T + 0.017998*T*T*T)*1000);
-                        teta = mas2rad((2004.3109*T - 0.42665*T*T - 0.041833*T*T*T)*1000);
-                        zet = mas2rad((2306.2181*T + 1.09468*T*T + 0.018203*T*T*T)*1000);
-/*
-                        xt = (-sin(ksi)*sin(zet) + cos(ksi)*cos(zet)*cos(teta))*X[i] + (-cos(ksi)*sin(zet) - sin(ksi)*cos(zet)*cos(teta))*X[i+1] + (-cos(zet)*sin(teta))*X[i+2];
-                        yt = (sin(ksi)*cos(zet) + cos(ksi)*sin(zet)*cos(teta))*X[i] + (cos(ksi)*cos(zet) - sin(ksi)*sin(zet)*cos(teta))*X[i+1] + (-sin(zet)*sin(teta))*X[i+2];
-                        zt = (cos(ksi)*sin(teta))*X[i] + (-sin(ksi)*sin(teta))*X[i+1] + (cos(teta))*X[i+2];
-  /
-                        P[0] = (-sin(ksi)*sin(zet) + cos(ksi)*cos(zet)*cos(teta));
-                        P[1] = (-cos(ksi)*sin(zet) - sin(ksi)*cos(zet)*cos(teta));
-                        P[2] = (-cos(zet)*sin(teta));
-                        P[3] = (sin(ksi)*cos(zet) + cos(ksi)*sin(zet)*cos(teta));
-                        P[4] = (cos(ksi)*cos(zet) - sin(ksi)*sin(zet)*cos(teta));
-                        P[5] = (-sin(zet)*sin(teta));
-                        P[6] = (cos(ksi)*sin(teta));
-                        P[7] = (-sin(ksi)*sin(teta));
-                        P[8] = (cos(teta));
-
-                        xt = P[0]*X[i] + P[1]*X[i+1] + P[2]*X[i+2];
-                        yt = P[3]*X[i] + P[4]*X[i+1] + P[5]*X[i+2];
-                        zt = P[6]*X[i] + P[7]*X[i+1] + P[8]*X[i+2];
- /*
-                        xt = P[0]*X[i] + P[3]*X[i+1] + P[6]*X[i+2];
-                        yt = P[1]*X[i] + P[4]*X[i+1] + P[7]*X[i+2];
-                        zt = P[2]*X[i] + P[5]*X[i+1] + P[8]*X[i+2];
-/
-                        qDebug() << QString("prec: %1").arg(sqrt(pow(xt-X[i], 2.0)+pow(yt-X[i+1], 2.0)+pow(zt-X[i+2], 2.0)));
-                        X[i] = xt;
-                        X[i+1] = yt;
-                        X[i+2] = zt;
-                    }
-*/
-
-                    //if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-                    //{
-                        //saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
-                    //}
-                    /*else
-                    {
-
-                        X[i]=X0[i];
-                        X[i+1]=X0[i+1];
-                        X[i+2]=X0[i+2];
-
-                        V[i]=V0[i];
-                        V[i+1]=V0[i+1];
-                        V[i+2]=V0[i+2];
-
-                    }
-                    */
-                }
-                else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-                {
-
-                    saveResults(TF, X, V, i, name, resStmSmall, dt<0);
-                    if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
-/*
-                    if(initMpc) break;
-                    if(mCat.GetRecName(name.simplified().toAscii().data())) break;
-
-                    TDB2UTC(TF, &jdUTC);
-
-                    if(useEPM)
-                    {
-                        status = calc_EPM(EARTH, centr_num, (int)TF, TF - (int)TF, XE0, VE0);
-                         if(!status)
-                         {
-                             qDebug() << QString("error EPM\n");
-                             return 1;
-                         }
-                    }
-                    else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
-                    //nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], TF, GEOCENTR_NUM, CENTER, SK);
-                    qDebug() << QString("%1: %2\t%3\t%4\t%5\t%6\t%7\n").arg(TF, 13, 'f', 4).arg(XE0[0], 22, 'e', 15).arg(XE0[1], 22, 'e', 15).arg(XE0[2], 22, 'e', 15).arg(VE0[0], 22, 'e', 15).arg(VE0[1], 22, 'e', 15).arg(VE0[2], 22, 'e', 15);
-
-                    if(useMiriade)
-                    {
-                        outerArguments << QString("-name=\"%1\"").arg(name.simplified());
-                        sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-                        outerArguments << QString("-ep=%1").arg(sJD);
-
-                        outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                        outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                        outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                        outerProcess.start(miriadeProcData.name, outerArguments);
-
-                        if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                        {
-                            qDebug() << "\nmiriadeProc finish error\n";
-                            break;
-                        }
-
-                        QTextStream objStream(outerProcess.readAllStandardOutput());
-
-                        while (!objStream.atEnd())
-                        {
-                            objDataStr = objStream.readLine();
-                            qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                            if(objDataStr.size()<1) continue;
-                            if(objDataStr.at(0)=='#') continue;
-
-                            resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                            if(resSL.size()<10) continue;
-                            X0[i+0] = resSL.at(1).toDouble();
-                            X0[i+1] = resSL.at(2).toDouble();
-                            X0[i+2] = resSL.at(3).toDouble();
-                            V0[i+0] = resSL.at(8).toDouble();
-                            V0[i+1] = resSL.at(9).toDouble();
-                            V0[i+2] = resSL.at(10).toDouble();
-
-                            X0[i+0] += XE0[0];
-                            X0[i+1] += XE0[1];
-                            X0[i+2] += XE0[2];
-                            V0[i+0] += VE0[0];
-                            V0[i+1] += VE0[1];
-                            V0[i+2] += VE0[2];
-
-
-                        }
-                        saveResults(TF, X, V, X0, V0, i, name, resStm, dxStm, deStm);
-                    }
-                    else saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
-
-                    detRDnumGC(&ra, &de, X[i], X[i+1], X[i+2], XE0[0], XE0[1], XE0[2], 0, 0, 0);
-                    //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
-
-
-                    //ra = ra - ra0;
-                    //de = de - de0;
-                    mrec.r = ra;
-                    mrec.d = de;
-                    mrec.eJD = jdUTC;
-                    mrec.num = 1;
-                    mCat.record->getNumStr(mrec.head->Snum);
-                    //strcpy(, mCat.record->getNumStr(>number);
-                    mrec.tail->set_numOfObs("500");
-                    mrec.toString(astr);
-
-                    mpcStm << astr << "\n";
-
+                    //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+                    name = QString(pList[teloi]->name.data());
+                    if(useEPM) plaNum = epm_planet_num(name);
+                    else plaNum = planet_num(name.toAscii().data());
+                    i = teloi*3;
                     if(useMoody)
                     {
-                        detRDnumGC(&ra, &de, Xm[i], Xm[i+1], Xm[i+2], Xm[6], Xm[7], Xm[8], 0, 0, 0);
-                        //detRDnumGC(&ra0, &de0, X0[i], X0[i+1], X0[i+2], X[9], X[10], X[11], 0, 0, 0);
-
-                        //TDB2UTC(t0, &jdUTC);
-                        //ra = ra - ra0;
-                        //de = de - de0;
-                        mrec.r = ra;
-                        mrec.d = de;
-                        mrec.eJD = jdUTC;
-                        mrec.num = 1;
-                        mCat.record->getNumStr(mrec.head->Snum);
-                        //strcpy(mrec.head->Snum, mCat.record->number);
-                        mrec.tail->set_numOfObs("500");
-                        mrec.toString(astr);
-
-                        mpcStmM << astr << "\n";
+                        if(getMopName(mState, mItem, name)!=-1)
+                        {
+                            Xm[i] = mItem.x/AUKM/1000;
+                            Xm[i+1] = mItem.y/AUKM/1000;
+                            Xm[i+2] = mItem.z/AUKM/1000;
+                            Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                            Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                            Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+                          }
                     }
 
-                    saveResults(TF, X, V, NULL, NULL, i, name, resStm, dxStm, deStm);
-                    //qDebug() << QString("OC %1: %2\t%3\n").arg(name).arg(rad2mas(ra)).arg(rad2mas(de));
-                    */
-                }
 
-                //if(useMoody) saveResults(TF, Xm, Vm, name, resmStm);
-
-
-
-                //i+=3;
-
-    /*
-                Ri = sqrt(X[i+0]*X[i+0] + X[i+1]*X[i+1] + X[i+2]*X[i+2]);
-                Vi = sqrt(V[i+0]*V[i+0] + V[i+1]*V[i+1] + V[i+2]*V[i+2])*AUKM/86400.0;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 13, 'f', 4).arg(X[i], 13, 'f', 9).arg(X[i+1], 13, 'f', 9).arg(X[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V[i], 13, 'f', 9).arg(V[i+1], 13, 'f', 9).arg(V[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
-
-
-
-                r[0] = X[i]-X0[i];
-                r[1] = X[i+1]-X0[i+1];
-                r[2] = X[i+2]-X0[i+2];
-
-                Ri = sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
-
-                v[0] = V[i]-V0[i];
-                v[1] = V[i+1]-V0[i+1];
-                v[2] = V[i+2]-V0[i+2];
-
-                dxStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9\n").arg(TF, 12, 'f', 4).arg(r[0], 13, 'f', 9).arg(r[1], 13, 'f', 9).arg(r[2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(v[0], 13, 'f', 9).arg(v[1], 13, 'f', 9).arg(v[2], 13, 'f', 9).arg(pList[teloi]->name.data());
-
-                Ri = sqrt(X0[i+0]*X0[i+0] + X0[i+1]*X0[i+1] + X0[i+2]*r[i+2]);
-
-                deStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|1\n").arg(TF, 12, 'f', 4).arg(X0[i], 13, 'f', 9).arg(X0[i+1], 13, 'f', 9).arg(X0[i+2], 13, 'f', 9).arg(Ri, 13, 'f', 9).arg(V0[i], 13, 'f', 9).arg(V0[i+1], 13, 'f', 9).arg(V0[i+2], 13, 'f', 9).arg(pList[teloi]->name.data());
-                */
-            }
-/*
-            for(i=0; i<pList.size(); i++)
-            {
-                //mass[i] = pList[i]->mass;
-                if(pList.at(i)->interactionPermission==Advisor::interactNONE) continue;
-
-                name = QString(pList[i]->name.data());
-
-                if(useEPM) plaNum = epm_planet_num(name);
-                else plaNum = planet_num(name.toAscii().data());
-                //if(plaNum==10) continue;
-/*
-                X[p] = pList[i]->x;
-                X[p+1] = pList[i]->y;
-                X[p+2] = pList[i]->z;
-                V[p] = pList[i]->xd;
-                V[p+1] = pList[i]->yd;
-                V[p+2] = pList[i]->zd;
-/
-
-                p = i*3;
-
-
-                if(plaNum!=-1)
-                {
-                    if(useEPM)
+                    if(plaNum!=-1)
                     {
-                        status = calc_EPM(plaNum, centr_num, (int)TF, TF - (int)TF, &X[p], &V[p]);
-                         if(!status)
-                         {
-                             qDebug() << QString("error EPM\n");
-                             return 1;
-                         }
+                        saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                        if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
+
                     }
-                    else
+                    else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {
-                        nbody->detR(&X[p+0], &X[p+1], &X[p+2], TF, plaNum, 0, CENTER, SK);
-                        nbody->detR(&V[p+0], &V[p+1], &V[p+2], TF, plaNum, 1, CENTER, SK);
+
+                        saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                        if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
+
                     }
 
-                    //saveResults(t0-t0, X, V, X0, V0, p, name, resStm, dxStm, deStm);
                 }
-
-                //p+=3;
+                p=0;
             }
 
-/
-
-            CM_int(CM0, X0, V0);
-            qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
-            S_int(S0, X0, V0);
-            qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
-            LF_int(&LF0, X0, V0);
-            qDebug() << QString("LF0: %1\n").arg(LF0);
-*/
             if(useMoody) mState = mFile->readState();
 
             //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
@@ -1000,6 +625,47 @@ int main(int argc, char *argv[])
         obrat = 1;
 
     }while(1);
+
+    if(p)
+    {
+        for(teloi=0; teloi<pList.size(); teloi++)
+        {
+            //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+            name = QString(pList[teloi]->name.data());
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
+            i = teloi*3;
+            if(useMoody)
+            {
+                if(getMopName(mState, mItem, name)!=-1)
+                {
+                    Xm[i] = mItem.x/AUKM/1000;
+                    Xm[i+1] = mItem.y/AUKM/1000;
+                    Xm[i+2] = mItem.z/AUKM/1000;
+                    Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                    Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                    Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+                  }
+            }
+
+
+            if(plaNum!=-1)
+            {
+                saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
+
+            }
+            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+            {
+
+                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
+
+            }
+
+        }
+        p=0;
+    }
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
