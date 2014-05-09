@@ -93,17 +93,20 @@ int observ::initObservatory(char *fname_obs)
 observ::observ()
 {
 	this->obs = new observatory();
+#ifdef DELE_LIB
 	this->place = new dele();
-
+#endif
 	mass = new double[20];
 }
 
 observ::~observ()
 {
 	delete(this->obs);
+#ifdef DELE_LIB
 	delete(this->place);
+#endif
 }
-
+#ifdef DELE_LIB
 int observ::initDELE(char *fname_dele)
 {
         if(this->place->init(fname_dele)) return 2;
@@ -114,23 +117,74 @@ int observ::initDELE(char *fname_dele)
                 //mass[i-8] = H2.data.constValue[i];//rc.value;
         }
 
+        ephType=0;
+
         return 0;
 }
-
-int observ::init(char *fname_obs, char *fname_dele_bin)
+#endif
+int observ::init(char *fname_obs, char *fname_eph, int e_type)
 {
-        if(this->initObservatory(fname_obs)) return 1;
-        if(this->initDELE(fname_dele_bin)) return 2;
+    if(this->initObservatory(fname_obs)) return 1;
+    ephType = e_type;
+    switch(ephType)
+    {
+        case 0:
+#ifdef DELE_LIB
+        {
+            if(this->initDELE(fname_eph)) return 2;
+        }
+#endif
+        break;
+        case 1:
+#ifdef CALCEPH_LIB
+        {
+            int status = !calceph_sopen(fname_eph);
+            centr_num = 11+!center;
+            if(status)
+            {
+                qDebug() << QString("init ephemeride error\n");
+                return 2;
+            }
+        }
+#endif
+        break;
+    }
+    return 0;
+}
 
-        return 0;
+int observ::set_obs_parpam(char *pl_name, int center, int sk, char *nobsy)
+{
+    switch(ephType)
+    {
+        case 0:
+#ifdef DELE_LIB
+        {
+            nplanet = planet_num(pl_name);
+            center = center;
+        }
+#endif
+        break;
+        case 1:
+#ifdef CALCEPH_LIB
+        {
+            nplanet = epm_planet_num(pl_name);
+            centr_num = 11+!center;
+        }
+#endif
+        break;
+    }
+    sk = sk;
+    nobsy = nobsy;
+    return(this->obs->getobsynumO(nobsy));
 }
 
 int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
 {
-	this->nplanet = nplanet;
-	this->center = center;
-	this->nobsy = nobsy;
-	this->sk = sk;
+    nplanet = nplanet;
+    center = center;
+    nobsy = nobsy;
+    sk = sk;
+    centr_num = 11+!center;
 
     return(this->obs->getobsynumO(nobsy));
 }
@@ -157,20 +211,42 @@ int observ::det_observ()
 {
     this->obs->det_state(ctime.UTC());
     int res = 0;
+    double timei = ctime.TDB();
 
-    if(this->place->detState(&this->ox, &this->oy, &this->oz, &this->ovx, &this->ovy, &this->ovz, ctime.TDB(), this->nplanet, this->center, sk)) return 1;
-    if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
 
-    state[0] = ox+obs->x;
-    state[1] = oy+obs->y;
-    state[2] = oz+obs->z;
-    state[3] = ovx+obs->vx;
-    state[4] = ovy+obs->vy;
-    state[5] = ovz+obs->vz;
+    switch(ephType)
+    {
+    case 0:
+        {
+#ifdef DELE_LIB
+        if(this->place->detState(&state[0], &state[1], &state[2], &state[3], &state[4], &state[5], ctime.TDB(), this->nplanet, this->center, sk)) return 1;
+        if(this->place->detRtt(&this->ovxt, &this->ovyt, &this->ovzt, ctime.TDB(), this->nplanet, this->center, sk)) return 3;
+
+
+#endif
+        }
+        break;
+     case 1:
+#ifdef CALCEPH_LIB
+        {
+            //calceph_scompute((int)timei, timei-(int)timei, 16, 0, state);
+            //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+            //timei = time0 + state[0];
+            calceph_scompute((int)timei, timei-(int)timei, nplanet, centr_num, state);
+
+        }
+#endif
+            break;
+    }
+    state[0] += obs->x;
+    state[1] += obs->y;
+    state[2] += obs->z;
+    state[3] += obs->vx;
+    state[4] += obs->vy;
+    state[5] += obs->vz;
 
     return res;
 }
-
 
 int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, double *range, int corr)
 {
@@ -203,6 +279,8 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
     Q[4] = state2sun[4];
     Q[5] = state2sun[5];
 
+    double *stateSun = new double[6];
+    detStatePlanet("sun", 0, 0, stateSun);
     if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
     if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
 
@@ -393,11 +471,42 @@ QString observ::getObsCode()
     return(QString(obs->record->num));
 }
 
+int observ::detStatePlanet(char *pl_name, int cent, int skoord, double *statePL)
+{
+    int pl_num;
+    double timei = ctime.TDB();
+    switch(ephType)
+    {
+    case 0:
+        {
+#ifdef DELE_LIB
+        pl_num = planet_num(pl_name);
+        if(this->place->detState(&statePL[0], &statePL[1], &statePL[2], &statePL[3], &statePL[4], &statePL[5], timei, pl_num, cent, skoord)) return 1;
+#endif
+        }
+
+        break;
+     case 1:
+#ifdef CALCEPH_LIB
+        {
+            pl_num = epm_planet_num(pl_name);
+            //calceph_scompute((int)timei, timei-(int)timei, 16, 0, state);
+            //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+            //timei = time0 + state[0];
+            calceph_scompute((int)timei, timei-(int)timei, pl_num, cent, statePL);
+
+        }
+#endif
+            break;
+    }
+}
+
 int observ::detSunRADEC(double *raS, double *decS)
 {
-    double Xs, Ys, Zs;
-    if(this->place->detR(&Xs, &Ys, &Zs, ctime.TDB(), SUN_NUM, 0, this->center, sk)) return 1;
-    rdsys(raS, decS, Xs-ox, Ys-oy, Zs-oz);
+    double *stateSun = new double[6];
+    detStatePlanet("sun", 0, sk, stateSun);
+    //if(this->place->detR(&Xs, &Ys, &Zs, ctime.TDB(), SUN_NUM, 0, this->center, sk)) return 1;
+    rdsys(raS, decS, stateSun[0]-state[0], stateSun[1]-state[1], stateSun[2]-state[2]);
 	return 0;
 }
 

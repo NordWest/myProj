@@ -125,8 +125,6 @@ int main(int argc, char *argv[])
     QString cfg_file, part_file, mop_file;
 
     QList <ParticleStruct*> pList;
-    //QList <ParticleStruct*> pmList;
-
 
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
@@ -158,10 +156,6 @@ int main(int argc, char *argv[])
     miriadeProcData.waitTime = sett->value("miriadeProcData/waitTime", -1).toInt();
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
-    /*moody
-    cfg_file = sett->value("moody/cfg_file").toString();
-    part_file = sett->value("moody/part_file").toString();
-    mop_file = sett->value("moody/mop_file").toString();*/
     cfg_file = QString("%1/cfg/cfg.xml").arg(moodyDir);
     part_file = QString("%1/particles/particles.xml").arg(moodyDir);
     mop_file = QString("%1/result/moodyProject.mop").arg(moodyDir);
@@ -178,7 +172,6 @@ int main(int argc, char *argv[])
     time1 = time0+dtime*nstep;
 
     makeParamIn(time0, time1, dtime, timestep);
-
 
     nbody = new dele();
 
@@ -212,8 +205,6 @@ int main(int argc, char *argv[])
         furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
         furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
     }
-
-
 
     if(readParticles(confFile, pList, &massType))
     {
@@ -251,34 +242,6 @@ int main(int argc, char *argv[])
     QFile smlFile("mercury6/small.in");
     smlFile.open(QFile::Truncate | QFile::WriteOnly);
     QTextStream smlStm(&smlFile);
-
-    /*double mass[10];/* = {
-                1.0, 5983000.0, 408522.0, 328900.1, 3098700.0, 1047.3908, 3499.2, 22930.0, 19260.0, 1812000.0, 0
-    };/
-
-
-
-    double gmass[10];
-
-    double gms = nbody->headParam("GMS");
-    gmass[9] = gms;
-    mass[9] = 1.0;
-    gmass[2] = nbody->headParam(QString("GMB").arg(i+1).toAscii().data());
-    mass[2] = gms/gmass[2];
-    for(i=0; i<9; i++)
-    {
-        if(i==2) continue;
-        gmass[i] = nbody->headParam(QString("GM%1").arg(i+1).toAscii().data());
-        mass[i] = gms/gmass[i];
-    }
-
-    for(i=0; i<10; i++)
-    {
-        if(si) mass[i] = SUN_MASS_KG/mass[i];
-        qDebug() << QString("mass %1: %2 - %3\n").arg(i).arg(mass[i]).arg(gmass[i]);
-    }
-*/
-
 
     double coefX, coefXD;
     coefX = coefXD = 1.0;
@@ -324,76 +287,26 @@ int main(int argc, char *argv[])
             switch(bigType)
             {
                 case 0:
-
-
-                if(useEPM)
                 {
-                    status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
-                }
-                else
-                {
-                    nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], time0, plaNum, CENTER, SK);
+                    if(useEPM)
+                    {
+                        status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else
+                    {
+                        nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], time0, plaNum, CENTER, SK);
+                    }
                 }
                 break;
 
                 case 1:
                 {
-/*
-                    outerArguments.clear();
 
-
-                    //outerArguments << QString("-name=earth");
-                    outerArguments << QString("-name=%1").arg(name.simplified());
-                    outerArguments << QString("-type=planet");
-                    outerArguments << QString("-observer=@sun");
-                    outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
-                    //outerArguments << QString("-ep=%1").arg(sJD);
-                    //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
-
-                    qDebug() << outerArguments.join(" ") << "\n";
-
-                    outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                    outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                    outerProcess.start(miriadeProcData.name, outerArguments);
-
-                    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                    {
-                        qDebug() << "\nmiriadeProc finish error\n";
-                        break;
-                    }
-
-                    QTextStream ethStream(outerProcess.readAllStandardOutput());
-
-
-                    isObj = 0;
-
-
-                    while (!ethStream.atEnd())
-                    {
-                        objDataStr = ethStream.readLine();
-                        //qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                        if(objDataStr.size()<1) continue;
-                        if(objDataStr.at(0)=='#') continue;
-
-                        resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                        if(resSL.size()<8) continue;
-                        //isObj = 1;
-                        X[0] = resSL.at(1).toDouble();
-                        X[1] = resSL.at(2).toDouble();
-                        X[2] = resSL.at(3).toDouble();
-                        V[0] = resSL.at(5).toDouble();
-                        V[1] = resSL.at(6).toDouble();
-                        V[2] = resSL.at(7).toDouble();
-                        break;
-                    }
-                    */
                 calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
                 qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
                 timei = time0 + state[0];
@@ -428,74 +341,18 @@ int main(int argc, char *argv[])
                     }
                 }
                     break;
-
-            }
-
-            xVect << X;
-            vVect << V;
-            dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
-            vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
-            pList[i]->x = coefX*X[0];
-            pList[i]->y = coefX*X[1];
-            pList[i]->z = coefX*X[2];
-            pList[i]->xd = coefXD*V[0];
-            pList[i]->yd = coefXD*V[1];
-            pList[i]->zd = coefXD*V[2];
-            //if(si) pList[i]->mass = pList[0]->mass/pList[i]->mass;
-
-            if(plaNum!=SUN_NUM)
-            {
-                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[i]->mass);
-                bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
-            }
-            else
-            {
-                Xsun[0] = X[0];
-                Xsun[1] = X[1];
-                Xsun[2] = X[2];
-                Vsun[0] = V[0];
-                Vsun[1] = V[1];
-                Vsun[2] = V[2];
-            }
-
-        }
-        else
-        {
-            /*
-            if(useEPM)
-            {
-                status = calc_EPM(EARTH, centr_num, jday, pday, X0, V0);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else
+            case 3:
             {
 
-                //nbody->detR(&X[0], &X[1], &X[2], time0, plaNum, 0, CENTER, SK);
-                //nbody->detR(&V[0], &V[1], &V[2], time0, plaNum, 1, CENTER, SK);
-                nbody->detState(&X0[0], &X0[1], &X0[2], &V0[0], &V0[1], &V0[2], time0, GEOCENTR_NUM, CENTER, SK);
-            }*/
-
-
-
-
-
-
-                isObj = 0;
-            switch(smlType)
-            {
-            case 1:
-                {
                 outerArguments.clear();
 
 
-                outerArguments << QString("-name=earth");
+                //outerArguments << QString("-name=earth");
+                outerArguments << QString("-name=%1").arg(name.simplified());
                 outerArguments << QString("-type=planet");
                 outerArguments << QString("-observer=@sun");
-                outerArguments << QString("-ep=%1").arg(sJD);
+                outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+                //outerArguments << QString("-ep=%1").arg(sJD);
                 //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
 
                 qDebug() << outerArguments.join(" ") << "\n";
@@ -528,92 +385,55 @@ int main(int argc, char *argv[])
                     resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
                     if(resSL.size()<8) continue;
                     //isObj = 1;
-                    X0[0] = resSL.at(1).toDouble();
-                    X0[1] = resSL.at(2).toDouble();
-                    X0[2] = resSL.at(3).toDouble();
-                    V0[0] = resSL.at(5).toDouble();
-                    V0[1] = resSL.at(6).toDouble();
-                    V0[2] = resSL.at(7).toDouble();
+                    X[0] = resSL.at(1).toDouble();
+                    X[1] = resSL.at(2).toDouble();
+                    X[2] = resSL.at(3).toDouble();
+                    V[0] = resSL.at(5).toDouble();
+                    V[1] = resSL.at(6).toDouble();
+                    V[2] = resSL.at(7).toDouble();
                     break;
                 }
 
 
-                qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
+            }
+            break;
+            }
 
+            xVect << X;
+            vVect << V;
+            dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
+            vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
+            pList[i]->x = coefX*X[0];
+            pList[i]->y = coefX*X[1];
+            pList[i]->z = coefX*X[2];
+            pList[i]->xd = coefXD*V[0];
+            pList[i]->yd = coefXD*V[1];
+            pList[i]->zd = coefXD*V[2];
+            //if(si) pList[i]->mass = pList[0]->mass/pList[i]->mass;
 
-//////////////////////////
-                    outerArguments.clear();
+            if(plaNum!=SUN_NUM)
+            {
+                bigStm << QString(" %1   m=%2 r=20.D0\n").arg(name, 10).arg(pList[i]->mass);
+                bigStm << QString("%1 %2 %3\n%4 %5 %6\n0.0 0.0 0.0\n").arg(X[0], 26, 'e', 20).arg(X[1], 26, 'e', 20).arg(X[2], 26, 'e', 20).arg(V[0], 26, 'e', 20).arg(V[1], 26, 'e', 20).arg(V[2], 26, 'e', 20);
+            }
+            else
+            {
+                Xsun[0] = X[0];
+                Xsun[1] = X[1];
+                Xsun[2] = X[2];
+                Vsun[0] = V[0];
+                Vsun[1] = V[1];
+                Vsun[2] = V[2];
+            }
 
-                    outerArguments << QString("-name=%1").arg(name.simplified());
-
-                    outerArguments << QString("-ep=%1").arg(sJD);
-                    //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
-                    outerArguments << "-type=aster";
-                    //outerArguments << QString("-observer=@sun");
-                    outerArguments << QString("-observer=500");
-                    outerArguments << "-tcoor=2";
-                    outerArguments << "-rplane=1";
-
-                    outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                    outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                    outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                    outerProcess.start(miriadeProcData.name, outerArguments);
-
-                    if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                    {
-                        qDebug() << "\nmiriadeProc finish error\n";
-                        break;
-                    }
-
-                    QTextStream objStream(outerProcess.readAllStandardOutput());
-
-
-
-
-
-                    while (!objStream.atEnd())
-                    {
-                        objDataStr = objStream.readLine();
-                        qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                        if(objDataStr.size()<1) continue;
-                        if(objDataStr.at(0)=='#') continue;
-
-                        resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                        if(resSL.size()<8) continue;
-                        isObj = 1;
-                        X[0] = resSL.at(1).toDouble();
-                        X[1] = resSL.at(2).toDouble();
-                        X[2] = resSL.at(3).toDouble();
-/*
-                        V[0] = resSL.at(5).toDouble();
-                        V[1] = resSL.at(6).toDouble();
-                        V[2] = resSL.at(7).toDouble();
-*/
-                        V[0] = resSL.at(8).toDouble();
-                        V[1] = resSL.at(9).toDouble();
-                        V[2] = resSL.at(10).toDouble();
-
-                        X[0] += X0[0];
-                        X[1] += X0[1];
-                        X[2] += X0[2];
-                        V[0] += V0[0];
-                        V[1] += V0[1];
-                        V[2] += V0[2];
-
-
-
-
-
-
-                    }
-                    break;
-                }
+        }
+        else
+        {
+            isObj = 0;
+            switch(smlType)
+            {
             case 0:
                 {
-
-
-
                     if(mCat.GetRecName(name.simplified().toAscii().data()))
                     {
                        qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
@@ -638,12 +458,110 @@ int main(int argc, char *argv[])
                     isObj = 1;
                     break;
                 }
+            case 1:
+                {
+                outerArguments.clear();
+
+                outerArguments << QString("-name=earth");
+                outerArguments << QString("-type=planet");
+                outerArguments << QString("-observer=@sun");
+                outerArguments << QString("-ep=%1").arg(sJD);
+
+                qDebug() << outerArguments.join(" ") << "\n";
+
+                outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                outerProcess.start(miriadeProcData.name, outerArguments);
+
+                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                {
+                    qDebug() << "\nmiriadeProc finish error\n";
+                    break;
+                }
+
+                QTextStream ethStream(outerProcess.readAllStandardOutput());
+
+                isObj = 0;
+
+                while (!ethStream.atEnd())
+                {
+                    objDataStr = ethStream.readLine();
+                    if(objDataStr.size()<1) continue;
+                    if(objDataStr.at(0)=='#') continue;
+
+                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                    if(resSL.size()<8) continue;
+                    X0[0] = resSL.at(1).toDouble();
+                    X0[1] = resSL.at(2).toDouble();
+                    X0[2] = resSL.at(3).toDouble();
+                    V0[0] = resSL.at(5).toDouble();
+                    V0[1] = resSL.at(6).toDouble();
+                    V0[2] = resSL.at(7).toDouble();
+                    break;
+                }
+
+                qDebug() << QString("X0: %1\t%2\t%3\nV0: %4\t%5\t%6\n").arg(X0[0]).arg(X0[1]).arg(X0[2]).arg(V0[0]).arg(V0[1]).arg(V0[2]);
+
+//////////////////////////
+                outerArguments.clear();
+
+                outerArguments << QString("-name=%1").arg(name.simplified());
+                outerArguments << QString("-ep=%1").arg(sJD);
+                //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
+                outerArguments << "-type=aster";
+                //outerArguments << QString("-observer=@sun");
+                outerArguments << QString("-observer=500");
+                outerArguments << "-tcoor=2";
+                outerArguments << "-rplane=1";
+
+                outerProcess.setWorkingDirectory(miriadeProcData.folder);
+                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
+                outerProcess.setReadChannel(QProcess::StandardOutput);
+
+                outerProcess.start(miriadeProcData.name, outerArguments);
+
+                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
+                {
+                    qDebug() << "\nmiriadeProc finish error\n";
+                    break;
+                }
+
+                QTextStream objStream(outerProcess.readAllStandardOutput());
+
+                while (!objStream.atEnd())
+                {
+                    objDataStr = objStream.readLine();
+                    qDebug() << QString("objDataStr: %1").arg(objDataStr);
+                    if(objDataStr.size()<1) continue;
+                    if(objDataStr.at(0)=='#') continue;
+
+                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
+                    if(resSL.size()<8) continue;
+                    isObj = 1;
+                    X[0] = resSL.at(1).toDouble();
+                    X[1] = resSL.at(2).toDouble();
+                    X[2] = resSL.at(3).toDouble();
+/*
+                    V[0] = resSL.at(5).toDouble();
+                    V[1] = resSL.at(6).toDouble();
+                    V[2] = resSL.at(7).toDouble();
+*/
+                    V[0] = resSL.at(8).toDouble();
+                    V[1] = resSL.at(9).toDouble();
+                    V[2] = resSL.at(10).toDouble();
+
+                    X[0] += X0[0];
+                    X[1] += X0[1];
+                    X[2] += X0[2];
+                    V[0] += V0[0];
+                    V[1] += V0[1];
+                    V[2] += V0[2];
+                }
+                break;
+                }
             }
-
-
-
-
-
 
             if(!isObj)
             {
@@ -687,7 +605,6 @@ int main(int argc, char *argv[])
 
     if(useMoody)
     {
-
         coefX = AUKM*1000;
         coefXD = 1000*AUKM/SECINDAY;
 

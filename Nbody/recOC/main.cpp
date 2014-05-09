@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
     double normE, normQ, normP, range;
 
     SpiceDouble             state [6];
+    SpiceDouble             state_obs [6];
     SpiceDouble             lt;
     SpiceChar             * corr;
     SpiceChar             * ref;
@@ -137,6 +138,7 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
     QString jplFile = sett->value("general/jplFile", "./../../data/cats/binp1940_2020.405").toString();
+    QString ephFile = sett->value("general/ephFile", "./../../data/cats/binp1940_2020.405").toString();
     QString epmDir = sett->value("general/epmDir", "./").toString();
     QString obsFile = sett->value("general/obsFile", "./../../data/cats/Obs.txt").toString();
     QString obsCode = sett->value("general/obsCode", "500").toString();
@@ -203,7 +205,7 @@ int main(int argc, char *argv[])
     obsPos.init(obsFile, bspName, leapName);
     obsPos.set_spice_parpam("Earth", "500", "sun", "J2000");
 */
-    if(obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data()))
+    if(obsPos.init(obsFile.toAscii().data(), jplFile.toAscii().data(), 0))
     {
         qDebug() << "\n\nError init obsPos\n\n";
         exit(1);
@@ -331,102 +333,120 @@ int main(int argc, char *argv[])
         }
         else
         {
+
             switch(bigType)
             {
-            case 0:
-            {
-                if(useEPM)
+                case 0:
                 {
-                    status = calc_EPM(3, centr_num, (int)time, time-(int)time, XE0, VE0);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
+                    if(useEPM)
+                    {
+                        status = calc_EPM(3, centr_num, (int)time, time-(int)time, XE0, VE0);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER_SUN, SK);
+
+                    if(useEPM)
+                    {
+                        status = calc_EPM(3, epm_planet_num("Sun"), (int)time, time-(int)time, XEB0, VEB0);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&XEB0[0], &XEB0[1], &XEB0[2], &VEB0[0], &VEB0[1], &VEB0[2], time, GEOCENTR_NUM, CENTER_BARY, SK);
+
+                    if(useEPM)
+                    {
+                        status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
+                         if(!status)
+                         {
+                             qDebug() << QString("error EPM\n");
+                             return 1;
+                         }
+                    }
+                    else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, SK);
+
                 }
-                else nbody->detState(&XE0[0], &XE0[1], &XE0[2], &VE0[0], &VE0[1], &VE0[2], time, GEOCENTR_NUM, CENTER_SUN, SK);
-                /*
-                if(useEPM)
-                {
-                    status = calc_EPM(3, epm_planet_num("Sun"), (int)time, time-(int)time, XEB0, VEB0);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
-                }
-                else nbody->detState(&XEB0[0], &XEB0[1], &XEB0[2], &VEB0[0], &VEB0[1], &VEB0[2], time, GEOCENTR_NUM, CENTER_BARY, SK);
-                */
-            }
-                break;
-            case 1:
-
-                while(!bigStm.atEnd())
-                {
-                    tStr = bigStm.readLine();
-                    dataSL = tStr.split(colSep, QString::SkipEmptyParts);
-                    if(dataSL.size()<8) continue;
-
-                    //name = dataSL.at(0).simplified();
-                    if(QString().compare(dataSL.at(0).simplified(), "Earth")!=0) continue;
-                    //time = dataSL.at(1).toDouble();
-
-                    XE0[0] = dataSL.at(2).toDouble();
-                    XE0[1] = dataSL.at(3).toDouble();
-                    XE0[2] = dataSL.at(4).toDouble();
-                    VE0[0] = dataSL.at(5).toDouble();
-                    VE0[1] = dataSL.at(6).toDouble();
-                    VE0[2] = dataSL.at(7).toDouble();
-
                     break;
+                case 1:
+
+                    while(!bigStm.atEnd())
+                    {
+                        tStr = bigStm.readLine();
+                        dataSL = tStr.split(colSep, QString::SkipEmptyParts);
+                        if(dataSL.size()<8) continue;
+
+                        //name = dataSL.at(0).simplified();
+                        if(QString().compare(dataSL.at(0).simplified(), "Earth")!=0) continue;
+                        //time = dataSL.at(1).toDouble();
+
+                        XE0[0] = dataSL.at(2).toDouble();
+                        XE0[1] = dataSL.at(3).toDouble();
+                        XE0[2] = dataSL.at(4).toDouble();
+                        VE0[0] = dataSL.at(5).toDouble();
+                        VE0[1] = dataSL.at(6).toDouble();
+                        VE0[2] = dataSL.at(7).toDouble();
+
+                        break;
+                    }
+                    break;
+                case 2:
+                {
+                /*
+                    //obsPos.setTDB(time);
+                    obsPos.det_observ_tdb(time);
+                    XE0[0] = obsPos.state[0];
+                    XE0[1] = obsPos.state[1];
+                    XE0[2] = obsPos.state[2];
+                    VE0[0] = obsPos.state[3];
+                    VE0[1] = obsPos.state[4];
+                    VE0[2] = obsPos.state[5];*/
+                    //if(plaNum!=SUN_NUM)
+                    //{
+                        //sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                        //qDebug() << QString("name: %1\n").arg(sName);
+                        sJD = QString("%1 JD").arg(time, 15, 'f',7);
+                        str2et_c(sJD.toAscii().data(), &et);
+
+                        qDebug() << QString("time: %1\tet: %2\n").arg(sJD).arg(et);
+
+                        spkezr_c (  "Earth", et, ref, "NONE", "sun", state, &lt );
+                        XE0[0] = state[0]/AUKM;
+                        XE0[1] = state[1]/AUKM;
+                        XE0[2] = state[2]/AUKM;
+                        VE0[0] = state[3]/AUKM*SECINDAY;
+                        VE0[1] = state[4]/AUKM*SECINDAY;
+                        VE0[2] = state[5]/AUKM*SECINDAY;
+
+                        spkezr_c (  "Earth", et, ref, "NONE", "ssb", state, &lt );
+                        XEB0[0] = state[0]/AUKM;
+                        XEB0[1] = state[1]/AUKM;
+                        XEB0[2] = state[2]/AUKM;
+                        VEB0[0] = state[3]/AUKM*SECINDAY;
+                        VEB0[1] = state[4]/AUKM*SECINDAY;
+                        VEB0[2] = state[5]/AUKM*SECINDAY;
+
+                        spkezr_c (  "sun", et, ref, "NONE", "ssb", state, &lt );
+                        XS0[0] = state[0]/AUKM;
+                        XS0[1] = state[1]/AUKM;
+                        XS0[2] = state[2]/AUKM;
+                        VS0[0] = state[3]/AUKM;
+                        VS0[1] = state[4]/AUKM;
+                        VS0[2] = state[5]/AUKM;
+                    //}
                 }
-                break;
-            case 2:
-            {
-                //obsPos.setTDB(time);
-                obsPos.det_observ_tdb(time);
-                XE0[0] = obsPos.state[0];
-                XE0[1] = obsPos.state[1];
-                XE0[2] = obsPos.state[2];
-                VE0[0] = obsPos.state[3];
-                VE0[1] = obsPos.state[4];
-                VE0[2] = obsPos.state[5];
-            }
-                break;
+                    break;
             }
 
             qDebug() << QString("XE0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XE0[0]).arg(XE0[1]).arg(XE0[2]).arg(VE0[0]).arg(VE0[1]).arg(VE0[2]);
 
-            switch(bigType)
-            {
-            case 0:
-            {
-                if(useEPM)
-                {
-                    status = calc_EPM(SUN_NUM, centr_num, (int)time, time-(int)time, XS0, VS0);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
-                }
-                else nbody->detState(&XS0[0], &XS0[1], &XS0[2], &VS0[0], &VS0[1], &VS0[2], time, SUN_NUM, CENTER_BARY, SK);
-            }
-                break;
-            case 2:
-            {
-                sJD = QString("%1 JD").arg(time, 15, 'f',7);
-                str2et_c(sJD.toAscii().data(), &et);
-                spkezr_c (  "sun", et, ref, "NONE", "ssb", state, &lt );
-                XS0[0] = state[0]/AUKM;
-                XS0[1] = state[1]/AUKM;
-                XS0[2] = state[2]/AUKM;
-                VS0[0] = state[3]/AUKM;
-                VS0[1] = state[4]/AUKM;
-                VS0[2] = state[5]/AUKM;
-            }
-                break;
-            }
+            qDebug() << QString("XEB0: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(XEB0[0]).arg(XEB0[1]).arg(XEB0[2]).arg(VEB0[0]).arg(VEB0[1]).arg(VEB0[2]);
+
 
             qDebug() << QString("XS0: %1\t%2\t%3\t%4\t%5\t%6").arg(XS0[0]).arg(XS0[1]).arg(XS0[2]).arg(VS0[0]).arg(VS0[1]).arg(VS0[2]);
 
@@ -458,7 +478,7 @@ int main(int argc, char *argv[])
 
                 //obsPos.setTDB(time);
                 obsPos.det_observ_tdb(time);
-
+/*
                 qDebug() << QString("Earth state %7: %1\t%2\t%3\nVE0: %4\t%5\t%6\n").arg(obsPos.state[0], 18, 'g', 9).arg(obsPos.state[1], 18, 'g', 9).arg(obsPos.state[2], 18, 'g', 9).arg(obsPos.state[3], 18, 'g', 9).arg(obsPos.state[4], 18, 'g', 9).arg(obsPos.state[5], 18, 'g', 9).arg(obsPos.ctime.TDB(), 15, 'f', 7);
 
                 state[0] = X[0];
@@ -467,8 +487,22 @@ int main(int argc, char *argv[])
                 state[3] = V[0];
                 state[4] = V[1];
                 state[5] = V[2];
-                obsPos.det_vect_radec(state, &ra, &de, &range);
 
+                obsPos.det_vect_radec(state, &ra, &de, &range);
+  */
+                state[0] = X1[0];
+                state[1] = X1[1];
+                state[2] = X1[2];
+                state[3] = V1[0];
+                state[4] = V1[1];
+                state[5] = V1[2];
+                state_obs[0] = XEB0[0]+obsPos.obs->x;
+                state_obs[1] = XEB0[1]+obsPos.obs->y;
+                state_obs[2] = XEB0[2]+obsPos.obs->z;
+                state_obs[3] = VEB0[0]+obsPos.obs->vx;
+                state_obs[4] = VEB0[1]+obsPos.obs->vy;
+                state_obs[5] = VEB0[2]+obsPos.obs->vz;
+                det_vect_radec(state, state_obs,&ra, &de, &range);
                 mrec.r = ra;// + dRa;
                 mrec.d = de;// + dDec;
 
