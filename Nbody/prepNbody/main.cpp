@@ -160,6 +160,9 @@ int main(int argc, char *argv[])
     part_file = QString("%1/particles/particles.xml").arg(moodyDir);
     mop_file = QString("%1/result/moodyProject.mop").arg(moodyDir);
 
+    //CALCEPH
+    QString ephFile = sett->value("CALCEPH/ephFile", "./../../data/cats/binp1940_2020.405").toString();
+
     //SPICE
     QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
     QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
@@ -175,35 +178,54 @@ int main(int argc, char *argv[])
 
     nbody = new dele();
 
-    if(useEPM)
-    {
-        status = !InitTxt(epmDir.toAscii().data());
-        centr_num = 11+!CENTER;
-    }
-    else
-    {
-        status = nbody->init(jplFile.toAscii().data());
-    }
-
-    if(status)
-    {
-        qDebug() << QString("init ephemeride error\n");
-        return 1;
-    }
-
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
-
-
     if(smlType==1&&initMpc)
     {
         qDebug() << QString("err: mCat not found: %1\n").arg(mpcCatFile.toAscii().data());
         return 1;
     }
 
-    if(bigType==2)
+    switch(bigType)
     {
-        furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
-        furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+        case 0:
+        {
+            if(useEPM)
+            {
+                status = !InitTxt(epmDir.toAscii().data());
+                centr_num = 11+!CENTER;
+            }
+            else
+            {
+                status = nbody->init(jplFile.toAscii().data());
+            }
+
+            if(status)
+            {
+                qDebug() << QString("init ephemeride error\n");
+                return 1;
+            }
+        }
+
+        break;
+
+        case 1:
+        {
+            status = !calceph_sopen(ephFile.toAscii().data());
+            if(status)
+            {
+                qDebug() << "\n\nError open capceph\n\n";
+                exit(1);
+            }
+
+            centr_num = 11+!CENTER;
+        }
+        break;
+        case 2:
+        {
+            furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
+            furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+        }
+        break;
     }
 
     if(readParticles(confFile, pList, &massType))
@@ -307,16 +329,16 @@ int main(int argc, char *argv[])
                 case 1:
                 {
 
-                calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
-                qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
-                timei = time0 + state[0];
-                calceph_scompute((int)timei, timei-(int)timei, epm_planet_num(name), centr_num, state);
-                X0[0] = state[0];
-                X0[1] = state[1];
-                X0[2] = state[2];
-                V0[0] = state[3];
-                V0[1] = state[4];
-                V0[2] = state[5];
+                //calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
+                //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+                //timei = time0 + state[0];
+                calceph_scompute((int)time0, time0-(int)time0, epm_planet_num(name), centr_num, state);
+                X[0] = state[0];
+                X[1] = state[1];
+                X[2] = state[2];
+                V[0] = state[3];
+                V[1] = state[4];
+                V[2] = state[5];
 
 
 

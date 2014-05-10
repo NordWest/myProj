@@ -99,9 +99,15 @@ int SK, CENTER;
 int centr_num;
 int useEPM;
 
+//double *CM, *S, LF;
+QTextStream resStmBig, resStmSmall;
+
+
 QList <ParticleStruct*> pList;
 //QList <ParticleStruct*> iList;
 //QList <ParticleStruct*> jList;
+
+void makeLog(double* X, double *V, double TF, double dt);
 
 void CM_int(double *CM, double X[], double V[])
 {
@@ -238,7 +244,7 @@ int main(int argc, char *argv[])
 
     //QList <ParticleStruct*> pList;
     //dele *nbody;
-    nbody = new dele();
+    //nbody = new dele();
 
     double t0, nstep, ti, dt;
     mpc mrec;
@@ -311,7 +317,7 @@ int main(int argc, char *argv[])
 
 
     int status;
-
+/*
     if(useEPM)
     {
         status = !InitTxt(epmDir.toAscii().data());
@@ -324,7 +330,7 @@ int main(int argc, char *argv[])
     }
 
     if(status) return 1;
-
+*/
     //nofzbody = pList.size();
     //int iNum, jNum;
     //nofzbody=0;
@@ -400,7 +406,7 @@ int main(int argc, char *argv[])
 //res_big
     QFile resFileBig("res_big.txt");
     resFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    QTextStream resStmBig(&resFileBig);
+    resStmBig.setDevice(&resFileBig);
 /*
     QFile dxFileBig("dxdy_big.txt");
     dxFileBig.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -413,7 +419,7 @@ int main(int argc, char *argv[])
 //res_small
     QFile resFileSmall("res_small.txt");
     resFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
-    QTextStream resStmSmall(&resFileSmall);
+    resStmSmall.setDevice(&resFileSmall);
 /*
     QFile dxFileSmall("dxdy_small.txt");
     dxFileSmall.open(QIODevice::Truncate | QIODevice::WriteOnly);
@@ -512,14 +518,14 @@ int main(int argc, char *argv[])
     qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
     LF_int(&LF, X, V);
     qDebug() << QString("LF: %1\n").arg(LF);
-
-    CM_int(CM0, X0, V0);
-    qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
-    S_int(S0, X0, V0);
-    qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
-    LF_int(&LF0, X0, V0);
-    qDebug() << QString("LF0: %1\n").arg(LF0);
 */
+    CM_int(CM0, X, V);
+    qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
+    S_int(S0, X, V);
+    qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
+    LF_int(&LF0, X, V);
+    qDebug() << QString("LF0: %1\n").arg(LF0);
+
 
 
 //    for(ti=t0; ti<t1; ti+=dt)
@@ -542,7 +548,7 @@ int main(int argc, char *argv[])
         {
 
 
-            qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+
 
             TI = TF;
             TF += dt;
@@ -550,26 +556,29 @@ int main(int argc, char *argv[])
 
             jday = int(TF);
             pday = TF - jday;
-            qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
+
 
             solSys->rada27(X, V, 0, fabs(dt));
 
-            /*
-            ssb[0] = 0;
-            ssb[1] = 0;
-            ssb[2] = 0;
 
-            CM_int(CM, X, V);
-            qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
-            S_int(S, X, V);
-            qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
-            LF_int(&LF, X, V);
-            qDebug() << QString("LF: %1\n").arg(LF);
-            */
 
             //i=0;
             if(p++==printstep)
             {
+                qDebug() << QString("\njd: %1\ntime: %2\n").arg(TF, 12, 'f', 4).arg(getStrFromDATEOBS(getDATEOBSfromMJD(jd2mjd(TF)), ":", 0, 3));
+                //qDebug() << QString("jday: %1\tpday: %2\n").arg(jday).arg(pday);
+/*
+                CM_int(CM, X, V);
+                qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+                S_int(S, X, V);
+                qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
+                LF_int(&LF, X, V);
+                qDebug() << QString("LF: %1\n").arg(LF);
+*/
+                makeLog(X, V, TF, dt);
+
+
+/*
                 for(teloi=0; teloi<pList.size(); teloi++)
                 {
                     //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
@@ -605,7 +614,7 @@ int main(int argc, char *argv[])
 
                     }
 
-                }
+                }*/
                 p=0;
             }
 
@@ -628,46 +637,22 @@ int main(int argc, char *argv[])
 
     if(p)
     {
-        for(teloi=0; teloi<pList.size(); teloi++)
-        {
-            //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
-            name = QString(pList[teloi]->name.data());
-            if(useEPM) plaNum = epm_planet_num(name);
-            else plaNum = planet_num(name.toAscii().data());
-            i = teloi*3;
-            if(useMoody)
-            {
-                if(getMopName(mState, mItem, name)!=-1)
-                {
-                    Xm[i] = mItem.x/AUKM/1000;
-                    Xm[i+1] = mItem.y/AUKM/1000;
-                    Xm[i+2] = mItem.z/AUKM/1000;
-                    Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
-                    Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
-                    Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
-                  }
-            }
-
-
-            if(plaNum!=-1)
-            {
-                saveResults(TF, X, V, i, name, resStmBig, dt<0);
-                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
-
-            }
-            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
-            {
-
-                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
-                if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
-
-            }
-
-        }
-        p=0;
+        makeLog(X, V, TF, dt);
+//        p=0;
     }
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
+
+    CM_int(CM, X, V);
+    qDebug() << QString("CM: %1\t%2\t%3\n").arg(CM[0]).arg(CM[1]).arg(CM[2]);
+    qDebug() << QString("CM0: %1\t%2\t%3\n").arg(CM0[0]).arg(CM0[1]).arg(CM0[2]);
+    qDebug() << QString("dCM: %1\t%2\t%3\n").arg(CM[0]-CM0[0]).arg(CM[1]-CM0[1]).arg(CM[2]-CM0[2]);
+    S_int(S, X, V);
+    qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
+    qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
+    qDebug() << QString("dS: %1\t%2\t%3\n").arg(S[0]-S0[0]).arg(S[1]-S0[1]).arg(S[2]-S0[2]);
+    LF_int(&LF, X, V);
+    qDebug() << QString("LF: %1 - %2: %3\n").arg(LF).arg(LF0).arg(LF-LF0);
 
 
     resFileBig.close();
@@ -686,6 +671,51 @@ int main(int argc, char *argv[])
   //      dxmFile.close();
     }
 
+}
+
+void makeLog(double* X, double *V, double TF, double dt)
+{
+    int plaNum;
+    QString name;
+    int teloi, i;
+
+
+        for(teloi=0; teloi<pList.size(); teloi++)
+        {
+            //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
+            name = QString(pList[teloi]->name.data());
+            if(useEPM) plaNum = epm_planet_num(name);
+            else plaNum = planet_num(name.toAscii().data());
+            i = teloi*3;
+            /*if(useMoody)
+            {
+                if(getMopName(mState, mItem, name)!=-1)
+                {
+                    Xm[i] = mItem.x/AUKM/1000;
+                    Xm[i+1] = mItem.y/AUKM/1000;
+                    Xm[i+2] = mItem.z/AUKM/1000;
+                    Vm[i] = mItem.xd*SECINDAY/1000/AUKM;
+                    Vm[i+1] = mItem.yd*SECINDAY/1000/AUKM;
+                    Vm[i+2] = mItem.zd*SECINDAY/1000/AUKM;
+                  }
+            }*/
+
+
+            if(plaNum!=-1)
+            {
+                saveResults(TF, X, V, i, name, resStmBig, dt<0);
+                //if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
+
+            }
+            else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
+            {
+
+                saveResults(TF, X, V, i, name, resStmSmall, dt<0);
+                //if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmSmall, dt<0);
+
+            }
+
+        }
 }
 
 int getMiriadeObject(mpephRec *mpcObj, double mJD, QString objStr, procData miriadeProcData)
