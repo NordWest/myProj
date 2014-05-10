@@ -546,7 +546,7 @@ int main(int argc, char *argv[])
     double vmul;
     vmul = pow(-1, dt<0);
 
-    //p = 0;
+    p = 0;
     for(i=0; i<nofzbody; i++)
     {
         name = QString(pList[i]->name.data());
@@ -657,7 +657,7 @@ int main(int argc, char *argv[])
                     {
                         saveResults(TF, X, V, i, name, resStmBig, dt<0);
                         if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
-
+/*
                         switch(bigType)
                         {
                             case 0:
@@ -719,6 +719,7 @@ int main(int argc, char *argv[])
                         V[i] *= vmul;
                         V[i+1] *= vmul;
                         V[i+2] *= vmul;
+*/
                     }
                     else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {

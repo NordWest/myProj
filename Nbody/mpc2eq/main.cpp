@@ -821,7 +821,7 @@ double state0[6];
                 V[j*3+2] = -V[j*3+2];
             }
         }
-
+/*
         while((fabs(dT)/dtime)>1)
         {
             ti = tf;
@@ -830,7 +830,7 @@ double state0[6];
             solSys->rada27(X, V, 0, fabs(dtime));
             dT = tEnd - tf;
         }
-
+*/
         //orb
 
 
@@ -924,7 +924,7 @@ double state0[6];
                 sDist = norm3(state);
                 eDist = dist3(opos->state, state);//sqrt((obs_pos->ox - x)*(obs_pos->ox - x) + (obs_pos->oy - y)*(obs_pos->oy - y) + (obs_pos->oz - z)*(obs_pos->oz - z));
 
-                magC = det_m(pList[j+1]->theta, sDist, eDist, 5.8, detPhase(opos->ox, opos->oy, opos->oz, state[0], state[1], state[2]));
+                magC = det_m(pList[j+1]->theta, sDist, eDist, 5.8, detPhase(opos->state[0], opos->state[1], opos->state[2], state[0], state[1], state[2]));
 
                 oc_rec->ocMag = oc_rec->mag - magC;
 

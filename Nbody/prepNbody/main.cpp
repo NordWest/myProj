@@ -348,7 +348,8 @@ int main(int argc, char *argv[])
                 {
                     if(plaNum!=SUN_NUM)
                     {
-                        sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                        if(QString().compare(name.simplified(), "EMB", Qt::CaseInsensitive)!=0) sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                        else sName = name;
                         qDebug() << QString("name: %1\n").arg(sName);
                         sJD = QString("%1 JD").arg(time0, 15, 'f',7);
                         str2et_c(sJD.toAscii().data(), &et);
