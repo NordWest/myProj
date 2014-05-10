@@ -22,6 +22,9 @@
 #include <QDataStream>
 #include <QDomDocument>
 
+#include <calceph.h>
+#include <SpiceUsr.h>
+
 /*
 #include <cuda.h>
 #include <cutil.h>
@@ -212,7 +215,7 @@ int main(int argc, char *argv[])
 
     setlocale(LC_NUMERIC, "C");
 
-    int i, N, teloi, nt, j, teloj, p;
+    int i, N, teloi, nt, j, teloj, p, status;
     double *X, *V, TI, TF, *X0, *V0, *r, *v;
     double jdUTC;
     Particle *tPar;
@@ -238,6 +241,13 @@ int main(int argc, char *argv[])
     procData miriadeProcData;
 
     QList <ParticleStruct*> iniList;
+
+    SpiceDouble             state [6];
+    SpiceDouble             lt;
+    SpiceChar             * corr;
+    SpiceChar             * ref;
+    ref = new SpiceChar[256];
+    corr = new SpiceChar[256];
 
 
     Everhardt *solSys;
@@ -267,6 +277,8 @@ int main(int argc, char *argv[])
     int useMiriade = sett->value("general/useMiriade", 0).toInt();
     int obrat = !sett->value("general/obrat", 1).toInt();
 
+    int bigType = sett->value("general/bigType", 0).toInt();
+
     //time
     t0 = sett->value("time/time0", 0).toDouble();
     dt = sett->value("time/timestep", 1).toDouble();
@@ -285,6 +297,15 @@ int main(int argc, char *argv[])
     if(miriadeProcData.waitTime>0) miriadeProcData.waitTime *= 1000;
 
     QString epmDir = sett->value("general/epmDir", "./").toString();
+
+    //CALCEPH
+    QString ephFile = sett->value("CALCEPH/ephFile", "./../../data/cats/binp1940_2020.405").toString();
+
+    //SPICE
+    QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
+    QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
+    sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
+    sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
 
     eparam = new ever_params;
 
@@ -309,6 +330,49 @@ int main(int argc, char *argv[])
     mpccat mCat;
     int initMpc = mCat.init(mpcCatFile.toAscii().data());
 
+    switch(bigType)
+    {
+        case 0:
+        {
+            if(useEPM)
+            {
+                status = !InitTxt(epmDir.toAscii().data());
+                centr_num = 11+!CENTER;
+            }
+            else
+            {
+                status = nbody->init(jplFile.toAscii().data());
+            }
+
+            if(status)
+            {
+                qDebug() << QString("init ephemeride error\n");
+                return 1;
+            }
+        }
+
+        break;
+
+        case 1:
+        {
+            status = !calceph_sopen(ephFile.toAscii().data());
+            if(status)
+            {
+                qDebug() << "\n\nError open capceph\n\n";
+                exit(1);
+            }
+
+            centr_num = 11+!CENTER;
+        }
+        break;
+        case 2:
+        {
+            furnsh_c ( leapName.toAscii().data() );     //load LSK kernel
+            furnsh_c ( bspName.toAscii().data()  );     //load SPK/BSP kernel with planets ephemerides
+        }
+        break;
+    }
+
     if(readParticles(confFile, iniList))
     {
         qDebug() << QString("readCFG error\n");
@@ -316,7 +380,7 @@ int main(int argc, char *argv[])
     }
 
 
-    int status;
+ //   int status;
 /*
     if(useEPM)
     {
@@ -498,8 +562,6 @@ int main(int argc, char *argv[])
         V[p+1] = pList[i]->yd*vmul;
         V[p+2] = pList[i]->zd*vmul;
 
-
-
         if(plaNum!=-1)
         {
             saveResults(t0, X, V, p, name, resStmBig, dt<0);
@@ -526,17 +588,17 @@ int main(int argc, char *argv[])
     LF_int(&LF0, X, V);
     qDebug() << QString("LF0: %1\n").arg(LF0);
 
-
-
 //    for(ti=t0; ti<t1; ti+=dt)
     double *P = new double[9];
     double *ssb, *ssbv, mui, mui1, muis;
-    double xt, yt, zt;
+    double xt, yt, zt, et;
     ssb= new double[3];
     ssbv= new double[3];
     TF = t0;
     int jday;
     double pday;
+    //double state[6];
+    QString sName;
 
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
@@ -546,21 +608,13 @@ int main(int argc, char *argv[])
         p=0;
         for(nt=0; nt<nstep; nt++)
         {
-
-
-
-
             TI = TF;
             TF += dt;
-
 
             jday = int(TF);
             pday = TF - jday;
 
-
             solSys->rada27(X, V, 0, fabs(dt));
-
-
 
             //i=0;
             if(p++==printstep)
@@ -575,10 +629,9 @@ int main(int argc, char *argv[])
                 LF_int(&LF, X, V);
                 qDebug() << QString("LF: %1\n").arg(LF);
 */
-                makeLog(X, V, TF, dt);
+//                makeLog(X, V, TF, dt);
 
 
-/*
                 for(teloi=0; teloi<pList.size(); teloi++)
                 {
                     //if(pList.at(teloi)->interactionPermission==Advisor::interactNONE) continue;
@@ -605,6 +658,67 @@ int main(int argc, char *argv[])
                         saveResults(TF, X, V, i, name, resStmBig, dt<0);
                         if(useMoody) saveResults(TF, Xm, Vm, i, name, resmStmBig, dt<0);
 
+                        switch(bigType)
+                        {
+                            case 0:
+                            {
+                                if(useEPM)
+                                {
+                                    status = calc_EPM(plaNum, centr_num, (int)TF, TF-(int)TF, &X[i], &V[i]);
+                                     if(!status)
+                                     {
+                                         qDebug() << QString("error EPM\n");
+                                         return 1;
+                                     }
+                                }
+                                else
+                                {
+                                    nbody->detState(&X[i], &X[i+1], &X[i+2], &V[i], &V[i+1], &V[i+2], TF, plaNum, CENTER, SK);
+                                }
+                            }
+                            break;
+
+                            case 1:
+                            {
+
+                            //calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
+                            //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
+                            //timei = time0 + state[0];
+                            calceph_scompute((int)TF, TF-(int)TF, epm_planet_num(name), centr_num, state);
+                            X[i] = state[0];
+                            X[i+1] = state[1];
+                            X[i+2] = state[2];
+                            V[i] = state[3];
+                            V[i+1] = state[4];
+                            V[i+2] = state[5];
+
+
+
+                                break;
+                            }
+                            case 2:
+                            {
+                                if(plaNum!=SUN_NUM)
+                                {
+                                    sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
+                                    qDebug() << QString("name: %1\n").arg(sName);
+                                    sJD = QString("%1 JD").arg(TF, 15, 'f',7);
+                                    str2et_c(sJD.toAscii().data(), &et);
+                                    if(CENTER) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
+                                    else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
+                                    X[i] = state[0]/AUKM;
+                                    X[i+1] = state[1]/AUKM;
+                                    X[i+2] = state[2]/AUKM;
+                                    V[i] = state[3]/AUKM*SECINDAY;
+                                    V[i+1] = state[4]/AUKM*SECINDAY;
+                                    V[i+2] = state[5]/AUKM*SECINDAY;
+                                }
+                            }
+                                break;
+                        }
+                        V[i] *= vmul;
+                        V[i+1] *= vmul;
+                        V[i+2] *= vmul;
                     }
                     else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {
@@ -614,11 +728,12 @@ int main(int argc, char *argv[])
 
                     }
 
-                }*/
+                }
                 p=0;
             }
 
             if(useMoody) mState = mFile->readState();
+
 
             //qDebug() << QString("SSB: %1\t%2\t%3\n").arg(ssb[0]).arg(ssb[1]).arg(ssb[2]);
         }
