@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
     t0 = sett->value("time/time0", 0).toDouble();
     dt = sett->value("time/timestep", 1).toDouble();
     nstep = sett->value("time/nstep", 1).toDouble();
-    int printstep = sett->value("time/printstep", 1).toInt();
+    int printstep = sett->value("time/printstep", 0).toInt();
 
     QString mopFileName = sett->value("moody/mopFile", "Reference_Project.mop").toString();
 
@@ -768,7 +768,7 @@ int main(int argc, char *argv[])
     qDebug() << QString("S0: %1\t%2\t%3\n").arg(S0[0]).arg(S0[1]).arg(S0[2]);
     qDebug() << QString("dS: %1\t%2\t%3\n").arg(S[0]-S0[0]).arg(S[1]-S0[1]).arg(S[2]-S0[2]);
     LF_int(&LF, X, V);
-    qDebug() << QString("LF: %1 - %2: %3\n").arg(LF).arg(LF0).arg(LF-LF0);
+    qDebug() << QString("LF: %1 - %2: %3\n").arg(LF).arg(LF0).arg(fabs(LF-LF0)/LF0);
 
 
     resFileBig.close();

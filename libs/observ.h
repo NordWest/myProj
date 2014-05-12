@@ -25,7 +25,7 @@
 #include <calceph.h>
 #endif
 
-int det_vect_radec(double *obj2ssb, double *obs2ssb, double *raRad, double *decRad, double *range);
+int det_vect_radec(double *obj2ssb, double *obs2ssb, double *raRad, double *decRad, double *range=NULL);
 
 class observ
 {

@@ -8,8 +8,8 @@ QT       += core
 
 QT       -= gui
 
-#TARGET = ~/bin/recOC
-TARGET = ./../../../lab/testNbody/recOC
+TARGET = ~/bin/recOC
+#TARGET = ./../../lab/testNbody/recOC
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 QT += xml

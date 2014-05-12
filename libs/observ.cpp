@@ -280,9 +280,15 @@ int observ::det_vect_radec(double *state2sun, double *raRad, double *decRad, dou
     Q[5] = state2sun[5];
 
     double *stateSun = new double[6];
-    detStatePlanet("sun", 0, 0, stateSun);
-    if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
-    if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
+    detStatePlanet("Sun", 0, 0, stateSun);
+    //if(this->place->detR(&XS0[0], &XS0[1], &XS0[2], ctime.TDB(), SUN_NUM, 0, 0, 0)) return 1;
+    //if(this->place->detR(&VS0[0], &VS0[1], &VS0[2], ctime.TDB(), SUN_NUM, 1, 0, 0)) return 1;
+    XS0[0] = stateSun[0];
+    XS0[1] = stateSun[1];
+    XS0[2] = stateSun[2];
+    VS0[0] = stateSun[3];
+    VS0[1] = stateSun[4];
+    VS0[2] = stateSun[5];
 
 //X1 - ssb
 
