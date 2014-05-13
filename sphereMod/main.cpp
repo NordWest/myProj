@@ -151,6 +151,13 @@ int main(int argc, char *argv[])
 //////////////////////////////////////////////////////////////////
     switch(rtype)
     {
+        case 0:
+        {
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+            randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+        }
+        break;
         case 1:
         {
             randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
@@ -163,13 +170,6 @@ int main(int argc, char *argv[])
                 ra[i] = raVect[i];
                 dec[i] = deVect[i];
             }
-        }
-        break;
-        case 0:
-        {
-            ra = new double[pointNum];
-            dec = new double[pointNum];
-            randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
         }
         break;
         case 2:

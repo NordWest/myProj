@@ -178,12 +178,12 @@ int observ::set_obs_parpam(char *pl_name, int center, int sk, char *nobsy)
     return(this->obs->getobsynumO(nobsy));
 }
 
-int observ::set_obs_parpam(int nplanet, int center, int sk, char *nobsy)
+int observ::set_obs_parpam(int npl, int cent, int sk0, char *nob)
 {
-    nplanet = nplanet;
-    center = center;
-    nobsy = nobsy;
-    sk = sk;
+    nplanet = npl;
+    center = cent;
+    nobsy = nob;
+    sk = sk0;
     centr_num = 11+!center;
 
     return(this->obs->getobsynumO(nobsy));

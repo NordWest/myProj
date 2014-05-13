@@ -79,3 +79,4 @@ HEADERS += ../../libs/orbit.h \
     ../../libs/filedynstr.h
 
 LIBS += -lmb -lastro -lephem_read -ldele -lrada -lcspice
+LIBS+=-lcalceph

@@ -4,6 +4,9 @@
 #include "./../../libs/orbit.h"
 #include <mb.h>
 
+#include <SpiceUsr.h>
+#include <calceph.h>
+
 #include <iostream>
 
 struct improveState
@@ -49,7 +52,12 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
     OrbCat ocat, ocatI;
     observ opos;
 
-
+    SpiceDouble             state [6];
+    SpiceDouble             lt;
+    SpiceChar             * corr;
+    SpiceChar             * ref;
+    ref = new SpiceChar[256];
+    corr = new SpiceChar[256];
 
 
 //
@@ -68,10 +76,29 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         sk = sett->value("general/sk", 0).toInt();
         center = sett->value("general/center", 0).toInt();
 
+        int bigType = sett->value("general/bigType", 0).toInt();
+
+        //CALCEPH
+        QString ephFile = sett->value("CALCEPH/ephFile", "./../../data/cats/binp1940_2020.405").toString();
+
+        //SPICE
+        QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
+        QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
+        sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
+        sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
+
 //////////////////////////////
 
-    opos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    opos.set_obs_parpam(GEOCENTR_NUM, 1, 0, obsCode.toAscii().data());
+    if(bigType==1)
+    {
+        opos.init(obsFile.toAscii().data(), ephFile.toAscii().data());
+        opos.set_obs_parpam("Earth", 1, 0, obsCode.toAscii().data());
+    }
+    else
+    {
+        opos.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+        opos.set_obs_parpam(GEOCENTR_NUM, 1, 0, obsCode.toAscii().data());
+    }
 
     ocat.init(argv[1]);
     sz = ocat.nstr;
@@ -191,8 +218,8 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         //detE00(impObj, opos, elem, dElem);
         //detE0(impObj, opos, elem, dElem);
         //detE1(impObj, opos, elem, dElem);
-        //detE2(impObj, opos, elem, dElem);
-        detE3(impObj, opos, elem, dElem);
+        detE2(impObj, opos, elem, dElem);
+        //detE3(impObj, opos, elem, dElem);
 
         //if(elem->ecc<0.1) detE2(impObj, opos, elem, dElem);
         //else detE3(impObj, opos, elem, dElem);
