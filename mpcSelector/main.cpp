@@ -185,6 +185,8 @@ int main(int argc, char *argv[])
         }
 */
         mpR.getObsCode(obsCode);
+
+/*
         if(!isObs)
         {
             //isObs =
@@ -193,13 +195,13 @@ int main(int argc, char *argv[])
                 isObs=1;
             }
         }
-        /*
+        */
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
         {
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
-*/
+
 //time
         mjd = mpR.mjd();
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
