@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings(cfgFileName, QSettings::IniFormat);
 
     QString obsFileName = sett->value("general/obsFileName", "").toString();
+    obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
     QString objFileName = sett->value("general/objFileName", "").toString();
     obsCodeList << sett->value("general/obsCodeList", "").toString().split("|", QString::SkipEmptyParts);
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
