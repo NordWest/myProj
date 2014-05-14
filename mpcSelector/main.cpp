@@ -163,6 +163,11 @@ int main(int argc, char *argv[])
         isMag = 1;
         isOT = 1;
 
+//time
+        mjd = mpR.mjd();
+        isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
+        if(!isTime) continue;
+
         mpR.getMpNumber(mpNum);
         if(!isObj) isObj = objNumList.indexOf(mpNum)!=-1;
         /*objn = mpR.mpNumber();
@@ -184,8 +189,10 @@ int main(int argc, char *argv[])
             //if(isObj) break;
         }
 */
-        mpR.getObsCode(obsCode);
 
+
+//obsCode
+        mpR.getObsCode(obsCode);
 /*
         if(!isObs)
         {
@@ -202,9 +209,7 @@ int main(int argc, char *argv[])
             if(isObs) break;
         }
 
-//time
-        mjd = mpR.mjd();
-        isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
+
 //catFlag
         mpR.getCatFlag(catFlag);
         for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
