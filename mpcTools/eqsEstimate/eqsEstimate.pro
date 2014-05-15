@@ -58,4 +58,4 @@ HEADERS += ../../libs/orbit.h \
 
 #unix:LIBS+=./../../libs/unix/cspice.a
 LIBS += -lmb -lastro -ldele -lephem_read
-
+unix:LIBS+=-lcalceph
