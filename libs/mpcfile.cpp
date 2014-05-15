@@ -123,6 +123,7 @@ void mpcRec::getObsCode(QString &obsCode)
 {
     obsCode.clear();
     obsCode.insert(0, dataStr.mid(77, 3));
+    obsCode.replace(" ", "0");
 }
 
 int  mpcRec::getObsNum()
