@@ -1,6 +1,6 @@
 #include <QtCore/QCoreApplication>
-#include "./../libs/mpcfile.h"
-#include "./../libs/comfunc.h"
+#include "./../../libs/mpcfile.h"
+#include "./../../libs/comfunc.h"
 
 
 

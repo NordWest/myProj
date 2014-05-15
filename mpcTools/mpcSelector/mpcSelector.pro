@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/mpcTools/mpcSelector
+TARGET = ./../../../lab/mpcTools/mpcSelector
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
@@ -16,15 +16,15 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp \
-    ../libs/mpcfile.cpp \
-    ../libs/comfunc.cpp
-HEADERS += ../libs/mpcfile.h \
+    ../../libs/mpcfile.cpp \
+    ../../libs/comfunc.cpp
+HEADERS += ../../libs/mpcfile.h \
 #            ../libs/astro.h \
 #            ../libs/mb.h \
-    ../libs/comfunc.h
+    ../../libs/comfunc.h
 
-win32:LIBS += ./../libs/win32/libmb.a \
-            ./../libs/win32/libastro.a
+win32:LIBS += ./../../libs/win32/libmb.a \
+            ./../../libs/win32/libastro.a
 unix:LIBS += -lmb -lastro
 
 
