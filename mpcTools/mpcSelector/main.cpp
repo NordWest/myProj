@@ -219,14 +219,14 @@ int main(int argc, char *argv[])
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
-
+/*
         for(i=0; i<obsNumN && obsCodeListN.at(i).size()>0;i++)
         {
             isObsN = (QString().compare(obsCode, obsCodeListN.at(i))==0);
             if(isObsN) break;
         }
         if(isObsN) continue;
-
+*/
 //catFlag
         mpR.getCatFlag(catFlag);
         for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
