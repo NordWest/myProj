@@ -52,6 +52,12 @@ int main(int argc, char *argv[])
     bool isOk;
     QString upStr;
 
+    QDir wDir;
+
+    wDir.setPath("./");
+    wDir.mkdir("./mpcs");
+    wDir.setPath("./mpcs");
+
 
     //unpackString(&upStr, dataStr.mid(0, 5));
 
@@ -144,6 +150,8 @@ int main(int argc, char *argv[])
     }
     QTextStream resStm(&resFile);
 
+    QFile mFile;
+    QTextStream mStm;
 
 
     obsNum = obsCodeList.size();
@@ -219,8 +227,6 @@ int main(int argc, char *argv[])
         }
         if(isObsN) continue;
 
-
-
 //catFlag
         mpR.getCatFlag(catFlag);
         for(i=0; i<cfNum && catFlagList.at(i).size()>0;i++)
@@ -243,6 +249,11 @@ int main(int argc, char *argv[])
         {
             resStm << mpR.toStr() << "\n";
             r++;
+            wDir.mkdir(obsCode);
+            mFile.setFileName(QString("./%1/%2.txt").arg(obsCode).arg(mpNum));
+            mFile.open(QFile::WriteOnly | QFile::Append);
+            mStm.setDevice(&mFile);
+            mStm << mpR.toStr() << "\n";
         }
         k++;
     }
