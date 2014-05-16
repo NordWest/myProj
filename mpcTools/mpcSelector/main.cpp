@@ -162,13 +162,22 @@ int main(int argc, char *argv[])
 
     for(i=objNum-1; i>=0;i--)
     {
-        if(objNumList.at(i).size()==0) obsTypeList.removeAt(i);
+        if(objNumList.at(i).size()==0) objNumList.removeAt(i);
     }
+    objNum = objNumList.size();
 
     for(i=otNum-1; i>=0;i--)
     {
         if(obsTypeList.at(i).size()==0) obsTypeList.removeAt(i);
     }
+    otNum = obsTypeList.size();
+
+    for(i=obsNum-1; i>=0;i--)
+    {
+        if(obsCodeList.at(i).size()==0) obsCodeList.removeAt(i);
+    }
+    obsNum = obsCodeList.size();
+
 
     qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\totNum=%4\n").arg(obsNum).arg(objNum).arg(cfNum).arg(otNum);
 
