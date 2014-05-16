@@ -159,6 +159,17 @@ int main(int argc, char *argv[])
     objNum = objNumList.size();
     cfNum = catFlagList.size();
     otNum = obsTypeList.size();
+
+    for(i=objNum-1; i>=0;i--)
+    {
+        if(objNumList.at(i).size()==0) obsTypeList.removeAt(i);
+    }
+
+    for(i=otNum-1; i>=0;i--)
+    {
+        if(obsTypeList.at(i).size()==0) obsTypeList.removeAt(i);
+    }
+
     qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\totNum=%4\n").arg(obsNum).arg(objNum).arg(cfNum).arg(otNum);
 
     k=0; r=0;
