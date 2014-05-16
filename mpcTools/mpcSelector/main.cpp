@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
             resStm << mpR.toStr() << "\n";
             r++;
             wDir.mkdir(obsCode);
-            mFile.setFileName(QString("./%1/%2.txt").arg(obsCode).arg(mpNum));
+            mFile.setFileName(QString("./mpcs/%1/%2.txt").arg(obsCode).arg(mpNum));
             mFile.open(QFile::WriteOnly | QFile::Append);
             mStm.setDevice(&mFile);
             mStm << mpR.toStr() << "\n";
