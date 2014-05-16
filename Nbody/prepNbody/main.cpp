@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
     int SK, CENTER;
     procData miriadeProcData;
-    int i, sz;
+    int i, sz, j, nObj;
     dele *nbody;
     int centr_num;
     int status;
@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
     mpccat mCat;
     mpcrec mRec;
     orbit orbRec;
+    OrbCat ocat;
 
     SpiceDouble             state [6];
     SpiceDouble             lt;
@@ -125,6 +126,7 @@ int main(int argc, char *argv[])
     QString cfg_file, part_file, mop_file;
 
     QList <ParticleStruct*> pList;
+    ParticleStruct* pTemp;
 
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
 
@@ -139,6 +141,9 @@ int main(int argc, char *argv[])
     int useMoody = sett->value("general/useMoody", 0).toInt();
     int massType = sett->value("general/massType", 0).toInt();
     int useEPM = sett->value("general/useEPM", 0).toInt();
+
+    QString orbCatFile = sett->value("general/orbCatFile", "./res.ocat").toString();
+    int useOrbCat = sett->value("general/useOrbCat", 0).toInt();
 
     SK = sett->value("general/sk", 0).toInt();
     CENTER = sett->value("general/center", 0).toInt();
@@ -184,6 +189,8 @@ int main(int argc, char *argv[])
         qDebug() << QString("err: mCat not found: %1\n").arg(mpcCatFile.toAscii().data());
         return 1;
     }
+
+    if(useOrbCat)ocat.init(orbCatFile.toAscii().data());
 
     switch(bigType)
     {
@@ -250,6 +257,32 @@ int main(int argc, char *argv[])
     }
     //Capsule *experiment = new Capsule;
 
+//read ocat particles
+
+    for(i=0; i<ocat.nstr; i++)
+    {
+        ocat.GetRec(i);
+        name = QString(ocat.record->name).simplified();
+        nObj = 1;
+        for(j=0;j<pList.size();j++)
+        {
+            if(QString().compare(QString(pList.at(j)->name.data()).simplified(), name, Qt::CaseInsensitive)==0)
+            {
+                nObj = 0;
+                break;
+            }
+        }
+        if(nObj)
+        {
+            pTemp = new ParticleStruct;
+            pTemp->name = name.toAscii().data();
+            pTemp->identity = Advisor::planetesimal;
+            pTemp->mass = -1.0;
+            pList << pTemp;
+        }
+
+    }
+
 
     X = new double[3];
     V = new double[3];
@@ -297,6 +330,7 @@ int main(int argc, char *argv[])
     //smlStm << QString(" epoch (in days) = %1\n").arg(time0, 15, 'f', 8);
     smlStm << ")---------------------------------------------------------------------\n";
 
+    sz = pList.size();
     for(i=0; i<sz; i++)
     {
         name = QString(pList[i]->name.data());

@@ -1,6 +1,9 @@
 #include <QtCore/QCoreApplication>
 //#include <QApplication>
 
+//#define SERIAL
+#define OMPLIB
+
 //#include "./../../libs/dele.h"
 #include <dele.h>
 //#include "./../../libs/orbcat.h"
@@ -34,8 +37,6 @@
 #include <shrUtils.h>
 #include <shrQATest.h>
 */
-//#define SERIAL
-#define OMPLIB
 
 #include "./../../libs/moody/capsule/capsuleBase/mopfile/MopFile.h"
 #include "./../../libs/moody/moody.h"
@@ -254,7 +255,7 @@ int main(int argc, char *argv[])
 
     //QList <ParticleStruct*> pList;
     //dele *nbody;
-    //nbody = new dele();
+    nbody = new dele();
 
     double t0, nstep, ti, dt;
     mpc mrec;

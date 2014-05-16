@@ -16,13 +16,13 @@ int main(int argc, char *argv[])
     }
 
     mpcRec mpR;
-    int obsNum, objNum, cfNum, otNum;
-    int isObs, isObj, isTime, isCF, isMag, isOT;
+    int obsNum, obsNumN, objNum, cfNum, otNum;
+    int isObs, isObsN, isObj, isTime, isCF, isMag, isOT;
     int k, r, i, j, sz;
     QString mpNum, obsCode, catFlag, obsType;
     double mjd0, mjd1, mjd, tMag;
     QStringList objNumList;
-    QStringList obsCodeList;
+    QStringList obsCodeList, obsCodeListN;
 
     QTime workTime;
     workTime.start();
@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 
     QString obsFileName = sett->value("general/obsFileName", "").toString();
     obsCodeList = sett->value("general/obsCodeList", "").toString().split("|");
+    obsCodeListN = sett->value("general/obsCodeListN", "").toString().split("|");
     QString objFileName = sett->value("general/objFileName", "").toString();
     obsCodeList << sett->value("general/obsCodeList", "").toString().split("|", QString::SkipEmptyParts);
     QStringList catFlagList = sett->value("general/catFlagList", "").toString().split("|");
@@ -146,6 +147,7 @@ int main(int argc, char *argv[])
 
 
     obsNum = obsCodeList.size();
+    obsNumN = obsCodeList.size();
     objNum = objNumList.size();
     cfNum = catFlagList.size();
     otNum = obsTypeList.size();
@@ -158,6 +160,7 @@ int main(int argc, char *argv[])
 
         isObj = !objNum;
         isObs = !obsNum;
+        isObsN = obsNumN;
         isTime = 1;
         isCF = 1;
         isMag = 1;
@@ -208,6 +211,14 @@ int main(int argc, char *argv[])
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
+
+        for(i=0; i<obsNumN && obsCodeListN.at(i).size()>0;i++)
+        {
+            isObsN = (QString().compare(obsCode, obsCodeListN.at(i))==0);
+            if(isObsN) break;
+        }
+        if(isObsN) continue;
+
 
 
 //catFlag
