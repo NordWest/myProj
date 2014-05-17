@@ -1095,6 +1095,8 @@ struct eqObsList
         }
     };
 };
+
+
 /*
 struct eqStatRec
 {

@@ -9,13 +9,13 @@
 //#include "conio.h"
 #include "math.h"
 #include <astro.h>
-#include "./../libs/mpcfile.h"
-#include "./../libs/comfunc.h"
-#include "./../libs/ringpix.h"
-#include "./../libs/mpcStats.h"
+#include "./../../libs/mpcfile.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/ringpix.h"
+#include "./../../libs/mpcStats.h"
 
-#include "./../libs/vsfFunc.h"
-#include "./../libs/observ.h"
+#include "./../../libs/vsfFunc.h"
+#include "./../../libs/observ.h"
 //#include "./../libs/redStat.h"
 //#include "./../libs/multidim.h"
 //#include "./../libs/vectGrid3D.h"
@@ -199,6 +199,25 @@ int oires;
         QVector <double> vDDE;
 
 
+        QFile mFile;
+        QTextStream mStm;
+        QDir wDir;
+        QStringList dList, dfList;
+
+        wDir.setPath("./");
+        wDir.mkdir("./mpcs");
+        wDir.setPath("./mpcs");
+
+/*        dList = wDir.entryList();
+        for(i=0; i<dList.size(); i++)
+        {
+            dfList = QDir(dList.at(i)).entryList();
+            for(j=0; j<dfList.size(); j++)
+            {
+                QDir().remove(dfList.at(j));
+            }
+        }
+*/
 
         if(isSphere)
         {
@@ -228,8 +247,6 @@ srand(time(NULL));
             mpR.getCatFlag(catFlag);
             mpNumber = mpR.mpNumber();
             magn = mpR.magn();
-
-
 
             if(isObsMod)
             {
@@ -317,10 +334,6 @@ srand(time(NULL));
                 //dRa += disp1*z0;
                 dDe += disp1*z1;
             }
-
-
-
-
 /*
             if(isEcl==1)
             {
@@ -373,17 +386,10 @@ srand(time(NULL));
 
             }
 
-
-
-
             if(dect<dMin||dect>dMax) continue;
             if((magn<mag0||magn>mag1)&&isMagn) continue;
 
             oNum++;
-
-
-
-
 
             if(isObs) addObsCode(obsList, obsCode);
             if(isYear) addYear(yrList, date_obs.year);
@@ -414,16 +420,11 @@ srand(time(NULL));
 
             if(isSphere)
             {
-
-
-
-
                 if(isZonal)
                 {
                     dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
                     //rat = asin((2.0*sin(rat)/(rs2-rs1))-(rs2+rs1)/(rs2-rs1));
                 }
-
 
                 ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
                 if(ipix>ipixMax||ipix<0)
@@ -434,8 +435,6 @@ srand(time(NULL));
                 iNum[ipix]++;
 
 //////////////////////////////
-
-
                 //qDebug() << QString("dRa: %1\tdDe: %2\n").arg(dRa).arg(dDe);
 
                 vDRA[ipix] += dRa;
@@ -449,6 +448,13 @@ srand(time(NULL));
                 mnum = ((magn-mag0)/(mag1-mag0))*magNum;
                 magnCount[mnum]++;
             }
+
+            wDir.mkdir(obsCode);
+            mFile.setFileName(QString("./mpcs/%1/%2.txt").arg(obsCode).arg(mpNum));
+            mFile.open(QFile::WriteOnly | QFile::Append);
+            mStm.setDevice(&mFile);
+            mStm << mpR.toStr() << "\n";
+            mFile.close();
         }
 
         qDebug() << QString("mpcNum: %5\nobs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count()).arg(oNum);
