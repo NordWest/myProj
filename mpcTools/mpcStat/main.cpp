@@ -207,9 +207,9 @@ int oires;
 
         if(sepObs)
         {
-            wDir.setPath("./");
-            wDir.mkdir("./mpcs");
-            wDir.setPath("./mpcs");
+            wDir.setPath(QFileInfo(argv[1]).absolutePath());
+            wDir.mkdir("mpcs");
+            wDir.setPath(QString("%1/mpcs").arg(wDir.absolutePath()));
         }
 
 /*        dList = wDir.entryList();
@@ -455,8 +455,8 @@ srand(time(NULL));
 
             if(sepObs)
             {
-                wDir.mkdir(obsCode);
-                mFile.setFileName(QString("./mpcs/%1/%2.txt").arg(obsCode).arg(mpNum));
+                wDir.mkdir(QString("./%1").arg(obsCode));
+                mFile.setFileName(QString("%1/%2/%3.txt").arg(wDir.absolutePath()).arg(obsCode).arg(mpNum));
                 mFile.open(QFile::WriteOnly | QFile::Append);
                 mStm.setDevice(&mFile);
                 mStm << mpR.toStr() << "\n";
