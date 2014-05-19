@@ -31,7 +31,7 @@ win32:LIBS += ./../../libs/win32/libmb.a \
 unix:LIBS += -lmb -lastro -ldele -lephem_read
 unix:LIBS+=-lcalceph
 
-TARGET = ./../../../lab/mpcStat/mpcStat
+TARGET = ./../../../lab/mpcTools/mpcStat
 CONFIG += console \
     qt \
     warn_off
