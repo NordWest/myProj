@@ -28,6 +28,26 @@
 #define CENTER CENTER_BARY
 #define SK SK_EKVATOR
 
+void sort_objects(QStringList &objNumList, QVector <int> &oNums)
+{
+    int i, j, sz;
+    int tnum;
+    sz = objNumList.size();
+    for(i=0;i<sz-1;i++)
+    {
+        for(j=i+1;j<sz;j++)
+        {
+            if(oNums[i]<oNums[j])
+            {
+                objNumList.swap(i, j);
+                tnum = oNums[i];
+                oNums[i] = oNums[j];
+                oNums[j] = tnum;
+            }
+        }
+    }
+}
+
 
 int main(int argc, char *argv[])
 {  
@@ -44,7 +64,7 @@ int main(int argc, char *argv[])
     setlocale(LC_NUMERIC, "C");
 	
 	
-   int i, j, sz, mnum;
+   int i, j, sz, mnum, opos ;
     QTextStream out_stream;
 
 	QFile fout("./fout.dat");
@@ -62,6 +82,7 @@ int main(int argc, char *argv[])
     int isSphere = settings->value("general/isSphere", 1).toInt();
     int isMagn = settings->value("general/isMagn", 1).toInt();
     int sepObs = settings->value("general/sepObs", 0).toInt();
+    int sepObj = settings->value("general/sepObj", 0).toInt();
 
 //model
     int isSphMod =  settings->value("model/isSphMod", 0).toInt();
@@ -205,7 +226,7 @@ int oires;
         QDir wDir;
         QStringList dList, dfList;
 
-        if(sepObs)
+        if(sepObs||sepObj)
         {
             wDir.setPath(QFileInfo(argv[1]).absolutePath());
             wDir.mkdir("mpcs");
@@ -234,6 +255,9 @@ int oires;
         //int *iNum = new int[ipixMax];
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
         int oNum=0;
+
+        QStringList objNumList;
+        QVector <int> objNums;
 
         objCounter *objc = new objCounter;;
 
@@ -400,6 +424,7 @@ srand(time(NULL));
             if(isCatFlag) addCatFlag(cfList, catFlag);
             if(isObj)
             {
+                /*
                 if(QString().compare(objc->objNum, mpNum)!=0)
                 {
                     objc = new objCounter;
@@ -407,7 +432,15 @@ srand(time(NULL));
                     objc->count = 1;
                     objList << objc;
                 }
-                else objc->count++;
+                else objc->count++;*/
+                opos = objNumList.indexOf(mpNum);
+                if(opos==-1)
+                {
+                    objNumList << mpNum;
+                    objNums << 1;
+                }
+                else objNums[opos]++;
+
 
             }
 
@@ -453,7 +486,7 @@ srand(time(NULL));
                 magnCount[mnum]++;
             }
 
-            if(sepObs)
+            if(sepObj)
             {
                 wDir.mkdir(QString("./%1").arg(obsCode));
                 mFile.setFileName(QString("%1/%2/%3.txt").arg(wDir.absolutePath()).arg(obsCode).arg(mpNum));
@@ -462,9 +495,18 @@ srand(time(NULL));
                 mStm << mpR.toStr() << "\n";
                 mFile.close();
             }
+            if(sepObs)
+            {
+                //wDir.mkdir(QString("./%1").arg(obsCode));
+                mFile.setFileName(QString("%1/%2.txt").arg(wDir.absolutePath()).arg(obsCode));
+                mFile.open(QFile::WriteOnly | QFile::Append);
+                mStm.setDevice(&mFile);
+                mStm << mpR.toStr() << "\n";
+                mFile.close();
+            }
         }
 
-        qDebug() << QString("mpcNum: %5\nobs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count()).arg(oNum);
+        qDebug() << QString("mpcNum: %5\nobs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objNumList.count()).arg(oNum);
 
 QFile resFile;
 QTextStream resStm;
@@ -537,7 +579,7 @@ QTextStream resStm;
     //save objList
         if(isObj)
         {
-            sortObjNum(objList);
+            sort_objects(objNumList, objNums);
 
             //resFile.setFileName("./objCounter.txt");
             resFile.setFileName(QString("%1/objCounter.txt").arg(wDirName));
@@ -545,11 +587,11 @@ QTextStream resStm;
             if(resFile.open(QFile::WriteOnly | QFile::Truncate))
             {
                 resStm.setDevice(&resFile);
-                sz = objList.count();
+                sz = objNumList.count();
                 for(i=0; i<sz; i++)
                 {
 
-                    resStm << QString("%1|%2\n").arg(objList.at(i)->objNum).arg(objList.at(i)->count);
+                    resStm << QString("%1|%2\n").arg(objNumList.at(i)).arg(objNums[i]);
                 }
 
                 resFile.close();

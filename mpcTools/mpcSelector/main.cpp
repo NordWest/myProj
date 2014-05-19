@@ -52,12 +52,6 @@ int main(int argc, char *argv[])
     bool isOk;
     QString upStr;
 
-    QDir wDir;
-
-    wDir.setPath("./");
-    wDir.mkdir("./mpcs");
-    wDir.setPath("./mpcs");
-
 
     //unpackString(&upStr, dataStr.mid(0, 5));
 
