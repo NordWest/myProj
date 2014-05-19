@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     int isObj = settings->value("general/isObj", 1).toInt();
     int isSphere = settings->value("general/isSphere", 1).toInt();
     int isMagn = settings->value("general/isMagn", 1).toInt();
+    int sepObs = settings->value("general/sepObs", 0).toInt();
 
 //model
     int isSphMod =  settings->value("model/isSphMod", 0).toInt();
@@ -204,9 +205,12 @@ int oires;
         QDir wDir;
         QStringList dList, dfList;
 
-        wDir.setPath("./");
-        wDir.mkdir("./mpcs");
-        wDir.setPath("./mpcs");
+        if(sepObs)
+        {
+            wDir.setPath("./");
+            wDir.mkdir("./mpcs");
+            wDir.setPath("./mpcs");
+        }
 
 /*        dList = wDir.entryList();
         for(i=0; i<dList.size(); i++)
@@ -449,12 +453,15 @@ srand(time(NULL));
                 magnCount[mnum]++;
             }
 
-            wDir.mkdir(obsCode);
-            mFile.setFileName(QString("./mpcs/%1/%2.txt").arg(obsCode).arg(mpNum));
-            mFile.open(QFile::WriteOnly | QFile::Append);
-            mStm.setDevice(&mFile);
-            mStm << mpR.toStr() << "\n";
-            mFile.close();
+            if(sepObs)
+            {
+                wDir.mkdir(obsCode);
+                mFile.setFileName(QString("./mpcs/%1/%2.txt").arg(obsCode).arg(mpNum));
+                mFile.open(QFile::WriteOnly | QFile::Append);
+                mStm.setDevice(&mFile);
+                mStm << mpR.toStr() << "\n";
+                mFile.close();
+            }
         }
 
         qDebug() << QString("mpcNum: %5\nobs: %1\nyears: %2\ncatFlags: %3\nobjects: %4\n").arg(obsList.count()).arg(yrList.count()).arg(cfList.count()).arg(objList.count()).arg(oNum);
