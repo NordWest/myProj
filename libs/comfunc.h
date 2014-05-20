@@ -263,7 +263,7 @@ int packDigStr(char *pstr, char *fstr);
 int upackDigStr(char *upstr, char *fstr);
 
 int packString(QString upStr, QString *pStr, int targLen);
-int unpackString(QString *upStr, QString pStr);
+void unpackString(QString *upStr, QString pStr);
 
 
 int epm_planet_num(QString name);

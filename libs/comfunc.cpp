@@ -844,7 +844,7 @@ int packString(QString upStr, QString *pStr, int targLen)
     return 0;
 }
 
-int unpackString(QString *upStr, QString pStr)
+void unpackString(QString *upStr, QString pStr)
 {
     upStr->clear();
     char *fstr = new char[2];
@@ -864,7 +864,7 @@ int unpackString(QString *upStr, QString pStr)
     delete [] fstr;
     delete [] ustr;
 
-    return 0;
+//    return 0;
 }
 
 

@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     mpcRec mpR;
     int obsNum, obsNumN, objNum, cfNum, otNum;
-    int isObs, isObsN, isObj, isTime, isCF, isMag, isOT;
+    int isObs, isObsN, isObj, isTime, isCF, isMag, isOT, isNum;
     int k, r, i, j, sz;
     QString mpNum, obsCode, catFlag, obsType;
     double mjd0, mjd1, mjd, tMag;
@@ -43,20 +43,22 @@ int main(int argc, char *argv[])
     double mag0 = sett->value("general/mag0", -30).toDouble();
     double mag1 = sett->value("general/mag1", 30).toDouble();
 
+    int isNumSel = sett->value("general/isNumSel", 0).toInt();
+    int num0 = sett->value("general/num0", 0).toInt();
+    int num1 = sett->value("general/num1", 0).toInt();
+
     if(timeS0.size()!=0) getMJDfromStrFTN(&mjd0, timeS0, 0);
     if(timeS1.size()!=0) getMJDfromStrFTN(&mjd1, timeS1, 0);
-
 
     QVector <int> mpcNums;
 
     bool isOk;
+    int num;
     QString upStr;
-
 
     //unpackString(&upStr, dataStr.mid(0, 5));
 
     int objn, pMin, nMin;
-
 
     QFile parFile;//(objFileName);
     QTextStream parStm;
@@ -144,10 +146,6 @@ int main(int argc, char *argv[])
     }
     QTextStream resStm(&resFile);
 
-    QFile mFile;
-    QTextStream mStm;
-
-
     obsNum = obsCodeList.size();
     obsNumN = obsCodeList.size();
     objNum = objNumList.size();
@@ -172,10 +170,15 @@ int main(int argc, char *argv[])
     }
     obsNum = obsCodeList.size();
 
+    for(i=obsNumN-1; i>=0;i--)
+    {
+        if(obsCodeListN.at(i).size()==0) obsCodeListN.removeAt(i);
+    }
+    obsNumN = obsCodeListN.size();
 
     qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\totNum=%4\n").arg(obsNum).arg(objNum).arg(cfNum).arg(otNum);
 
-    k=0; r=0;
+    k=-1; r=0;
     while(!inFile.atEnd())
     {
         mpR.fromStr(inStm.readLine());
@@ -187,7 +190,9 @@ int main(int argc, char *argv[])
         isCF = 1;
         isMag = 1;
         isOT = 1;
+        isNum = !isNumSel;
 
+        k++;
 //time
         mjd = mpR.mjd();
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
@@ -195,6 +200,18 @@ int main(int argc, char *argv[])
 
         mpR.getMpNumber(mpNum);
         if(!isObj) isObj = objNumList.indexOf(mpNum)!=-1;
+
+        if(isNumSel)
+        {
+            unpackString(&upStr, mpNum);
+            objn = mpR.mpNumber();
+            //num = upStr.toInt(&isOk);
+
+            isNum = ((objn>=num0)&&(objn<=num1));
+            //qDebug() << QString("objn: %1\tisNum: %2").arg(objn).arg(isNum);
+        }
+        if(!isNum) continue;
+
         /*objn = mpR.mpNumber();
         if(!isObj)
         {
@@ -233,12 +250,14 @@ int main(int argc, char *argv[])
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
-
+        if(isObsN) continue;
+        //qDebug() << QString("isObsN: %1").arg(isObsN);
         for(i=0; i<obsNumN && obsCodeListN.at(i).size()>0;i++)
         {
             isObsN = (QString().compare(obsCode, obsCodeListN.at(i))==0);
             if(isObsN) break;
         }
+        //qDebug() << QString("obsCode: %1\tobsCodeListN: %2\nisObsN: %3").arg(obsCode).arg(obsCodeListN.at(i)).arg(isObsN);
         if(isObsN) continue;
 
 //catFlag
@@ -259,13 +278,14 @@ int main(int argc, char *argv[])
         tMag = mpR.magn();
         if(tMag<mag0||tMag>mag1) isMag = 0;
 
+        //qDebug() << QString("isObj: %1\tisObs: %2\tisTime: %3\tisMag: %4\n").arg(isObj).arg(isObs).arg(isTime).arg(isMag);
         if(isObj&&isObs&&isTime&&isCF&&isMag)
         {
             resStm << mpR.toStr() << "\n";
             r++;
 
         }
-        k++;
+
     }
 
     qDebug() << QString("\nFrom %1 records %2 selected\n").arg(k).arg(r);
