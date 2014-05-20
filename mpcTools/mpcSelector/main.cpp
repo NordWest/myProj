@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     QTextStream resStm(&resFile);
 
     obsNum = obsCodeList.size();
-    obsNumN = obsCodeList.size();
+    obsNumN = obsCodeListN.size();
     objNum = objNumList.size();
     cfNum = catFlagList.size();
     otNum = obsTypeList.size();
@@ -245,13 +245,15 @@ int main(int argc, char *argv[])
             }
         }
         */
+        //isObs = 0;
         for(i=0; i<obsNum && obsCodeList.at(i).size()>0;i++)
         {
             isObs = (QString().compare(obsCode, obsCodeList.at(i))==0);
             if(isObs) break;
         }
-        if(isObsN) continue;
+        if(!isObs) continue;
         //qDebug() << QString("isObsN: %1").arg(isObsN);
+        isObsN=0;
         for(i=0; i<obsNumN && obsCodeListN.at(i).size()>0;i++)
         {
             isObsN = (QString().compare(obsCode, obsCodeListN.at(i))==0);
