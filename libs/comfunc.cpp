@@ -774,7 +774,10 @@ int upackDigStr(char *pstr, char *upstr)
         if(streqv(pstr, "S")) strcpy(upstr, "28\0");
         if(streqv(pstr, "T")) strcpy(upstr, "29\0");
         if(streqv(pstr, "U")) strcpy(upstr, "30\0");
-        if(streqv(pstr, "V")) strcpy(upstr, "31\0");
+        if(streqv(pstr, "W")) strcpy(upstr, "31\0");
+        if(streqv(pstr, "X")) strcpy(upstr, "32\0");
+        if(streqv(pstr, "Y")) strcpy(upstr, "33\0");
+        if(streqv(pstr, "Z")) strcpy(upstr, "34\0");
 
 	return 0;
 }

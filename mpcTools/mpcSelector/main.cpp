@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     qDebug() << QString("obsNum= %1\tobjNum= %2\tcfNum= %3\totNum=%4\n").arg(obsNum).arg(objNum).arg(cfNum).arg(otNum);
 
     k=-1; r=0;
-    while(!inFile.atEnd())
+    while(!inStm.atEnd())
     {
         mpR.fromStr(inStm.readLine());
 
@@ -196,6 +196,7 @@ int main(int argc, char *argv[])
 //time
         mjd = mpR.mjd();
         isTime = (timeS0.size()==0||mjd>=mjd0)&&(timeS1.size()==0||mjd<=mjd1);
+        //qDebug() << QString("time %4: %1\t%2\t%3").arg(mjd0).arg(mjd).arg(mjd1).arg(k);
         if(!isTime) continue;
 
         mpR.getMpNumber(mpNum);
@@ -290,7 +291,7 @@ int main(int argc, char *argv[])
 
     }
 
-    qDebug() << QString("\nFrom %1 records %2 selected\n").arg(k).arg(r);
+    qDebug() << QString("\nFrom %1 records %2 selected\n").arg(k+1).arg(r);
 
     inFile.close();
     resFile.close();
