@@ -360,6 +360,8 @@ int main(int argc, char *argv[])
 //mpc2eq
     int isCountCols = sett->value("mpc2eq/isCountCols", 1).toInt();
     QString colsNums = sett->value("mpc2eq/colsNums", "4,5,6").toString();
+    int isSaveXML = sett->value("mpc2eq/isSaveXML", 0).toInt();
+    int isSaveImp = sett->value("mpc2eq/isSaveImp", 0).toInt();
 
     /*moody
     cfg_file = sett->value("moody/cfg_file").toString();
@@ -562,14 +564,14 @@ int main(int argc, char *argv[])
     for(i=0;i<mNum;i++)
     {
         mpc_rec = mpc_file.at(i);
-        mpc_rec->getMpUPackNumber(tStr);
+        mpc_rec->getMpNumber(tStr);
 
         tStr.replace(" ", "0");
-        sprintf(tname, "%s", tStr.toAscii().data());
+        sprintf(tname, "%s   ", tStr.toAscii().data());
 
 //qDebug() << QString("MpNumber: %1\n").arg(tname);
 
-        if(mCat.GetRecNum(tname))
+        if(mCat.GetProvDest(tname))
         {
             mpc_rec->getProvDest(tStr);
             qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
@@ -990,12 +992,12 @@ objName = QString(mCat.record->name).simplified();
     ocFile.setFileName(resFileName);
     ocFile.open(QFile::WriteOnly | QFile::Truncate);
     ocStm.setDevice(&ocFile);
-
+/*
     QString mpcFileName = QString("%1_mpc.txt").arg(resFileName.section(".", 0, -2));
     mpcFile1.setFileName(mpcFileName);
     mpcFile1.open(QFile::WriteOnly | QFile::Truncate);
     mpcStm.setDevice(&mpcFile1);
-
+*/
     vmul = 1;
     for(j=0;j<nofzbody;j++)
     {
@@ -1013,9 +1015,14 @@ objName = QString(mCat.record->name).simplified();
 mpc mrec;
 double cosD;
 double sDist, eDist, magC;
-QFile impFile(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
-impFile.open(QFile::Truncate | QFile::WriteOnly);
-QTextStream impStm(&impFile);
+QFile impFile;
+QTextStream impStm;
+if(isSaveImp)
+{
+    impFile.setFileName(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
+    impFile.open(QFile::Truncate | QFile::WriteOnly);
+    impStm.setDevice(&impFile);
+}
 
 int dOrb = 1;
 int k;
@@ -1269,7 +1276,7 @@ double state0[6];
 
 //                eqo_list.addEQ(oc_rec);
 
-                impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 17, 'e', 12).arg(state[1], 17, 'e', 12).arg(state[2], 17, 'e', 12).arg(state[3], 17, 'e', 12).arg(state[4], 17, 'e', 12).arg(state[5], 17, 'e', 12).arg(oc_rec->obsCode);
+                if(isSaveImp) impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 17, 'e', 12).arg(state[1], 17, 'e', 12).arg(state[2], 17, 'e', 12).arg(state[3], 17, 'e', 12).arg(state[4], 17, 'e', 12).arg(state[5], 17, 'e', 12).arg(oc_rec->obsCode);
 
                 oc_rec->rec2sBase(&tstr);
 
@@ -1297,7 +1304,7 @@ double state0[6];
 
     }
 
-impFile.close();
+    if(isSaveImp) impFile.close();
 
     //QList <eqFile*> eqList;
     eqFile* eqTemp;
@@ -1330,7 +1337,7 @@ impFile.close();
     }
 
     ocFile.close();
-    mpcFile1.close();
+    //mpcFile1.close();
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 

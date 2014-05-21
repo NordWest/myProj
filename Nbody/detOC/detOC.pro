@@ -10,7 +10,7 @@ QT       -= gui
 
 #TARGET = ~/bin/detOC
 TARGET = ./../../../lab/testNbody/detOC
-CONFIG   += console warn_off release
+CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
 TEMPLATE = app
