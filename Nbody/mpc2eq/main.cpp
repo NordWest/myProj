@@ -562,14 +562,14 @@ int main(int argc, char *argv[])
     for(i=0;i<mNum;i++)
     {
         mpc_rec = mpc_file.at(i);
-        mpc_rec->getMpNumber(tStr);
+        mpc_rec->getMpUPackNumber(tStr);
 
         tStr.replace(" ", "0");
         sprintf(tname, "%s", tStr.toAscii().data());
 
 //qDebug() << QString("MpNumber: %1\n").arg(tname);
 
-        if(mCat.GetProvDest(tname))
+        if(mCat.GetRecNum(tname))
         {
             mpc_rec->getProvDest(tStr);
             qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());

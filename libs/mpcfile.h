@@ -17,6 +17,8 @@ class mpcRec
     QString dataStr;
 public:
     void getMpNumber(QString &mpNumber);
+    void getMpUPackNumber(QString &mpNumber);
+    //void getMpPackNumber(QString &mpNumber);
     //QString& getMpNumber();
     int mpNumber();
     void getProvDest(QString &provDest);

@@ -29,6 +29,11 @@ QString trCatFlag(QString catFlag)
     return QString("Unspecified");
 }
 
+void mpcRec::getMpUPackNumber(QString &mpNumber)
+{
+    unpackString(&mpNumber, dataStr.mid(0, 5));
+}
+
 void mpcRec::getMpNumber(QString &mpNumber)
 {
     mpNumber.clear();
