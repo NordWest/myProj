@@ -8,7 +8,9 @@ QT       += core
 
 QT       -= gui
 
-TARGET = aitoffpoints
+#TARGET = aitoffpoints
+TARGET = ~/bin/aitoffpoints
+
 CONFIG   += console
 CONFIG   -= app_bundle
 

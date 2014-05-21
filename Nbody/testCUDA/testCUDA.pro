@@ -18,5 +18,6 @@ TEMPLATE = app
 SOURCES += main.cpp
 
 LIBS += -libcudart
-INCLUDEPATH += /usr/local/cuda-5.5/include
-
+INCLUDEPATH += /usr/local/cuda-6.0/include
+INCLUDEPATH += /usr/local/cuda-6.0/samples/common/inc
+INCLUDEPATH += /usr/local/cuda-6.0/lib

@@ -1,9 +1,9 @@
 #include <QtCore/QCoreApplication>
 #include <QtSql>
 
-#include "./../libs/mpcfile.h"
-#include "./../libs/comfunc.h"
-#include "./../libs/ringpix.h"
+#include "./../../libs/mpcfile.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/ringpix.h"
 
 int main(int argc, char *argv[])
 {

@@ -6,7 +6,7 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
-//#include <cu>
+#include <helper_cuda.h>
 
 int *pArgc = NULL;
 char **pArgv = NULL;
@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
 
             printf("  (%2d) Multiprocessors, (%3d) CUDA Cores/MP:     %d CUDA Cores\n",
                    deviceProp.multiProcessorCount,
-                   _ConvertSMVer2Cores_local(deviceProp.major, deviceProp.minor),
-                   _ConvertSMVer2Cores_local(deviceProp.major, deviceProp.minor) * deviceProp.multiProcessorCount);
+                   _ConvertSMVer2Cores(deviceProp.major, deviceProp.minor),
+                   _ConvertSMVer2Cores(deviceProp.major, deviceProp.minor) * deviceProp.multiProcessorCount);
             printf("  GPU Clock rate:                                %.0f MHz (%0.2f GHz)\n", deviceProp.clockRate * 1e-3f, deviceProp.clockRate * 1e-6f);
 
 

@@ -25,7 +25,7 @@
 #include "./../../libs/moody/capsule/Capsule.h"
 #include "./../../libs/moody/capsule/capsuleBase/CapsuleBase.h"
 #include "./../../libs/myDomMoody.h"
-
+/*
 static QDataStream* clog0 = 0;
 
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -65,7 +65,7 @@ void customMessageHandler(QtMsgType type, const char* msg)
 #endif
     }
 }
-
+*/
 
 int nofzbody;
 dele *nbody;
@@ -253,12 +253,12 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
-
+/*
     QFile* logFile = new QFile("mpc2eq.log");
     if(logFile->open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Unbuffered))
         clog0 = new QDataStream(logFile);
     QTextStream logstr(logFile);
-
+*/
     if(argc<2)
     {
         qDebug() << "\nError: mpc file needed\n";
@@ -1334,7 +1334,7 @@ impFile.close();
 
     qDebug() << QString("Time elapsed: %1 sec\n").arg(timeElapsed.elapsed()/1000.0);
 
-    logFile->close();
+    //logFile->close();
     return 0;//a.exec();
 }
 
