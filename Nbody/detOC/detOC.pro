@@ -8,8 +8,8 @@ QT       += core
 
 QT       -= gui
 
-#TARGET = ~/bin/detOC
-TARGET = ./../../../lab/testNbody/detOC
+TARGET = ~/bin/detOC
+#TARGET = ./../../../lab/testNbody/detOC
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 

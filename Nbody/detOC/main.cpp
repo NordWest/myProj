@@ -276,6 +276,7 @@ int main(int argc, char *argv[])
     mpcRec mpc_rec;
 
     mpc_rec.fromStr(QString(argv[1]));
+    qDebug() << "imput str: " << iniMpcFile << "\n";
 /*
     if(mpc_file.init(iniMpcFile))
     {
@@ -1116,9 +1117,9 @@ double state0[6];
 
                 if(isSaveImp) impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 17, 'e', 12).arg(state[1], 17, 'e', 12).arg(state[2], 17, 'e', 12).arg(state[3], 17, 'e', 12).arg(state[4], 17, 'e', 12).arg(state[5], 17, 'e', 12).arg(oc_rec->obsCode);
 
-                oc_rec->rec2sBase(&tstr);
+                ;
 
-                qDebug() << tstr << "\n";
+                qDebug() << oc_rec->rec2sBase1()<< "\n";
 /*                ocStm << tstr << "\n";
 
 
@@ -1145,7 +1146,7 @@ double state0[6];
     if(isSaveImp) impFile.close();
 
 
-    cout << oc_rec->rec2sBase1().toAscii().data();
+    cout << oc_rec->rec2sBase1().toAscii().data() << "\n";
 /*
     //QList <eqFile*> eqList;
     eqFile* eqTemp;

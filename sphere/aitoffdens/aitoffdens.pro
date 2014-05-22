@@ -6,7 +6,7 @@
 
 QT       -= gui
 
-TARGET = aitoffdens
+TARGET = ~/bin/aitoffdens
 CONFIG   += console
 CONFIG   -= app_bundle
 
