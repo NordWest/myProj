@@ -43,7 +43,7 @@ SOURCES += main.cpp  \
 #    ../libs/uneven.cpp
 
 //SOURCES += astro.cpp
-TARGET = estimates
+TARGET = ~/bin/estimates
 CONFIG += console \
     exceptions \
     warn_off
