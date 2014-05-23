@@ -678,6 +678,7 @@ int main(int argc, char *argv[])
 
         if(plaNum!=-1)
         {
+
             switch(bigType)
             {
                 case 0:
@@ -796,20 +797,7 @@ int main(int argc, char *argv[])
             }
             break;
             }
-            /*
-            if(useEPM)
-            {
-                status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else
-            {
-                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, center, sk);
-            }*/
+
         }
         else
         {
@@ -858,8 +846,8 @@ int main(int argc, char *argv[])
             pList[i]->theta = mCat.record->H;
         }
 
-        xVect << X;
-        vVect << V;
+        //xVect << X;
+        //vVect << V;
         dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
         vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
         pList[i]->x = coefX*X[0];
@@ -879,6 +867,7 @@ int main(int argc, char *argv[])
         V0[i*3+2] = pList[i]->zd;
 
         mass[i] = pList[i]->mass;
+
         //}
     }
     mass[envSize] = -1.0;
@@ -993,17 +982,7 @@ int main(int argc, char *argv[])
             }
 
             objName = QString(mCat.record->name).simplified();
-            //qDebug() << QString("objName: %1\n").arg(objName);
-            //sortOClist(eq_file.ocList);
-            /*szj = eq_file.ocList.size();
-            for(j=0;j<szj;j++)
-            {
-                oc_rec = eq_file.ocList.at(j);
-                tstr = oc_rec->rec2sBase1();
 
-                qDebug() << tstr << "\n";
-                ocStm << tstr << "\n";
-            }*/
             if(eq_file.size()>3)
             {
                 ocFile.setFileName(resFileName);
@@ -1092,7 +1071,7 @@ int main(int argc, char *argv[])
                     VT[i*3] = V0[i*3];
                     VT[i*3+1] = V0[i*3+1];
                     VT[i*3+2] = V0[i*3+2];
-                    qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(i).arg(XT[i*3]).arg(XT[i*3+2]).arg(XT[i*3+2]).arg(VT[i*3]).arg(VT[i*3+2]).arg(VT[i*3+2]);
+                    //qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(i).arg(XT[i*3]).arg(XT[i*3+2]).arg(XT[i*3+2]).arg(VT[i*3]).arg(VT[i*3+2]).arg(VT[i*3+2]);
                 }
                 XT[envSize*3] = X[0];
                 XT[envSize*3+1] = X[1];
@@ -1100,7 +1079,7 @@ int main(int argc, char *argv[])
                 VT[envSize*3] = V[0];
                 VT[envSize*3+1] = V[1];
                 VT[envSize*3+2] = V[2];
-                qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(envSize).arg(XT[envSize*3]).arg(XT[envSize*3+2]).arg(XT[envSize*3+2]).arg(VT[envSize*3]).arg(VT[envSize*3+2]).arg(VT[envSize*3+2]);
+                //qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(envSize).arg(XT[envSize*3]).arg(XT[envSize*3+2]).arg(XT[envSize*3+2]).arg(VT[envSize*3]).arg(VT[envSize*3+2]).arg(VT[envSize*3+2]);
                 //pList[i]->theta = mCat.record->H;
             }
 
@@ -1308,18 +1287,7 @@ int main(int argc, char *argv[])
         state[3] = vmul*VT[objPos*3];//+VS0[0];
         state[4] = vmul*VT[objPos*3+1];//+VS0[1];
         state[5] = vmul*VT[objPos*3+2];//+VS0[2];
-/*
-        if(nObj&&isSaveOrb)
-        {
-            findOrb(orbRec.elem, &state[0], &state[3], tdo);
-            orbRec.set(&orb_cat0);
-            orb_cat0.record->set_number(mpc_rec.mpNumber());
-            orb_cat0.record->set_name(objName.simplified().toAscii().data());
-            orb_cat0.record->set_author("Berezhnoy");
-            orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
-            orb_cat0.AddRec();
-        }
-*/
+
         state[0] +=XS0[0];
         state[1] +=XS0[1];
         state[2] +=XS0[2];
@@ -1381,23 +1349,6 @@ int main(int argc, char *argv[])
                 ocStm << oc_rec->rec2sBase1() << "\n";
 
         ocFile.close();
-/*
-                mCat.GetRecName(oc_rec->name.toAscii().data());
-                //mCat.record->getNumStr(astr);
-                //objNumStr = QString(astr);
-
-
-                mrec.eJD = mjd2jd(oc_rec->MJday);
-                mrec.num = 1;
-                mCat.record->getNumStr(mrec.head->Snum);
-                mrec.tail->set_numOfObs(obsCode.toAscii().data());
-                mrec.toString(astr);
-
-                //oc_rec->rec2MPC(&tstr, obsCode, objNumStr);
-
-                mpcStm << astr << "\n";*/
-            //}
-        //}
 
 
     }

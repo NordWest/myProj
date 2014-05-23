@@ -10,7 +10,7 @@ QT       -= gui
 
 #TARGET = ~/bin/mpc2eq
 TARGET = ./../../../lab/testNbody/mpc2eq
-CONFIG   += console debug
+CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
