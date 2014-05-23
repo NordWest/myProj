@@ -1092,7 +1092,7 @@ int main(int argc, char *argv[])
                     VT[i*3] = V0[i*3];
                     VT[i*3+1] = V0[i*3+1];
                     VT[i*3+2] = V0[i*3+2];
-                    //qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(i).arg(XT[i*3]).arg(XT[i*3+2]).arg(XT[i*3+2]).arg(VT[i*3]).arg(VT[i*3+2]).arg(VT[i*3+2]);
+                    qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(i).arg(XT[i*3]).arg(XT[i*3+2]).arg(XT[i*3+2]).arg(VT[i*3]).arg(VT[i*3+2]).arg(VT[i*3+2]);
                 }
                 XT[envSize*3] = X[0];
                 XT[envSize*3+1] = X[1];
@@ -1100,7 +1100,7 @@ int main(int argc, char *argv[])
                 VT[envSize*3] = V[0];
                 VT[envSize*3+1] = V[1];
                 VT[envSize*3+2] = V[2];
-                //qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(envSize).arg(XT[envSize*3]).arg(XT[envSize*3+2]).arg(XT[envSize*3+2]).arg(VT[envSize*3]).arg(VT[envSize*3+2]).arg(VT[envSize*3+2]);
+                qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(envSize).arg(XT[envSize*3]).arg(XT[envSize*3+2]).arg(XT[envSize*3+2]).arg(VT[envSize*3]).arg(VT[envSize*3+2]).arg(VT[envSize*3+2]);
                 //pList[i]->theta = mCat.record->H;
             }
 
