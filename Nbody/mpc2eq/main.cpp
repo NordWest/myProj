@@ -278,6 +278,8 @@ int main(int argc, char *argv[])
 
     double *X, *V;
     double *X0, *V0;
+    double *XT, *VT;
+
     QVector <double*> xVect, vVect;
     double Xsun[3], Vsun[3];
     double XE0[3], VE0[3];
@@ -660,8 +662,10 @@ int main(int argc, char *argv[])
         mass = new double[envSize+1];
         X0 = new double[(envSize+1)*3];
         V0 = new double[(envSize+1)*3];
+        XT = new double[(envSize+1)*3];
+        VT = new double[(envSize+1)*3];
 
-        double *XT, *VT;
+
 
     //    srand (time(NULL));
     //    double decVol = 0.000001;//*(rand()%1)-0.0000005;
@@ -883,6 +887,44 @@ int main(int argc, char *argv[])
     }
     mass[envSize] = -1.0;
 //main cycle
+    objNameT = "";
+
+    int nt, N;
+    double ti, tf, dT, ra, dec;
+    double vmul;
+    Everhardt *solSys;
+    QString tstr, objNumStr;
+    char* astr = new char[256];
+
+    QTime timeElapsed;// = QTime.currentTime();
+    timeElapsed.start();
+
+    int dOrb = 1;
+    int k, szj;
+    double tdo;
+    double state0[6];
+
+    QFile ocFile;
+    QTextStream ocStm;
+
+    qDebug() << QString("resFileName: %1\n").arg(resFileName);
+    ocFile.setFileName(resFileName);
+    ocFile.open(QFile::WriteOnly | QFile::Truncate);
+    ocStm.setDevice(&ocFile);
+
+    double cosD;
+    double sDist, eDist, magC;
+    QFile impFile;
+    QTextStream impStm;
+    if(isSaveImp)
+    {
+        impFile.setFileName(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
+        impFile.open(QFile::Truncate | QFile::WriteOnly);
+        impStm.setDevice(&impFile);
+    }
+
+    int isS;
+
 
     while(!inpStm.atEnd())
     {
@@ -893,32 +935,35 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        isS = 0;
+
         mpc_rec.getMpNumber(tStr);
 
         tStr.replace(" ", "0");
         sprintf(tname, "%s   ", tStr.toAscii().data());
 
-        nObj = (QString.compare(tStr, objNameT)==0);
+        nObj = (QString().compare(tStr, objNameT)==0);
 //qDebug() << QString("MpNumber: %1\n").arg(tname);
+
         if(nObj)
         {
             objNameT = tStr;
 
             if(mCat.GetProvDest(tname))
             {
-                mpc_rec->getProvDest(tStr);
+                mpc_rec.getProvDest(tStr);
                 qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
                 if(mCat.GetProvDest(tStr.toAscii().data()))
                 {
-                    qDebug() << QString("not found: %1\n").arg(mpc_rec->toStr());
+                    qDebug() << QString("not found: %1\n").arg(mpc_rec.toStr());
                     continue;
                 }
             }
 
             objName = QString(mCat.record->name).simplified();
 
-            sortOClist(eq_file.ocList);
-            szj = eq_file.ocList.size();
+            //sortOClist(eq_file.ocList);
+            /*szj = eq_file.ocList.size();
             for(j=0;j<szj;j++)
             {
                 oc_rec = eq_file.ocList.at(j);
@@ -926,7 +971,7 @@ int main(int argc, char *argv[])
 
                 qDebug() << tstr << "\n";
                 ocStm << tstr << "\n";
-            }
+            }*/
             if(isCountCols) eq_file.countCols(colsNums);
             szj = eq_file.colList.size();
             for(j=0; j<szj; j++)
@@ -935,7 +980,7 @@ int main(int argc, char *argv[])
                 qDebug() << tstr << "\n";
                 ocStm << tstr << "\n";
             }
-
+            isS = 1;
             eq_file.clear();
             objNameT = objName;
 
@@ -972,7 +1017,7 @@ int main(int argc, char *argv[])
 
 
     /////////////////
-                if(orbRec.elem->eJD!=objJD)
+                if(orbRec.elem->eJD!=orbJD)
                 {
                     qDebug() << QString("orbJD change, skip\n");
                     continue;
@@ -996,10 +1041,21 @@ int main(int argc, char *argv[])
 
                 tBeg = jdTDB;
                 vmul=1;
-                for(i=0;i<envSize; i++)
+                for(i=0; i<envSize; i++)
                 {
-
+                    XT[i*3] = X0[i*3];
+                    XT[i*3+1] = X0[i*3+1];
+                    XT[i*3+2] = X0[i*3+2];
+                    VT[i*3] = V0[i*3];
+                    VT[i*3+1] = V0[i*3+1];
+                    VT[i*3+2] = V0[i*3+2];
                 }
+                XT[envSize] = X[0];
+                XT[envSize+1] = X[1];
+                XT[envSize+2] = X[2];
+                VT[envSize] = V[0];
+                VT[envSize+1] = V[1];
+                VT[envSize+2] = V[2];
                 //pList[i]->theta = mCat.record->H;
             }
             else //continue
@@ -1009,18 +1065,16 @@ int main(int argc, char *argv[])
 
         }
 
-
         oc_rec->name = objName;
-        oc_rec->MJday = mpc_rec->mjd();
-        oc_rec->ra = mpc_rec->ra();
-        oc_rec->de = mpc_rec->dec();
-        oc_rec->mag = mpc_rec->magn();
-        mpc_rec->getObsCode(oc_rec->obsCode);
+        oc_rec->MJday = mpc_rec.mjd();
+        oc_rec->ra = mpc_rec.ra();
+        oc_rec->de = mpc_rec.dec();
+        oc_rec->mag = mpc_rec.magn();
+        mpc_rec.getObsCode(oc_rec->obsCode);
         eq_file.ocList << oc_rec;
 
-        nofzbody = envSize + nObs;
-
-
+        nofzbody = envSize + nObj;
+        N = (nofzbody)*3;
 
         tEnd = UTC2TDB(mjd2jd(oc_rec->MJday));
         dT = tEnd - tBeg;
@@ -1037,576 +1091,15 @@ int main(int argc, char *argv[])
             }
         }
 
-    }
-
-
-
-
-    for(i=0;i<mNum;i++)
-    {
-        mpc_rec = mpc_file.at(i);
-        mpc_rec->getMpNumber(tStr);
-
-        tStr.replace(" ", "0");
-        sprintf(tname, "%s   ", tStr.toAscii().data());
-
-//qDebug() << QString("MpNumber: %1\n").arg(tname);
-
-        if(mCat.GetProvDest(tname))
+        if(nObj)
         {
-            mpc_rec->getProvDest(tStr);
-            qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
-            if(mCat.GetProvDest(tStr.toAscii().data()))
-            {
-                qDebug() << QString("not found: %1\n").arg(mpc_rec->toStr());
-                continue;
-            }
+            delete solSys;
+            solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
         }
 
-objName = QString(mCat.record->name).simplified();
+        solSys->rada27(XT, VT, 0, fabs(dT));
 
-        if(useOrbCat)
-        {
-            if(ocat.GetRecName(objName.toAscii().data())==-1)
-            {
-               qDebug() << QString("ocat\'t find object |%1|\n").arg(objName);
-               orbJD += mCat.record->getEpoch();
-            }
-            else orbJD += ocat.record->eJD;
-        }
-        else
-        {
-
-
-        //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
-            orbJD += mCat.record->getEpoch();
-        }
-
-
-        oc_rec = new ocRec;
-        oc_rec->name = objName;
-        oc_rec->MJday = mpc_rec->mjd();
-        oc_rec->ra = mpc_rec->ra();
-        oc_rec->de = mpc_rec->dec();
-        oc_rec->mag = mpc_rec->magn();
-        mpc_rec->getObsCode(oc_rec->obsCode);
-        eq_file.ocList << oc_rec;
-
-        isObj = 1;
-
-        for(j=0; j<envSize; j++)
-        {
-            if(QString().compare(objName, pList[j]->name.data())==0)
-            {
-                isObj=0;
-                break;
-            }
-        }
-        if(isObj)
-        {
-            nPar = new ParticleStruct;
-            nPar->name = objName.toAscii().data();
-            nPar->identity = Advisor::planetesimal;
-            nPar->interactionPermission = Advisor::interactALL;
-            nPar->mass = -1.0;
-
-            pList << nPar;
-            envSize++;
-        }
-    }
-
-//time
-    jdTDT = orbJD/(1.0*mNum);
-    jdTDB = TDT2TDB(jdTDT);
-    jdUTC = TDT2UTC(jdTDT);
-
-    qDebug() << QString("orb jdTDB: %1\n").arg(jdTDB, 15, 'f', 8);
-
-    sJD = QString("%1").arg(jdUTC, 11, 'f',7);
-
-    jday = (int)jdTDB;
-    pday = jdTDB - jday;
-
-//sun
-    if(useEPM) plaNum = epm_planet_num("Sun");
-    else plaNum = planet_num("Sun");
-    if(center)
-    {
-        //nbody->detState(&Xsun[0], &Xsun[1], &Xsun[2], &Vsun[0], &Vsun[1], &Vsun[2], jdTDB, SUN_NUM, 0, sk);
-        switch(bigType)
-        {
-            case 0:
-            {
-                if(useEPM)
-                {
-                    status = calc_EPM(plaNum, 12, (int)jdTDB, (int)jdTDB-jdTDB, Xsun, Vsun);
-                     if(!status)
-                     {
-                         qDebug() << QString("error EPM\n");
-                         return 1;
-                     }
-                }
-                else
-                {
-                    nbody->detState(&Xsun[0], &Xsun[1], &Xsun[2], &Vsun[0], &Vsun[1], &Vsun[2], jdTDB, plaNum, 0, sk);
-                }
-            }
-            break;
-
-            case 1:
-            {
-                plaNum = epm_planet_num("Sun");
-
-                //calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
-                //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
-                //timei = time0 + state[0];
-                calceph_scompute((int)jdTDB, jdTDB-(int)jdTDB, plaNum, 12, state);
-                Xsun[0] = state[0];
-                Xsun[1] = state[1];
-                Xsun[2] = state[2];
-                Vsun[0] = state[3];
-                Vsun[1] = state[4];
-                Vsun[2] = state[5];
-
-                break;
-            }
-            case 2:
-            {
-                    sJD = QString("%1 JD").arg(jdTDB, 15, 'f',7);
-                    str2et_c(sJD.toAscii().data(), &et);
-                    spkezr_c (  "Sun", et, ref, "NONE", "ssb", state, &lt );
-
-                    Xsun[0] = state[0]/AUKM;
-                    Xsun[1] = state[1]/AUKM;
-                    Xsun[2] = state[2]/AUKM;
-                    Vsun[0] = state[3]/AUKM*SECINDAY;
-                    Vsun[1] = state[4]/AUKM*SECINDAY;
-                    Vsun[2] = state[5]/AUKM*SECINDAY;
-
-
-                break;
-            }
-        }
-    }
-
-    envSize = pList.size();
-    qDebug() << QString("full envSize: %1\n").arg(envSize);
-    nofzbody = envSize-1;
-    mass = new double[nofzbody];
-    X0 = new double[nofzbody*3];
-    V0 = new double[nofzbody*3];
-
-//    srand (time(NULL));
-//    double decVol = 0.000001;//*(rand()%1)-0.0000005;
-
-
-    p=0;
-    for(i=0; i<envSize; i++)
-    {
-        if(pList.at(i)->identity==Advisor::collapsorFixed) continue;
-        name = QString(pList[i]->name.data());
-
-        plaNum = planet_num(name.toAscii().data());
-
-        if(plaNum!=-1)
-        {
-            switch(bigType)
-            {
-                case 0:
-                {
-                    if(useEPM)
-                    {
-                        plaNum = epm_planet_num(name);
-                        status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
-                         if(!status)
-                         {
-                             qDebug() << QString("error EPM\n");
-                             return 1;
-                         }
-                    }
-                    else
-                    {
-                        //plaNum = planet_num(name.toAscii().data());
-                        nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, center, sk);
-                    }
-                }
-                break;
-
-                case 1:
-                {
-                plaNum = epm_planet_num(name);
-                //calceph_scompute((int)time0, time0-(int)time0, 16, 0, state);
-                //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
-                //timei = time0 + state[0];
-                calceph_scompute((int)jdTDB, jdTDB-(int)jdTDB, epm_planet_num(name), centr_num, state);
-                X[0] = state[0];
-                X[1] = state[1];
-                X[2] = state[2];
-                V[0] = state[3];
-                V[1] = state[4];
-                V[2] = state[5];
-
-
-
-                    break;
-                }
-                case 2:
-                {
-                //plaNum = planet_num(name.toAscii().data());
-                    if(plaNum!=SUN_NUM)
-                    {
-                        if(QString().compare(name.simplified(), "EMB", Qt::CaseInsensitive)!=0) sName = QString("%1 BARYCENTER").arg(name.simplified().toAscii().data());
-                        else sName = name;
-                        qDebug() << QString("name: %1\n").arg(sName);
-                        sJD = QString("%1 JD").arg(jdTDB, 15, 'f',7);
-                        str2et_c(sJD.toAscii().data(), &et);
-                        if(center) spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "sun", state, &lt );
-                        else spkezr_c (  sName.toAscii().data(), et, ref, "NONE", "ssb", state, &lt );
-                        X[0] = state[0]/AUKM;
-                        X[1] = state[1]/AUKM;
-                        X[2] = state[2]/AUKM;
-                        V[0] = state[3]/AUKM*SECINDAY;
-                        V[1] = state[4]/AUKM*SECINDAY;
-                        V[2] = state[5]/AUKM*SECINDAY;
-                    }
-                }
-                    break;
-            case 3:
-            {
-
-                outerArguments.clear();
-
-
-                //outerArguments << QString("-name=earth");
-                outerArguments << QString("-name=%1").arg(name.simplified());
-                outerArguments << QString("-type=planet");
-                outerArguments << QString("-observer=@sun");
-                outerArguments << QString("-ep=%1").arg(jdTDB, 15, 'f',7);
-                //outerArguments << QString("-ep=%1").arg(sJD);
-                //outerArguments << QString("-ep=%1").arg(time0, 15, 'f',7);
-
-                qDebug() << outerArguments.join(" ") << "\n";
-
-                outerProcess.setWorkingDirectory(miriadeProcData.folder);
-                outerProcess.setProcessChannelMode(QProcess::MergedChannels);
-                outerProcess.setReadChannel(QProcess::StandardOutput);
-
-                outerProcess.start(miriadeProcData.name, outerArguments);
-
-                if(!outerProcess.waitForFinished(miriadeProcData.waitTime))
-                {
-                    qDebug() << "\nmiriadeProc finish error\n";
-                    break;
-                }
-
-                QTextStream ethStream(outerProcess.readAllStandardOutput());
-
-
-                isObj = 0;
-
-
-                while (!ethStream.atEnd())
-                {
-                    objDataStr = ethStream.readLine();
-                    //qDebug() << QString("objDataStr: %1").arg(objDataStr);
-                    if(objDataStr.size()<1) continue;
-                    if(objDataStr.at(0)=='#') continue;
-
-                    resSL =  objDataStr.split(" ", QString::SkipEmptyParts);
-                    if(resSL.size()<8) continue;
-                    //isObj = 1;
-                    X[0] = resSL.at(1).toDouble();
-                    X[1] = resSL.at(2).toDouble();
-                    X[2] = resSL.at(3).toDouble();
-                    V[0] = resSL.at(5).toDouble();
-                    V[1] = resSL.at(6).toDouble();
-                    V[2] = resSL.at(7).toDouble();
-                    break;
-                }
-
-
-            }
-            break;
-            }
-            /*
-            if(useEPM)
-            {
-                status = calc_EPM(plaNum, centr_num, jday, pday, X, V);
-                 if(!status)
-                 {
-                     qDebug() << QString("error EPM\n");
-                     return 1;
-                 }
-            }
-            else
-            {
-                nbody->detState(&X[0], &X[1], &X[2], &V[0], &V[1], &V[2], jdTDB, plaNum, center, sk);
-            }*/
-        }
-        else
-        {
-            isObj = 0;
-
-            if(mCat.GetRecName(name.simplified().toAscii().data()))
-            {
-               qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
-               break;
-            }
-
-            if(useOrbCat)
-            {
-                if(ocat.GetRecName(name.simplified().toAscii().data())==-1)
-                {
-                   //qDebug() << QString("cat\'t find object %1\n").arg(name.simplified().toAscii().data());
-                   orbRec.get(&mCat);
-                }
-                else orbRec.get(ocat.record);
-            }
-            else
-            {
-
-
-            //qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(mCat.record->meanA, 11, 'f',6).arg(mCat.record->w, 11, 'f',6).arg(mCat.record->Node, 11, 'f',6).arg(mCat.record->inc, 11, 'f',6).arg(mCat.record->ecc, 11, 'f',6).arg(mCat.record->a, 11, 'f',6);
-                orbRec.get(&mCat);
-            }
-
-//decrease orbits
-
-            if(!useOrbCat)
-            {
-
-/*
-                qDebug() << QString("decVol: %1\n").arg(decVol);
-
-                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
-*/
-                //orbRec.elem->ecc = orbRec.elem->ecc + decVol;
-                //orbRec.elem->inc = orbRec.elem->inc + decVol;
-                //orbRec.elem->M0 = orbRec.elem->M0 + decVol;
-                //orbRec.elem->Node = orbRec.elem->Node + decVol;
-                //orbRec.elem->q = orbRec.elem->q + decVol;*/
-                //orbRec.elem->w = orbRec.elem->w + decVol;
-
-//                qDebug() << QString("%1:\nepoch: %2\nMA: %3\nw: %4\nNode: %5\ninc: %6\necc: %7\na: %8\n").arg(mCat.record->name).arg(mCat.record->getEpoch(), 15, 'f',7).arg(orbRec.elem->M0, 11, 'f',6).arg(orbRec.elem->w, 11, 'f',6).arg(orbRec.elem->Node, 11, 'f',6).arg(orbRec.elem->inc, 11, 'f',6).arg(orbRec.elem->ecc, 11, 'f',6).arg(orbRec.elem->q, 11, 'f',6);
-            }
-
-/////////////////
-
-            orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
-            orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
-
-            if(!center)
-            {
-                X[0] += Xsun[0];
-                X[1] += Xsun[1];
-                X[2] += Xsun[2];
-                V[0] += Vsun[0];
-                V[1] += Vsun[1];
-                V[2] += Vsun[2];
-            }
-
-            mCat.record->copyTo(orb_cat.record);
-            orb_cat.AddRec();
-
-
-            pList[i]->theta = mCat.record->H;
-        }
-
-        xVect << X;
-        vVect << V;
-        dist = sqrt(X[0]*X[0] + X[1]*X[1] + X[2]*X[2]);
-        vel = sqrt(V[0]*V[0] + V[1]*V[1] + V[2]*V[2]);
-        pList[i]->x = coefX*X[0];
-        pList[i]->y = coefX*X[1];
-        pList[i]->z = coefX*X[2];
-        pList[i]->xd = coefXD*V[0];
-        pList[i]->yd = coefXD*V[1];
-        pList[i]->zd = coefXD*V[2];
-
-
-            X0[p*3+0] = pList[i]->x;
-            X0[p*3+1] = pList[i]->y;
-            X0[p*3+2] = pList[i]->z;
-
-            V0[p*3+0] = pList[i]->xd;
-            V0[p*3+1] = pList[i]->yd;
-            V0[p*3+2] = pList[i]->zd;
-
-            mass[p] = pList[i]->mass;
-            p++;
-        //}
-    }
-
-
-    saveParticles(xmlFileName, pList);
-    orb_cat.SaveAs(QString("%1_ocat.txt").arg(iniMpcFile.section(".", 0, -2)).toAscii().data());
-
-/////////////////////////testNB
-
-    QTime timeElapsed;// = QTime.currentTime();
-    timeElapsed.start();
-
-    int nt, N;
-    double ti, tf, dT, ra, dec;
-    double vmul;
-    Everhardt *solSys;
-    QString tstr, objNumStr;
-    char* astr = new char[256];
-
-    N = (nofzbody)*3;
-
-    delete [] X;
-    delete [] V;
-    X = new double[N];
-    V = new double[N];
-
-    solSys = new Everhardt(N, eparam->NCLASS, eparam->NOR, eparam->NI, eparam->LL, eparam->XL);
-
-    double dTmin;
-
-    sortEQdtime(&eq_file, jd2mjd(jdUTC));
-
-    QFile ocFile, mpcFile1;
-    QTextStream ocStm, mpcStm;
-
-    qDebug() << QString("resFileName: %1\n").arg(resFileName);
-    ocFile.setFileName(resFileName);
-    ocFile.open(QFile::WriteOnly | QFile::Truncate);
-    ocStm.setDevice(&ocFile);
-/*
-    QString mpcFileName = QString("%1_mpc.txt").arg(resFileName.section(".", 0, -2));
-    mpcFile1.setFileName(mpcFileName);
-    mpcFile1.open(QFile::WriteOnly | QFile::Truncate);
-    mpcStm.setDevice(&mpcFile1);
-*/
-    vmul = 1;
-    for(j=0;j<nofzbody;j++)
-    {
-        X[j*3] = X0[j*3];
-        X[j*3+1] = X0[j*3+1];
-        X[j*3+2] = X0[j*3+2];
-
-        V[j*3] = V0[j*3];
-        V[j*3+1] = V0[j*3+1];
-        V[j*3+2] = V0[j*3+2];
-    }
-
-    T0 = jdTDB;
-
-mpc mrec;
-double cosD;
-double sDist, eDist, magC;
-QFile impFile;
-QTextStream impStm;
-if(isSaveImp)
-{
-    impFile.setFileName(QString("%1_imp.txt").arg(resFileName.section(".", 0, -2)));
-    impFile.open(QFile::Truncate | QFile::WriteOnly);
-    impStm.setDevice(&impFile);
-}
-
-int dOrb = 1;
-int k;
-double tdo;
-double state0[6];
-
-    for(i=0; i<mNum; i++)
-    {
-        oc_rec = eq_file.ocList.at(i);
-        tBeg = T0;
-        tEnd = UTC2TDB(mjd2jd(oc_rec->MJday));
-        tf = tBeg;
-        dT = tEnd - tf;
-
-        //qDebug() << QString("i: %1/%2\n").arg(i).arg(mNum);
-        //qDebug() << QString("tBeg= %1\ttEnd= %2\ndT= %3").arg(tBeg, 15, 'f', 7).arg(tEnd, 15, 'f', 7).arg(dT);
-
-        //qDebug() << QString("dT= %1\tvmul= %2\n").arg(dT).arg(vmul);
-
-        if(dT*vmul<0)
-        {
-            vmul = -vmul;
-
-            for(j=0;j<nofzbody;j++)
-            {
-                V[j*3] = -V[j*3];
-                V[j*3+1] = -V[j*3+1];
-                V[j*3+2] = -V[j*3+2];
-            }
-        }
-/*
-        while((fabs(dT)/dtime)>1)
-        {
-            ti = tf;
-            tf = tf+vmul*dtime;
-            //qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
-            solSys->rada27(X, V, 0, fabs(dtime));
-            dT = tEnd - tf;
-        }
-*/
-        //orb
-
-
-
-//det Local orbits
-
-        if(dOrb&&(fabs(dT)>10))
-        {
-            tdo = floor(tEnd) - vmul;
-            solSys->rada27(X, V, 0, fabs(tf-tdo));
-
-            qDebug() << "###############det Local orbits###############\n\n";
-            for(k=0;k<orb_cat.nstr;k++)
-            {
-                orb_cat.GetRec(k);
-                for(j=0;j<nofzbody;j++)
-                {
-                    if(QString().compare(QString(orb_cat.record->name).simplified(), pList.at(j+1)->name.data())==0)
-                    {
-
-                        state[0] = X[j*3];
-                        state[1] = X[j*3+1];
-                        state[2] = X[j*3+2];
-
-                        state[3] = vmul*V[j*3];
-                        state[4] = vmul*V[j*3+1];
-                        state[5] = vmul*V[j*3+2];
-
-                        findOrb(orbRec.elem, &state[0], &state[3], tdo);
-                        orbRec.set(&orb_cat0);
-                        orb_cat0.record->set_number(orb_cat.record->number);
-                        orb_cat0.record->set_name(QString(orb_cat.record->name).simplified().toAscii().data());
-                        orb_cat0.record->set_author("Berezhnoy");
-                        orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
-                        orb_cat0.AddRec();
-                        //orbRec.detRecEkv(&state0[0],&state0[1],&state0[2],tdo);
-                        //orbRec.detRecEkvVel(&state0[3],&state0[4],&state0[5],tdo);
-                        //qDebug() << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]).arg(state[1]).arg(state[2]).arg(state[3]).arg(state[4]).arg(state[5]);
-                        //qDebug() << QString("state0: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state0[0]).arg(state0[1]).arg(state0[2]).arg(state0[3]).arg(state0[4]).arg(state0[5]);
-                        //qDebug() << QString("dstate: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]-state[0]).arg(state[1]-state[1]).arg(state[2]-state[2]).arg(state[3]-state[3]).arg(state[4]-state[4]).arg(state[5]-state[5]);
-                    }
-                }
-
-            }
-            orb_cat0.SaveAs(QString("%1_ocat0.txt").arg(iniMpcFile.section(".", 0, -2)).toAscii().data());
-
-            dOrb = 0;
-            tf = tdo;
-        }
-
-
-        if(fabs(tf-tEnd)>1e-7)
-        {
-            ti = tf;
-            tf = tEnd;
-            //qDebug() << QString("ti= %1\ttf= %2\n").arg(ti, 15, 'f', 8).arg(tf, 15, 'f', 8);
-            solSys->rada27(X, V, 0, fabs(tf-ti));
-        }
-
-
-
-        T0 = tEnd;
-
+//save
         for(j=0;j<nofzbody;j++)
         {
             if(QString().compare(oc_rec->name, pList.at(j+1)->name.data())==0)
@@ -1652,9 +1145,6 @@ double state0[6];
                         break;
                     case 1:
                 {
-                        //calceph_scompute((int)timei, timei-(int)timei, 16, 0, state);
-                        //qDebug() << QString("TT-TDB = %1\n").arg(state[0]);
-                        //timei = time0 + state[0];
                     calceph_scompute((int)tEnd, tEnd-(int)tEnd, epm_planet_num("Earth"), epm_planet_num("Sun"), state);
                         XE0[0] = state[0];
                         XE0[1] = state[1];
@@ -1711,9 +1201,6 @@ double state0[6];
                     }
                         break;
                 }
-
-
-
 
                 state[0] = X[j*3]+XS0[0];
                 state[1] = X[j*3+1]+XS0[1];
@@ -1783,39 +1270,76 @@ double state0[6];
             }
         }
 
+
     }
 
     if(isSaveImp) impFile.close();
 
-    //QList <eqFile*> eqList;
-    eqFile* eqTemp;
-    eqSplitObjects(&eq_file, eqList);
-
-    int szi, szj;
-    szi = eqList.size();
-    qDebug() << QString("eqList size: %1\n").arg(szi);
-    for(i=0; i<szi; i++)
+    if(!isS)
     {
-        eqTemp = eqList.at(i);
-        sortOClist(eqTemp->ocList);
-        szj = eqTemp->ocList.size();
-        for(j=0;j<szj;j++)
-        {
-            oc_rec = eqList.at(i)->ocList.at(j);
-            tstr = oc_rec->rec2sBase1();
-
-            qDebug() << tstr << "\n";
-            ocStm << tstr << "\n";
-        }
-        if(isCountCols) eqTemp->countCols(colsNums);
-        szj = eqTemp->colList.size();
+        if(isCountCols) eq_file.countCols(colsNums);
+        szj = eq_file.colList.size();
         for(j=0; j<szj; j++)
         {
-            eqTemp->colList.at(j)->rec2s(&tstr);
+            eq_file.colList.at(j)->rec2s(&tstr);
             qDebug() << tstr << "\n";
             ocStm << tstr << "\n";
         }
+        isS = 1;
+        eq_file.clear();
     }
+
+
+/*
+
+//det Local orbits
+
+        if(dOrb&&(fabs(dT)>10))
+        {
+            tdo = floor(tEnd) - vmul;
+            solSys->rada27(X, V, 0, fabs(tf-tdo));
+
+            qDebug() << "###############det Local orbits###############\n\n";
+            for(k=0;k<orb_cat.nstr;k++)
+            {
+                orb_cat.GetRec(k);
+                for(j=0;j<nofzbody;j++)
+                {
+                    if(QString().compare(QString(orb_cat.record->name).simplified(), pList.at(j+1)->name.data())==0)
+                    {
+
+                        state[0] = X[j*3];
+                        state[1] = X[j*3+1];
+                        state[2] = X[j*3+2];
+
+                        state[3] = vmul*V[j*3];
+                        state[4] = vmul*V[j*3+1];
+                        state[5] = vmul*V[j*3+2];
+
+                        findOrb(orbRec.elem, &state[0], &state[3], tdo);
+                        orbRec.set(&orb_cat0);
+                        orb_cat0.record->set_number(orb_cat.record->number);
+                        orb_cat0.record->set_name(QString(orb_cat.record->name).simplified().toAscii().data());
+                        orb_cat0.record->set_author("Berezhnoy");
+                        orb_cat0.record->set_makeD(QDate().currentDate().toString("yyMMdd").toAscii().data());
+                        orb_cat0.AddRec();
+                        //orbRec.detRecEkv(&state0[0],&state0[1],&state0[2],tdo);
+                        //orbRec.detRecEkvVel(&state0[3],&state0[4],&state0[5],tdo);
+                        //qDebug() << QString("state: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]).arg(state[1]).arg(state[2]).arg(state[3]).arg(state[4]).arg(state[5]);
+                        //qDebug() << QString("state0: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state0[0]).arg(state0[1]).arg(state0[2]).arg(state0[3]).arg(state0[4]).arg(state0[5]);
+                        //qDebug() << QString("dstate: %1\t%2\t%3\t%4\t%5\t%6\n").arg(state[0]-state[0]).arg(state[1]-state[1]).arg(state[2]-state[2]).arg(state[3]-state[3]).arg(state[4]-state[4]).arg(state[5]-state[5]);
+                    }
+                }
+
+            }
+            orb_cat0.SaveAs(QString("%1_ocat0.txt").arg(iniMpcFile.section(".", 0, -2)).toAscii().data());
+
+            dOrb = 0;
+            tf = tdo;
+        }
+
+*/
+
 
     ocFile.close();
     //mpcFile1.close();

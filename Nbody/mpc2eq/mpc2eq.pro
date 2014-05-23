@@ -8,8 +8,8 @@ QT       += core
 
 QT       -= gui
 
-#TARGET = ~/bin/mpc2eq
-TARGET = ./../../../lab/testNbody/mpc2eq
+TARGET = ~/bin/mpc2eq
+#TARGET = ./../../../lab/testNbody/mpc2eq
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
