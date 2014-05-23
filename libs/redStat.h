@@ -87,6 +87,7 @@ public:
         QString mesureTimeCode;          //time of measurements [YYYYMMDDHHMMSSSS]
         QString obsCode;
 
+
 	
 	ocRec();
 	~ocRec();
@@ -110,6 +111,9 @@ public:
         int vers;
         //0 - MJday|ra|de|mag|ocRaCosDe|ocDe|ocMag|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
         //1 - MJday|ra|de|mag|ocRaCosDe|ocDe|ocMag|ra_oc|de_oc|topDist|muRaCosDec|muDe|Vr|phase|elong|name|catNum|expTime
+private:
+        int dig_ra, dig_dec, dig_magn;
+        int dig_oc, dig_col;
 	
 };
 
@@ -143,6 +147,8 @@ public:
 	void s2rec(QString str);
 	
         colRec& operator=(const colRec &source);
+private:
+        int dig_radec, dig_magn;
 };
 
 class moveModelRec

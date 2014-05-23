@@ -330,6 +330,11 @@ ocRec::ocRec()
 	catNum = -1;
 	vers = 0;
 	name.clear();
+    dig_ra = 3;
+    dig_dec = 2;
+    dig_col = 2;
+    dig_oc = 1;
+    dig_magn = 2;
        /* x = 0;
         y = 0;
         pixmag = 0;
@@ -395,12 +400,12 @@ QString ocRec::rec2sBase1()
     rList << QString("%1").arg(name, -16);
 //    rList << QString("%1").arg(mjd2jd(MJday), 15, 'f', 7);
     rList << getStrFromDATEOBS(getDATEOBSfromMJD(MJday), " ", 0, 7);
-    rList << deg_to_hms(ra, " ", 3);
-    rList << deg_to_damas(de, " ", 2);
-    rList << QString("%1").arg(mag, 6, 'f', 2);
-    rList << QString("%1").arg(ocRaCosDe, 8, 'f', 1, QLatin1Char(' '));
-    rList << QString("%1").arg(ocDe, 8, 'f', 1, QLatin1Char(' '));
-    rList << QString("%1").arg(ocMag, 6, 'f', 2);
+    rList << deg_to_hms(ra, " ", dig_ra);
+    rList << deg_to_damas(de, " ", dig_dec);
+    rList << QString("%1").arg(mag, 6, 'f', dig_magn);
+    rList << QString("%1").arg(ocRaCosDe, 8, 'f', dig_oc, QLatin1Char(' '));
+    rList << QString("%1").arg(ocDe, 8, 'f', dig_oc, QLatin1Char(' '));
+    rList << QString("%1").arg(ocMag, 6, 'f', dig_magn);
     rList << QString("%1").arg(obsCode);
 
     //recStr = rList.join("|");
@@ -567,6 +572,8 @@ colRec::colRec()
 {
 	colNum = num = 0;
         mean = rmsMean = rmsOne = 0.0;
+        dig_radec = 2;
+        dig_magn = 2;
 };
 
 colRec::colRec(QString str)
@@ -579,7 +586,7 @@ void colRec::rec2s(QString *str)
 {
 	str->clear();
 //	str->insert(0, "%" + QString("%1|%2|%3|%4|%5").arg(colNum, 3, 10, QLatin1Char( ' ' )).arg(mean, 10, 'f', 3, QLatin1Char(' ')).arg(rmsMean, 10, 'f', 3, QLatin1Char(' ')).arg(rms, 10, 'f', 3, QLatin1Char(' ')).arg(num, 5, 10, QLatin1Char( ' ' )));
-        str->insert(0, "%" + QString("%1|%2|%3|%4|%5").arg(colNum, 3, 10, QLatin1Char( ' ' )).arg(mean,20,'g',13).arg(rmsMean,20,'g',13).arg(rmsOne,20,'g',13).arg(num, 5, 10, QLatin1Char( ' ' )));
+        str->insert(0, "%" + QString("%1|%2|%3|%4|%5").arg(colNum, 3, 10, QLatin1Char( ' ' )).arg(mean,20,'f',dig_radec).arg(rmsMean,20,'f',dig_radec).arg(rmsOne,20,'f',dig_radec).arg(num, 10, 10, QLatin1Char( ' ' )));
 //	str->insert(0, "%" + QString("%1|%2|%3|%4|%5").arg(colNum, 3, 10, QLatin1Char( ' ' )).arg(mean, 20).arg(rmsMean, 20).arg(rms, 20).arg(num, 5, 10, QLatin1Char( ' ' )));
 };
 
