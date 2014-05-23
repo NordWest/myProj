@@ -268,19 +268,16 @@ int main(int argc, char *argv[])
     int sk, center;
     procData miriadeProcData;
     int i, j, sz;
-    //dele *nbody;
-    //int centr_num;
-    //int status;
 
     QString objDataStr;
     QString name, sName;
     int plaNum;
 
-    double *X, *V;
+    //double *X, *V;
     double *X0, *V0;
     double *XT, *VT;
 
-    QVector <double*> xVect, vVect;
+    double X[3], V[3];
     double Xsun[3], Vsun[3];
     double XE0[3], VE0[3];
     double XEB0[3], VEB0[3];
@@ -294,35 +291,47 @@ int main(int argc, char *argv[])
     double time0, time1, dtime, timestep;
     int nstep;
 
-    mpcObjList m_objList;
+    QTime timeElapsed;
+
+    int k, szj;
+    double tdo;
+
+    int nt, N;
+    double ti, tf, dT, ra, dec;
+    double vmul;
+    Everhardt *solSys;
+    QString tstr, objNumStr;
+
     double tBeg, tEnd;
     tBeg = 9999999999;
     tEnd = 0;
     QString tStr, objName;
-    char *tname = new char[256];
+    char *tname = new char[1024];
 
-    //eqObjList eqo_list;
-    //eqObjRec* eqoTemp;
-    //eqFile* eqTemp;
-    ocRec *ocTemp;
     int nObj, eObj;
-    QList <orbit*> orbList;
-    orbit* tOrb;
-    int objNum;
-    double T0, DT;
-    double TF;
-    int mNum;
 
-    mpcrec mRec;
     OrbCat ocat;
     orbit orbRec;
+
+    QFile ocFile;
+    QTextStream ocStm;
+    double cosD;
+    double sDist, eDist, magC;
+    QFile impFile;
+    QTextStream impStm;
+    int isS;
+    QString mpNum, mpNumT;
+    double coefH;
+    int objPos;
+    QFile ocatFile;
+    QTextStream ocatStm;
+
+    char *t_str = new char[1024];
 
     ref = new SpiceChar[256];
     corr = new SpiceChar[256];
 
     QString cfg_file, part_file, mop_file;
-
-    bodyStateList bsList;
 
     QList <ParticleStruct*> iniList;
     QList <ParticleStruct*> pList;
@@ -403,7 +412,7 @@ int main(int argc, char *argv[])
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
 
 ///////////
-    observ opos5;
+    //observ opos5;
 
     opos = new observ;
     if(opos->init(obsFile.toAscii().data(), jplFile.toAscii().data()))
@@ -413,8 +422,8 @@ int main(int argc, char *argv[])
     }
     opos->set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
 
-    opos5.init(obsFile.toAscii().data(), jplFile.toAscii().data());
-    opos5.set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
+    //opos5.init(obsFile.toAscii().data(), jplFile.toAscii().data());
+    //opos5.set_obs_parpam(GEOCENTR_NUM, center, sk, "500");
 
     int jday;// = (int)time0;
     double pday;// = time0 - jday;
@@ -441,23 +450,10 @@ int main(int argc, char *argv[])
     //mpcFile mpc_file;
     mpcRec mpc_rec;
     mpcObjRec* moRec;
-    /*if(mpc_file.init(iniMpcFile))
-    {
-        qDebug() << QString("error: Can't open file %1\n").arg(iniMpcFile);
-        exit(1);
-    }
-    mNum = mpc_file.size();*/
-//
-//    tBeg = UTC2TDB(mjd2jd(mpc_file.recList.first()->mjd()));
-//    tEnd = UTC2TDB(mjd2jd(mpc_file.recList.last()->mjd()));
-    //tBeg = UTC2TDB(tBeg);
-    //tEnd = UTC2TDB(tEnd);
-    //qDebug() << QString("Time span: %1 - %2\n").arg(tBeg, 12, 'f', 6).arg(tEnd, 12, 'f', 6);
 
-//
     OrbCat orb_cat;
     OrbCat orb_cat0;
-    int p;
+    //int p;
 
 //////////////prepNB
 
@@ -506,23 +502,7 @@ int main(int argc, char *argv[])
         }
         break;
     }
-/*
-    if(useEPM)
-    {
-        status = !InitTxt(epmDir.toAscii().data());
-        centr_num = 11+!center;
-    }
-    else
-    {
-        status = nbody->init(jplFile.toAscii().data());
-    }
 
-    if(status)
-    {
-        qDebug() << QString("init ephemeride error\n");
-        return 1;
-    }
-*/
     if(readParticles(confFile, iniList))
     {
         qDebug() << QString("readCFG error\n");
@@ -553,11 +533,11 @@ int main(int argc, char *argv[])
 
     envSize = pList.size();
 
-    X = new double[3];
-    V = new double[3];
+//    X = new double[3];
+ //   V = new double[3];
 
-    X0 = new double[3];
-    V0 = new double[3];
+//    X0 = new double[3];
+//    V0 = new double[3];
 
     double coefX, coefXD;
     coefX = coefXD = 1.0;
@@ -566,13 +546,9 @@ int main(int argc, char *argv[])
 //append environment
     double orbJD;
     ParticleStruct *nPar;
-    //sortMPCdtime(mpc_file);
-    //mNum = mpc_file.size();
     orbJD = 0;
 
     eqFile eq_file;
-    QList <eqFile*> eqList;
-    //eqFile* eqTemp;
     ocRec *oc_rec;
 
     orbJD = time0;
@@ -652,14 +628,14 @@ int main(int argc, char *argv[])
             }
         }
 
-        envSize = pList.size();
-        qDebug() << QString("full envSize: %1\n").arg(envSize);
-        //nofzbody = envSize+1;
-        mass = new double[envSize+1];
-        X0 = new double[(envSize+1)*3];
-        V0 = new double[(envSize+1)*3];
-        XT = new double[(envSize+1)*3];
-        VT = new double[(envSize+1)*3];
+    envSize = pList.size();
+    qDebug() << QString("full envSize: %1\n").arg(envSize);
+    //nofzbody = envSize+1;
+    mass = new double[envSize+1];
+    X0 = new double[(envSize+1)*3];
+    V0 = new double[(envSize+1)*3];
+    XT = new double[(envSize+1)*3];
+    VT = new double[(envSize+1)*3];
 
 
 
@@ -668,7 +644,8 @@ int main(int argc, char *argv[])
 
 
 //prep XV enviroment
-    p=0;
+//    p=0;
+
     for(i=0; i<envSize; i++)
     {
  //       if(pList.at(i)->identity==Advisor::collapsorFixed) continue;
@@ -844,6 +821,7 @@ int main(int argc, char *argv[])
 
 
             pList[i]->theta = mCat.record->H;
+
         }
 
         //xVect << X;
@@ -876,33 +854,11 @@ int main(int argc, char *argv[])
 //main cycle
     objNameT = "";
 
-    int nt, N;
-    double ti, tf, dT, ra, dec;
-    double vmul;
-    Everhardt *solSys;
-    QString tstr, objNumStr;
-    char* astr = new char[256];
 
-    QTime timeElapsed;// = QTime.currentTime();
+    //char* astr = new char[256];
+
+    // = QTime.currentTime();
     timeElapsed.start();
-
-    int dOrb = 1;
-    int k, szj;
-    double tdo;
-    double state0[6];
-
-    QFile ocFile;
-    QTextStream ocStm;
-    double cosD;
-    double sDist, eDist, magC;
-    QFile impFile;
-    QTextStream impStm;
-    int isS;
-    QString mpNum, mpNumT;
-    double coefH;
-    int objPos;
-    QFile ocatFile;
-    QTextStream ocatStm;
 
     QFile inpFile(argv[1]);
     inpFile.open(QFile::ReadOnly);
@@ -913,8 +869,6 @@ int main(int argc, char *argv[])
     ocFile.open(QFile::WriteOnly | QFile::Truncate);
     ocStm.setDevice(&ocFile);
     ocFile.close();
-
-    //QString orbCatName0 = QString("%1_ocat.txt").arg(resFileName.section(".", 0, -2));
 
 
     if(isSaveImp)
@@ -939,7 +893,7 @@ int main(int argc, char *argv[])
     tEnd = jdTDB;
     solSys = NULL;
 
-    char *t_str = new char[1024];
+
 
     while(!inpStm.atEnd())
     {

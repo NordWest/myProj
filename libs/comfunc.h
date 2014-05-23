@@ -51,7 +51,7 @@
 
 #define STRLEN 1024
 #define SIMPLE_STR 1024
-#define FNLEN 255
+#define FNLEN 1024
 
 #define MIU 0.002737909350795
 #define VIU 0.0027304336

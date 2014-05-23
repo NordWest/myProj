@@ -170,9 +170,9 @@ int fbStream::Get(char *str, char *name, int kpos, int szstr, int startpos)
 {
     basic_string <char>::size_type spos;
     static const basic_string <char>::size_type npos = -1;
-        char *tname = new char[256];
+        char *tname = new char[1024];
         int res;
-        sprintf(tname, "%s", name);
+        sprintf(tname, "%s\0", name);
         spos = buf->find(tname, startpos);
         res = 1;
     if(spos!=npos)
