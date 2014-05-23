@@ -882,6 +882,8 @@ int main(int argc, char *argv[])
         //}
     }
     mass[envSize] = -1.0;
+
+    if(isSaveXML) saveParticles(xmlFileName, pList);
 //main cycle
     objNameT = "";
 
