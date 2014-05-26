@@ -84,7 +84,11 @@ int main(int argc, char *argv[])
     deMax = sett->value("general/deMax", 90).toDouble();        //
     int pointNum = sett->value("general/pointNum", 0).toInt();
     int nsMax = sett->value("general/nsMax", 32).toInt();
+
     int rtype = sett->value("general/rtype", 0).toInt();
+    //0 - randomSphere
+    //1 - randomSphereHpix
+
     QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
     QString colSep = sett->value("general/colSep", "|").toString();
@@ -183,7 +187,7 @@ int main(int argc, char *argv[])
                 tStr = iStm.readLine();
                 raVect << tStr.section(colSep, cx, cx).toDouble();
                 deVect << tStr.section(colSep, cy, cy).toDouble();
-                numVect << tStr.section(colSep, cn, cn).toDouble();
+                //numVect << tStr.section(colSep, cn, cn).toDouble();
             }
             pointNum = raVect.size();
             ra = new double[pointNum];
