@@ -850,6 +850,18 @@ int main(int argc, char *argv[])
     }
     mass[envSize] = -1.0;
 
+    vmul=1;
+    for(i=0; i<envSize; i++)
+    {
+        XT[i*3] = X0[i*3];
+        XT[i*3+1] = X0[i*3+1];
+        XT[i*3+2] = X0[i*3+2];
+        VT[i*3] = V0[i*3];
+        VT[i*3+1] = V0[i*3+1];
+        VT[i*3+2] = V0[i*3+2];
+        //qDebug() << QString("XVT[%1]: %2\t%3\t%4:%5\t%6\t%7\n").arg(i).arg(XT[i*3]).arg(XT[i*3+2]).arg(XT[i*3+2]).arg(VT[i*3]).arg(VT[i*3+2]).arg(VT[i*3+2]);
+    }
+
     if(isSaveXML) saveParticles(xmlFileName, pList);
 //main cycle
     objNameT = "";
@@ -937,12 +949,12 @@ int main(int argc, char *argv[])
 
             objName = QString(mCat.record->name).simplified();
 
-            if(eq_file.size()>3)
+            if((eq_file.size()>2)&&isCountCols)
             {
                 ocFile.setFileName(resFileName);
                 ocFile.open(QFile::WriteOnly | QFile::Append);
                 ocStm.setDevice(&ocFile);
-                if(isCountCols) eq_file.countCols(colsNums);
+                eq_file.countCols(colsNums);
                 szj = eq_file.colList.size();
                 for(j=0; j<szj; j++)
                 {
