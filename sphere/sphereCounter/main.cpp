@@ -5,13 +5,12 @@
 #include <QTextStream>
 #include <QList>
 
-
 #include <astro.h>
-#include "./../libs/comfunc.h"
 #include <mb.h>
-#include "./../libs/ringpix.h"
 
-#include "./../libs/vsfFunc.h"
+#include "./../../libs/comfunc.h"
+#include "./../../libs/ringpix.h"
+#include "./../../libs/vsfFunc.h"
 
 static QDataStream* clog = 0;
 void customMessageHandler(QtMsgType type, const char* msg)
@@ -120,6 +119,14 @@ int main(int argc, char *argv[])
     double EpsVel[6], sgEpsVel[6];
     int res;
 
+    int N, K, P;
+    double *sCoef = new double[coefNum];
+    double *tCoef = new double[coefNum];
+    double *sCoefSg = new double[coefNum];
+    double *tCoefSg = new double[coefNum];
+    double sigmaVal;
+
+//ini
     QFile resFile("resCoef.txt");
     resFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream resStm(&resFile);
@@ -158,13 +165,6 @@ int main(int argc, char *argv[])
     de = new double[dSize];
     dRa = new double[dSize];//cosD
     dDe = new double[dSize];
-
-    int N, K, P;
-    double *sCoef = new double[coefNum];
-    double *tCoef = new double[coefNum];
-    double *sCoefSg = new double[coefNum];
-    double *tCoefSg = new double[coefNum];
-    double sigmaVal;
 
     //time0 = floor(tMean/dSize);
     qDebug() << QString("time0: %1\n").arg(time0,12, 'f', 8);

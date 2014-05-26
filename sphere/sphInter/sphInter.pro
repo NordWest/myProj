@@ -17,17 +17,13 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
 #    ../libs/ringpix.cpp \
-    ../libs/comfunc.cpp
+    ../../libs/comfunc.cpp
 
-HEADERS += ../libs/astro.h \
-    ../libs/mb.h \
-#    ../libs/ringpix.h \
-    ../libs/comfunc.h \
+HEADERS += ../libs/comfunc.h \
     ../libs/healpix/chealpix.h
 
 #win32:LIBS += ./../libs/win32/cfitsio.lib
 #unix:LIBS += ./../libs/unix/libcfitsio.a
 
-unix:LIBS += ./../libs/unix/libastro.a
 unix:LIBS += ./../libs/unix/libchealpix.a
-unix:LIBS += ./../libs/unix/libmb.a
+unix:LIBS += -lmb -lastro

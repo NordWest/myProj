@@ -88,14 +88,16 @@ int main(int argc, char *argv[])
     int rtype = sett->value("general/rtype", 0).toInt();
     //0 - randomSphere
     //1 - randomSphereHpix
+    //2 - real points - do mod
+    //3 - real points - not to mod, just summ
 
     QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
     QString colSep = sett->value("general/colSep", "|").toString();
     int cx = sett->value("general/cx", 0).toInt();
     int cy = sett->value("general/cy", 1).toInt();
-//    int cdx = sett->value("general/cdx", 2).toInt();
-//    int cdy = sett->value("general/cdy", 3).toInt();
+    int cxc = sett->value("general/cxcalc", 2).toInt();
+    int cyc = sett->value("general/cycalc", 3).toInt();
     int cn = sett->value("general/cn", 4).toInt();
 
     double *Eps = new double[3];
@@ -139,12 +141,15 @@ int main(int argc, char *argv[])
 */
     double x, y, z, z0, z1, lns, s;
     double *ra, *dec;
+    double *raC, *decC;
     double lam, beta;
     double h, phi;
     int pN = 0;
 
     QVector <double> raVect;
     QVector <double> deVect;
+    QVector <double> raVectC;
+    QVector <double> deVectC;
     QVector <int> numVect;
 
     QFile iFile;
@@ -200,7 +205,36 @@ int main(int argc, char *argv[])
             }
         }
         break;
+        case 3:
+        {
+            iFile.setFileName(inpFileName);
+            iFile.open(QFile::ReadOnly);
+            iStm.setDevice(&iFile);
 
+            while(!iStm.atEnd())
+            {
+                tStr = iStm.readLine();
+                raVect << tStr.section(colSep, cx, cx).toDouble();
+                deVect << tStr.section(colSep, cy, cy).toDouble();
+                raVectC << tStr.section(colSep, cxc, cxc).toDouble();
+                deVectC << tStr.section(colSep, cyc, cyc).toDouble();
+                //numVect << tStr.section(colSep, cn, cn).toDouble();
+            }
+            pointNum = raVect.size();
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+            raC = new double[pointNum];
+            decC = new double[pointNum];
+
+            for(i=0; i<pointNum; i++)
+            {
+                ra[i] = raVect[i];
+                dec[i] = deVect[i];
+                raC[i] = raVectC[i];
+                decC[i] = deVectC[i];
+            }
+        }
+        break;
     }
 
 

@@ -8,9 +8,9 @@ CONFIG += console \
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
-    ../libs/ringpix.cpp \
-    ../libs/comfunc.cpp
-HEADERS += ../libs/ringpix.h \
-    ../libs/comfunc.h
-win32:LIBS += ./../libs/win32/cfitsio.lib
+    ../../libs/ringpix.cpp \
+    ../../libs/comfunc.cpp
+HEADERS += ../../libs/ringpix.h \
+    ../../libs/comfunc.h
+#win32:LIBS += ./../../libs/win32/cfitsio.lib
 unix:LIBS += -lastro -lmb
