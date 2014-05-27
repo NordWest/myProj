@@ -11,7 +11,7 @@ class mpccatL;
 
 #define MPCCAT_LEN 203
 #define MPCCAT_NAME_KPOS 176
-#define MPCCAT_NAME_BPOS 2106
+#define MPCCAT_NAME_BPOS 2296
 #define MPCCAT_NUM_KPOS 166
 #define MPCCAT_PDEST_KPOS 1
 
@@ -24,11 +24,11 @@ public:
 	char *epoch;		//Epoch (in packed form, .0 TT), [a5]
 	double meanA;		//Mean anomaly at the epoch, in degrees, f[9.5]
 	double w;			//Argument of perihelion, J2000.0 (degrees), [f9.5]
-	double Node;			//Longitude of the ascending node, J2000.0 (degrees), [f9.5]
+    double Node;        //Longitude of the ascending node, J2000.0 (degrees), [f9.5]
 	double inc;			//Inclination to the ecliptic, J2000.0 (degrees), [f9.5]
 	double ecc;			//Orbital eccentricity, [f9.7]
 	double n;			//Mean daily motion (degrees per day), [f11.8]
-	double a;			//Semimajor axis (AU), [f11.7]
+    double a;			//Semimajor axis (AU), [f11.7]
 	int U;				//Uncertainty parameter, U, [i1]
 /*
 If this column contains `E' it indicates
@@ -135,7 +135,7 @@ double (or multiple) designation is involved.
 	void set_diam(float diam);
 */
 	void set_default();
-
+    int fromString(char *str_in);
 };
 
 class mpccat : public fbStreamStr

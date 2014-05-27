@@ -74,6 +74,7 @@ ever_params *eparam;
 int *interact_permitions;
 
 mpccat mCat;
+mpccatL mCatL;
 int useEPM;
 int centr_num;
 int status;
@@ -320,7 +321,7 @@ int main(int argc, char *argv[])
     QFile impFile;
     QTextStream impStm;
     int isS;
-    QString mpNum, mpNumT;
+    QString mpNumStr, mpNumStrT;
     double coefH;
     int objPos;
     QFile ocatFile;
@@ -867,6 +868,13 @@ int main(int argc, char *argv[])
     objNameT = "";
 
 
+    if(mCatL.init(mpcCatFile.toAscii().data()))
+    {
+        qDebug() << "\nError MPCCAT init\n\n";
+        return 1;
+    }
+
+
     //char* astr = new char[256];
 
     // = QTime.currentTime();
@@ -901,11 +909,13 @@ int main(int argc, char *argv[])
 
 
 
-    mpNumT = "";
+    mpNumStrT = "";
     tEnd = jdTDB;
     solSys = NULL;
 
-
+    int numb;
+    bool isOk;
+    QString mpNum;
 
     while(!inpStm.atEnd())
     {
@@ -919,35 +929,48 @@ int main(int argc, char *argv[])
 
        isS = 0;
 
-        mpc_rec.getMpNumber(mpNum);
-
-        tStr.replace(" ", "0");
-        sprintf(tname, "%s   ", mpNum.toAscii().data());
+        mpc_rec.getMpNumber(mpNumStr);
+        nObj = (QString().compare(mpNumStr, mpNumStrT)!=0);
 
         //qDebug() << QString("mpnum: %1\n").arg(mpNum);
         //qDebug() << QString("mpnumT: %1\n").arg(mpNumT);
         //qDebug() << QString("tname:|%1|\n").arg(tname);
-        nObj = (QString().compare(mpNum, mpNumT)!=0);
+
 //qDebug() << QString("MpNumber: %1\n").arg(tname);
 
         tBeg = tEnd;
 
         if(nObj)
         {
-            mpNumT = mpNum;
-
-            if(mCat.GetProvDest(tname))
+            mpNumStrT = mpNumStr;
+//////////////////
+            mpc_rec.getMpUPackNumber(mpNum);
+            numb = mpNum.toInt(&isOk);
+            if(isOk)
             {
-                mpc_rec.getProvDest(tStr);
-                qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
-                if(mCat.GetProvDest(tStr.toAscii().data()))
+                if(mCatL.GetRec(numb)) continue;
+                objName = QString(mCatL.record->name).simplified();
+            }
+            else
+            {
+
+                tStr.replace(" ", "0");
+                sprintf(tname, "%s   ", mpNum.toAscii().data());
+    ////////
+                if(mCat.GetProvDest(tname))
                 {
-                    qDebug() << QString("not found: %1\n").arg(mpc_rec.toStr());
-                    continue;
+                    mpc_rec.getProvDest(tStr);
+                    qDebug() << QString("ProvDest: %1\n").arg(tStr.toAscii().data());
+                    if(mCat.GetProvDest(tStr.toAscii().data()))
+                    {
+                        qDebug() << QString("not found: %1\n").arg(mpc_rec.toStr());
+                        continue;
+                    }
                 }
+                objName = QString(mCat.record->name).simplified();
             }
 
-            objName = QString(mCat.record->name).simplified();
+
 
             if((eq_file.size()>2)&&isCountCols)
             {

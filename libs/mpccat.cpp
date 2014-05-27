@@ -354,6 +354,110 @@ double mpcrec::getEpoch()
 
 	return jday;
 }
+
+int mpcrec::fromString(char *str_in)
+{
+    if(strlen(str_in)!=MPCCAT_LEN-1) return 1;
+    char *tstr;
+    tstr = new char[60];
+    strcpy(tstr, "\0");
+
+    slovoG(str_in, tstr, 0, 7);
+    strncpy(provnum, tstr, 7);
+    strcpy(&provnum[7], "\0");
+
+    slovoG(str_in, tstr, 8, 13);
+    H = atof(tstr);
+
+    slovoG(str_in, tstr, 14, 19);
+    G = atof(tstr);
+
+    slovoG(str_in, tstr, 20, 25);
+    strncpy(epoch, tstr, 5);
+    strcpy(&epoch[5], "\0");
+
+    slovoG(str_in, tstr, 26, 35);
+    meanA = atof(tstr);
+
+    slovoG(str_in, tstr, 36, 46);
+    w = atof(tstr);
+
+    slovoG(str_in, tstr, 47, 57);
+    Node = atof(tstr);
+
+    slovoG(str_in, tstr, 58, 68);
+    inc = atof(tstr);
+
+    slovoG(str_in, tstr, 69, 79);
+    ecc = atof(tstr);
+
+    slovoG(str_in, tstr, 80, 91);
+    n = atof(tstr);
+
+    slovoG(str_in, tstr, 92, 103);
+    a = atof(tstr);
+
+    slovoG(str_in, tstr, 104, 106);
+    U = atoi(tstr);
+
+    slovoG(str_in, tstr, 107, 117);
+    strncpy(ref, tstr, 10);
+    strcpy(&ref[10], "\0");
+
+    slovoG(str_in, tstr, 118, 122);
+    obsnum = atoi(tstr);
+
+    slovoG(str_in, tstr, 123, 126);
+    oppnum = atoi(tstr);
+
+    slovoG(str_in, tstr, 127, 131);
+    arclen = obs_fst = atoi(tstr);
+
+    slovoG(str_in, tstr, 131, 132);
+    strncpy(flag_multi, tstr, 1);
+    strcpy(&flag_multi[1], "\0");
+
+    slovoG(str_in, tstr, 132, 136);
+    obs_lst = atoi(tstr);
+    strncpy(days, tstr, 4);
+    strcpy(&days[4], "\0");
+
+    slovoG(str_in, tstr, 137, 141);
+    rms = atof(tstr);
+
+    slovoG(str_in, tstr, 142, 145);
+    strncpy(indCoarse, tstr, 3);
+    strcpy(&indCoarse[3], "\0");
+
+    slovoG(str_in, tstr, 146, 149);
+    strncpy(indPrecide, tstr, 3);
+    strcpy(&indPrecide[3], "\0");
+
+    slovoG(str_in, tstr, 150, 160);
+    strncpy(compName, tstr, 10);
+    strcpy(&compName[10], "\0");
+
+    slovoG(str_in, tstr, 161, 165);
+    strncpy(flags, tstr, 4);
+    strcpy(&flags[4], "\0");
+
+    slovoG(str_in, tstr, 166, 174);
+    strncpy(number, tstr, 8);
+    strcpy(&number[8], "\0");
+
+    slovoG(str_in, tstr, 175, 193);
+    strncpy(name, tstr, 18);
+    strcpy(&name[18], "\0");
+
+    slovoG(str_in, tstr, 194, 202);
+    strncpy(lastObs, tstr, 8);
+    strcpy(&lastObs[8], "\0");
+
+    delete [] tstr;
+
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 mpccat::mpccat(char *fn) : fbStreamStr(fn)
@@ -683,9 +787,11 @@ mpccatL::~mpccatL()
 
 int mpccatL::init(char *fname)
 {
-    init_line(MPCCAT_NAME_BPOS);
+
     this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
-        return(fbStreamStr::init(fname));
+    if(fbStreamStr::init(fname)) return 1;
+    init_line(MPCCAT_NAME_BPOS);
+    return 0;
 }
 
 
@@ -791,8 +897,9 @@ void mpccatL::s2rec(char *str_in)
 
 int mpccatL::GetRec(int pos)
 {
-    if(GetLine(pos)) return 1;
+    if(GetLine(pos-1)) return 1;
     s2rec(this->str);
+    return 0;
 }
 
 int mpccatL::PushRec()
