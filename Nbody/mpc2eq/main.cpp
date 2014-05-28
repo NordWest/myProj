@@ -1006,6 +1006,7 @@ int main(int argc, char *argv[])
 
             if(eObj)
             {
+
                 if(mCat.GetRecName(objName.simplified().toAscii().data()))
                 {
                    qDebug() << QString("cat\'t find object %1\n").arg(objName.simplified().toAscii().data());

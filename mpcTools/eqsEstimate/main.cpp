@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 //Settings
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
+    int obsMin = sett->value("eqsEstimate/obsMin", 2).toInt();
 
 /////////////////////////
 
@@ -74,6 +75,7 @@ int main(int argc, char *argv[])
 
             do3sigma(obj_rec->eq_list, 0.0, 3.0);
 
+            if(obj_rec->eq_list.size()<obsMin) continue;
             if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
             wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(obj_rec->objName, 16).arg(obs_rec->obsCode, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);
             szk = obj_rec->eq_list.size();

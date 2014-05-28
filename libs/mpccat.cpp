@@ -498,9 +498,11 @@ int mpccat::GetRec(int pos)
 */
 int mpccat::GetRecName(char *name)
 {
-	if(this->GetStr(name)) return 1;
+    char *spname = new char[256];
+    sprintf(spname, "%s ", name);
+    if(this->GetStr(spname)) return 1;
 	this->s2rec(this->str);
-	
+    delete [] spname;
     return 0;
 }
 
