@@ -488,6 +488,11 @@ int mpccat::init(char *fname, int catKpos)
 	this->init_str(MPCCAT_LEN, catKpos);
         return(fbStreamStr::init(fname));
 }
+
+size_t mpccat::detBpos()
+{
+    return(buf->find("00001", 0));
+}
 /*
 int mpccat::GetRec(int pos)
 {
@@ -792,7 +797,7 @@ int mpccatL::init(char *fname)
 
     this->init_str(MPCCAT_LEN, MPCCAT_NAME_KPOS);
     if(fbStreamStr::init(fname)) return 1;
-    init_line(MPCCAT_NAME_BPOS);
+    init_line(buf->find("00001", 0));
     return 0;
 }
 
@@ -899,7 +904,7 @@ void mpccatL::s2rec(char *str_in)
 
 int mpccatL::GetRec(int pos)
 {
-    if(GetLine(pos-1)) return 1;
+    if(GetLine(pos)) return 1;
     s2rec(this->str);
     return 0;
 }

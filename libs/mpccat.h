@@ -161,6 +161,7 @@ public:
 
 	int init(char *fname);
 	int init(char *fname, int catKpos);
+    size_t detBpos();
 };
 
 class mpccatL : public fbStreamLine

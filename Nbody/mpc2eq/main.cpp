@@ -429,7 +429,7 @@ int main(int argc, char *argv[])
     int jday;// = (int)time0;
     double pday;// = time0 - jday;
 
-    time1 = time0+dtime*nstep;
+    //time1 = time0+dtime*nstep;
 
     if(useOrbCat)ocat.init(orbCatFile.toAscii().data());
     if(mCat.init(mpcCatFile.toAscii().data()))
@@ -552,7 +552,15 @@ int main(int argc, char *argv[])
     eqFile eq_file;
     ocRec *oc_rec;
 
-    orbJD = time0;
+    if(mCatL.init(mpcCatFile.toAscii().data()))
+    {
+        qDebug() << "\nError MPCCAT init\n\n";
+        return 1;
+    }
+    mCatL.GetRec(0);
+    orbJD = mCatL.record->getEpoch();
+
+    //orbJD = time0;
     QString objNameT;
 
     //time
@@ -637,15 +645,6 @@ int main(int argc, char *argv[])
     V0 = new double[(envSize+1)*3];
     XT = new double[(envSize+1)*3];
     VT = new double[(envSize+1)*3];
-
-
-
-    //    srand (time(NULL));
-    //    double decVol = 0.000001;//*(rand()%1)-0.0000005;
-
-
-//prep XV enviroment
-//    p=0;
 
     for(i=0; i<envSize; i++)
     {
@@ -867,17 +866,6 @@ int main(int argc, char *argv[])
 //main cycle
     objNameT = "";
 
-
-    if(mCatL.init(mpcCatFile.toAscii().data()))
-    {
-        qDebug() << "\nError MPCCAT init\n\n";
-        return 1;
-    }
-
-
-    //char* astr = new char[256];
-
-    // = QTime.currentTime();
     timeElapsed.start();
 
     QFile inpFile(argv[1]);
@@ -948,7 +936,7 @@ int main(int argc, char *argv[])
             numb = mpNum.toInt(&isOk);
             if(isOk)
             {
-                if(mCatL.GetRec(numb)) continue;
+                if(mCatL.GetRec(numb-1)) continue;
                 objName = QString(mCatL.record->name).simplified();
             }
             else
