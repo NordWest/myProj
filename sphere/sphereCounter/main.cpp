@@ -147,10 +147,10 @@ int main(int argc, char *argv[])
         data[2] = tStr.section(colSep, cdx, cdx).toDouble();
         data[3] = tStr.section(colSep, cdy, cdy).toDouble();*/
         data[0] = tStr.section(colSep, 1, 1).toDouble();
-        data[1] = grad2rad(tStr.section(colSep, 2, 2).toDouble());
-        data[2] = grad2rad(tStr.section(colSep, 3, 3).toDouble());
-        data[3] = grad2rad(tStr.section(colSep, 4, 4).toDouble());
-        data[4] = grad2rad(tStr.section(colSep, 5, 5).toDouble());
+        data[1] = grad2rad(tStr.section(colSep, cx, cx).toDouble());
+        data[2] = grad2rad(tStr.section(colSep, cy, cy).toDouble());
+        data[3] = grad2rad(tStr.section(colSep, cdx, cdx).toDouble());
+        data[4] = grad2rad(tStr.section(colSep, cdy, cdy).toDouble());
         //qDebug() << QString("data: %1\t%2\t%3\t%4\t%5\n").arg(data[0],12, 'f', 8).arg(data[1],12, 'f', 8).arg(data[2],12, 'f', 8).arg(data[3],12, 'f', 8).arg(data[4],12, 'f', 8);
         if(isZonal&&(data[2]<dMin||data[2]>dMax)) continue;
 

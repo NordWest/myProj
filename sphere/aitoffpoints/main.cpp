@@ -157,9 +157,9 @@ int main(int argc, char *argv[])
     Mu.Set(X.data(),X.count());
     Nu.Set(Y.data(),Y.count());
     Pu.Set(M.data(),M.count());
-    //gr->Plot(Mu,Nu," b. ");
-    gr->Dots(Mu, Nu, Pu,qPrintable(style));
-    gr->Colorbar(qPrintable(style));
+    gr->Plot(Mu,Nu," b. ");
+    //gr->Dots(Mu, Nu, Pu,qPrintable(style));
+    //gr->Colorbar(qPrintable(style));
     ///////////////
     for (int i=0;i<=4;i++)
     {
