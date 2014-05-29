@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     QSettings *sett = new QSettings("./nb.ini", QSettings::IniFormat);
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     int obsMin = sett->value("eqsEstimate/obsMin", 2).toInt();
+    double ocMax = sett->value("eqsEstimate/ocMax", 100000).toDouble();
 
 /////////////////////////
 
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 
             if(obj_rec->eq_list.size()<obsMin) continue;
             if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
+            if((colList.at(0)->rmsOne>ocMax)||(colList.at(1)->rmsOne>ocMax)) continue;
             wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(obj_rec->objName, 16).arg(obs_rec->obsCode, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);
             szk = obj_rec->eq_list.size();
             for(k=0;k<szk;k++)
