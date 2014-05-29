@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
     //gr->Box();
     //gr->Axis("xyz");
     gr->Dens(Z,argv[7]);
+    //gr->Dots(Z, );
     //gr->Surf(z,"wk");
     mglData ksi(101),eta(101);
     psi=0;

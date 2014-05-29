@@ -13,9 +13,9 @@
 #include <math.h>
 
 #include <astro.h>
-#include "./../libs/comfunc.h"
+#include "./../../libs/comfunc.h"
 #include <mb.h>
-#include "./../libs/ringpix.h"
+#include "./../../libs/ringpix.h"
 
 //#define PI 3.141592653589
 
@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
             {
                 ra[i] = raVect[i];
                 dec[i] = deVect[i];
+                numVect << 20;
             }
         }
         break;

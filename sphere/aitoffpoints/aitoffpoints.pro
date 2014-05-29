@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-#TARGET = aitoffpoints
+#TARGET = ./../../../lab/mpcTools/aitoffpoints
 TARGET = ~/bin/aitoffpoints
 
 CONFIG   += console
@@ -18,4 +18,4 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp
-LIBS+= -lmgl
+LIBS+= -lmgl -lastro -lmb
