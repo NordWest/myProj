@@ -16,6 +16,7 @@
 #include "./../../libs/comfunc.h"
 #include <mb.h>
 #include "./../../libs/ringpix.h"
+#include "./../../libs/sphere.h"
 
 //#define PI 3.141592653589
 
@@ -146,6 +147,7 @@ int main(int argc, char *argv[])
     double h, phi;
     int pN = 0;
 
+    QVector <double> tmVect;
     QVector <double> raVect;
     QVector <double> deVect;
     QVector <double> raVectC;
@@ -277,6 +279,14 @@ int main(int argc, char *argv[])
     zFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream zStm(&zFile);
 
+    double *raO, *decO, *dRa, *dDec;
+    raO = new double[pointNum];
+    decO = new double[pointNum];
+    dRa = new double[pointNum];
+    dDec = new double[pointNum];
+
+    qDebug() << QString("pointNum: %1\n").arg(pointNum);
+
     for(i=0; i<pointNum; i++)
     {
 
@@ -379,15 +389,32 @@ int main(int argc, char *argv[])
     //        qDebug() << "r[i]= " << r[i] << "\n";
 
         objListRot << objR;
-        oData << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(obj[0], 12, 'e', 9).arg(obj[1], 12, 'e', 9).arg(objR[0], 12, 'e', 9).arg(objR[1], 12, 'e', 9).arg((objR[0]-obj[0])*cos(dec[i]), 12, 'e', 9).arg(objR[1]-obj[1], 12, 'e', 9).arg(numVect[i]);
+        raO[i] = objR[0];
+        decO[i] = objR[1];
+        dRa[i] = (raO[i]-ra[i])*cos(decO[i]);
+        dDec[i] = decO[i]-dec[i];
+        oData << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(0.0).arg(rad2grad(raO[i]), 15, 'e', 12).arg(rad2grad(decO[i]), 15, 'e', 12).arg(rad2grad(ra[i]), 15, 'e', 12).arg(rad2grad(dec[i]), 15, 'e', 12).arg(rad2grad(dRa[i]), 15, 'e', 12).arg(rad2grad(dDec[i]), 15, 'e', 12).arg(numVect[i]);
+
+
+
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(rad2grad(obj[0]), 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
     }
 
 
+
 ////////////////////////////////////////////////////////////////////
     qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0]),12, 'f', 8).arg(rad2mas(Eps[1]),12, 'f', 8).arg(rad2mas(Eps[2]),12, 'f', 8);
 
+    double *EpsC = new double[3];
+    double *sgEpsC = new double[3];
+
+    lsmCount(raO, decO, dRa, dDec, pointNum, EpsC, sgEpsC);
+
+    qDebug() << QString("EpsC: %1\t%2\t%3\n").arg(rad2mas(EpsC[0]),12, 'f', 8).arg(rad2mas(EpsC[1]),12, 'f', 8).arg(rad2mas(EpsC[2]),12, 'f', 8);
+    qDebug() << QString("sgEpsC: %1\t%2\t%3\n").arg(rad2mas(sgEpsC[0]),12, 'f', 8).arg(rad2mas(sgEpsC[1]),12, 'f', 8).arg(rad2mas(sgEpsC[2]),12, 'f', 8);
+
+/*
     lsm(3, pointNum*2, Z, A, r, uwe, &Dx[0][0], W);
 
 //    slsm(3, pointNum, Z, A, r, W);
