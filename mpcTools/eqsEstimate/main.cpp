@@ -62,12 +62,20 @@ int main(int argc, char *argv[])
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream mpcStm(&mpcFile);
 
+    int objnum, onumRa, onumDe;
+    double rmsRa, rmsDe;
+    QFile obsFile(QString("%1.obs").arg(eqFileName.section(".", 0, -2)));
+    obsFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream obsStm(&obsFile);
+
     for(i=0;i<sz;i++)
     {
         obs_rec = obs_list.eqoList.at(i);
         //qDebug() << QString("obsCode: %1\n").arg(obs_rec->obsCode);
         szj = obs_rec->objList.eqrList.size();
         //qDebug() << QString("objNum: %1\n").arg(szj);
+        objnum=0; onumRa=0; onumDe=0;
+        rmsRa = rmsDe = 0.0;
         for(j=0;j<szj;j++)
         {
             obj_rec = obs_rec->objList.eqrList.at(j);
@@ -100,11 +108,24 @@ int main(int argc, char *argv[])
             colList.at(1)->rec2s(&tStr);
             resStm << tStr << "\n";
             resStm << "\n";
+
+            objnum++;
+            onumRa += colList.at(0)->num;
+            onumDe += colList.at(1)->num;
+            rmsRa += colList.at(0)->rmsOne;
+            rmsDe += colList.at(1)->rmsOne;
         }
+
+        if(objnum<10) continue;
+        rmsRa /= objnum;
+        rmsDe /= objnum;
+
+        obsStm << QString("%1@%2#%3|%4#%5|%6\n").arg(objnum, 5).arg(obs_rec->obsCode, 3).arg(onumRa, 5).arg(rmsRa, 10, 'f', 2).arg(onumDe, 5).arg(rmsDe, 10, 'f', 2);
     }
 
     wFile.close();
     resFile.close();
     mpcFile.close();
+    obsFile.close();
     return 0;//a.exec();
 }
