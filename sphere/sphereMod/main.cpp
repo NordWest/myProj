@@ -72,19 +72,17 @@ int main(int argc, char *argv[])
         clog = new QDataStream(logFile);
 
     int i;
-    QFile oFile("res.dat");
-    oFile.open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Text);
-    QTextStream oData(&oFile);
+
 
     double raMin, raMax, deMin, deMax;
     QSettings *sett = new QSettings("sph.ini", QSettings::IniFormat);
 
     raMin = sett->value("general/raMin", 0).toDouble()*15.0;   //degree
     raMax = sett->value("general/raMax", 24).toDouble()*15.0;   //
-    deMin = sett->value("general/deMin", -90).toDouble();        //
-    deMax = sett->value("general/deMax", 90).toDouble();        //
+    deMin = grad2rad(sett->value("general/deMin", -90).toDouble());        //
+    deMax = grad2rad(sett->value("general/deMax", 90).toDouble());        //
     int pointNum = sett->value("general/pointNum", 0).toInt();
-    int nsMax = sett->value("general/nsMax", 32).toInt();
+    //int nsMax = sett->value("general/nsMax", 32).toInt();
 
     int rtype = sett->value("general/rtype", 0).toInt();
     //0 - randomSphere
@@ -97,8 +95,8 @@ int main(int argc, char *argv[])
     QString colSep = sett->value("general/colSep", "|").toString();
     int cx = sett->value("general/cx", 0).toInt();
     int cy = sett->value("general/cy", 1).toInt();
-    int cxc = sett->value("general/cxcalc", 2).toInt();
-    int cyc = sett->value("general/cycalc", 3).toInt();
+    int cxc = sett->value("general/cdx", 2).toInt();
+    int cyc = sett->value("general/cdy", 3).toInt();
     int cn = sett->value("general/cn", 4).toInt();
 
     double *Eps = new double[3];
@@ -116,10 +114,22 @@ int main(int argc, char *argv[])
     mMatr[7] = mas_to_rad(sett->value("rotation/M32", 0).toDouble());
     mMatr[8] = mas_to_rad(sett->value("rotation/M33", 0).toDouble());
 
+//objSphere
+    long nsMax = sett->value("objSphere/nsMax", 32).toLongLong();
+    int isEcl = sett->value("objSphere/isEcl", 0).toInt();
+    int pMin = sett->value("objSphere/pMin", 10).toInt();
+    double dMin = grad2rad(sett->value("objSphere/dMin", -90).toDouble());
+    double dMax = grad2rad(sett->value("objSphere/dMax", 90).toDouble());
+    int isZonal = sett->value("objSphere/isZonal", 0).toInt();
+    int isZonalB = sett->value("objSphere/isZonalBack", 0).toInt();
+
     int isUBmod = sett->value("ubMod/isUBmod", 0).toInt();        //
     double kPar = sett->value("ubMod/kPar", 300).toDouble();        //
     double bPar = sett->value("ubMod/bPar", 300).toDouble();
     double disp1;
+
+    double s1 = sin(dMin);
+    double s2 = sin(dMax);
 
 
 //    double epsi = grad2rad(sett->value("general/eps").toDouble());
@@ -143,8 +153,12 @@ int main(int argc, char *argv[])
     double x, y, z, z0, z1, lns, s;
     double *ra, *dec;
     double *raC, *decC;
+    double *dRa, *dDec;
+    double *raO, *decO;
     double lam, beta;
     double h, phi;
+    int *numI;
+    long ipix;
     int pN = 0;
 
     QVector <double> tmVect;
@@ -158,6 +172,9 @@ int main(int argc, char *argv[])
     QTextStream iStm;
     QString tStr;
 
+    double rat, dect, ratC, dectC;
+    double *raAve, *deAve;
+
 
 //////////////////////////////////////////////////////////////////
     switch(rtype)
@@ -166,12 +183,12 @@ int main(int argc, char *argv[])
         {
             ra = new double[pointNum];
             dec = new double[pointNum];
-            randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+            randomSphere(ra, dec, pointNum, grad2rad(raMin), grad2rad(raMax), deMin, deMax, csys);
         }
         break;
         case 1:
         {
-            randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), grad2rad(raMax), grad2rad(deMin), grad2rad(deMax), csys);
+            randomSphereHpix(raVect, deVect, nsMax, grad2rad(raMin), raMax, deMin, grad2rad(deMax), csys);
             pointNum = raVect.size();
             ra = new double[pointNum];
             dec = new double[pointNum];
@@ -186,7 +203,7 @@ int main(int argc, char *argv[])
         break;
         case 2:
         {
-            iFile.setFileName(inpFileName);
+            iFile.setFileName(argv[1]);
             iFile.open(QFile::ReadOnly);
             iStm.setDevice(&iFile);
 
@@ -210,37 +227,125 @@ int main(int argc, char *argv[])
         break;
         case 3:
         {
-            iFile.setFileName(inpFileName);
+            iFile.setFileName(argv[1]);
             iFile.open(QFile::ReadOnly);
             iStm.setDevice(&iFile);
+
+            QFile resFile(QString("%1_hps.txt").arg(QFileInfo(argv[1]).absoluteFilePath().section(".", -2, -2)));
+            resFile.open(QFile::WriteOnly | QFile::Truncate);
+            QTextStream resStm(&resFile);
+
+            pointNum = nsMax*nsMax*12;
+            ra = new double[pointNum];
+            dec = new double[pointNum];
+            raAve = new double[pointNum];
+            deAve = new double[pointNum];
+            dRa = new double[pointNum];
+            dDec = new double[pointNum];
+            numI = new int[pointNum];
+
+            for(i=0; i<pointNum; i++)
+            {
+                pix2ang_ring( nsMax, i, &dect, &rat);
+                dect = dect-M_PI/2.0;
+                ra[i] = rat;
+                dec[i] = dect;
+                raAve[i] = 0.0;
+                deAve[i] = 0.0;
+                dRa[i] = 0.0;
+                dDec[i] = 0.0;
+                numI[i] = 0;
+            }
 
             while(!iStm.atEnd())
             {
                 tStr = iStm.readLine();
-                raVect << tStr.section(colSep, cx, cx).toDouble();
-                deVect << tStr.section(colSep, cy, cy).toDouble();
-                raVectC << tStr.section(colSep, cxc, cxc).toDouble();
-                deVectC << tStr.section(colSep, cyc, cyc).toDouble();
+                rat = grad2rad(tStr.section(colSep, cx, cx).toDouble());
+                dect = grad2rad(tStr.section(colSep, cy, cy).toDouble());
+                ratC = grad2rad(tStr.section(colSep, cxc, cxc).toDouble());
+                dectC = grad2rad(tStr.section(colSep, cyc, cyc).toDouble());
                 //numVect << tStr.section(colSep, cn, cn).toDouble();
+
+                if(isEcl==1)
+                {
+                    //ratC = rat - mas2rad(dRa)/cos(dect);
+                    //dectC = dect - mas2rad(dDe);
+
+                    lam = atan2(cos(dect)*sin(rat)*cos(-EKV)-sin(dect)*sin(-EKV), cos(dect)*cos(rat));
+
+                    beta = asin(cos(dect)*sin(rat)*sin(-EKV)+sin(dect)*cos(-EKV));
+
+                    if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                    if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                    if((lam>2.0*PI)) lam -=2.0*PI;
+                    if((lam<0.0)) lam +=2.0*PI;
+                    rat = lam;
+                    dect = beta;
+
+                    lam = atan2(cos(dectC)*sin(ratC)*cos(-EKV)-sin(dectC)*sin(-EKV), cos(dectC)*cos(ratC));
+                    beta = asin(cos(dectC)*sin(ratC)*sin(-EKV)+sin(dectC)*cos(-EKV));
+
+                    if(beta>PI/2.0) {lam += PI; beta = PI/2.0 - beta;}
+                    if(beta<-PI/2.0) {lam += PI; beta = PI/2.0 + beta;}
+
+                    if((lam>2.0*PI)) lam -=2.0*PI;
+                    if((lam<0.0)) lam +=2.0*PI;
+                    ratC = lam;
+                    dectC = beta;
+                }
+                if(dect<dMin||dect>dMax) continue;
+                if(isZonal)
+                {
+                    dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
+                    dectC = asin((2.0*sin(dectC)/(s2-s1))-(s2+s1)/(s2-s1));
+                    //rat = asin((2.0*sin(rat)/(rs2-rs1))-(rs2+rs1)/(rs2-rs1));
+                }
+
+                //if(dect<dMin||dect>dMax) continue;
+                //if((magn<mag0||magn>mag1)&&isMagn) continue;
+                ang2pix_ring(nsMax, dect+M_PI/2.0, rat, &ipix);
+                if(ipix>pointNum||ipix<0)
+                {
+                    qDebug() << QString("WARN ipix: %1\n").arg(ipix);
+                    continue;
+                }
+                raAve[ipix] += rat;
+                deAve[ipix] += dect;
+                dRa[ipix] += (rat - ratC)*cos(dect);
+                dDec[ipix] += dect - dectC;
+
+                numI[ipix]++;
             }
-            pointNum = raVect.size();
-            ra = new double[pointNum];
-            dec = new double[pointNum];
-            raC = new double[pointNum];
-            decC = new double[pointNum];
 
             for(i=0; i<pointNum; i++)
             {
-                ra[i] = raVect[i];
-                dec[i] = deVect[i];
-                raC[i] = raVectC[i];
-                decC[i] = deVectC[i];
+                if(numI[i]<pMin) continue;
+                //{
+                    raAve[i] /= numI[i];
+                    deAve[i] /= numI[i];
+                    dRa[i] /= numI[i];
+                    dDec[i] /= numI[i];
+                /*}
+                else
+                {
+                    raAve[i] = 0.0;
+                    deAve[i] = 0.0;
+                    dRa[i] = 0.0;
+                    dDec[i] = 0.0;
+                }*/
+                rat = ra[i] - dRa[i]/cos(dec[i]);
+                dect = dec[i] - dDec[i];
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ra[i], 15, 'e', 12).arg(dec[i], 15, 'e', 12).arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(rad2mas(dRa[i]), 15, 'e', 12).arg(rad2mas(dDec[i]), 15, 'e', 12).arg(numI[i]);
             }
+            resFile.close();
+            return 0;
         }
+
         break;
     }
 
-
+//modeling
 
     double orT0, orT1;
 
@@ -275,11 +380,14 @@ int main(int argc, char *argv[])
 
     Zd[0] = Zd[1] = 0.0;
 */
+    QFile oFile("res.dat");
+    oFile.open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Text);
+    QTextStream oData(&oFile);
+
     QFile zFile("z.dat");
     zFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QTextStream zStm(&zFile);
 
-    double *raO, *decO, *dRa, *dDec;
     raO = new double[pointNum];
     decO = new double[pointNum];
     dRa = new double[pointNum];

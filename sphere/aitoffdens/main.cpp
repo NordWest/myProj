@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
         {
             L = line.section('|',cl,cl).toDouble()-M_PI;
             B = -line.section('|',cb,cb).toDouble();
-            MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
+            //MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
+            MAG = line.section('|',cm,cm).toDouble();
         }
         else
         {

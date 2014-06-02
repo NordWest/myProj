@@ -298,8 +298,6 @@ resFile.close();
 
     qDebug() << QString("rMin: %1\n").arg(rMin);
 
-
-
     riterNum = 0;
     int iterTot = 0;
 
@@ -330,13 +328,12 @@ resFile.close();
                 pW=0;
                 for(i=0; i<npix; i++)
                 {
-                    if(numVect.at(i)>=10)
+                    if(numVect.at(i)>=nMin)
                     {
                         rNum++;
 
                         if(isZonal)
                         {
-
                             dect = asin(0.5*sin(dataVect[i][1])*(s2-s1) + 0.5*(s2+s1));
                             //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                         }
@@ -353,7 +350,7 @@ resFile.close();
 
                     for(j=0; j<npix; j++)
                     {
-                        if(i==j||numVect.at(j)<10) continue;
+                        if(i==j||numVect.at(j)<nMin) continue;
                         getDegToTang(&ksi, &eta, rad2grad(dataVect[j][0]), rad2grad(dataVect[j][1]), rad2grad(dataVect[i][0]), rad2grad(dataVect[i][1]));
                         dist = sqrt(pow((dataVect[j][0]-dataVect[i][0])*cos(dataVect[i][1]), 2.0) + pow(dataVect[j][1]-dataVect[i][1], 2.0));
                         distT = grad2rad(sqrt(ksi*ksi + eta*eta));
@@ -410,7 +407,6 @@ resFile.close();
 
             }while((nNum<npix)&&(nrNum>0));
 
-
             qDebug() << QString("iterNum: %1\n\n").arg(iterNum);
             iterTot+=iterNum;
 
@@ -418,7 +414,6 @@ resFile.close();
         }
 
         qDebug() << QString("total:\nriterNum: %1\niterTot: %2\n\n").arg(riterNum).arg(iterTot);
-
     }
     ///////////
         logFile->close();
