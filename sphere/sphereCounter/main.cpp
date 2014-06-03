@@ -80,7 +80,12 @@ int main(int argc, char *argv[])
 
     QSettings *sett = new QSettings("sphC.ini", QSettings::IniFormat);
 
-    int solMode = sett->value("general/solutionMode", 0).toInt();   //0 - LSM; 1- VSF.
+    int solMode = sett->value("general/solutionMode", 0).toInt();
+    //0 - LSM;
+    //1 - VSF;
+    //2 - vsfCount_lsm;
+    //3 - lsmCountVel;
+
     int isZonal = sett->value("general/isZonal", 0).toInt();
     double dMin = grad2rad(sett->value("general/dMin", -90).toDouble());
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
@@ -92,6 +97,8 @@ int main(int argc, char *argv[])
     int cy = sett->value("general/cy", 1).toInt();
     int cdx = sett->value("general/cdx", 2).toInt();
     int cdy = sett->value("general/cdy", 3).toInt();
+
+    int isDegree = sett->value("general/isDegree", 0).toInt();
 
     double time0 = sett->value("general/time0", 2450000.5).toDouble();
 
@@ -153,10 +160,19 @@ int main(int argc, char *argv[])
         data[2] = tStr.section(colSep, cdx, cdx).toDouble();
         data[3] = tStr.section(colSep, cdy, cdy).toDouble();*/
         data[0] = tStr.section(colSep, ct, ct).toDouble();
-        data[1] = grad2rad(tStr.section(colSep, cx, cx).toDouble());
-        data[2] = grad2rad(tStr.section(colSep, cy, cy).toDouble());
-        data[3] = grad2rad(tStr.section(colSep, cdx, cdx).toDouble());
-        data[4] = grad2rad(tStr.section(colSep, cdy, cdy).toDouble());
+
+        data[1] = tStr.section(colSep, cx, cx).toDouble();
+        data[2] = tStr.section(colSep, cy, cy).toDouble();
+        data[3] = tStr.section(colSep, cdx, cdx).toDouble();
+        data[4] = tStr.section(colSep, cdy, cdy).toDouble();
+
+        if(isDegree)
+        {
+            data[1] = grad2rad(data[1]);
+            data[2] = grad2rad(data[2]);
+            data[3] = grad2rad(data[3]);
+            data[4] = grad2rad(data[4]);
+        }
         //qDebug() << QString("data: %1\t%2\t%3\t%4\t%5\n").arg(data[0],12, 'f', 8).arg(data[1],12, 'f', 8).arg(data[2],12, 'f', 8).arg(data[3],12, 'f', 8).arg(data[4],12, 'f', 8);
         if(isZonal&&(data[2]<dMin||data[2]>dMax)) continue;
 
@@ -241,9 +257,20 @@ int main(int argc, char *argv[])
             indexes(i+1, N, K, P);
             qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
         }
+        qDebug() << QString("Eps coef: %1\t%2\t%3\n").arg(indexJ(1, 1, 1)-1).arg(indexJ(1, 1, 0)-1).arg(indexJ(1, 0, 1)-1);
+
+        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/coef1;
+        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/coef2;
+        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/coef3;
+
+        sgEps[0] = tCoefSg[indexJ(1, 1, 1)-1]/coef1;
+        sgEps[1] = tCoefSg[indexJ(1, 1, 0)-1]/coef2;
+        sgEps[2] = tCoefSg[indexJ(1, 0, 1)-1]/coef3;
         break;
     case 3:
         res = lsmCountVel(dTime, ra, de, dRa, dDe, dSize, &EpsVel[0], &sgEpsVel[0]);
+
+        break;
     }
 
     for(i=0; i<3; i++)

@@ -59,8 +59,67 @@ void customMessageHandler(QtMsgType type, const char* msg)
     }
 }
 
+struct ObsObjRec
+{
+    QString objName;
+    QString obsCode;
+    int numRa, numDec;
+    double meanRa, rmsMeanRa, rmsOneRa;
+    double meanDec, rmsMeanDec, rmsOneDec;
+};
+class ObjObsStat
+{
+public:
+    QList <ObsObjRec*> ooList;
+    ObjObsStat(){};
+    int init(QString fileName)
+    {
+        QString tStr;
+        ObsObjRec* tRec;
+        int isN;
+        QStringList opers, op1;
+        QFile iniFile(fileName);
+        if(!iniFile.open(QFile::ReadOnly)) return 1;
+        QTextStream iniStm(&iniFile);
+        while(!iniStm.atEnd())
+        {
+            tRec = new ObsObjRec;
+            tStr = iniStm.readLine();
+            opers = tStr.split("#");
+            tRec->objName = opers.at(0).section("@", 0, 0).simplified();
+            tRec->obsCode = opers.at(0).section("@", 1, 1).simplified();
+            tRec->numRa = opers.at(1).section("|", 0, 0).toInt();
+            tRec->meanRa = opers.at(1).section("|", 1, 1).toDouble();
+            tRec->rmsMeanRa = opers.at(1).section("|", 2, 2).toDouble();
+            tRec->rmsOneRa = opers.at(1).section("|", 3, 3).toDouble();
+            tRec->numDec = opers.at(2).section("|", 0, 0).toInt();
+            tRec->meanDec = opers.at(2).section("|", 1, 1).toDouble();
+            tRec->rmsMeanDec = opers.at(2).section("|", 2, 2).toDouble();
+            tRec->rmsOneDec = opers.at(2).section("|", 3, 3).toDouble();
+            ooList << tRec;
+        }
+        iniFile.close();
+        return 0;
+    };
+    int getStat(QString objN, QString obsC, ObsObjRec* rRes)
+    {
+        int i, sz;
+        sz = ooList.size();
+        for(i=0;i<sz;i++)
+        {
+            if((QString().compare(ooList.at(i)->objName, objN)==0)&&(QString().compare(ooList.at(i)->obsCode, obsC)==0))
+            {
+                rRes = ooList.at(i);
+                return 0;
+            }
+        }
+        return 1;
+    }
+};
+
 int randomSphere(double *ra, double *de, int num, double raMin, double raMax, double deMin, double deMax, int csys = 0);
 int randomSphereHpix(QVector <double> &ra, QVector <double> &de, int nsMax, double raMin, double raMax, double deMin, double deMax, int csys);
+void get2Ddisp(double &z0, double &z1);
 
 int main(int argc, char *argv[])
 {
@@ -98,6 +157,8 @@ int main(int argc, char *argv[])
     int cxc = sett->value("general/cdx", 2).toInt();
     int cyc = sett->value("general/cdy", 3).toInt();
     int cn = sett->value("general/cn", 4).toInt();
+
+    int isDegree = sett->value("general/isDegree", 0).toInt();
 
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
@@ -160,6 +221,8 @@ int main(int argc, char *argv[])
     int *numI;
     long ipix;
     int pN = 0;
+    double ti;
+    QString objName, obsCode;
 
     QVector <double> tmVect;
     QVector <double> raVect;
@@ -172,9 +235,12 @@ int main(int argc, char *argv[])
     QTextStream iStm;
     QString tStr;
 
+    double ocRa, ocDec;
+
     double rat, dect, ratC, dectC;
     double *raAve, *deAve;
 
+    srand(time(NULL));
 
 //////////////////////////////////////////////////////////////////
     switch(rtype)
@@ -207,22 +273,71 @@ int main(int argc, char *argv[])
             iFile.open(QFile::ReadOnly);
             iStm.setDevice(&iFile);
 
+            ObjObsStat ooSt;
+            ObsObjRec ooRec;
+            if(ooSt.init(QString("%1.we").arg(QFileInfo(argv[1]).absoluteFilePath().section("_", 0, 0))))
+            {
+                qDebug() << "Error init weghts\n\n";
+                return 1;
+            }
+            int skipNum = 0;
+            int obsNum = 0;
+
+            QFile resFile(QString("%1_sph.txt").arg(QFileInfo(argv[1]).absoluteFilePath().section(".", -2, -2)));
+            resFile.open(QFile::WriteOnly | QFile::Truncate);
+            QTextStream resStm(&resFile);
+
+            double *aMatr = new double[5];
+
             while(!iStm.atEnd())
             {
                 tStr = iStm.readLine();
-                raVect << tStr.section(colSep, cx, cx).toDouble();
-                deVect << tStr.section(colSep, cy, cy).toDouble();
-                //numVect << tStr.section(colSep, cn, cn).toDouble();
-            }
-            pointNum = raVect.size();
-            ra = new double[pointNum];
-            dec = new double[pointNum];
+                objName = tStr.section(colSep, 0, 0).simplified();
+                ti = tStr.section(colSep, 1, 1).toDouble();
+                rat = tStr.section(colSep, 2, 2).toDouble();
+                dect = tStr.section(colSep, 3, 3).toDouble();
+                obsCode = tStr.section(colSep, -1, -1).simplified();
 
-            for(i=0; i<pointNum; i++)
-            {
-                ra[i] = raVect[i];
-                dec[i] = deVect[i];
+                if(isDegree)
+                {
+                    rat = grad2rad(rat);
+                    dect = grad2rad(dect);
+                }
+
+                if(ooSt.getStat(objName, obsCode, &ooRec))
+                {
+                    //qDebug() << QString("Skip %1@%2\n").arg(objName).arg(obsCode);
+                    skipNum++;
+                    //continue;
+                    ooRec.rmsOneRa = disp;
+                    ooRec.rmsOneDec = disp;
+                }
+
+                aMatr[0] = -(sin(dect)*cos(rat));
+                aMatr[1] = -(sin(dect)*sin(rat));
+                aMatr[2] = cos(dect);
+
+                aMatr[3] = sin(rat);
+                aMatr[4] = -cos(rat);
+
+                get2Ddisp(z0, z1);
+
+                ocRa = aMatr[0]*Eps[0]+aMatr[1]*Eps[1]+aMatr[2]*Eps[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + mas2rad(ooRec.rmsOneRa)*z0;
+                ocDec = aMatr[3]*Eps[0]+aMatr[4]*Eps[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + mas2rad(ooRec.rmsOneDec)*z1;
+
+                //ratC = ocRa/cos(dect)+rat;
+                //dectC = ocDec+dect;
+
+                //resStm << QString("%1|%2|%3|%4|%5|%6|%7").arg(rad2grad(rat)).arg(dect).arg(ratC).arg(dectC).arg(rad2mas(ocRa)).arg(rad2mas(ocDec));
+                //numVect << tStr.section(colSep, cn, cn).toDouble();
+                ratC = rat - ocRa/cos(dect);
+                dectC = dect - ocDec;
+                resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 15, 'e', 12).arg(rad2mas(ocDec), 15, 'e', 12);
+                obsNum++;
             }
+            resFile.close();
+            qDebug() << QString("obsNum: %1\t%2 skiped\n").arg(obsNum).arg(skipNum);
+            return 0;
         }
         break;
         case 3:
@@ -260,10 +375,18 @@ int main(int argc, char *argv[])
             while(!iStm.atEnd())
             {
                 tStr = iStm.readLine();
-                rat = grad2rad(tStr.section(colSep, cx, cx).toDouble());
-                dect = grad2rad(tStr.section(colSep, cy, cy).toDouble());
-                ratC = grad2rad(tStr.section(colSep, cxc, cxc).toDouble());
-                dectC = grad2rad(tStr.section(colSep, cyc, cyc).toDouble());
+                rat = tStr.section(colSep, cx, cx).toDouble();
+                dect = tStr.section(colSep, cy, cy).toDouble();
+                ratC = tStr.section(colSep, cxc, cxc).toDouble();
+                dectC = tStr.section(colSep, cyc, cyc).toDouble();
+
+                if(isDegree)
+                {
+                    rat = grad2rad(rat);
+                    dect = grad2rad(dect);
+                    ratC = grad2rad(ratC);
+                    dectC = grad2rad(dectC);
+                }
                 //numVect << tStr.section(colSep, cn, cn).toDouble();
 
                 if(isEcl==1)
@@ -348,25 +471,29 @@ int main(int argc, char *argv[])
 //modeling
 
     double orT0, orT1;
-
-    double *A = new double[3*pointNum*2];
-    double *r = new double[pointNum*2];
-    double *W = new double[pointNum*2];
-    double *Z = new double[3];
-
-    double *Ara = new double[3*pointNum];
-    double *rRa = new double[pointNum];
-    double *Wra = new double[pointNum];
-    double *Zra = new double[3];
-
-    double *Ade = new double[2*pointNum];
-    double *rDe = new double[pointNum];
-    double *Wde = new double[pointNum];
-    double *Zde = new double[2];
+    double *A, *r, *W, *Z;
+    double *Ara, *rRa, *Wra, *Zra;
+    double *Ade, *rDe, *Wde, *Zde;
 
     double Dx[3][3];
     double Dra[3][3];
     double Dde[2][2];
+
+    A = new double[3*pointNum*2];
+    r = new double[pointNum*2];
+    W = new double[pointNum*2];
+    Z = new double[3];
+
+    Ara = new double[3*pointNum];
+    rRa = new double[pointNum];
+    Wra = new double[pointNum];
+    Zra = new double[3];
+
+    Ade = new double[2*pointNum];
+    rDe = new double[pointNum];
+    Wde = new double[pointNum];
+    Zde = new double[2];
+
     int exclind[pointNum];
     double uwe, uweRa, uweDe;
     int rn;
@@ -722,4 +849,28 @@ int randomSphere(double *ra, double *de, int num, double raMin, double raMax, do
     }while(k<num);
 
     return 0;
+}
+
+
+
+
+void get2Ddisp(double &z0, double &z1)
+{
+    double x, y, s, lns;
+    //srand(time(NULL));
+/////////////   dispersion  ////////////////
+        do
+        {
+    //           srand(time(NULL));
+            x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+            y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+            s = x*x + y*y;
+        }while((s==0)||(s>1));
+        lns = sqrt(-2.0*log(s)/s);
+        z0 = x*lns;
+        z1 = y*lns;
+
+ //       zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
+
+////////////////////////////////////////////
 }
