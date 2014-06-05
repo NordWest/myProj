@@ -1,7 +1,7 @@
 #include <QtCore/QCoreApplication>
-#include "./../libs/healpix/chealpix.h"
+#include "./../../libs/healpix/chealpix.h"
 
-#include "./../libs/comfunc.h"
+#include "./../../libs/comfunc.h"
 #include <astro.h>
 
 #include <QFile>
@@ -224,10 +224,10 @@ setlocale(LC_NUMERIC, "C");
         data[1] = grad2rad(tStr.section(" ", 3, 3).toDouble());
         data[2] = grad2rad(tStr.section(" ", 4, 4).toDouble());
         data[3] = grad2rad(tStr.section(" ", 5, 5).toDouble());*/
-        data[0] = grad2rad(tStr.section(colSep, cx, cx).toDouble());
-        data[1] = grad2rad(tStr.section(colSep, cy, cy).toDouble());
-        data[2] = grad2rad(tStr.section(colSep, cdx, cdx).toDouble());
-        data[3] = grad2rad(tStr.section(colSep, cdy, cdy).toDouble());
+        data[0] = tStr.section(colSep, cx, cx).toDouble();
+        data[1] = tStr.section(colSep, cy, cy).toDouble();
+        data[2] = tStr.section(colSep, cdx, cdx).toDouble();
+        data[3] = tStr.section(colSep, cdy, cdy).toDouble();
         iNum = tStr.section(colSep, cn, cn).toDouble();
         //if(isZonal&&(data[1]<dMin||data[1]>dMax)) continue;
         if(isZonal)
@@ -246,10 +246,10 @@ setlocale(LC_NUMERIC, "C");
         if(cn>=0)
         {
             numVect[ipnest] = iNum;
-            dataVect[ipnest][2] = data[2];
-            dataVect[ipnest][3] = data[3];
+            dataVect[ipnest][2] = (data[0] - data[2])*cos(data[1]);
+            dataVect[ipnest][3] = data[1] - data[3];
 
-            resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[ipnest][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[ipnest][0]-dataVect[ipnest][2], 16, 'e', 10).arg(dataVect[ipnest][1]-dataVect[ipnest][3], 16, 'e', 10).arg(dataVect[ipnest][2], 16, 'e', 10).arg(dataVect[ipnest][3], 16, 'e', 10).arg(numVect[ipnest], 10, 'i', 10);
+            resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[ipnest][0], 16, 'e', 10).arg(dataVect[ipnest][1], 16, 'e', 10).arg(data[2], 16, 'e', 10).arg(data[3], 16, 'e', 10).arg(rad2mas(dataVect[ipnest][2]), 16, 'f', 3).arg(rad2mas(dataVect[ipnest][3]), 16, 'f', 3).arg(numVect[ipnest], 10, 'i', 10);
         }
         else
         {
@@ -338,7 +338,7 @@ resFile.close();
                             //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                         }
                         else dect = dataVect[i][1];
-                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2], 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
+                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
 
                         continue;
                     }
@@ -383,7 +383,7 @@ resFile.close();
                             //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                         }
                         else dect = dataVect[i][1];
-                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2], 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
+                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
                         nrNum++;
                     }
                     if(minNr>nearNum) minNr = nearNum;

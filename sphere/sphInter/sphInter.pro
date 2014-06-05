@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../lab/sphereMod/sphInter
+TARGET = ./../../../lab/sphereMod/sphInter
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
@@ -19,11 +19,11 @@ SOURCES += main.cpp \
 #    ../libs/ringpix.cpp \
     ../../libs/comfunc.cpp
 
-HEADERS += ../libs/comfunc.h \
-    ../libs/healpix/chealpix.h
+HEADERS += ../../libs/comfunc.h \
+    ../../libs/healpix/chealpix.h
 
 #win32:LIBS += ./../libs/win32/cfitsio.lib
 #unix:LIBS += ./../libs/unix/libcfitsio.a
 
-unix:LIBS += ./../libs/unix/libchealpix.a
+unix:LIBS += ./../../libs/unix/libchealpix.a
 unix:LIBS += -lmb -lastro

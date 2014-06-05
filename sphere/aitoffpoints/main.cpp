@@ -19,15 +19,15 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_NUMERIC, "C");
     QString fname(argv[1]);
-    QString epsfname(argv[7]);
+    QString epsfname(argv[6]);
     QStringList sl;
     loadDataFile(fname,sl);
     int cl = QString(argv[2]).toInt();//longitude
     int cb = QString(argv[3]).toInt();//latitude
-    int cm = QString(argv[4]).toInt();//mag
-    int fl = QString(argv[5]).toInt();//flag for separator of columns
-    QString style(argv[6]);
-    QString clims(argv[8]);
+    //int cm = QString(argv[4]).toInt();//mag
+    int fl = QString(argv[4]).toInt();//flag for separator of columns
+    QString style(argv[5]);
+    //QString clims(argv[8]);
     /////////////////////////////
     QVector<double>X,Y, M;
     QVector<double>X1,Y1, M1;
@@ -53,24 +53,25 @@ int main(int argc, char *argv[])
         {
             L = line.section('|',cl,cl).toDouble()-M_PI;
             B = -line.section('|',cb,cb).toDouble();
-            MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
+            //MAG = 180*3600000*line.section('|',cm,cm).toDouble()/M_PI;
             //MAG = line.section('|',cm,cm).toDouble();
         }
         else
         {
             L = line.section(' ',cl,cl).toDouble()-M_PI;
             B = -line.section(' ',cb,cb).toDouble();
-            MAG = line.section(' ',cm,cm).toDouble();
+            //MAG = line.section(' ',cm,cm).toDouble();
         }
         X<<-2*cos(B)*sin(L/2)/sqrt(1+cos(B)*cos(L/2));
         Y<< -sin(B)/sqrt(1+cos(B)*cos(L/2));
-        M<<MAG;
+        //M<<MAG;
         //qDebug() << QString("mag: %1\n").arg(MAG);
     }
 
     qDebug() << QString("pNum: %1\n").arg(X.size());
 
     //////////////////////////////
+    /*
     double maxMag = M[0];
     double minMag = M[0];
     for(int i=0;i<M.count();i++)
@@ -84,14 +85,14 @@ int main(int argc, char *argv[])
         maxMag=clims.section('|',2,2).toDouble();
     }
     //////////////////////////////
-    qDebug() << QString("mag: %1-%2\n").arg(minMag).arg(maxMag);
+    qDebug() << QString("mag: %1-%2\n").arg(minMag).arg(maxMag);*/
     //////////////////////////////
     mglData xs(2),ys(2),zs(2),cs(2);
     xs.a[0]=-2;
     xs.a[1]=2;
     ys.a[0]=-1;
     ys.a[1]=1;
-
+/*
     if(clims.contains("yes"))
     {
         zs.a[0]=clims.section('|',1,1).toDouble();
@@ -106,12 +107,13 @@ int main(int argc, char *argv[])
         cs.a[0]=minMag;//slimits.section('|',7,7).toDouble();
         cs.a[1]=maxMag;//slimits.section('|',8,8).toDouble();
     }
-    //
+    */
     mglGraph *gr = new mglGraph;
     //gr->XRange(xs);
     //gr->YRange(ys);
-    gr->SetRanges(xs,ys, zs);
-    gr->SetRange('c',cs);
+    gr->SetRanges(xs,ys);
+    //gr->SetRanges(xs,ys, zs);
+    //gr->SetRange('c',cs);
     mglData ksi(201),eta(201);
     double psi=0;
     for(int i=0;i<=200;i++){ksi.a[i]=2*cos(psi);eta.a[i]=sin(psi);psi+=2*M_PI/200;}
@@ -185,6 +187,7 @@ int main(int argc, char *argv[])
         }
     }
     ////////////////
+    qDebug() << QString("res eps: %1\n").arg(epsfname);
     gr->WriteEPS(qPrintable(epsfname),qPrintable(epsfname));
     //gr->WriteGIF(qPrintable(epsfname),qPrintable(epsfname));
     delete gr;

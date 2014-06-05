@@ -131,8 +131,6 @@ int main(int argc, char *argv[])
         clog = new QDataStream(logFile);
 
     int i;
-
-
     double raMin, raMax, deMin, deMax;
     QSettings *sett = new QSettings("sph.ini", QSettings::IniFormat);
 
@@ -152,6 +150,7 @@ int main(int argc, char *argv[])
     QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
     QString colSep = sett->value("general/colSep", "|").toString();
+    int ct = sett->value("general/ct", 0).toInt();
     int cx = sett->value("general/cx", 0).toInt();
     int cy = sett->value("general/cy", 1).toInt();
     int cxc = sett->value("general/cdx", 2).toInt();
@@ -159,6 +158,7 @@ int main(int argc, char *argv[])
     int cn = sett->value("general/cn", 4).toInt();
 
     int isDegree = sett->value("general/isDegree", 0).toInt();
+    int isWe = sett->value("general/isWe", 0).toInt();
 
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
@@ -192,25 +192,14 @@ int main(int argc, char *argv[])
     double s1 = sin(dMin);
     double s2 = sin(dMax);
 
-
-//    double epsi = grad2rad(sett->value("general/eps").toDouble());
     int csys = sett->value("general/coord_sys", 0).toInt();
 
     double disp = mas_to_rad(sett->value("noice/disp", 0).toDouble());
-
 
     QList <double*> objList;
     QList <double*> objListRot;
     double *obj, *objR;
 
-/*
-    double *Ac = new double[3*pointNum];
-    double *rc = new double[pointNum];
-    double *Wc = new double[pointNum];
-    double *Zc = new double[3];
-
-    Zc[0] = Zc[1] = Zc[2] = 0.0;
-*/
     double x, y, z, z0, z1, lns, s;
     double *ra, *dec;
     double *raC, *decC;
@@ -275,10 +264,13 @@ int main(int argc, char *argv[])
 
             ObjObsStat ooSt;
             ObsObjRec ooRec;
-            if(ooSt.init(QString("%1.we").arg(QFileInfo(argv[1]).absoluteFilePath().section("_", 0, 0))))
+            if(isWe)
             {
-                qDebug() << "Error init weghts\n\n";
-                return 1;
+                if(ooSt.init(QString("%1.we").arg(QFileInfo(argv[1]).absoluteFilePath().section("_", 0, 0))))
+                {
+                    qDebug() << "Error init weghts\n\n";
+                    return 1;
+                }
             }
             int skipNum = 0;
             int obsNum = 0;
@@ -293,9 +285,9 @@ int main(int argc, char *argv[])
             {
                 tStr = iStm.readLine();
                 objName = tStr.section(colSep, 0, 0).simplified();
-                ti = tStr.section(colSep, 1, 1).toDouble();
-                rat = tStr.section(colSep, 2, 2).toDouble();
-                dect = tStr.section(colSep, 3, 3).toDouble();
+                ti = tStr.section(colSep, ct, ct).toDouble();
+                rat = tStr.section(colSep, cx, cx).toDouble();
+                dect = tStr.section(colSep, cy, cy).toDouble();
                 obsCode = tStr.section(colSep, -1, -1).simplified();
 
                 if(isDegree)
@@ -332,7 +324,7 @@ int main(int argc, char *argv[])
                 //numVect << tStr.section(colSep, cn, cn).toDouble();
                 ratC = rat - ocRa/cos(dect);
                 dectC = dect - ocDec;
-                resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 15, 'e', 12).arg(rad2mas(ocDec), 15, 'e', 12);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
                 obsNum++;
             }
             resFile.close();
@@ -417,7 +409,7 @@ int main(int argc, char *argv[])
                     ratC = lam;
                     dectC = beta;
                 }
-                if(dect<dMin||dect>dMax) continue;
+                if(isZonal&&(dect<dMin||dect>dMax)) continue;
                 if(isZonal)
                 {
                     dect = asin((2.0*sin(dect)/(s2-s1))-(s2+s1)/(s2-s1));
@@ -443,20 +435,13 @@ int main(int argc, char *argv[])
 
             for(i=0; i<pointNum; i++)
             {
-                if(numI[i]<pMin) continue;
-                //{
-                    raAve[i] /= numI[i];
-                    deAve[i] /= numI[i];
-                    dRa[i] /= numI[i];
-                    dDec[i] /= numI[i];
-                /*}
-                else
-                {
-                    raAve[i] = 0.0;
-                    deAve[i] = 0.0;
-                    dRa[i] = 0.0;
-                    dDec[i] = 0.0;
-                }*/
+                if(numI[i]<pMin)continue;
+
+                raAve[i] /= numI[i];
+                deAve[i] /= numI[i];
+                dRa[i] /= numI[i];
+                dDec[i] /= numI[i];
+
                 rat = ra[i] - dRa[i]/cos(dec[i]);
                 dect = dec[i] - dDec[i];
                 resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(ra[i], 15, 'e', 12).arg(dec[i], 15, 'e', 12).arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(rad2mas(dRa[i]), 15, 'e', 12).arg(rad2mas(dDec[i]), 15, 'e', 12).arg(numI[i]);
@@ -499,14 +484,7 @@ int main(int argc, char *argv[])
     int rn;
 
     Z[0] = Z[1] = Z[2] = 0.0;
-/*
-    double *Ad = new double[2*pointNum];
-    double *rd = new double[pointNum];
-    double *Wd = new double[pointNum];
-    double *Zd = new double[2];
 
-    Zd[0] = Zd[1] = 0.0;
-*/
     QFile oFile("res.dat");
     oFile.open(QFile::WriteOnly | QIODevice::Truncate | QIODevice::Text);
     QTextStream oData(&oFile);
@@ -524,7 +502,6 @@ int main(int argc, char *argv[])
 
     for(i=0; i<pointNum; i++)
     {
-
         obj = new double[2];
         objR = new double[2];
 
@@ -540,11 +517,7 @@ int main(int argc, char *argv[])
         Ade[i*2] = A[pointNum+i*3] = sin(ra[i]);
         Ade[i*2+1] = A[pointNum+i*3+1] = -cos(ra[i]);
         A[pointNum+i*3+2] = 0;
-    //         Ad[i*3+2] = 0.0;
-    /*         Ac[i*3] = A[i*3] + Ad[i*2];
-        Ac[i*3+1] = A[i*3+1] + Ad[i*2+1];
-        Ac[i*3+2] = A[i*3+2];
-    */
+
         Wra[i] = Wde[i] = W[i] = 1.0;
         W[pointNum+i] = 1.0;
     //          Wc[i] = 1.0;
@@ -564,23 +537,13 @@ int main(int argc, char *argv[])
         zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
 
 ////////////////////////////////////////////
-    //            qDebug() << QString("z0= %1\tz1= %2\n").arg(z0).arg(z1);
-
-    //            z1 = z0 = 0;
-
-
-        //objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] + disp*z0;
-        //objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] + disp*z1;
 
         objR[0] = A[i*3]*Eps[0]+A[i*3+1]*Eps[1]+A[i*3+2]*Eps[2] - mMatr[2]*sin(dec[i])*sin(ra[i]) + mMatr[5]*sin(dec[i])*cos(ra[i]) + mMatr[1]*cos(dec[i])*cos(2.0*ra[i]) - 0.5*mMatr[0]*cos(dec[i])*sin(2.0*ra[i]) + 0.5*mMatr[4]*cos(dec[i])*sin(3.0*ra[i]) + disp*z0;
         objR[1] = A[pointNum+i*3]*Eps[0]+A[pointNum+i*3+1]*Eps[1]+A[pointNum+i*3+2]*Eps[2] - 0.5*mMatr[1]*sin(2.0*dec[i])*sin(2.0*ra[i]) + mMatr[2]*cos(2.0*dec[i])*cos(ra[i]) + mMatr[5]*cos(2.0*dec[i])*sin(ra[i]) - 0.5*mMatr[0]*sin(2.0*dec[i])*pow(cos(ra[i]), 2.0) - 0.5*mMatr[4]*sin(2.0*dec[i])*pow(sin(ra[i]), 2.0) + 0.5*mMatr[8]*sin(2.0*dec[i]) + disp*z1;
 
-
 ///////////////////////////////////
         if(isUBmod)
         {
-
-
             do
             {
         //           srand(time(NULL));
@@ -593,23 +556,12 @@ int main(int argc, char *argv[])
             z1 = y*lns;
 
     //////////////////////
-            //if(oPos.set_obs_parpam(GEOCENTR_NUM, CENTER, SK, obsCode.toAscii().data())) qDebug() << QString("warn obsParam, %1\n").arg(obsCode);
-            //oPos.det_observ(mjd2jd(mjd));
-            //detAhnumGC(&Az, &hVal, oPos.obs->stime, oPos.obs->record->Cos, oPos.obs->record->Sin, rat, dect);
-            //zet = PI/2.0 - hVal;
             disp1 = kPar*(rand()/(1.0*RAND_MAX)) + bPar;
-            //if(hVal<0.0) qDebug() << QString("obsCode:%1\thVal: %2\tzet: %3\n").arg(obsCode).arg(rad2grad(hVal)).arg(rad2grad(zet));
-
     //////////////////////
-
-            //objR[0] += disp1*z0;
             objR[1] += mas2rad(disp1*z1);
         }
 
 ///////////////////////////////////
-
-
-        //orT0 = r[i]/cos(dec[i]) + ra[i];
 
         rRa[i] = r[i] = objR[0];
         rDe[i] = r[pointNum+i] = objR[1];
@@ -617,20 +569,13 @@ int main(int argc, char *argv[])
         objR[0] = r[i]/cos(dec[i])+ra[i];
         objR[1] = r[pointNum+i]+dec[i];
 
-    //        objR[0] = obj[0]+A[i]*Eps[0]+A[i+1]*Eps[1]+A[i+2]*Eps[2];
-    //       objR[0] = obj[0]+rad_to_mas(-sin(mas_to_rad(obj[1]))*cos(mas_to_rad(obj[0]))*mas_to_rad(Eps[0]) - sin(mas_to_rad(obj[1]))*sin(mas_to_rad(obj[0]))*mas_to_rad(Eps[1]) + cos(mas_to_rad(obj[1]))*mas_to_rad(Eps[2]))/cos(mas_to_rad(obj[1]));
-    //        r[i] = objR[0] - obj[0];
-    //        rc[i] = r[i] + rd[i];
-    //        qDebug() << "r[i]= " << r[i] << "\n";
-
         objListRot << objR;
         raO[i] = objR[0];
         decO[i] = objR[1];
         dRa[i] = (raO[i]-ra[i])*cos(decO[i]);
         dDec[i] = decO[i]-dec[i];
-        oData << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(0.0).arg(rad2grad(raO[i]), 15, 'e', 12).arg(rad2grad(decO[i]), 15, 'e', 12).arg(rad2grad(ra[i]), 15, 'e', 12).arg(rad2grad(dec[i]), 15, 'e', 12).arg(rad2grad(dRa[i]), 15, 'e', 12).arg(rad2grad(dDec[i]), 15, 'e', 12).arg(numVect[i]);
 
-
+        oData << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(raO[i], 15, 'e', 12).arg(decO[i], 15, 'e', 12).arg(ra[i], 15, 'e', 12).arg(dec[i], 15, 'e', 12).arg(rad2mas(dRa[i]), 15, 'e', 12).arg(rad2mas(dDec[i]), 15, 'e', 12).arg(numVect[i]);
 
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(rad2grad(obj[0]), 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
         //oData << QString("%1 %2 %3 %4 %5 %6\n").arg(obj[0], 12, 'e', 9).arg(rad2grad(obj[1]), 12, 'e', 9).arg(rad2grad(objR[0]), 12, 'e', 9).arg(rad2grad(objR[1]), 12, 'e', 9).arg(rad2grad((objR[0]-obj[0])*cos(dec[i])), 12, 'e', 9).arg(rad2grad(objR[1]-obj[1]), 12, 'e', 9);
