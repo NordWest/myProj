@@ -293,7 +293,7 @@ srand(time(NULL));
             if(isObjHist)
             {
                 hPos = (mpNumber-objNum0)/hStep;
-                if(hPos>0&&hPos<histSize) objHist[hPos]++;
+                if(hPos>=0&&hPos<histSize) objHist[hPos]++;
             }
 
             if(isObsMod)

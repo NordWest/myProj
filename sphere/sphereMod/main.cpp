@@ -149,17 +149,23 @@ int main(int argc, char *argv[])
 
     QString inpFileName = sett->value("general/inpFileName", "inp.txt").toString();
 
-    QString colSep = sett->value("general/colSep", "|").toString();
-    int ct = sett->value("general/ct", 0).toInt();
-    int cx = sett->value("general/cx", 0).toInt();
-    int cy = sett->value("general/cy", 1).toInt();
-    int cxc = sett->value("general/cdx", 2).toInt();
-    int cyc = sett->value("general/cdy", 3).toInt();
-    int cn = sett->value("general/cn", 4).toInt();
+//input
+    QString colSep = sett->value("input/colSep", "|").toString();
+    int ct = sett->value("input/ct", 0).toInt();
+    int cx = sett->value("input/cx", 0).toInt();
+    int cy = sett->value("input/cy", 1).toInt();
+    int cxc = sett->value("input/cxc", 2).toInt();
+    int cyc = sett->value("input/cyc", 3).toInt();
+    int cn = sett->value("input/cn", 4).toInt();
+    int isDegree = sett->value("input/isDegree", 0).toInt();
 
-    int isDegree = sett->value("general/isDegree", 0).toInt();
+
     int isWe = sett->value("general/isWe", 0).toInt();
+    int isImpr = sett->value("general/isImpr", 0).toInt();
 
+    double time0 = mas_to_rad(sett->value("rotation/time0", 0).toDouble());
+
+    double epsT[3];
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
     Eps[1] = mas_to_rad(sett->value("rotation/w2", 0).toDouble());
@@ -175,6 +181,21 @@ int main(int argc, char *argv[])
     mMatr[7] = mas_to_rad(sett->value("rotation/M32", 0).toDouble());
     mMatr[8] = mas_to_rad(sett->value("rotation/M33", 0).toDouble());
 
+    double *dEps = new double[3];
+    dEps[0] = mas_to_rad(sett->value("rotation/dw1", 0).toDouble());
+    dEps[1] = mas_to_rad(sett->value("rotation/dw2", 0).toDouble());
+    dEps[2] = mas_to_rad(sett->value("rotation/dw3", 0).toDouble());
+    double *mMatrD = new double[9];
+    mMatrD[0] = mas_to_rad(sett->value("rotation/dM11", 0).toDouble());
+    mMatrD[1] = mas_to_rad(sett->value("rotation/dM12", 0).toDouble());
+    mMatrD[2] = mas_to_rad(sett->value("rotation/dM13", 0).toDouble());
+    mMatrD[3] = mas_to_rad(sett->value("rotation/dM21", 0).toDouble());
+    mMatrD[4] = mas_to_rad(sett->value("rotation/dM22", 0).toDouble());
+    mMatrD[5] = mas_to_rad(sett->value("rotation/dM23", 0).toDouble());
+    mMatrD[6] = mas_to_rad(sett->value("rotation/dM31", 0).toDouble());
+    mMatrD[7] = mas_to_rad(sett->value("rotation/dM32", 0).toDouble());
+    mMatrD[8] = mas_to_rad(sett->value("rotation/dM33", 0).toDouble());
+
 //objSphere
     long nsMax = sett->value("objSphere/nsMax", 32).toLongLong();
     int isEcl = sett->value("objSphere/isEcl", 0).toInt();
@@ -188,6 +209,7 @@ int main(int argc, char *argv[])
     double kPar = sett->value("ubMod/kPar", 300).toDouble();        //
     double bPar = sett->value("ubMod/bPar", 300).toDouble();
     double disp1;
+    double dT;
 
     double s1 = sin(dMin);
     double s2 = sin(dMax);
@@ -225,6 +247,7 @@ int main(int argc, char *argv[])
     QString tStr;
 
     double ocRa, ocDec;
+    double ocRa0, ocDec0;
 
     double rat, dect, ratC, dectC;
     double *raAve, *deAve;
@@ -288,7 +311,12 @@ int main(int argc, char *argv[])
                 ti = tStr.section(colSep, ct, ct).toDouble();
                 rat = tStr.section(colSep, cx, cx).toDouble();
                 dect = tStr.section(colSep, cy, cy).toDouble();
+                ratC = tStr.section(colSep, cxc, cxc).toDouble();
+                dectC = tStr.section(colSep, cyc, cyc).toDouble();
                 obsCode = tStr.section(colSep, -1, -1).simplified();
+
+                ocRa0 = (rat-ratC)*cos(dect);
+                ocDec0 = dect - dectC;
 
                 if(isDegree)
                 {
@@ -314,8 +342,20 @@ int main(int argc, char *argv[])
 
                 get2Ddisp(z0, z1);
 
-                ocRa = aMatr[0]*Eps[0]+aMatr[1]*Eps[1]+aMatr[2]*Eps[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + mas2rad(ooRec.rmsOneRa)*z0;
-                ocDec = aMatr[3]*Eps[0]+aMatr[4]*Eps[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + mas2rad(ooRec.rmsOneDec)*z1;
+                dT = ti-time0;
+                epsT[0] = Eps[0] + dT*dEps[0];
+                epsT[1] = Eps[1] + dT*dEps[1];
+                epsT[2] = Eps[2] + dT*dEps[2];
+
+                ocRa = aMatr[0]*epsT[0]+aMatr[1]*epsT[1]+aMatr[2]*epsT[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + mas2rad(ooRec.rmsOneRa)*z0;
+                ocDec = aMatr[3]*epsT[0]+aMatr[4]*epsT[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + mas2rad(ooRec.rmsOneDec)*z1;
+
+                if(isImpr)
+                {
+                    ocRa -= ocRa0;
+                    ocDec -= ocDec0;
+                }
+
 
                 //ratC = ocRa/cos(dect)+rat;
                 //dectC = ocDec+dect;

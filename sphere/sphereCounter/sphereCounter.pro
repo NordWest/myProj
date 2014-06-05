@@ -8,7 +8,7 @@ QT       += core
 
 QT       -= gui
 
-TARGET = ./../../../lab/sphereMod/sphereCounter
+TARGET = ./../../lab/sphereMod/sphereCounter
 CONFIG   += console warn_off
 CONFIG   -= app_bundle
 
