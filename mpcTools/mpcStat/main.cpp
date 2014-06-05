@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
     int isMagn = settings->value("general/isMagn", 1).toInt();
     int sepObs = settings->value("general/sepObs", 0).toInt();
     int sepObj = settings->value("general/sepObj", 0).toInt();
+    int isObjHist = settings->value("general/isObjHist", 0).toInt();
 
 //model
     int isSphMod =  settings->value("model/isSphMod", 0).toInt();
@@ -106,6 +107,12 @@ int main(int argc, char *argv[])
 
 //obj
      int isSortObj = settings->value("obj/isSortObj", 0).toInt();
+
+//objHistogram
+     int objNum0 = settings->value("objHistogram/objNum0", 0).toInt();
+     int objNum1 = settings->value("objHistogram/objNum1", 0).toInt();
+     int histSize = settings->value("objHistogram/histSize", 0).toInt();
+
 
 //magCounter
      int magNum = settings->value("magCounter/magNum", 1).toInt();
@@ -255,6 +262,13 @@ int oires;
         //int *iNum = new int[ipixMax];
         //for(i=0; i<ipixMax; i++) iNum[i] = 0;
         int oNum=0;
+        QVector <int> objHist;
+        int hPos, hStep;
+        if(isObjHist)
+        {
+            objHist.fill(0, histSize);
+            hStep = (objNum1-objNum0)/histSize;
+        }
 
         QStringList objNumList;
         QVector <int> objNums;
@@ -275,6 +289,12 @@ srand(time(NULL));
             mpR.getCatFlag(catFlag);
             mpNumber = mpR.mpNumber();
             magn = mpR.magn();
+
+            if(isObjHist)
+            {
+                hPos = (mpNumber-objNum0)/hStep;
+                if(hPos>0&&hPos<histSize) objHist[hPos]++;
+            }
 
             if(isObsMod)
             {
@@ -646,6 +666,22 @@ QTextStream resStm;
                     mDiap = (i+0.5)*((mag1-mag0)/magNum)+mag0;
 
                     resStm << QString("%1|%2\n").arg(mDiap, 5, 'f', 2).arg(magnCount[i]);
+                }
+
+                resFile.close();
+            }
+        }
+
+        if(isObjHist)
+        {
+            resFile.setFileName(QString("%1/objHistogram.txt").arg(wDirName));
+
+            if(resFile.open(QFile::WriteOnly | QFile::Truncate))
+            {
+                resStm.setDevice(&resFile);
+                for(i=0; i<histSize; i++)
+                {
+                    resStm << QString("%1|%2\n").arg(i+objNum0, 10).arg(objHist[i]);
                 }
 
                 resFile.close();
