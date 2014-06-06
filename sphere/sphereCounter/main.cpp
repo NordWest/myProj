@@ -91,14 +91,15 @@ int main(int argc, char *argv[])
     double dMax = grad2rad(sett->value("general/dMax", 90).toDouble());
     int coefNum = sett->value("general/coefNum", 9).toInt();
 
-    QString colSep = sett->value("general/colSep", "|").toString();
-    int ct = sett->value("general/ct", 0).toInt();
-    int cx = sett->value("general/cx", 0).toInt();
-    int cy = sett->value("general/cy", 1).toInt();
-    int cdx = sett->value("general/cdx", 2).toInt();
-    int cdy = sett->value("general/cdy", 3).toInt();
-
-    int isDegree = sett->value("general/isDegree", 0).toInt();
+//input
+    QString colSep = sett->value("input/colSep", "|").toString();
+    int ct = sett->value("input/ct", 0).toInt();
+    int cx = sett->value("input/cx", 0).toInt();
+    int cy = sett->value("input/cy", 1).toInt();
+    int cxc = sett->value("input/cxc", 2).toInt();
+    int cyc = sett->value("input/cyc", 3).toInt();
+    int cn = sett->value("input/cn", 4).toInt();
+    int isDegree = sett->value("input/isDegree", 0).toInt();
 
     double time0 = sett->value("general/time0", 2450000.5).toDouble();
 
@@ -163,8 +164,8 @@ int main(int argc, char *argv[])
 
         data[1] = tStr.section(colSep, cx, cx).toDouble();
         data[2] = tStr.section(colSep, cy, cy).toDouble();
-        data[3] = tStr.section(colSep, cdx, cdx).toDouble();
-        data[4] = tStr.section(colSep, cdy, cdy).toDouble();
+        data[3] = tStr.section(colSep, cxc, cxc).toDouble();
+        data[4] = tStr.section(colSep, cyc, cyc).toDouble();
 
         if(isDegree)
         {
