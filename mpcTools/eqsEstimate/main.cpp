@@ -3,15 +3,95 @@
 #include "./../../libs/redStat.h"
 #include "./../../libs/mpccat.h"
 
+struct objObsStatRec
+{
+    int objNum, onumRa, onumDe;
+    double meanRa, rmsMeanRa, rmsOneRa;
+    double meanDe, rmsMeanDe, rmsOneDe;
+    objObsStatRec()
+    {
+        objNum = 0;
+        onumRa = onumDe = 0;
+        meanRa = rmsMeanRa = rmsOneRa = 0.0;
+        meanDe = rmsMeanDe = rmsOneDe = 0.0;
+    };
+};
+
+struct obsStatRec
+{
+    QString obsCode;
+    objObsStatRec objStat;
+
+    void addStat(objObsStatRec &nStat)
+    {
+        objStat.objNum++;
+        objStat.onumRa += nStat.onumRa;
+        objStat.meanRa += nStat.meanRa;
+        objStat.rmsMeanRa += nStat.rmsMeanRa;
+        objStat.rmsOneRa += nStat.rmsOneRa;
+        objStat.onumDe += nStat.onumDe;
+        objStat.meanDe += nStat.meanDe;
+        objStat.rmsMeanDe += nStat.rmsMeanDe;
+        objStat.rmsOneDe += nStat.rmsOneDe;
+    }
+};
+
+struct obsStatList
+{
+    QList <obsStatRec*> osList;
+    int addStat(QString oCode, objObsStatRec &oStat)
+    {
+        int i, sz;
+        int nObs = -1;
+        sz = osList.size();
+        obsStatRec* osRec;
+        for(i=0;i<sz;i++)
+        {
+            if(QString().compare(oCode,osList.at(i)->obsCode)==0)
+            {
+                nObs = i;
+                osRec = osList.at(i);
+                break;
+            }
+        }
+        if(nObs==-1)
+        {
+            osRec = new obsStatRec;
+            osRec->obsCode = oCode;
+            osList << osRec;
+        }
+        osRec->addStat(oStat);
+    };
+    void doStat(int oMin)
+    {
+        int i, sz;
+        sz = osList.size();
+        for(i=sz-1;i>=0;i--)
+        {
+            if(osList.at(i)->objStat.objNum<oMin)
+            {
+                osList.removeAt(i);
+                continue;
+            }
+            osList.at(i)->objStat.meanRa /= osList.at(i)->objStat.objNum;
+            osList.at(i)->objStat.rmsMeanRa /= osList.at(i)->objStat.objNum;
+            osList.at(i)->objStat.rmsOneRa /= osList.at(i)->objStat.objNum;
+            osList.at(i)->objStat.meanDe /= osList.at(i)->objStat.objNum;
+            osList.at(i)->objStat.rmsMeanDe /= osList.at(i)->objStat.objNum;
+            osList.at(i)->objStat.rmsOneDe /= osList.at(i)->objStat.objNum;
+        }
+    };
+};
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     setlocale(LC_NUMERIC, "C");
 
-    QString eqFileName(argv[1]);
-    eqFile eq_ini;
-    eq_ini.init(eqFileName.toAscii().data());
 
+/*    eqFile eq_ini;
+    eq_ini.init(eqFileName.toAscii().data());
+*/
     QString resFolder = "./eqStat";
     QDir resDir(resFolder);
 
@@ -27,6 +107,7 @@ int main(int argc, char *argv[])
     QString mpcCatFile = sett->value("general/mpcCatFile", "mocorb.txt").toString();
     int obsMin = sett->value("eqsEstimate/obsMin", 2).toInt();
     double ocMax = sett->value("eqsEstimate/ocMax", 100000).toDouble();
+    int objMin = sett->value("eqsEstimate/objMin", 5).toInt();
 
 /////////////////////////
 
@@ -36,20 +117,33 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    sz =eq_ini.size();
-    qDebug() << QString("eq num: %1\n").arg(sz);
+    /*sz =eq_ini.size();
+    //qDebug() << QString("eq num: %1\n").arg(sz);
     for(i=0;i<sz;i++)
     {
         obs_list.addEQ(eq_ini.at(i));
     }
+*/
 
-    sz = obs_list.eqoList.size();
-    qDebug() << QString("Observatories num: %1\n").arg(sz);
+//    sz = obs_list.eqoList.size();
+//    qDebug() << QString("Observatories num: %1\n").arg(sz);
 
     eqObsRec* obs_rec;
     eqObjRec* obj_rec;
-    ocRec *oc_rec;
+    //obsStat* oStat;
+    ocRec *oc_rec, *oc_recT;
+    QList <ocRec*> ocList;
     QList <colRec*> colList;
+    //QList <obsStat*> statList;
+
+    objObsStatRec objStat;
+    obsStatList obsStat;
+
+    QString eqFileName(argv[1]);
+    QFile iniFile(eqFileName);
+    iniFile.open(QFile::ReadOnly);
+    QTextStream iniStm(&iniFile);
+
     QFile wFile(QString("%1.we").arg(eqFileName.section(".", 0, -2)));
     wFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream wStm(&wFile);
@@ -57,6 +151,10 @@ int main(int argc, char *argv[])
     QFile resFile(QString("%1.res").arg(eqFileName.section(".", 0, -2)));
     resFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream resStm(&resFile);
+
+    QFile ocFile(QString("%1_oc.txt").arg(eqFileName.section(".", 0, -2)));
+    ocFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream ocStm(&ocFile);
 
     QFile mpcFile(QString("%1.mpc").arg(eqFileName.section(".", 0, -2)));
     mpcFile.open(QFile::WriteOnly | QFile::Truncate);
@@ -68,64 +166,119 @@ int main(int argc, char *argv[])
     obsFile.open(QFile::WriteOnly | QFile::Truncate);
     QTextStream obsStm(&obsFile);
 
-    for(i=0;i<sz;i++)
+    QString obsCodeT, objNameT;
+    int nObs, nObj;
+    int objNumIni, obsNumIni, ocNumIni;
+    int objNumRes, obsNumRes, ocNumRes;
+    ocNumIni = objNumIni = obsNumIni = 0;
+    ocNumRes = objNumRes = obsNumRes = 0;
+
+    obsCodeT="";
+    objNameT="";
+    while(!iniStm.atEnd())
     {
-        obs_rec = obs_list.eqoList.at(i);
-        //qDebug() << QString("obsCode: %1\n").arg(obs_rec->obsCode);
-        szj = obs_rec->objList.eqrList.size();
-        //qDebug() << QString("objNum: %1\n").arg(szj);
-        objnum=0; onumRa=0; onumDe=0;
-        rmsRa = rmsDe = 0.0;
-        for(j=0;j<szj;j++)
+        tStr = iniStm.readLine();
+        if(tStr.contains("%")||tStr.contains("#")) continue;
+        oc_rec = new ocRec;
+        if(oc_rec->s2rec(tStr)) continue;
+
+        ocNumIni++;
+        //qDebug() << QString("%1@%2\n").arg(oc_rec->name).arg(oc_rec->obsCode);
+
+        nObs = (QString().compare(oc_rec->obsCode, obsCodeT)!=0);
+        nObj = (QString().compare(oc_rec->name, objNameT)!=0);
+        if(nObs||nObj)
         {
-            obj_rec = obs_rec->objList.eqrList.at(j);
+            is_mcat = !mCat.GetRecName(objNameT.toAscii().data());
 
-            is_mcat = !mCat.GetRecName(obj_rec->objName.toAscii().data());
+            do3sigma(ocList, 0.0, 3.0);
 
-            do3sigma(obj_rec->eq_list, 0.0, 3.0);
+            objNumIni++;
 
-            if(obj_rec->eq_list.size()<obsMin) continue;
-            if(countCols(obj_rec->eq_list, colList, "4,5"))continue;
-            if((colList.at(0)->rmsOne>ocMax)||(colList.at(1)->rmsOne>ocMax)) continue;
-            wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(obj_rec->objName, 16).arg(obs_rec->obsCode, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);
-            szk = obj_rec->eq_list.size();
-            for(k=0;k<szk;k++)
+
+            if((ocList.size()>=obsMin)&&(!countCols(ocList, colList, "4,5"))&&(colList.at(0)->rmsOne<=ocMax)&&(colList.at(1)->rmsOne<ocMax))
             {
-                oc_rec = obj_rec->eq_list.at(k);
-                oc_rec->rec2s(&tStr);
-                resStm << tStr << "\n";
 
-                if(is_mcat)
+                //if(countCols(ocList, colList, "4,5"))continue;
+                //if((colList.at(0)->rmsOne>ocMax)||(colList.at(1)->rmsOne>ocMax)) continue;
+                wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(objNameT, 16).arg(obsCodeT, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);
+                szk = ocList.size();
+                for(k=0;k<szk;k++)
                 {
-                    mCat.record->getNumStr(tstr);
-                    oc_rec->rec2MPC(&tStr, tstr);
-                    mpcStm << tStr << "\n";
+                    oc_recT = ocList.at(k);
+                    oc_recT->rec2s(&tStr);
+                    resStm << tStr << "\n";
+                    ocNumRes++;
+                    if(is_mcat)
+                    {
+                        mCat.record->getNumStr(tstr);
+                        oc_recT->rec2MPC(&tStr, tstr);
+                        mpcStm << tStr << "\n";
+                    }
+                    ocStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(oc_recT->name, 16).arg(mjd2jd(oc_recT->MJday), 15, 'f', 7).arg(oc_recT->ra, 15, 'f', 11).arg(oc_recT->de, 15, 'f', 10).arg(oc_recT->ra-mas2grad(oc_recT->ocRaCosDe)/cos(grad2rad(oc_recT->de)), 15, 'f', 11).arg(oc_recT->de-mas2grad(oc_recT->ocDe), 15, 'f', 10).arg(oc_recT->obsCode);
+                    //ocStm << QString("%1|%2|%3")
                 }
+
+
+                colList.at(0)->rec2s(&tStr);
+                resStm << tStr << "\n";
+                colList.at(1)->rec2s(&tStr);
+                resStm << tStr << "\n";
+                //resStm << "\n";
+
+                //objStat.objNum++;
+                objStat.onumRa = colList.at(0)->num;
+                objStat.onumDe = colList.at(1)->num;
+                objStat.meanRa = colList.at(0)->mean;
+                objStat.rmsMeanRa = colList.at(0)->rmsMean;
+                objStat.rmsOneRa = colList.at(0)->rmsOne;
+                objStat.meanDe = colList.at(1)->mean;
+                objStat.rmsMeanDe = colList.at(1)->rmsMean;
+                objStat.rmsOneDe = colList.at(1)->rmsOne;
+                obsStat.addStat(oc_recT->obsCode, objStat);
+
             }
+/*
 
-            colList.at(0)->rec2s(&tStr);
-            resStm << tStr << "\n";
-            colList.at(1)->rec2s(&tStr);
-            resStm << tStr << "\n";
-            resStm << "\n";
+            if(nObs)
+            {
+                if(oStat!=NULL&&) statList << oStat;
+                oStat = new obsStat;
+            }
+*/
+            ocList.clear();
+//ocList.clear();
+            objNameT = oc_rec->name;
+            obsCodeT = oc_rec->obsCode;
+            //sz = ocList.size();
+            //for(i=sz-1;i>=0;i--) ocList.removeAt(i);
 
-            objnum++;
-            onumRa += colList.at(0)->num;
-            onumDe += colList.at(1)->num;
-            rmsRa += colList.at(0)->rmsOne;
-            rmsDe += colList.at(1)->rmsOne;
         }
 
-        if(objnum<10) continue;
+        ocList << oc_rec;
+/*        if(objnum<10) continue;
         rmsRa /= objnum;
         rmsDe /= objnum;
+*/
 
-        obsStm << QString("%1@%2#%3|%4#%5|%6\n").arg(objnum, 5).arg(obs_rec->obsCode, 3).arg(onumRa, 5).arg(rmsRa, 10, 'f', 2).arg(onumDe, 5).arg(rmsDe, 10, 'f', 2);
     }
+    obsNumIni = obsStat.osList.size();
+    obsStat.doStat(0);
+    sz = obsStat.osList.size();
+    obsNumRes = sz;
+    for(i=0;i<sz;i++)
+    {
+        obsStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(obsStat.osList.at(i)->objStat.objNum, 5).arg(obsStat.osList.at(i)->obsCode, 3).arg(obsStat.osList.at(i)->objStat.onumRa, 5).arg(obsStat.osList.at(i)->objStat.meanRa, 10, 'f', 2).arg(obsStat.osList.at(i)->objStat.rmsMeanRa, 10, 'f', 2).arg(obsStat.osList.at(i)->objStat.rmsOneRa, 10, 'f', 2).arg(obsStat.osList.at(i)->objStat.onumDe, 5).arg(obsStat.osList.at(i)->objStat.meanDe, 10, 'f', 2).arg(obsStat.osList.at(i)->objStat.rmsMeanDe, 10, 'f', 2).arg(obsStat.osList.at(i)->objStat.rmsOneDe, 10, 'f', 2);
+        objNumRes+=obsStat.osList.at(i)->objStat.objNum;
+    }
+
+    qDebug() << QString("ocNumIni= %1\tobjNumIni= %2\tobsNumIni = %3\n\n").arg(ocNumIni).arg(objNumIni).arg(obsNumIni);
+    qDebug() << QString("ocNumRes= %1\tobjNumRes= %2\tobsNumRes = %3\n\n").arg(ocNumRes).arg(objNumRes).arg(obsNumRes);
 
     wFile.close();
     resFile.close();
     mpcFile.close();
     obsFile.close();
+    ocFile.close();
     return 0;//a.exec();
 }

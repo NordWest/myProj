@@ -472,7 +472,7 @@ int ocRec::s2recBase1(QString str)
     ocDe = sL[6].toDouble();
     ocMag = sL[7].toDouble();
 
-    obsCode = sL[8];
+    obsCode = sL[8].simplified();
 
     return 0;
 }
@@ -3247,11 +3247,11 @@ void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocR
 
     num1 = ocList.size();
 
-    QFile s3File("s3file.txt");
-    s3File.open(QIODevice::Append);
-    QTextStream s3Stm(&s3File);
+    //QFile s3File("s3file.txt");
+    //s3File.open(QIODevice::Append);
+    //QTextStream s3Stm(&s3File);
     if(REDSTAT_LOG_LEVEL>0) qDebug() << "\ndo3Sigma\n";
-    s3Stm << "\ndo3Sigma\n";
+    //s3Stm << "\ndo3Sigma\n";
     if(num1<3) return;
 
     countCols(ocList, colList, "4,5");
@@ -3273,20 +3273,20 @@ void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocR
             for(i=0; i<sz; i++)
             {
                 if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
-                s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
+                //s3Stm << QString("%1:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe, 7, 'f', 1).arg(ocList[i]->ocDe, 7, 'f', 1);
             }
 
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
-            s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
-            s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
+            //s3Stm << QString("\nsigmaKsi= %1\t\tsigmaEta= %2\n").arg(sigmaKsi, 7, 'f', 1).arg(sigmaEta, 7, 'f', 1);
+            //s3Stm << QString("\nmeanKsi= %1\t\tmeanEta= %2\n").arg(meanRa, 7, 'f', 1).arg(meanDec, 7, 'f', 1);
 
             maxOCKsi = sigmaMul*sigmaKsi;
             maxOCEta = sigmaMul*sigmaEta;
 
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
-            s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
+            //s3Stm << QString("\nmaxOCKsi= %1\t\tmaxOCEta= %2\n").arg(maxOCKsi, 7, 'f', 1).arg(maxOCEta, 7, 'f', 1);
 
 
             sz = ocList.size();
@@ -3295,7 +3295,7 @@ void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocR
                 if((fabs(meanRa-ocList[i]->ocRaCosDe)>maxOCKsi)||(fabs(meanDec-ocList[i]->ocDe)>maxOCEta))
                 {
                     if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
-                    s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
+                    //s3Stm << QString("%1remove:\t%2\t%3\n").arg(i).arg(ocList[i]->ocRaCosDe).arg(ocList[i]->ocDe);
                     if(rejList!=NULL) rejList->append(ocList.at(i));
                     ocList.removeAt(i);
                 }
@@ -3303,7 +3303,7 @@ void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocR
             num1 = ocList.size();
 
             if(REDSTAT_LOG_LEVEL>0) qDebug() << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
-            s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
+            //s3Stm << QString("\nnum0= %1\t\tnum1= %2\n").arg(num0).arg(num1);
 
             countCols(ocList, colList, "4,5");
             //if((getColRecNum(4)!=-1)&&(getColRecNum(5)!=-1)) reCountCols();
@@ -3311,7 +3311,7 @@ void do3sigma(QList <ocRec*> &ocList, double proofP, double sigmaMul, QList <ocR
 
     }while(abs(num0-num1)>(proofP*num1));
 
-    s3File.close();
+    //s3File.close();
 }
 
 void eqFile::do3sigma(double proofP, double sigmaMul, QList <ocRec*> *rejList)
