@@ -559,7 +559,7 @@ int main(int argc, char *argv[])
     }
     mCatL.GetRec(0);
     orbJD = mCatL.record->getEpoch();
-
+    qDebug() << QString("orbJD: %1\n").arg(orbJD, 15, 'f', 6);
     //orbJD = time0;
     QString objNameT;
 

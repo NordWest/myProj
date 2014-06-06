@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         nObj = (QString().compare(oc_rec->name, objNameT)!=0);
         if(nObs||nObj)
         {
-            is_mcat = !mCat.GetRecName(objNameT.toAscii().data());
+
 
             do3sigma(ocList, 0.0, 3.0);
 
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
 
             if((ocList.size()>=obsMin)&&(!countCols(ocList, colList, "4,5"))&&(colList.at(0)->rmsOne<=ocMax)&&(colList.at(1)->rmsOne<ocMax))
             {
-
+                is_mcat = !mCat.GetRecName(objNameT.toAscii().data());
                 //if(countCols(ocList, colList, "4,5"))continue;
                 //if((colList.at(0)->rmsOne>ocMax)||(colList.at(1)->rmsOne>ocMax)) continue;
                 wStm << QString("%1@%2#%3|%4|%5|%6#%7|%8|%9|%10\n").arg(objNameT, 16).arg(obsCodeT, 3).arg(colList.at(0)->num, 5).arg(colList.at(0)->mean, 10, 'f', 2).arg(colList.at(0)->rmsMean, 10, 'f', 2).arg(colList.at(0)->rmsOne, 10, 'f', 2).arg(colList.at(1)->num, 5).arg(colList.at(1)->mean, 10, 'f', 2).arg(colList.at(1)->rmsMean, 10, 'f', 2).arg(colList.at(1)->rmsOne, 10, 'f', 2);

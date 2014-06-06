@@ -28,8 +28,6 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     for(i=0; i<pointNum; i++)
     {
 
-//        obj = new double[2];
-//        objR = new double[2];
         rRa[i] = r[i] = dRa[i];
         rDe[i] = r[pointNum+i] = dDe[i];
 
@@ -43,24 +41,15 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
 
         Wra[i] = Wde[i] = W[i] = 1.0;
         W[pointNum+i] = 1.0;
-
-        //qDebug() << QString("%1\t%2\t%3\t = %7\n").arg((A[i*3]),12, 'e', 8).arg((A[i*3+1]),12, 'e', 8).arg((A[i*3+2]),12, 'e', 8).arg(r[i],12, 'e', 8);
-        //qDebug() << QString("%1\t%2\t%3\t = %7\n").arg((A[pointNum+i*3]),12, 'e', 8).arg((A[pointNum+i*3+1]),12, 'e', 8).arg((A[pointNum+i*3+2]),12, 'f', 8).arg(r[pointNum+i],12, 'e', 8);
     }
 
 
 ////////////////////////////////////////////////////////////////////
-//    qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0]),12, 'f', 8).arg(rad2mas(Eps[1]),12, 'f', 8).arg(rad2mas(Eps[2]),12, 'f', 8);
 
     lsm(3, pointNum*2, Z, A, r, uwe, &Dx[0][0], W);
 
-//    slsm(3, pointNum, Z, A, r, W);
-//    iLSM(3, pointNum, 0.6, &exclind[0], Z, A, r, uwe, &Dx[0][0], -1, rn, W);
     qDebug() << QString("Z: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Z[0]),12, 'f', 8).arg(rad2mas(sqrt(Dx[0][0])),12, 'f', 8).arg(rad2mas(Z[1]),12, 'f', 8).arg(rad2mas(sqrt(Dx[1][1])),12, 'f', 8).arg(rad2mas(Z[2]),12, 'f', 8).arg(rad2mas(sqrt(Dx[2][2])),12, 'f', 8);
     qDebug() << QString("uwe: %1\n").arg(rad2mas(sqrt(uwe)),12, 'f', 8);
-//    slsm(2, pointNum, Zd, Ad, rd, Wd);
-  //  qDebug() << "Zd: " << Zd[0] << "\t" << Zd[1] << "\n";
-//    qDebug() << QString("Zd: %1\t%2\n").arg(Zd[0],12, 'f', 8).arg(Zd[1],12, 'f', 8);
 
     lsm(3, pointNum, Zra, Ara, rRa, uweRa, &Dra[0][0], Wra);
     qDebug() << QString("Zra: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[0]),12, 'f', 8).arg(rad2mas(sqrt(Dra[0][0])),12, 'f', 8).arg(rad2mas(Zra[1]),12, 'f', 8).arg(rad2mas(sqrt(Dra[1][1])),12, 'f', 8).arg(rad2mas(Zra[2]),12, 'f', 8).arg(rad2mas(sqrt(Dra[2][2])),12, 'f', 8);
@@ -187,11 +176,15 @@ int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe
     return 0;
 }
 
-int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum, int coefNum, double *sCoef, double *tCoef, double *sCoefSg, double *tCoefSg)
+int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum, int coefNum, double *sCoef, double *tCoef, double *sCoefSg, double *tCoefSg, double &xi)
 {
     int i, j, k;
 
-
+    double *A = new double[coefNum*pointNum*4];
+    double *LD = new double[pointNum*2];
+    double *W = new double[pointNum*2];
+    double *Z = new double[coefNum*4];
+/*
     double *Ara = new double[coefNum*pointNum*2];
     double *rRa = new double[pointNum];
     double *Wra = new double[pointNum];
@@ -201,29 +194,33 @@ int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum
     double *rDe = new double[pointNum];
     double *Wde = new double[pointNum];
     double *Zde = new double[coefNum*2];
-
-    double Dx[3][3];
-    double Dra[coefNum*2][coefNum*2];
-    double Dde[coefNum*2][coefNum*2];
-    double uwe, uweRa, uweDe;
+*/
+    double* D = new double[4*pointNum*pointNum];
+    //double Dra[coefNum*2][coefNum*2];
+    //double Dde[coefNum*2][coefNum*2];
+    double uwe;
 
     for(i=0; i<pointNum; i++)
     {
-
-//        obj = new double[2];
-//        objR = new double[2];
-        rRa[i] = dRa[i];
-        rDe[i] = dDe[i];
+        LD[i] = dRa[i];
+        LD[i+pointNum] = dDe[i];
+        //rRa[i] = dRa[i];
+        //rDe[i] = dDe[i];
 
         for(j=0; j<coefNum; j++)
         {
             k= (i*2*coefNum);
-            Ara[k+j*2] =  SLJ(j+1, ra[i], dec[i]);//sCoef[j]*SLJ(j+1, ra[i], dec[i]) + tCoef[j]*TLJ(j+1, ra[i], dec[i]);
-            Ara[k+j*2+1] = TLJ(j+1, ra[i], dec[i]);
-            Ade[k+j*2] =   SBJ(j+1, ra[i], dec[i]);
-            Ade[k+j*2+1] = TBJ(j+1, ra[i], dec[i]);
+            A[k+j] =  TLJ(j+1, ra[i], dec[i]);//SLJ(j+1, ra[i], dec[i]);//sCoef[j]*SLJ(j+1, ra[i], dec[i]) + tCoef[j]*TLJ(j+1, ra[i], dec[i]);
+            A[k+coefNum+j] = SLJ(j+1, ra[i], dec[i]);
+            A[coefNum*pointNum*2+k+j] =   TBJ(j+1, ra[i], dec[i]);
+            A[coefNum*pointNum*2+k+j+coefNum] = SBJ(j+1, ra[i], dec[i]);
+            /*if(j==0)
+            {
+                qDebug() << QString("Ara: %1\t%2\n").arg(Ara[k+j*2],12, 'f', 8).arg(Ara[k+j*2+1],12, 'f', 8);
+                qDebug() << QString("Ade: %1\t%2\n").arg(Ade[k+j*2],12, 'f', 8).arg(Ade[k+j*2+1],12, 'f', 8);
+            }*/
         }
-        Wra[i] = Wde[i]  = 1.0;
+        W[i] = W[i+pointNum]  = 1.0;
     }
 
 
@@ -231,24 +228,27 @@ int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum
 //    qDebug() << QString("Eps: %1\t%2\t%3\n").arg(rad2mas(Eps[0]),12, 'f', 8).arg(rad2mas(Eps[1]),12, 'f', 8).arg(rad2mas(Eps[2]),12, 'f', 8);
 
 
-    lsm(coefNum*2, pointNum, Zra, Ara, rRa, uweRa, &Dra[0][0], Wra);
+    //lsm(coefNum*2, pointNum, Zra, Ara, rRa, uweRa, &Dra[0][0], Wra);
     //qDebug() << QString("Zra: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[0]),12, 'f', 8).arg(rad2mas(sqrt(Dra[0][0])),12, 'f', 8).arg(rad2mas(Zra[1]),12, 'f', 8).arg(rad2mas(sqrt(Dra[1][1])),12, 'f', 8).arg(rad2mas(Zra[2]),12, 'f', 8).arg(rad2mas(sqrt(Dra[2][2])),12, 'f', 8);
     //qDebug() << QString("uweRa: %1\n").arg(rad2mas(sqrt(uweRa)),12, 'f', 8);
 
-    lsm(coefNum*2, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
+    //lsm(coefNum*2, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
     //qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
     //qDebug() << QString("uweDe: %1\n").arg(rad2mas(sqrt(uweDe)),12, 'f', 8);
+    lsm(coefNum*2, pointNum*2, Z, A, LD, uwe, D, W);
 
     for(i=0;i<coefNum;i++)
     {
-        sCoef[i] = Zra[i*2];
-        tCoef[i] = Zra[i*2+1];
-        sCoefSg[i] = sqrt(Dde[i*2][i*2]);
-        tCoefSg[i] = sqrt(Dde[i*2+1][i*2+1]);
-        qDebug() << QString("coefRA[%1]: %2\t%3\n").arg(indexesStr(i+1)).arg(rad2mas(Zra[i*2])).arg(rad2mas(Zra[i*2+1]));
-        qDebug() << QString("coefDE[%1]: %2\t%3\n").arg(indexesStr(i+1)).arg(rad2mas(Zde[i*2])).arg(rad2mas(Zde[i*2+1]));
-    }
+        tCoef[i] = Z[i];
+        tCoefSg[i] = sqrt(D[i*coefNum+i]);
 
+        sCoef[i] = Z[i+coefNum];
+        sCoefSg[i] = sqrt(D[(i+coefNum)*coefNum+(i+coefNum)]);
+
+        qDebug() << QString("coef[%1]: %2\t%3\n").arg(indexesStr(i)).arg(rad2mas(tCoef[i])).arg(rad2mas(sCoef[i]));
+        //qDebug() << QString("coefDE[%1]: %2\t%3\n").arg(indexesStr(i)).arg(rad2mas(Zde[i*2])).arg(rad2mas(Zde[i*2+1]));
+    }
+    xi=sqrt(uwe);
     return 0;
 }
 
@@ -328,4 +328,37 @@ int vsfCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     qDebug() << QString("de: %1\t%2\t%3\n").arg(rad2mas(meanDe)).arg(rad2mas(rmsOneDe), 10, 'e').arg(rad2mas(rmsMeanDe), 10, 'e');
 
     qDebug() << QString("sigma: %1\t%2\t:%3\n").arg(rad2mas(sigmaVal0)).arg(rad2mas(sigmaVal1)).arg(rad2mas(sigmaVal));
+}
+
+void ormlsm(double* L, double* B, double* MUL, double* MUB, int N, double* T, double* S, double* eT, double* eS, int ORD, double& xi)
+{
+    double* LD = new double[2*N];
+    double* W = new double[2*N];
+    double* C = new double[4*N*ORD];
+    for(int i=0;i<N;i++) {LD[i]=MUL[i];W[i]=1;LD[i+N]=MUB[i];W[i+N]=1;}
+    for(int i=0;i<N;i++)
+    {
+        for(int j=0;j<ORD;j++)
+        {
+            C[i*2*ORD+j]=TLJ(j+1,L[i],B[i]);C[i*2*ORD+j+ORD]=SLJ(j+1,L[i],B[i]);
+            C[(i+N)*2*ORD+j]=TBJ(j+1,L[i],B[i]);C[(i+N)*2*ORD+j+ORD]=SBJ(j+1,L[i],B[i]);
+        }
+        //om(L[i],B[i],OML,OMB);
+        //for(int j=0;j<11;j++){C[i*11+j]=OML[j];C[(i+N)*11+j]=OMB[j];}
+    }
+    double* Z = new double[2*ORD];
+    double* D = new double[4*ORD*ORD];
+    double uwe;
+    lsm(2*ORD,2*N,Z,C,LD,uwe,D,W);
+    for(int i=0;i<ORD;i++)
+    {
+        T[i]=Z[i];eT[i]=sqrt(D[i*ORD+i]);
+        S[i]=Z[i+ORD];eS[i]=sqrt(D[(i+ORD)*ORD+(i+ORD)]);
+    }
+    xi=sqrt(uwe);
+    delete[] LD;
+    delete[] W;
+    delete[] C;
+    delete[] Z;
+    delete[] D;
 }

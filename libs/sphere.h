@@ -13,6 +13,7 @@
 int lsmCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps);
 int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe, int pointNum, double *Eps, double *sgEps);
 int vsfCount(double *ra, double *de, double *dRa, double *dDe, int pointNum, double *sCoef, double *tCoef, int coefNum, double &sigmaVal);
-int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum, int coefNum, double *sCoef, double *tCoef, double *sCoefSg, double *tCoefSg);
+int vsfCount_lsm(double *ra, double *dec, double *dRa, double *dDe, int pointNum, int coefNum, double *sCoef, double *tCoef, double *sCoefSg, double *tCoefSg, double &xi);
+void ormlsm(double* L, double* B, double* MUL, double* MUB, int N, double* T, double* S, double* eT, double* eS, int ORD, double& xi);
 
 #endif // SPHERE_H

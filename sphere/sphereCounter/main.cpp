@@ -194,15 +194,22 @@ int main(int argc, char *argv[])
 
     qDebug() << QString("point num: %1\n").arg(dSize);
 
+    double raC, decC;
+
     for(i=0; i<dSize; i++)
     {
         dTime[i] = (dataVect[i][0]-time0)/(365.2425);
         ra[i] = dataVect[i][1];
         de[i] = dataVect[i][2];
-        //dRa[i] = dataVect[i][3];
-        //dDe[i] = dataVect[i][4];
-        dRa[i] = (ra[i]-dataVect[i][3])*cos(de[i]);
-        dDe[i] = de[i] - dataVect[i][4];
+        raC = dataVect[i][3];
+        decC = dataVect[i][4];
+        if(solMode==4||solMode==1||solMode==2)
+        {
+            de[i] = de[i] + M_PI/2.0;
+            decC = decC + M_PI/2.0;
+        }
+        dRa[i] = (ra[i]-raC)*cos(de[i]);
+        dDe[i] = de[i] - decC;
         //rStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(dTime[i],12, 'f', 8).arg(rad2grad(ra[i]),12, 'e', 8).arg(rad2grad(de[i]),12, 'e', 8).arg(rad2grad(dataVect[i][3]),12, 'e', 8).arg(rad2grad(dataVect[i][4]),12, 'e', 8).arg(rad2mas(dRa[i]),12, 'f', 8).arg(rad2mas(dDe[i]),12, 'f', 8);
         if(isZonal&&(solMode==1))
         {
@@ -214,6 +221,8 @@ int main(int argc, char *argv[])
 
 
     }
+
+    double xival;
 
     switch(solMode)
     {
@@ -251,26 +260,43 @@ int main(int argc, char *argv[])
         break;
 
     case 2:
-        res = vsfCount_lsm(ra, de, dRa, dDe, dSize, coefNum, &sCoef[0], &tCoef[0], sCoefSg, tCoefSg);
+        res = vsfCount_lsm(ra, de, dRa, dDe, dSize, coefNum, &sCoef[0], &tCoef[0], sCoefSg, tCoefSg, xival);
 
         for(i=0; i<coefNum; i++)
         {
-            indexes(i+1, N, K, P);
+            indexes(i, N, K, P);
             qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
         }
         qDebug() << QString("Eps coef: %1\t%2\t%3\n").arg(indexJ(1, 1, 1)-1).arg(indexJ(1, 1, 0)-1).arg(indexJ(1, 0, 1)-1);
 
-        Eps[0] = tCoef[indexJ(1, 1, 1)-1]/coef1;
-        Eps[1] = tCoef[indexJ(1, 1, 0)-1]/coef2;
-        Eps[2] = tCoef[indexJ(1, 0, 1)-1]/coef3;
+        Eps[0] = tCoef[indexJ(2, 1, 1)-1]/coef1;
+        Eps[1] = tCoef[indexJ(2, 1, 0)-1]/coef2;
+        Eps[2] = tCoef[indexJ(2, 0, 1)-1]/coef3;
 
-        sgEps[0] = tCoefSg[indexJ(1, 1, 1)-1]/coef1;
-        sgEps[1] = tCoefSg[indexJ(1, 1, 0)-1]/coef2;
-        sgEps[2] = tCoefSg[indexJ(1, 0, 1)-1]/coef3;
+        sgEps[0] = tCoefSg[indexJ(2, 1, 1)-1]/coef1;
+        sgEps[1] = tCoefSg[indexJ(2, 1, 0)-1]/coef2;
+        sgEps[2] = tCoefSg[indexJ(2, 0, 1)-1]/coef3;
         break;
     case 3:
         res = lsmCountVel(dTime, ra, de, dRa, dDe, dSize, &EpsVel[0], &sgEpsVel[0]);
 
+        break;
+    case 4:
+        ormlsm(ra, de, dRa, dDe, dSize, tCoef, sCoef, tCoefSg, sCoefSg, coefNum, xival);
+        for(i=0; i<coefNum; i++)
+        {
+            indexes(i, N, K, P);
+            qDebug() << QString("%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
+        }
+        qDebug() << QString("Eps coef: %1\t%2\t%3\n").arg(indexJ(1, 1, 1)-1).arg(indexJ(1, 1, 0)-1).arg(indexJ(1, 0, 1)-1);
+
+        Eps[0] = tCoef[indexJ(2, 1, 1)-1]/coef1;
+        Eps[1] = tCoef[indexJ(2, 1, 0)-1]/coef2;
+        Eps[2] = tCoef[indexJ(2, 0, 1)-1]/coef3;
+
+        sgEps[0] = tCoefSg[indexJ(2, 1, 1)-1]/coef1;
+        sgEps[1] = tCoefSg[indexJ(2, 1, 0)-1]/coef2;
+        sgEps[2] = tCoefSg[indexJ(2, 0, 1)-1]/coef3;
         break;
     }
 

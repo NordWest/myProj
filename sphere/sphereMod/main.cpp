@@ -109,7 +109,17 @@ public:
         {
             if((QString().compare(ooList.at(i)->objName, objN)==0)&&(QString().compare(ooList.at(i)->obsCode, obsC)==0))
             {
-                rRes = ooList.at(i);
+                rRes->meanRa = ooList.at(i)->meanRa;
+                rRes->rmsMeanRa = ooList.at(i)->rmsMeanRa;
+                rRes->rmsOneRa = ooList.at(i)->rmsOneRa;
+                rRes->numRa = ooList.at(i)->numRa;
+                rRes->meanDec = ooList.at(i)->meanDec;
+                rRes->rmsMeanDec = ooList.at(i)->rmsMeanDec;
+                rRes->rmsOneDec = ooList.at(i)->rmsOneDec;
+                rRes->numDec = ooList.at(i)->numDec;
+                rRes->objName = ooList.at(i)->objName;
+                rRes->obsCode = ooList.at(i)->obsCode;
+
                 return 0;
             }
         }
@@ -163,9 +173,9 @@ int main(int argc, char *argv[])
     int isWe = sett->value("general/isWe", 0).toInt();
     int isImpr = sett->value("general/isImpr", 0).toInt();
 
-    double time0 = mas_to_rad(sett->value("rotation/time0", 0).toDouble());
+    double time0 = sett->value("rotation/time0", 0).toDouble();
 
-    double epsT[3];
+    double epsT0, epsT1, epsT2;
     double *Eps = new double[3];
     Eps[0] = mas_to_rad(sett->value("rotation/w1", 0).toDouble());
     Eps[1] = mas_to_rad(sett->value("rotation/w2", 0).toDouble());
@@ -286,7 +296,7 @@ int main(int argc, char *argv[])
             iStm.setDevice(&iFile);
 
             ObjObsStat ooSt;
-            ObsObjRec ooRec;
+            ObsObjRec ooRec;// = new ObsObjRec;
             if(isWe)
             {
                 if(ooSt.init(QString("%1.we").arg(QFileInfo(argv[1]).absoluteFilePath().section("_", 0, 0))))
@@ -302,7 +312,7 @@ int main(int argc, char *argv[])
             resFile.open(QFile::WriteOnly | QFile::Truncate);
             QTextStream resStm(&resFile);
 
-            double *aMatr = new double[5];
+            double aMatr0, aMatr1, aMatr2, aMatr3, aMatr4;
 
             while(!iStm.atEnd())
             {
@@ -315,15 +325,18 @@ int main(int argc, char *argv[])
                 dectC = tStr.section(colSep, cyc, cyc).toDouble();
                 obsCode = tStr.section(colSep, -1, -1).simplified();
 
-                ocRa0 = (rat-ratC)*cos(dect);
-                ocDec0 = dect - dectC;
+
 
                 if(isDegree)
                 {
                     rat = grad2rad(rat);
                     dect = grad2rad(dect);
+                    ratC = grad2rad(ratC);
+                    dectC = grad2rad(dectC);
                 }
 
+                ocRa0 = (rat-ratC)*cos(dect);
+                ocDec0 = dect - dectC;
                 if(ooSt.getStat(objName, obsCode, &ooRec))
                 {
                     //qDebug() << QString("Skip %1@%2\n").arg(objName).arg(obsCode);
@@ -333,22 +346,22 @@ int main(int argc, char *argv[])
                     ooRec.rmsOneDec = disp;
                 }
 
-                aMatr[0] = -(sin(dect)*cos(rat));
-                aMatr[1] = -(sin(dect)*sin(rat));
-                aMatr[2] = cos(dect);
+                aMatr0 = -(sin(dect)*cos(rat));
+                aMatr1 = -(sin(dect)*sin(rat));
+                aMatr2 = cos(dect);
 
-                aMatr[3] = sin(rat);
-                aMatr[4] = -cos(rat);
+                aMatr3 = sin(rat);
+                aMatr4 = -cos(rat);
 
                 get2Ddisp(z0, z1);
 
-                dT = ti-time0;
-                epsT[0] = Eps[0] + dT*dEps[0];
-                epsT[1] = Eps[1] + dT*dEps[1];
-                epsT[2] = Eps[2] + dT*dEps[2];
+                dT = (ti-time0)/365.2425;
+                epsT0 = Eps[0] + dT*dEps[0];
+                epsT1 = Eps[1] + dT*dEps[1];
+                epsT2 = Eps[2] + dT*dEps[2];
 
-                ocRa = aMatr[0]*epsT[0]+aMatr[1]*epsT[1]+aMatr[2]*epsT[2] - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + mas2rad(ooRec.rmsOneRa)*z0;
-                ocDec = aMatr[3]*epsT[0]+aMatr[4]*epsT[1] - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + mas2rad(ooRec.rmsOneDec)*z1;
+                ocRa = aMatr0*epsT0+aMatr1*epsT1+aMatr2*epsT2 + mas2rad(ooRec.rmsOneRa)*z0;// - mMatr[2]*sin(dect)*sin(rat) + mMatr[5]*sin(dect)*cos(rat) + mMatr[1]*cos(dect)*cos(2.0*rat) - 0.5*mMatr[0]*cos(dect)*sin(2.0*rat) + 0.5*mMatr[4]*cos(dect)*sin(3.0*rat) + mas2rad(ooRec.rmsOneRa)*z0;
+                ocDec = aMatr3*epsT0+aMatr4*epsT1 + mas2rad(ooRec.rmsOneDec)*z1;// - 0.5*mMatr[1]*sin(2.0*dect)*sin(2.0*rat) + mMatr[2]*cos(2.0*dect)*cos(rat) + mMatr[5]*cos(2.0*dect)*sin(rat) - 0.5*mMatr[0]*sin(2.0*dect)*pow(cos(rat), 2.0) - 0.5*mMatr[4]*sin(2.0*dect)*pow(sin(rat), 2.0) + 0.5*mMatr[8]*sin(2.0*dect) + mas2rad(ooRec.rmsOneDec)*z1;
 
                 if(isImpr)
                 {
@@ -364,7 +377,7 @@ int main(int argc, char *argv[])
                 //numVect << tStr.section(colSep, cn, cn).toDouble();
                 ratC = rat - ocRa/cos(dect);
                 dectC = dect - ocDec;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(ti, 15, 'f', 8).arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
                 obsNum++;
             }
             resFile.close();
