@@ -15,14 +15,14 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     double *Wra = new double[pointNum];
     double *Zra = new double[3];
 
-    double *Ade = new double[2*pointNum];
+    double *Ade = new double[3*pointNum];
     double *rDe = new double[pointNum];
     double *Wde = new double[pointNum];
-    double *Zde = new double[2];
+    double *Zde = new double[3];
 
     double Dx[3][3];
     double Dra[3][3];
-    double Dde[2][2];
+    double Dde[3][3];
     double uwe, uweRa, uweDe;
 
     for(i=0; i<pointNum; i++)
@@ -31,12 +31,13 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
         rRa[i] = r[i] = dRa[i];
         rDe[i] = r[pointNum+i] = dDe[i];
 
-        Ara[i*3] = A[i*3] = -(sin(dec[i])*cos(ra[i]));
-        Ara[i*3+1] = A[i*3+1] = -(sin(dec[i])*sin(ra[i]));
-        Ara[i*3+2] = A[i*3+2] = cos(dec[i]);
+        Ara[i*3] = A[i*3] = (sin(dec[i])*cos(ra[i]));
+        Ara[i*3+1] = A[i*3+1] = (sin(dec[i])*sin(ra[i]));
+        Ara[i*3+2] = A[i*3+2] = -cos(dec[i]);
 
-        Ade[i*2] = A[pointNum+i*3] = sin(ra[i]);
-        Ade[i*2+1] = A[pointNum+i*3+1] = -cos(ra[i]);
+        Ade[i*3] = A[pointNum+i*3] = -sin(ra[i]);
+        Ade[i*3+1] = A[pointNum+i*3+1] = cos(ra[i]);
+        Ade[i*3+2] = 1.0;
         A[pointNum+i*3+2] = 0.0;
 
         Wra[i] = Wde[i] = W[i] = 1.0;
@@ -55,8 +56,8 @@ int lsmCount(double *ra, double *dec, double *dRa, double *dDe, int pointNum, do
     qDebug() << QString("Zra: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[0]),12, 'f', 8).arg(rad2mas(sqrt(Dra[0][0])),12, 'f', 8).arg(rad2mas(Zra[1]),12, 'f', 8).arg(rad2mas(sqrt(Dra[1][1])),12, 'f', 8).arg(rad2mas(Zra[2]),12, 'f', 8).arg(rad2mas(sqrt(Dra[2][2])),12, 'f', 8);
     qDebug() << QString("uweRa: %1\n").arg(rad2mas(sqrt(uweRa)),12, 'f', 8);
 
-    lsm(2, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
-    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
+    lsm(3, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
+    qDebug() << QString("Zde: %1 +/- %2\t%3 +/- %4\t%5 +/- %6\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8).arg(rad2mas(Zde[2]),12, 'f', 8).arg(rad2mas(sqrt(Dde[2][2])),12, 'f', 8);
     qDebug() << QString("uweDe: %1\n").arg(rad2mas(sqrt(uweDe)),12, 'f', 8);
 
     Eps[0] = Zde[0];
@@ -84,14 +85,14 @@ int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe
     double *Wra = new double[pointNum];
     double *Zra = new double[6];
 
-    double *Ade = new double[4*pointNum];
+    double *Ade = new double[5*pointNum];
     double *rDe = new double[pointNum];
     double *Wde = new double[pointNum];
-    double *Zde = new double[4];
+    double *Zde = new double[5];
 
     double Dx[6][6];
     double Dra[6][6];
-    double Dde[4][4];
+    double Dde[5][5];
     double uwe, uweRa, uweDe;
 
     for(i=0; i<pointNum; i++)
@@ -102,19 +103,21 @@ int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe
         rRa[i] = r[i] = dRa[i];
         rDe[i] = r[pointNum+i] = dDe[i];
 
-        Ara[i*6] = A[i*6] = -(sin(dec[i])*cos(ra[i]));
-        Ara[i*6+1] = A[i*6+1] = -(sin(dec[i])*sin(ra[i]));
-        Ara[i*6+2] = A[i*6+2] = cos(dec[i]);
-        Ara[i*6+3] = A[i*6+3] = -(sin(dec[i])*cos(ra[i]))*dTime[i];
-        Ara[i*6+4] = A[i*6+4] = -(sin(dec[i])*sin(ra[i]))*dTime[i];
-        Ara[i*6+5] = A[i*6+5] = cos(dec[i])*dTime[i];
+        Ara[i*6] = A[i*6] = (sin(dec[i])*cos(ra[i]));
+        Ara[i*6+1] = A[i*6+1] = (sin(dec[i])*sin(ra[i]));
+        Ara[i*6+2] = A[i*6+2] = -cos(dec[i]);
+        Ara[i*6+3] = A[i*6+3] = (sin(dec[i])*cos(ra[i]))*dTime[i];
+        Ara[i*6+4] = A[i*6+4] = (sin(dec[i])*sin(ra[i]))*dTime[i];
+        Ara[i*6+5] = A[i*6+5] = -cos(dec[i])*dTime[i];
 
-        Ade[i*4] = A[pointNum+i*6] = sin(ra[i]);
-        Ade[i*4+1] = A[pointNum+i*6+1] = -cos(ra[i]);
+        Ade[i*5] = A[pointNum+i*6] = -sin(ra[i]);
+        Ade[i*5+1] = A[pointNum+i*6+1] = cos(ra[i]);
+        //Ade[i*5+2] = 1.0;
         A[pointNum+i*6+2] = 0.0;
-        Ade[i*4+2] = A[pointNum+i*6+3] = sin(ra[i])*dTime[i];
-        Ade[i*4+3] = A[pointNum+i*6+4] = -cos(ra[i])*dTime[i];
-        A[pointNum+i*3+5] = 0.0;
+        Ade[i*5+2] = A[pointNum+i*6+3] = -sin(ra[i])*dTime[i];
+        Ade[i*5+3] = A[pointNum+i*6+4] = cos(ra[i])*dTime[i];
+        Ade[i*5+4] = 1.0;
+        A[pointNum+i*6+5] = 0.0;
 
         Wra[i] = Wde[i] = W[i] = 1.0;
         W[pointNum+i] = 1.0;
@@ -145,9 +148,10 @@ int lsmCountVel(double *dTime, double *ra, double *dec, double *dRa, double *dDe
     qDebug() << QString("ZraVel: %1 +- %2\t%3 +- %4\t%5 +- %6\n").arg(rad2mas(Zra[3]),12, 'f', 8).arg(rad2mas(sqrt(Dra[3][3])),12, 'f', 8).arg(rad2mas(Zra[4]),12, 'f', 8).arg(rad2mas(sqrt(Dra[4][4])),12, 'f', 8).arg(rad2mas(Zra[5]),12, 'f', 8).arg(rad2mas(sqrt(Dra[5][5])),12, 'f', 8);
     qDebug() << QString("uweRa: %1\n").arg(rad2mas(sqrt(uweRa)),12, 'f', 8);
 
-    lsm(4, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
-    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
-    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[2]),12, 'f', 8).arg(rad2mas(sqrt(Dde[2][2])),12, 'f', 8).arg(rad2mas(Zde[3]),12, 'f', 8).arg(rad2mas(sqrt(Dde[3][3])),12, 'f', 8);
+    lsm(5, pointNum, Zde, Ade, rDe, uweDe, &Dde[0][0], Wde);
+    qDebug() << QString("Zde: %1 +- %2\t%3 +- %4\t\n").arg(rad2mas(Zde[0]),12, 'f', 8).arg(rad2mas(sqrt(Dde[0][0])),12, 'f', 8).arg(rad2mas(Zde[1]),12, 'f', 8).arg(rad2mas(sqrt(Dde[1][1])),12, 'f', 8);
+    qDebug() << QString("ZdeVel: %1 +- %2\t%3 +- %4\n").arg(rad2mas(Zde[2]),12, 'f', 8).arg(rad2mas(sqrt(Dde[2][2])),12, 'f', 8).arg(rad2mas(Zde[3]),12, 'f', 8).arg(rad2mas(sqrt(Dde[3][3])),12, 'f', 8);
+    qDebug() << QString("D: %1 +- %2\n").arg(rad2mas(Zde[4]),12, 'f', 8).arg(rad2mas(sqrt(Dde[4][4])),12, 'f', 8);
     qDebug() << QString("uweDe: %1\n").arg(rad2mas(sqrt(uweDe)),12, 'f', 8);
 
 /*

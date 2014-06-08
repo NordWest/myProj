@@ -453,6 +453,7 @@ void ocRec::rec2MPC(QString *str, QString objNum, int provNum, QString objType)
 
 int ocRec::s2rec(QString str)
 {
+    if(str.contains("%")||str.contains("#")) return 1;
     return(s2recBase1(str));
 }
 

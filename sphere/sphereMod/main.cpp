@@ -377,7 +377,8 @@ int main(int argc, char *argv[])
                 //numVect << tStr.section(colSep, cn, cn).toDouble();
                 ratC = rat - ocRa/cos(dect);
                 dectC = dect - ocDec;
-                resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(ti, 15, 'f', 8).arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
+                //resStm << QString("%1|%2|%3|%4|%5|%6|%7|%8\n").arg(ti, 15, 'f', 8).arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
+                resStm << QString("%1|%2|%3|%4|%5|%6|%7\n").arg(rat, 15, 'e', 12).arg(dect, 15, 'e', 12).arg(ratC, 15, 'e', 12).arg(dectC, 15, 'e', 12).arg(rad2mas(ocRa), 10, 'f', 2).arg(rad2mas(ocDec), 10, 'f', 2).arg(pMin);
                 obsNum++;
             }
             resFile.close();

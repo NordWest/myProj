@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
             de1 = de[i]+dDe[i];
             de[i] = asin((2.0*sin(de[i])/(s2-s1))-(s2+s1)/(s2-s1));
             de1 = asin((2.0*sin(de1)/(s2-s1))-(s2+s1)/(s2-s1));
-            dDe[i] = de1-de[i];
+            //dDe[i] = de1-de[i];
         }
 
 
@@ -261,6 +261,12 @@ int main(int argc, char *argv[])
 
     case 2:
         res = vsfCount_lsm(ra, de, dRa, dDe, dSize, coefNum, &sCoef[0], &tCoef[0], sCoefSg, tCoefSg, xival);
+
+        for(i=0; i<coefNum; i++)
+        {
+            indexes(i, N, K, P);
+            qDebug() << QString("S%1: %2 %3 %4:\t%5\t%6\n").arg(i).arg(N).arg(K).arg(P).arg(rad2mas(sCoef[i])).arg(rad2mas(tCoef[i]));
+        }
 
         for(i=0; i<coefNum; i++)
         {

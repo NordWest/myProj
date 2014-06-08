@@ -307,7 +307,7 @@ resFile.close();
         for(riterNum=0; riterNum<riter; riterNum++)
         {
 
-            rMax = (riterNum+1.200)*rMin;
+            rMax = (riterNum*0.2+1.200)*rMin;
             //rMax = (riterNum+1.200)*distMax;
             nMinI = pow(nMin, riterNum+1)-riterNum;
             qDebug() << QString("riterNum: %1\nrMin: %2\tnMinI: %3\n").arg(riterNum).arg(rMax).arg(nMinI);
@@ -325,7 +325,7 @@ resFile.close();
                 nrNum = 0;
                 minNr = 1000;
                 maxNr = 0;
-                pW=0;
+
                 for(i=0; i<npix; i++)
                 {
                     if(numVect.at(i)>=nMin)
@@ -338,14 +338,14 @@ resFile.close();
                             //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                         }
                         else dect = dataVect[i][1];
-                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
+                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|0\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(rad2mas(dataVect[i][2]), 16, 'e', 10).arg(rad2mas(dataVect[i][3]), 16, 'e', 10).arg(numVect[i]);
 
                         continue;
                     }
                     nNum++;
                     tNum = nearNum = 0;
                     dx = dy = 0.0;
-
+                    pW=0;
                     distMin = 2.0*PI;
 
                     for(j=0; j<npix; j++)
@@ -359,11 +359,18 @@ resFile.close();
                         {
                             //dx += dataVect[j][2]*(1.0-(distT/rMax))*nC;
                             //dy += dataVect[j][3]*(1.0-(distT/rMax))*nC;
-                            dx += dataVect[j][2]/(distT*distT);
-                            dy += dataVect[j][3]/(distT*distT);
-                            tNum += numVect[j];
+                            pW += pow(1.0/distT, 2.0);
+                            dx += dataVect[j][2]*pow(1.0/distT, 2.0);//*distT);
+                            dy += dataVect[j][3]*pow(1.0/distT, 2.0);//*distT);
+                            /*
+                            dx += dataVect[j][2]/(distT);//*distT);
+                            dy += dataVect[j][3]/(distT);//*distT);
+
                             //pW+=(1.0-(distT/rMax))*nC;
-                            pW += 1.0/(distT*distT);
+                            //pW += distT;//*distT);
+                            */
+                            tNum += numVect[j];
+                            //qDebug() << QString("ad: %1\t%2\n").arg(rad2mas(dataVect[j][2])).arg(rad2mas(dataVect[j][3]));
                             //qDebug() << QString("ad: %1\t%2\n").arg(adx).arg(ady);
                             //dx += adx;
                             //dy += ady;
@@ -373,8 +380,13 @@ resFile.close();
                     }
                     if(nearNum>nMin)
                     {
-                        dataVect[i][2] = dx/nearNum/pW;
-                        dataVect[i][3] = dy/nearNum/pW;
+                        //dataVect[i][2] = dx/nearNum/pW;
+                        //dataVect[i][3] = dy/nearNum/pW;
+
+                        dataVect[i][2] = dx/pW;
+                        dataVect[i][3] = dy/pW;
+                        //qDebug() << QString("resC: %1\t%2\n").arg(rad2mas(dataVect[i][2])).arg(rad2mas(dataVect[i][3]));
+                        //qDebug() << QString("res: %1\t%2\t%3\t%4\n").arg(rad2mas(dx)).arg(rad2mas(dy)).arg(nearNum).arg(rad2mas(pW));
                         numVect[i] = tNum/nearNum;
                         if(isZonal)
                         {
@@ -383,7 +395,7 @@ resFile.close();
                             //rat = asin(0.5*sin(rat)*(rs2-rs1) + 0.5*(rs2+rs1));
                         }
                         else dect = dataVect[i][1];
-                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(dataVect[i][2], 16, 'e', 10).arg(dataVect[i][3], 16, 'e', 10).arg(numVect[i]);
+                        resStm << QString("%1|%2|%3|%4|%5|%6|%7|1\n").arg(dataVect[i][0], 16, 'e', 10).arg(dect, 16, 'e', 10).arg(dataVect[i][0]-dataVect[i][2]/cos(dect), 16, 'e', 10).arg(dataVect[i][1]-dataVect[i][3], 16, 'e', 10).arg(rad2mas(dataVect[i][2]), 16, 'e', 10).arg(rad2mas(dataVect[i][3]), 16, 'e', 10).arg(numVect[i]);
                         nrNum++;
                     }
                     if(minNr>nearNum) minNr = nearNum;
