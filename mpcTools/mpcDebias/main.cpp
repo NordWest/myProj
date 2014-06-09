@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
                 dx = query.value(5).toDouble()/206265.0;
                 dy = query.value(7).toDouble()/206265.0;
 
-                resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(rat-dx, 15, 'e', 10).arg(dect-dy, 15, 'e', 10).arg(dx, 15, 'e', 10).arg(dy, 15, 'e', 10);
+                resStm << QString("%1|%2|%3|%4|%5|%6\n").arg(rat, 15, 'e', 10).arg(dect, 15, 'e', 10).arg(rat-dx, 15, 'e', 10).arg(dect-dy, 15, 'e', 10).arg(rad2mas(dx), 10, 'f', 2).arg(rad2mas(dy), 10, 'f', 2);
             }
 
             resFile.close();

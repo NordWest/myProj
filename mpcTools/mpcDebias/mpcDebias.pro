@@ -1,4 +1,4 @@
-#-------------------------------------------------
+#-----------#--------------------------------------
 #
 # Project created by QtCreator 2012-09-20T13:14:18
 #
@@ -20,14 +20,14 @@ SOURCES += main.cpp \
     ../../libs/comfunc.cpp \
     ../../libs/ringpix.cpp
 HEADERS += ../../libs/mpcfile.h \
-            ../../libs/astro.h \
-            ../../libs/mb.h \
+ #           ../../libs/astro.h \
+#            ../../libs/mb.h \
     ../../libs/comfunc.h \
     ../../libs/ringpix.h \
     ../../libs/mpcStats.h
 
-win32:LIBS += ./../../libs/win32/libmb.a \
-            ./../../libs/win32/libastro.a
-unix:LIBS += ./../../libs/unix/libmb.a \
-            ./../../libs/unix/libastro.a
-
+#win32:LIBS += ./../../libs/win32/libmb.a \
+#            ./../../libs/win32/libastro.a
+#unix:LIBS += ./../../libs/unix/libmb.a \
+#            ./../../libs/unix/libastro.a
+LIBS += -lmb -lastro
