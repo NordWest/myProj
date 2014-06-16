@@ -1139,7 +1139,7 @@ int main(int argc, char *argv[])
             state[4] = vmul*VT[objPos*3+1];//+VS0[1];
             state[5] = vmul*VT[objPos*3+2];//+VS0[2];
 
-            findOrb(orbRec.elem, &state[0], &state[3], tdo);
+            findOrb(orbRec.elem, &state[0], &state[3], TDB2TDT(tdo));
             orbRec.set(&orb_cat0);
             orb_cat0.record->set_number(mpc_rec.mpNumber());
             orb_cat0.record->set_name(objName.simplified().toAscii().data());

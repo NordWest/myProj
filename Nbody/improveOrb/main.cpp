@@ -16,6 +16,15 @@ struct improveState
     double raC, decC;
     double state[6];
     QString obsCode;
+    double ocRaCosD()
+    {
+        return((raO-raC)*cos(decO));
+    }
+    double ocDec()
+    {
+        return(decO-decC);
+    }
+
 };
 
 struct inproveObject
@@ -37,6 +46,7 @@ void detE0(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 void detE1(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
 void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem);
+void get2Ddisp(double &z0, double &z1);
 
 int main(int argc, char *argv[])    //improveOrb ocat imp
 {
@@ -44,13 +54,16 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
     setlocale(LC_NUMERIC, "C");
 
     orbit orb;
-    orbElem *elem, *elem_ekv, *elemI, dElem;
+    orbElem *elem, *elem_ekv, *elemI, dElem, elemC;
     eposrec erec;
     double X[3], V[3], t0;
     int sk, center;
     int i, sz, nObj, p, j;
     OrbCat ocat, ocatI;
     observ opos;
+    double ocRaMin, ocRaMax, ocDeMin, ocDeMax, ocRa, ocDe;
+    double histStepRa, histStepDe;
+    double z0, z1, disp;
 
     SpiceDouble             state [6];
     SpiceDouble             lt;
@@ -72,6 +85,8 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         QString confFile = sett->value("general/confFile", "particles.xml").toString();
         QString moodyDir = QDir(sett->value("general/moodyDir", "./testProject").toString()).absolutePath();
 
+        int histSz = sett->value("improveObj/histSz", 7).toInt();
+        disp = sett->value("improveObj/disp", 0).toInt();
 
         sk = sett->value("general/sk", 0).toInt();
         center = sett->value("general/center", 0).toInt();
@@ -91,7 +106,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
 
     if(bigType==1)
     {
-        opos.init(obsFile.toAscii().data(), ephFile.toAscii().data());
+        opos.init(obsFile.toAscii().data(), ephFile.toAscii().data(), 1);
         opos.set_obs_parpam("Earth", 1, 0, obsCode.toAscii().data());
     }
     else
@@ -165,10 +180,77 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
     }
 
     stFile.close();
-
-
     int oNum = impObjList.size();
     ostm << QString("improve objects: %1\n").arg(oNum);
+
+
+    int *histRa = new int[histSz];
+    int *histDe = new int[histSz];
+    for(i=0;i<histSz;i++)
+    {
+        histRa[i] = 0;
+        histDe[i] = 0;
+    }
+    int pos;
+
+    QFile histFile("hist.txt");
+    histFile.open(QFile::WriteOnly | QFile::Truncate);
+    QTextStream histStm(&histFile);
+
+    for(p=0; p<oNum; p++)
+    {
+        impObj = impObjList.at(p);
+        sz = impObj->impList.size();
+
+        for(i=0;i<sz;i++)
+        {
+            impSt = impObj->impList.at(i);
+
+            get2Ddisp(z0, z1);
+            impSt->decO += mas2rad(z1*disp);
+            impSt->raO = impSt->raO + mas2rad(z0*disp)/cos(impSt->decO);
+        }
+
+        ocRaMin = ocDeMin = 1000000;
+        ocRaMax = ocDeMax = -1000000;
+        for(i=0;i<sz;i++)
+        {
+            impSt = impObj->impList.at(i);
+            //ocRa = fabs(rad2mas(impSt->ocRaCosD()));
+            //ocDe = fabs(rad2mas(impSt->ocDec()));
+            ocRa = rad2mas(impSt->ocRaCosD());
+            ocDe = rad2mas(impSt->ocDec());
+            if(ocRa<ocRaMin) ocRaMin = ocRa;
+            if(ocRa>ocRaMax) ocRaMax = ocRa;
+            if(ocDe<ocDeMin) ocDeMin = ocDe;
+            if(ocDe>ocDeMax) ocDeMax = ocDe;
+        }
+        ocRaMin = floor(ocRaMin);
+        ocRaMax = floor(ocRaMax)+1;
+        ocDeMin = floor(ocDeMin);
+        ocDeMax = floor(ocDeMax)+1;
+
+        ostm << QString("%1: oc_ra:%2:%3\toc_de: %4-%5\n").arg(impObj->name).arg(ocRaMin).arg(ocRaMax).arg(ocDeMin).arg(ocDeMax);
+        histStepRa = (ocRaMax-ocRaMin)/histSz;
+        histStepDe = (ocDeMax-ocDeMin)/histSz;
+        for(i=0;i<sz;i++)
+        {
+            impSt = impObj->impList.at(i);
+            //ocRa = fabs(rad2mas(impSt->ocRaCosD()));
+            //ocDe = fabs(rad2mas(impSt->ocDec()));
+            ocRa = rad2mas(impSt->ocRaCosD());
+            ocDe = rad2mas(impSt->ocDec());
+            pos = floor((ocRa-ocRaMin)/histStepRa);
+            histRa[pos]++;
+            pos = floor((ocDe-ocDeMin)/histStepDe);
+            histDe[pos]++;
+        }
+        for(i=0;i<histSz;i++)
+        {
+            histStm << QString("%1|%2|%3|%4|%5|%6\n").arg(impObj->name, 16).arg(i).arg(i*histStepRa).arg(histRa[i]).arg(i*histStepDe).arg(histDe[i]);
+        }
+    }
+    histFile.close();
     /*
     double *ai, *bi, *C;
     double *La, *Lb, *Lc;
@@ -196,19 +278,33 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
 */
     opos.set_obs_parpam(GEOCENTR_NUM, center, sk, obsCode.toAscii().data());
 
+    double *R0, *V0;
+    R0 = new double[3];
+    V0 = new double[3];
+
     for(p=0; p<oNum; p++)
     {
         impObj = impObjList.at(p);
         elem = impObj->iniOrb.elem;
         elemI = impObj->impOrb.elem;
 
-
-
         ostm << QString("%1: %2\n\n").arg(p).arg(impObj->name);
-
         ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
         ostm << QString("==============================================================================\n");
         ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(elem->M0, 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(elem->inc, 10, 'f', 7).arg(elem->w, 10, 'f', 7).arg(elem->Node, 10, 'f', 7);
+
+        R0[0] = impObj->impList.at(0)->state[0];
+        R0[1] = impObj->impList.at(0)->state[1];
+        R0[2] = impObj->impList.at(0)->state[2];
+        V0[0] = impObj->impList.at(0)->state[3];
+        V0[1] = impObj->impList.at(0)->state[4];
+        V0[2] = impObj->impList.at(0)->state[5];
+        findOrb(&elemC, R0, V0, TDB2TDT(impObj->impList.at(0)->jdTDB));
+
+        //ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
+        //ostm << QString("==============================================================================\n");
+        ostm << QString("elem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD, 15, 'f', 8).arg(elemC.M0, 10, 'f', 7).arg(elemC.q, 10, 'f', 7).arg(elemC.ecc, 10, 'f', 7).arg(elemC.inc, 10, 'f', 7).arg(elemC.w, 10, 'f', 7).arg(elemC.Node, 10, 'f', 7);
+        ostm << QString("delem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD-elem->eJD, 15, 'f', 8).arg(elemC.M0-elem->M0, 10, 'f', 7).arg(elemC.q-elem->q, 10, 'f', 7).arg(elemC.ecc-elem->ecc, 10, 'f', 7).arg(elemC.inc-elem->inc, 10, 'f', 7).arg(elemC.w-elem->w, 10, 'f', 7).arg(elemC.Node-elem->Node, 10, 'f', 7);
 
 
         //detE00(impObj, opos, elem, elemI);
@@ -235,7 +331,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         elemI->inc = elem->inc + dElem.inc;
         elemI->w = elem->w + dElem.w;
 
-         //ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(elemI->M0, 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(elemI->inc, 10, 'f', 7).arg(elemI->w, 10, 'f', 7).arg(elemI->Node, 10, 'f', 7);
+         ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(elemI->M0, 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(elemI->inc, 10, 'f', 7).arg(elemI->w, 10, 'f', 7).arg(elemI->Node, 10, 'f', 7);
 
         impObj->impOrb.set(&ocatI);
 
@@ -1336,4 +1432,25 @@ void detE3(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     elemI->Node = elem->Node - dElem.Node;
     elemI->q = elem->q - dElem.q;
     elemI->w = elem->w - dElem.w;*/
+}
+
+void get2Ddisp(double &z0, double &z1)
+{
+    double x, y, s, lns;
+    //srand(time(NULL));
+/////////////   dispersion  ////////////////
+        do
+        {
+    //           srand(time(NULL));
+            x = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+            y = 2.0*rand()/(1.0*RAND_MAX) - 1.0;
+            s = x*x + y*y;
+        }while((s==0)||(s>1));
+        lns = sqrt(-2.0*log(s)/s);
+        z0 = x*lns;
+        z1 = y*lns;
+
+ //       zStm << QString("%1|%2|%3|%4|%5|%6\n").arg(x).arg(y).arg(s).arg(lns).arg(z0).arg(z1);
+
+////////////////////////////////////////////
 }
