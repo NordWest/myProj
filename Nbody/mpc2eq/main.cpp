@@ -82,6 +82,7 @@ int bigType, smlType;
 SpiceChar             * corr;
 SpiceChar             * ref;
 SpiceDouble             state [6];
+SpiceDouble             stateSun[6];
 SpiceDouble             state_obs [6];
 SpiceDouble             sgT0, sgT1, lt;
 QString bspName, leapName;
@@ -411,6 +412,9 @@ int main(int argc, char *argv[])
     eparam->col = esett->value("general/col", 0.0015).toDouble();
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
+
+    double dispR = sett->value("improveObj/dispR", 1.0e-12).toDouble();
+    double dispV = sett->value("improveObj/dispV", 1.0e-18).toDouble();
 
 ///////////
     //observ opos5;
@@ -806,6 +810,7 @@ int main(int argc, char *argv[])
             orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
             orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
 
+
             if(!center)
             {
                 X[0] += Xsun[0];
@@ -904,6 +909,8 @@ int main(int argc, char *argv[])
     int numb;
     bool isOk;
     QString mpNum;
+
+    srand(time(NULL));
 
     while(!inpStm.atEnd())
     {
@@ -1258,21 +1265,33 @@ int main(int argc, char *argv[])
                 break;
         }
 
-        state[0] = XT[objPos*3];//+XS0[0];
-        state[1] = XT[objPos*3+1];//+XS0[1];
-        state[2] = XT[objPos*3+2];//+XS0[2];
+        stateSun[0] = XT[objPos*3];//+XS0[0];
+        stateSun[1] = XT[objPos*3+1];//+XS0[1];
+        stateSun[2] = XT[objPos*3+2];//+XS0[2];
 
-        state[3] = vmul*VT[objPos*3];//+VS0[0];
-        state[4] = vmul*VT[objPos*3+1];//+VS0[1];
-        state[5] = vmul*VT[objPos*3+2];//+VS0[2];
+        stateSun[3] = vmul*VT[objPos*3];//+VS0[0];
+        stateSun[4] = vmul*VT[objPos*3+1];//+VS0[1];
+        stateSun[5] = vmul*VT[objPos*3+2];//+VS0[2];
 
-        state[0] +=XS0[0];
-        state[1] +=XS0[1];
-        state[2] +=XS0[2];
+////decrease
 
-        state[3] +=VS0[0];
-        state[4] +=VS0[1];
-        state[5] +=VS0[2];
+/*
+            stateSun[0] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
+            stateSun[1] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
+            stateSun[2] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
+            stateSun[3] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
+            stateSun[4] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
+            stateSun[5] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
+            */
+////
+
+        state[0] = stateSun[0] + XS0[0];
+        state[1] = stateSun[1] + XS0[1];
+        state[2] = stateSun[2] + XS0[2];
+
+        state[3] = stateSun[3] + VS0[0];
+        state[4] = stateSun[4] + VS0[1];
+        state[5] = stateSun[5] + VS0[2];
 
         opos->obs->getobsynumO(oc_rec->obsCode.toAscii().data());
         opos->det_observ_tdb(tEnd);
@@ -1314,7 +1333,8 @@ int main(int argc, char *argv[])
             impFile.open(QFile::Truncate | QFile::Append);
             impStm.setDevice(&impFile);
 
-            impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(state[0], 17, 'e', 12).arg(state[1], 17, 'e', 12).arg(state[2], 17, 'e', 12).arg(state[3], 17, 'e', 12).arg(state[4], 17, 'e', 12).arg(state[5], 17, 'e', 12).arg(oc_rec->obsCode);
+
+            impStm << QString("%1|%2|%3|%4|%5|%6|%7|%8|%9|%10|%11|%12|%13\n").arg(oc_rec->name, 16).arg(tEnd, 15, 'f', 7).arg(oc_rec->ra, 15, 'f', 11).arg(oc_rec->de, 15, 'f', 10).arg(ra, 15, 'f', 11).arg(dec, 15, 'f', 10).arg(stateSun[0], 17, 'e', 12).arg(stateSun[1], 17, 'e', 12).arg(stateSun[2], 17, 'e', 12).arg(stateSun[3], 17, 'e', 12).arg(stateSun[4], 17, 'e', 12).arg(stateSun[5], 17, 'e', 12).arg(oc_rec->obsCode);
             impFile.close();
         }
 

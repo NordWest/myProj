@@ -100,7 +100,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         QString bspName = sett->value("SPICE/bspName", "./de421.bsp").toString();
         QString leapName = sett->value("SPICE/leapName", "./naif0010.tls").toString();
         sprintf(ref,"%s", sett->value("SPICE/ref", "J2000").toString().toAscii().data());
-        sprintf(corr,"%s", sett->value("general/corr", "LT").toString().toAscii().data());
+        sprintf(corr,"%s", sett->value("SPICE/corr", "LT").toString().toAscii().data());
 
 //////////////////////////////
 
@@ -311,11 +311,11 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
 
-        //detE00(impObj, opos, elem, dElem);
-        //detE0(impObj, opos, elem, dElem);
-        //detE1(impObj, opos, elem, dElem);
+        detE00(impObj, opos, elem, dElem);
+        detE0(impObj, opos, elem, dElem);
+        detE1(impObj, opos, elem, dElem);
         detE2(impObj, opos, elem, dElem);
-        //detE3(impObj, opos, elem, dElem);
+        detE3(impObj, opos, elem, dElem);
 
         //if(elem->ecc<0.1) detE2(impObj, opos, elem, dElem);
         //else detE3(impObj, opos, elem, dElem);
