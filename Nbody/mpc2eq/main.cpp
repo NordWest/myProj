@@ -1275,14 +1275,14 @@ int main(int argc, char *argv[])
 
 ////decrease
 
-/*
+
             stateSun[0] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
             stateSun[1] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
             stateSun[2] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR;
             stateSun[3] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
             stateSun[4] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
             stateSun[5] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV;
-            */
+
 ////
 
         state[0] = stateSun[0] + XS0[0];
