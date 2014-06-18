@@ -15,18 +15,20 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    cppIntegration_gold.cpp \
+    cppIntegration.cu
+SOURCES -= cppIntegration.cu
+#LIBS += -lcudart
+INCLUDEPATH += /usr/local/cuda-5.5/include
+INCLUDEPATH += /usr/local/cuda-5.5/samples/common/inc
+INCLUDEPATH += /usr/local/cuda-5.5/lib
 
-LIBS += -lcudart
-INCLUDEPATH += /usr/local/cuda-6.0/include
-INCLUDEPATH += /usr/local/cuda-6.0/samples/common/inc
-INCLUDEPATH += /usr/local/cuda-6.0/lib
-
-CUDASOURCES = vectorAdd_kernel.cu
-#LIBS += -L/usr/local/cuda-6.0/lib -lcudart
+CUDASOURCES = cppIntegration.cu
+LIBS += -L/usr/local/cuda-5.5/lib -lcudart
 
 cu.output = ${QMAKE_FILE_BASE}.o
-cu.commands = /usr/local/cuda/bin/nvcc -c ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
+cu.commands = /usr/local/cuda/bin/nvcc $$join(INCLUDEPATH,'" -I "','-I "','"') -c ${QMAKE_FILE_NAME} -o ${QMAKE_FILE_OUT}
 cu.input = CUDASOURCES
 cu.CONFIG += no_link
 cu.variable_out = OBJECTS
