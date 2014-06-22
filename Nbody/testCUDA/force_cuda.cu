@@ -30,80 +30,99 @@
 #include <helper_cuda.h>
 #include <helper_functions.h>
 
+#include "rada.h"
+//#include <dele.h>
+
 #ifndef MAX
 #define MAX(a,b) (a > b ? a : b)
 #endif
 
+#define EKV 0.409092804
+#define ka 0.017202098955
+#define CAU 173.144632685
+
+
+extern ever_params *eparam;
+extern int nofzbody;
+extern double *mass;
+
+extern "C" double dist3(double X0[], double X1[]);
+extern "C" double norm3(double *v);
+
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
-
-extern "C" void computeGold(char *reference, char *idata, const unsigned int len);
-extern "C" void computeGold2(int2 *reference, int2 *idata, const unsigned int len);
-
-///////////////////////////////////////////////////////////////////////////////
-//! Simple test kernel for device functionality
-//! @param g_odata  memory to process (in and out)
-///////////////////////////////////////////////////////////////////////////////
-__global__ void kernel(int *g_data)
-{
-    // write data to global memory
-    const unsigned int tid = threadIdx.x;
-    int data = g_data[tid];
-
-    // use integer arithmetic to process all four bytes with one thread
-    // this serializes the execution, but is the simplest solutions to avoid
-    // bank conflicts for this very low number of threads
-    // in general it is more efficient to process each byte by a separate thread,
-    // to avoid bank conflicts the access pattern should be
-    // g_data[4 * wtid + wid], where wtid is the thread id within the half warp
-    // and wid is the warp id
-    // see also the programming guide for a more in depth discussion.
-    g_data[tid] = ((((data <<  0) >> 24) - 10) << 24)
-                  | ((((data <<  8) >> 24) - 10) << 16)
-                  | ((((data << 16) >> 24) - 10) <<  8)
-                  | ((((data << 24) >> 24) - 10) <<  0);
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-//! Demonstration that int2 data can be used in the cpp code
-//! @param g_odata  memory to process (in and out)
-///////////////////////////////////////////////////////////////////////////////
-__global__ void
-kernel2(int2 *g_data)
-{
-    // write data to global memory
-    const unsigned int tid = threadIdx.x;
-    int2 data = g_data[tid];
-
-    // use integer arithmetic to process all four bytes with one thread
-    // this serializes the execution, but is the simplest solutions to avoid
-    // bank conflicts for this very low number of threads
-    // in general it is more efficient to process each byte by a separate thread,
-    // to avoid bank conflicts the access pattern should be
-    // g_data[4 * wtid + wid], where wtid is the thread id within the half warp
-    // and wid is the warp id
-    // see also the programming guide for a more in depth discussion.
-    g_data[tid].x = data.x - data.y;
-}
-
-extern "C" __global__ void VecAdd_kernel(const float *A, const float *B, float *C, int N)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    if (i < N)
-        C[i] = A[i] + B[i];
-}
-
-__global__ void
-vectorAdd(const float *A, const float *B, float *C, int numElements)
+__global__ void force_GN_kernel(double X[], double V[], double F[], int numElements)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < numElements)
     {
-        C[i] = A[i] + B[i];
+        F[i] = X[i]*V[i];
     }
+}
+
+extern "C" void force_GN_CU(double X[], double V[], double F[])
+{
+  int iNum = nofzbody;
+  int Ni = iNum*3;
+
+  //printf("nofzbody: %d\n", nofzbody);
+
+  for(int teloi=0; teloi<iNum; teloi++)
+  {
+      int i=teloi*3;
+      double Ri = norm3(&X[i]);
+
+      if(Ri>(eparam->vout))
+      {
+          printf("WARN!!!! V OUT!!!!\n");
+          printf("Ri[%d]: %f > %f\n", teloi, Ri, eparam->vout);
+          exit(1);
+      }
+
+      double massI = mass[teloi];//0.0;
+      //printf("massI: %e\n", massI);
+      if(massI<0)massI=0;
+      for(int komp=0; komp<3; komp++)
+      {
+          double res0, res1;
+              res0 = res1 = 0.0;
+//                         #pragma omp parallel for reduction(+:res0)
+              for(int teloj=0; teloj<iNum; teloj++)
+              {
+                 int j=teloj*3;
+                 double massJ = mass[teloj];
+                 if(teloi!=teloj&&massJ>0)
+                 {
+                    double Rij = dist3(&X[i], &X[j]);
+                    double Rj = norm3(&X[j]);
+
+                    if(Rij<eparam->col)
+                    {
+
+                        printf("teloi= %d\tteloj= %d\n", teloi, teloj);
+                        printf("Xi: %f\t%f\t%f\n", X[i], X[i+1], X[i+2]);
+                        printf("Xj: %f\t%f\t%f\n", X[j], X[j+1], X[j+2]);
+                        printf("Rij= %f\n", Rij);
+                        printf("WARN!!!! CRASH!!!!\n");
+                        exit(1);
+                    }
+
+
+
+                    res0 += massJ*((X[j+komp] - X[i+komp])/(pow(Rij,3)) - X[j+komp]/(pow(Rj, 3)));
+
+                 }
+
+              }
+
+              res1 = -((1.0 + massI)*X[i+komp])/(pow(Ri, 3));
+
+
+              F[i+komp] = ka*ka*(res0+res1);
+
+          }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +133,7 @@ vectorAdd(const float *A, const float *B, float *C, int numElements)
 //! @param len   len of \a data
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" bool
-runTest(const int argc, const char **argv, char *data, int2 *data_int2, unsigned int len)
+Test(const int argc, const char **argv, char *data, int2 *data_int2, unsigned int len)
 {
     // use command-line specified CUDA device, otherwise use device with highest Gflops/s
     findCudaDevice(argc, (const char **)argv);
@@ -142,17 +161,17 @@ runTest(const int argc, const char **argv, char *data, int2 *data_int2, unsigned
     dim3 threads(num_threads, 1, 1);
     dim3 threads2(len, 1, 1); // more threads needed fir separate int2 version
     // execute the kernel
-    kernel<<< grid, threads >>>((int *) d_data);
-    kernel2<<< grid, threads2 >>>(d_data_int2);
+    //kernel<<< grid, threads >>>((int *) d_data);
+    //kernel2<<< grid, threads2 >>>(d_data_int2);
 
     // check if kernel execution generated and error
     getLastCudaError("Kernel execution failed");
 
     // compute reference solutions
     char *reference = (char *) malloc(mem_size);
-    computeGold(reference, data, len);
+    //computeGold(reference, data, len);
     int2 *reference2 = (int2 *) malloc(mem_size_int2);
-    computeGold2(reference2, data_int2, len);
+    //computeGold2(reference2, data_int2, len);
 
     // copy results from device to host
     checkCudaErrors(cudaMemcpy(data, d_data, mem_size,
@@ -184,7 +203,7 @@ runTest(const int argc, const char **argv, char *data, int2 *data_int2, unsigned
 
 
 extern "C" bool
-runSumm(void)
+tSumm(void)
 {
     // Error code to check return values for CUDA calls
     cudaError_t err = cudaSuccess;
@@ -270,7 +289,7 @@ runSumm(void)
     int threadsPerBlock = 256;
     int blocksPerGrid =(numElements + threadsPerBlock - 1) / threadsPerBlock;
     printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
-    vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
+    //vectorAdd<<<blocksPerGrid, threadsPerBlock>>>(d_A, d_B, d_C, numElements);
     err = cudaGetLastError();
 
     if (err != cudaSuccess)

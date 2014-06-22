@@ -11,6 +11,14 @@
 #include <helper_cuda.h>
 #include <helper_functions.h>
 
+#include <dele.h>
+#include <calceph.h>
+#include "rada.h"
+dele *nbody;
+int nofzbody;
+double *mass;
+ever_params *eparam;
+
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
 extern "C" bool runTest(const int argc, const char **argv,
