@@ -305,19 +305,24 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         ostm << QString("==============================================================================\n");
         ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(elem->M0, 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(elem->inc, 10, 'f', 7).arg(elem->w, 10, 'f', 7).arg(elem->Node, 10, 'f', 7);
 
-        R0[0] = impObj->impList.at(0)->state[0];
-        R0[1] = impObj->impList.at(0)->state[1];
-        R0[2] = impObj->impList.at(0)->state[2];
-        V0[0] = impObj->impList.at(0)->state[3];
-        V0[1] = impObj->impList.at(0)->state[4];
-        V0[2] = impObj->impList.at(0)->state[5];
-        findOrb(&elemC, R0, V0, TDB2TDT(impObj->impList.at(0)->jdTDB));
+        i=0;
+        //for(i=0;i<impObj->impList.size();i++)
+        //{
 
-        //ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
-        //ostm << QString("==============================================================================\n");
-        ostm << QString("elem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD, 15, 'f', 8).arg(elemC.M0, 10, 'f', 7).arg(elemC.q, 10, 'f', 7).arg(elemC.ecc, 10, 'f', 7).arg(elemC.inc, 10, 'f', 7).arg(elemC.w, 10, 'f', 7).arg(elemC.Node, 10, 'f', 7);
-        ostm << QString("delem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD-elem->eJD, 15, 'f', 8).arg(elemC.M0-elem->M0, 10, 'f', 7).arg(elemC.q-elem->q, 10, 'f', 7).arg(elemC.ecc-elem->ecc, 10, 'f', 7).arg(elemC.inc-elem->inc, 10, 'f', 7).arg(elemC.w-elem->w, 10, 'f', 7).arg(elemC.Node-elem->Node, 10, 'f', 7);
+            R0[0] = impObj->impList.at(i)->state[0];
+            R0[1] = impObj->impList.at(i)->state[1];
+            R0[2] = impObj->impList.at(i)->state[2];
+            V0[0] = impObj->impList.at(i)->state[3];
+            V0[1] = impObj->impList.at(i)->state[4];
+            V0[2] = impObj->impList.at(i)->state[5];
+            findOrb(&elemC, R0, V0, TDB2TDT(impObj->impList.at(i)->jdTDB));
 
+            //ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
+            //ostm << QString("==============================================================================\n");
+            ostm << QString("elem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD, 15, 'f', 8).arg(rad2grad(elemC.M0), 10, 'f', 7).arg(elemC.q, 10, 'f', 7).arg(elemC.ecc, 10, 'f', 7).arg(rad2grad(elemC.inc), 10, 'f', 7).arg(rad2grad(elemC.w), 10, 'f', 7).arg(rad2grad(elemC.Node), 10, 'f', 7);
+            //ostm << QString("delem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD-elem->eJD, 15, 'f', 8).arg(elemC.M0-elem->M0, 10, 'f', 7).arg(elemC.q-elem->q, 10, 'f', 7).arg(elemC.ecc-elem->ecc, 10, 'f', 7).arg(elemC.inc-elem->inc, 10, 'f', 7).arg(elemC.w-elem->w, 10, 'f', 7).arg(elemC.Node-elem->Node, 10, 'f', 7);
+
+        //}
 
         //detE00(impObj, opos, elem, elemI);
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
@@ -344,7 +349,17 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
             //detE00(impObj, opos, &elemC, dElem);
         //else detE3(impObj, opos, &elemC, dElem);
 
+        elemI->eJD = elemC.eJD + dElem.eJD;
 
+        elemI->M0 = elemC.M0 + dElem.M0;
+        elemI->q = elemC.q + dElem.q;
+        elemI->ecc = elemC.ecc + dElem.ecc;
+
+        elemI->Node = elemC.Node + dElem.Node;
+        elemI->inc = elemC.inc + dElem.inc;
+        elemI->w = elemC.w + dElem.w;
+
+/*
         elemI->eJD = elem->eJD + dElem.eJD;
 
         elemI->M0 = elem->M0 + dElem.M0;
@@ -354,7 +369,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         elemI->Node = elem->Node + dElem.Node;
         elemI->inc = elem->inc + dElem.inc;
         elemI->w = elem->w + dElem.w;
-
+*/
         if(elemI->M0<0.0) elemI->M0 += 2.0*PI;
         if(elemI->Node<0.0) elemI->Node += 2.0*PI;
         if(elemI->w<0.0) elemI->w += 2.0*PI;
