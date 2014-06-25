@@ -807,8 +807,8 @@ int main(int argc, char *argv[])
 
 /////////////////
 
-            orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
-            orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
+            detRecEkv(orbRec.elem, &X[0], &X[1], &X[2], jdTDT);
+            detRecEkvVel(orbRec.elem, &V[0], &V[1], &V[2], jdTDT);
 
 
             if(!center)
@@ -1030,8 +1030,8 @@ int main(int argc, char *argv[])
                     continue;
                 }
 
-                orbRec.detRecEkv(&X[0], &X[1], &X[2], jdTDT);
-                orbRec.detRecEkvVel(&V[0], &V[1], &V[2], jdTDT);
+                detRecEkv(orbRec.elem, &X[0], &X[1], &X[2], jdTDT);
+                detRecEkvVel(orbRec.elem, &V[0], &V[1], &V[2], jdTDT);
 
                 if(!center)
                 {

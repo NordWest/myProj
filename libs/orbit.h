@@ -111,10 +111,21 @@ struct orbElem
     void set(come5_rec *crec);
 
 
+    double a();
+    double p();
 //	int findT(double *T, double M, double t);
 //	int FindOrb(myvector *R0, myvector *V0, double t0, int log);	//nahozgdenie orbity po polozgeniju i skorosti v opred. moment vremeni
 
 };
+
+int detPolarOrb(orbElem *elem, double *r, double *v, double t);
+int detRecOrb(orbElem *elem, double *ksi, double *eta, double t);
+int detRecEcl(orbElem *elem, double *x, double *y, double *z, double t);
+int detRecEkv(orbElem *elem, double *x, double *y, double *z, double t);
+
+int detPolarOrbVel(orbElem *elem, double *Vr, double *Vn, double t);
+int detRecEclVel(orbElem *elem, double *Vx, double *Vy, double *Vz, double t);
+int detRecEkvVel(orbElem *elem, double *Vx, double *Vy, double *Vz, double t);
 
 
 class orbit
@@ -154,7 +165,7 @@ public:
 //	int writeCat(char *fname, int mode);	//write catalog format in file fname
 //	int writeCStr(char *Sline);	//make string in catalog format ready for write in catalog file
 //	int dispCat(char *sd);		//make string suit for display all parameters
-
+/*
 	int detPolarOrb(double *r, double *v, double t);
 	int detRecOrb(double *ksi, double *eta, double t);
 	int detRecEcl(double *x, double *y, double *z, double t);
@@ -163,7 +174,7 @@ public:
 	int detPolarOrbVel(double *Vr, double *Vn, double t);
         int detRecEclVel(double *Vx, double *Vy, double *Vz, double t);
         int detRecEkvVel(double *Vx, double *Vy, double *Vz, double t);
-
+*/
 	double get_a();
 
 //	int FindOrb(myvector *R0, myvector *V0, double t0, int log);	//nahozgdenie orbity po polozgeniju i skorosti v opred. moment vremeni

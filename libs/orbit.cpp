@@ -365,50 +365,47 @@ void orbit::set(CommetOrbCat *ocat)
 
 ///////////////////det
 
-int orbit::detPolarOrb(double *r, double *v, double t)
+int detPolarOrb(orbElem *elem, double *r, double *v, double t)
 {
-	if(this->elem->isElips())
+    if(elem->isElips())
 	{
         double T, n, M, E, p, a;
 
-        p = this->elem->q*(1.0 + this->elem->ecc);
-        a = this->elem->q/(1.0-this->elem->ecc);
+        p = elem->q*(1.0 + elem->ecc);
+        a = elem->q/(1.0-elem->ecc);
         n = grad2rad(kaGRAD*pow(a, -1.5));
 
-		T = this->elem->eJD - this->elem->M0/n;
-		M = n*(t - this->elem->eJD) + this->elem->M0;
-        eKepler(&E, M, this->elem->ecc);
+        T = elem->eJD - elem->M0/n;
+        M = n*(t - elem->eJD) + elem->M0;
+        eKepler(&E, M, elem->ecc);
 
     //            printf("p= %f\tn= %f\tT= %f\tM= %f\tE=%f\n", p, n, T, M, E);
 
 		double Pr1, Pr2;
-        //Pr1 = this->elem->q*sqrt((1.0 + this->elem->ecc)/(1.0 - this->elem->ecc))*sin(E);
-        //Pr2 = this->elem->q*(cos(E) - this->elem->ecc)/(1.0 - this->elem->ecc);
 
-        Pr1 = sqrt(1.0+this->elem->ecc)*tan(E/2.0);
-        Pr2 = sqrt(1.0-this->elem->ecc);
+        Pr1 = sqrt(1.0+elem->ecc)*tan(E/2.0);
+        Pr2 = sqrt(1.0-elem->ecc);
 
 		double viu;
 
         viu = 2.0*atan2(Pr1, Pr2);
 
-        //*r = p/(1.0 + this->elem->ecc*cos(viu));
-        *r = a*(1.0 - this->elem->ecc*this->elem->ecc)/(1.0 + this->elem->ecc*cos(viu));
+        *r = a*(1.0 - elem->ecc*elem->ecc)/(1.0 + elem->ecc*cos(viu));
 		*v = viu;
 
 		return 1;
 	}
-	else if(this->elem->isPorabola())
+    else if(elem->isPorabola())
 	{
 		double B, s, T, dT, n;
 		int key = 0;
 //
 //		findT(&T, this->elem->M0, this->elem->eJD, this->elem->q, this->elem->eJD);
-		T = this->elem->M0;
+        T = elem->M0;
 
 		dT = t - T;		
 
-		B = pow(this->elem->q, -1.5)*dT;
+        B = pow(elem->q, -1.5)*dT;
 		if(B<0.0)
 		{
 			key = 1;
@@ -418,14 +415,14 @@ int orbit::detPolarOrb(double *r, double *v, double t)
 		pKepler(&s, B);
 //
 //		s = -tan(this->elem->M0/2.0);
-		*r = this->elem->q*(1.0 + s*s);
+        *r = elem->q*(1.0 + s*s);
 		*v = 2.0*atan(s);
 		if(key) *v = 2.0*PI - fabs(*v);
 
 		return 2;
 
 	}
-	else if(this->elem->isGiperbola())
+    else if(elem->isGiperbola())
 	{
 /*		double M, a, T, H, n;
 
@@ -445,27 +442,27 @@ int orbit::detPolarOrb(double *r, double *v, double t)
 		return 3;
 
 	}
-	else if(this->elem->isNPorabola())
+    else if(elem->isNPorabola())
 	{
 		double B, s, T;
 		int key = 0;
 
-		findT(&T, this->elem->M0, this->elem->eJD, this->elem->q, this->elem->eJD);
+        findT(&T, elem->M0, elem->eJD, elem->q, elem->eJD);
 
-		B = pow(this->elem->q, -1.5)*(t - T);
+        B = pow(elem->q, -1.5)*(t - T);
 		if(B<0.0)
 		{
 			key = 1;
 			B = -B;
 		}
 
-        npKepler(&s, B, this->elem->ecc);
+        npKepler(&s, B, elem->ecc);
 
 		double eps, ksi;
-        eps = (1.0-this->elem->ecc)/2.0;
+        eps = (1.0-elem->ecc)/2.0;
 		ksi = eps*s*s;
 
-        *r = this->elem->q*(1.0 + this->elem->ecc*s*s);
+        *r = elem->q*(1.0 + elem->ecc*s*s);
 		*v = 2.0*atan(s*sqrt((1.0-eps)/(1.0-ksi)));
 		if(key) *v = 2.0*PI - fabs(*v);
 
@@ -478,30 +475,30 @@ int orbit::detPolarOrb(double *r, double *v, double t)
 	return 0;
 }
 
-int orbit::detRecOrb(double *ksi, double *eta, double t)
+int detRecOrb(orbElem *elem, double *ksi, double *eta, double t)
 {
-	if(this->elem->isPorabola())
+    if(elem->isPorabola())
 	{
 		double r, v, s;
-		this->detPolarOrb(&r, &v, t);
+        detPolarOrb(elem, &r, &v, t);
 		s = tan(v/2.0);
-		*ksi = this->elem->q*(1.0 - s*s);
-		*eta = 2.0*this->elem->q*s;
+        *ksi = elem->q*(1.0 - s*s);
+        *eta = 2.0*elem->q*s;
 
 		return 0;
 	}
-	else if(this->elem->isElips())
+    else if(elem->isElips())
 	{
 		double r, v;
 
-		this->detPolarOrb(&r, &v, t);
+        detPolarOrb(elem, &r, &v, t);
 
 		*ksi = r*cos(v);
 		*eta = r*sin(v);
 
 		return 0;
 	}
-	else if(this->elem->isGiperbola())
+    else if(elem->isGiperbola())
 	{
 /*		double r, v;
 		this->detPolarOrb(&r, &v, t);
@@ -509,49 +506,49 @@ int orbit::detRecOrb(double *ksi, double *eta, double t)
 		*eta = r*sin(v);*/
 		return 1;
 	}
-	else if(this->elem->isNPorabola())
+    else if(elem->isNPorabola())
 	{
 		double B, s, T;
 		int key = 0;
 
-		findT(&T, this->elem->M0, this->elem->eJD, this->elem->q, this->elem->eJD);
+        findT(&T, elem->M0, elem->eJD, elem->q, elem->eJD);
 
-		B = pow(this->elem->q, -1.5)*(t - T);
+        B = pow(elem->q, -1.5)*(t - T);
 		if(B<0.0)
 		{
 			key = 1;
 			B = -B;
 		}
 
-        npKepler(&s, B, this->elem->ecc);
+        npKepler(&s, B, elem->ecc);
 
 		double eps, dz;
-        eps = (1.0-this->elem->ecc)/2.0;
+        eps = (1.0-elem->ecc)/2.0;
 		dz = eps*s*s;
 
-		*ksi = this->elem->q*(1.0 - s*s);
-		*eta = sqrt(2.0)*ka*this->elem->q*sqrt(1.0 - eps)*s*npU(dz);
+        *ksi = elem->q*(1.0 - s*s);
+        *eta = sqrt(2.0)*ka*elem->q*sqrt(1.0 - eps)*s*npU(dz);
 		return 0;
 	}
 	return 1;
 }
 
 
-int orbit::detRecEcl(double *x, double *y, double *z, double t)
+int detRecEcl(orbElem *elem, double *x, double *y, double *z, double t)
 {
 	double r, v;
-	this->detPolarOrb(&r, &v, t);
+    detPolarOrb(elem, &r, &v, t);
 
-	double u = this->elem->w + v;
+    double u = elem->w + v;
 
-	*x = r*(cos(u)*cos(this->elem->Node) - sin(u)*sin(this->elem->Node)*cos(this->elem->inc));
-	*y = r*(cos(u)*sin(this->elem->Node) + sin(u)*cos(this->elem->Node)*cos(this->elem->inc));
-	*z = r*sin(u)*sin(this->elem->inc);
+    *x = r*(cos(u)*cos(elem->Node) - sin(u)*sin(elem->Node)*cos(elem->inc));
+    *y = r*(cos(u)*sin(elem->Node) + sin(u)*cos(elem->Node)*cos(elem->inc));
+    *z = r*sin(u)*sin(elem->inc);
 
 	return 0;
 }
 
-int orbit::detRecEkv(double *x, double *y, double *z, double t)
+int detRecEkv(orbElem *elem, double *x, double *y, double *z, double t)
 {
 /*	double ksi, eta;
 
@@ -559,17 +556,17 @@ int orbit::detRecEkv(double *x, double *y, double *z, double t)
 
 	double px, py, pz, qx, qy, qz, rx, ry, rz;
 
-	px = cos(this->elem->w)*cos(this->elem->Node) - sin(this->elem->w)*sin(this->elem->Node)*cos(this->elem->inc);
-	py = (cos(this->elem->w)*sin(this->elem->Node) + sin(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc))*cos(EKV) - sin(this->elem->w)*sin(this->elem->inc)*sin(EKV);
-	pz = (cos(this->elem->w)*sin(this->elem->Node) + sin(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc))*sin(EKV) + sin(this->elem->w)*sin(this->elem->inc)*cos(EKV);
+    px = cos(elem->w)*cos(elem->Node) - sin(elem->w)*sin(elem->Node)*cos(elem->inc);
+    py = (cos(elem->w)*sin(elem->Node) + sin(elem->w)*cos(elem->Node)*cos(elem->inc))*cos(EKV) - sin(elem->w)*sin(elem->inc)*sin(EKV);
+    pz = (cos(elem->w)*sin(elem->Node) + sin(elem->w)*cos(elem->Node)*cos(elem->inc))*sin(EKV) + sin(elem->w)*sin(elem->inc)*cos(EKV);
 
-	qx = -sin(this->elem->w)*cos(this->elem->Node) - cos(this->elem->w)*sin(this->elem->Node)*cos(this->elem->inc);
-	qy = (-sin(this->elem->w)*sin(this->elem->Node) + cos(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc))*cos(EKV) - cos(this->elem->w)*sin(this->elem->inc)*sin(EKV);
-	qz = (-sin(this->elem->w)*sin(this->elem->Node) + cos(this->elem->w)*cos(this->elem->Node)*cos(this->elem->inc))*sin(EKV) + cos(this->elem->w)*sin(this->elem->inc)*cos(EKV);
+    qx = -sin(elem->w)*cos(elem->Node) - cos(elem->w)*sin(elem->Node)*cos(elem->inc);
+    qy = (-sin(elem->w)*sin(elem->Node) + cos(elem->w)*cos(elem->Node)*cos(elem->inc))*cos(EKV) - cos(elem->w)*sin(elem->inc)*sin(EKV);
+    qz = (-sin(elem->w)*sin(elem->Node) + cos(elem->w)*cos(elem->Node)*cos(elem->inc))*sin(EKV) + cos(elem->w)*sin(elem->inc)*cos(EKV);
 
-	rx = sin(this->elem->inc)*sin(this->elem->Node);
-	ry = -sin(this->elem->inc)*cos(this->elem->Node)*cos(EKV) - cos(this->elem->inc)*sin(EKV);
-	rz= -sin(this->elem->inc)*cos(this->elem->Node)*sin(EKV) - cos(this->elem->inc)*cos(EKV);
+    rx = sin(elem->inc)*sin(elem->Node);
+    ry = -sin(elem->inc)*cos(elem->Node)*cos(EKV) - cos(elem->inc)*sin(EKV);
+    rz= -sin(elem->inc)*cos(elem->Node)*sin(EKV) - cos(elem->inc)*cos(EKV);
 
 	if((fabs(sqrt(px*px + py*py + pz*pz) - 1.0)>EPS)||(fabs(sqrt(qx*qx + qy*qy + qz*qz) - 1.0)>EPS)||((px*qx + py*qy + pz*qz)>EPS)) return 1;
 
@@ -580,7 +577,7 @@ int orbit::detRecEkv(double *x, double *y, double *z, double t)
     double *vect;
     vect = new double[3];
 
-    detRecEcl(&vect[0], &vect[1], &vect[2], t);
+    detRecEcl(elem, &vect[0], &vect[1], &vect[2], t);
 
     RotX(vect, EKV);
 
@@ -611,18 +608,18 @@ double orbit::get_a()
     return(this->elem->q/(1.0-this->elem->ecc));
 }
 
-int orbit::detPolarOrbVel(double *Vr, double *Vn, double t)
+int detPolarOrbVel(orbElem *elem, double *Vr, double *Vn, double t)
 {
 	double r, v, p;
 
-	if(this->elem->isElips())
+    if(elem->isElips())
 	{
-		this->detPolarOrb(&r, &v, t);
+        detPolarOrb(elem, &r, &v, t);
 
-        p = this->elem->q*(1.0 + this->elem->ecc);
+        p = elem->q*(1.0 + elem->ecc);
 
-        *Vr = ka*this->elem->ecc*sin(v)/sqrt(p);
-        *Vn = ka*(1.0 + this->elem->ecc*cos(v))/sqrt(p);
+        *Vr = ka*elem->ecc*sin(v)/sqrt(p);
+        *Vn = ka*(1.0 + elem->ecc*cos(v))/sqrt(p);
 
 		return 0;
 	}
@@ -631,26 +628,22 @@ int orbit::detPolarOrbVel(double *Vr, double *Vn, double t)
 	return 1;
 }
 
-int orbit::detRecEclVel(double *Vx, double *Vy, double *Vz, double t)
+int detRecEclVel(orbElem *elem, double *Vx, double *Vy, double *Vz, double t)
 {
 	double Vr, Vn, vui, u;
-        double x, y, z, r, r0;
+    double x, y, z, r, r0;
 
-	if(this->elem->isElips())
+    if(elem->isElips())
 	{
-		this->detPolarOrbVel(&Vr, &Vn, t);
-                //printf("polar orb vel: %f\t%f\n", Vr, Vn);
-		this->detRecEcl(&x, &y, &z, t);
-		this->detPolarOrb(&r, &vui, t);
+        detPolarOrbVel(elem, &Vr, &Vn, t);
+        detRecEcl(elem, &x, &y, &z, t);
+        detPolarOrb(elem, &r, &vui, t);
 
-                r0 = sqrt(x*x + y*y + z*z);
+        r0 = sqrt(x*x + y*y + z*z);
+        u = elem->w + vui;
 
-                //printf("r0= %f\tr= %f\n", r0, r);
-
-		u = this->elem->w + vui;
-
-		*Vx = x*Vr/r + (-sin(u)*cos(this->elem->Node) - cos(u)*sin(elem->Node)*cos(elem->inc))*Vn;
-		*Vy = y*Vr/r + (-sin(u)*sin(this->elem->Node) + cos(u)*cos(elem->Node)*cos(elem->inc))*Vn;
+        *Vx = x*Vr/r + (-sin(u)*cos(elem->Node) - cos(u)*sin(elem->Node)*cos(elem->inc))*Vn;
+        *Vy = y*Vr/r + (-sin(u)*sin(elem->Node) + cos(u)*cos(elem->Node)*cos(elem->inc))*Vn;
 		*Vz = z*Vr/r + cos(u)*sin(elem->inc)*Vn;
 
 		return 0;
@@ -659,13 +652,13 @@ int orbit::detRecEclVel(double *Vx, double *Vy, double *Vz, double t)
 	return 1;
 }
 
-int orbit::detRecEkvVel(double *Vx, double *Vy, double *Vz, double t)
+int detRecEkvVel(orbElem *elem, double *Vx, double *Vy, double *Vz, double t)
 {
         double Vr, Vn, vui, u;
         double x, y, z, r, r0;
         double vel[3];
 
-        if(this->elem->isElips())
+        if(elem->isElips())
         {
 /*                this->detPolarOrbVel(&Vr, &Vn, t);
                 //printf("polar orb vel: %f\t%f\n", Vr, Vn);
@@ -676,13 +669,13 @@ int orbit::detRecEkvVel(double *Vx, double *Vy, double *Vz, double t)
 
                 //printf("r0= %f\tr= %f\n", r0, r);
 
-                u = this->elem->w + vui;
+                u = elem->w + vui;
 
-                *Vx = x*Vr/r + (-sin(u)*cos(this->elem->Node) - cos(u)*sin(elem->Node)*cos(elem->inc))*Vn;
-                *Vy = y*Vr/r + (-sin(u)*sin(this->elem->Node) + cos(u)*cos(elem->Node)*cos(elem->inc))*Vn;
+                *Vx = x*Vr/r + (-sin(u)*cos(elem->Node) - cos(u)*sin(elem->Node)*cos(elem->inc))*Vn;
+                *Vy = y*Vr/r + (-sin(u)*sin(elem->Node) + cos(u)*cos(elem->Node)*cos(elem->inc))*Vn;
                 *Vz = z*Vr/r + cos(u)*sin(elem->inc)*Vn;
 */
-            detRecEclVel(&vel[0], &vel[1], &vel[2], t);
+            detRecEclVel(elem, &vel[0], &vel[1], &vel[2], t);
             RotX(vel, EKV);
 
             *Vx = vel[0];
@@ -1699,6 +1692,16 @@ void orbElem::set(come5_rec *crec)
     crec->Node = rad2grad(Node);
     crec->q = q;
     crec->w = rad2grad(w);
+}
+
+double orbElem::a()
+{
+    return(q/(1.0-ecc));
+}
+
+double orbElem::p()
+{
+    return(a()*(1.0-ecc*ecc));
 }
 
 
