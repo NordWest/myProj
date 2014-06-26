@@ -328,6 +328,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         ostm << QString("==============================================================================\n");
         ostm << QString("elem_ini\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(rad2grad(elem->M0), 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(rad2grad(elem->inc), 10, 'f', 7).arg(rad2grad(elem->w), 10, 'f', 7).arg(rad2grad(elem->Node), 10, 'f', 7);
 
+
         t0 = impObj->iniOrb.elem->eJD;
         i=0;
 
@@ -342,7 +343,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         //ostm << QString("\t\t: eJD\t\t\tM0\t\tq\t\tec\t\tinc\t\tw\t\tNode\t\n");
         //ostm << QString("==============================================================================\n");
         ostm << QString("elem_C\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemC.eJD, 15, 'f', 8).arg(rad2grad(elemC.M0), 10, 'f', 7).arg(elemC.q, 10, 'f', 7).arg(elemC.ecc, 10, 'f', 7).arg(rad2grad(elemC.inc), 10, 'f', 7).arg(rad2grad(elemC.w), 10, 'f', 7).arg(rad2grad(elemC.Node), 10, 'f', 7);
-
+/*
         dElemC.eJD = elem->eJD - elemC.eJD;
 
         dElemC.M0 = elem->M0 - elemC.M0;
@@ -468,67 +469,78 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
             dr[0] = (impSt->state[0] - 1.5*(ti-t0)*impSt->state[3])*(dElemC.a()/elem->a());
             dr[1] = (impSt->state[1] - 1.5*(ti-t0)*impSt->state[4])*(dElemC.a()/elem->a());
             dr[2] = (impSt->state[2] - 1.5*(ti-t0)*impSt->state[5])*(dElemC.a()/elem->a());
-*/
+/
         }
 
         lsm(6, sz*2, Ec, C, Lc, uweC, Dc);
         ostm << QString("Ec: %1\t%2\t%3\t%4\t%5\t%6\n").arg(Ec[0], 12, 'f', 7).arg(Ec[1], 12, 'f', 7).arg(Ec[2], 12, 'f', 7).arg(Ec[3], 12, 'f', 7).arg(Ec[4], 12, 'f', 7).arg(Ec[5], 12, 'f', 7);
         E2elem_low(Ec, &dElem, elem);
         ostm << QString("dElemC\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-
+*/
         //detE00(impObj, opos, elem, elemI);
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
         /*detEB(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+*/
 /*
-        detE00(impObj, opos, &elemC, dElem);
-        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-/*
-        detE0(impObj, opos, &elemC, dElem);
-        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-
-        detE1(impObj, opos, &elemC, dElem);
+        detE00(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 */
+        /*
+        detE0(impObj, opos, &elemC, dElem);
+        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+*/
+        /*
+        detE1(impObj, opos, elem, dElem);
+        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+
 /*
         detE2(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-/*
-        detE3(impObj, opos, &elemC, dElem);
-        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 */
+        detE3(impObj, opos, elem, dElem);
+        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+
         //if(elem->ecc<0.1) continue;
             //detE00(impObj, opos, &elemC, dElem);
         //else detE3(impObj, opos, &elemC, dElem);
-
+/*
         elemI->eJD = elemC.eJD + dElem.eJD;
 
         elemI->M0 = elemC.M0 + dElem.M0;
-        elemI->q = elemC.q + dElem.q;
-        elemI->ecc = elemC.ecc + dElem.ecc;
+        elemI->q = elemC.q - dElem.q;
+        elemI->ecc = elemC.ecc - dElem.ecc;
 
-        elemI->Node = elemC.Node + dElem.Node;
-        elemI->inc = elemC.inc + dElem.inc;
-        elemI->w = elemC.w + dElem.w;
+        elemI->Node = elemC.Node - dElem.Node;
+        elemI->inc = elemC.inc - dElem.inc;
+        elemI->w = elemC.w - dElem.w;
 
-/*
-        elemI->eJD = elem->eJD + dElem.eJD;
-
-        elemI->M0 = elem->M0 + dElem.M0;
-        elemI->q = elem->q + dElem.q;
-        elemI->ecc = elem->ecc + dElem.ecc;
-
-        elemI->Node = elem->Node + dElem.Node;
-        elemI->inc = elem->inc + dElem.inc;
-        elemI->w = elem->w + dElem.w;
+        //elemI->eJD = elem->eJD;
+        elemI->M0 = elem->M0;
 */
+
+        elemI->eJD = elem->eJD - dElem.eJD;
+
+        elemI->M0 = elem->M0 - dElem.M0;
+        elemI->q = elem->q - dElem.q;
+        elemI->ecc = elem->ecc - dElem.ecc;
+
+        elemI->Node = elem->Node - dElem.Node;
+        elemI->inc = elem->inc - dElem.inc;
+        elemI->w = elem->w - dElem.w;
+
         if(elemI->M0<0.0) elemI->M0 += 2.0*PI;
         if(elemI->Node<0.0) elemI->Node += 2.0*PI;
         if(elemI->w<0.0) elemI->w += 2.0*PI;
 
-        ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(elemI->M0, 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(elemI->inc, 10, 'f', 7).arg(elemI->w, 10, 'f', 7).arg(elemI->Node, 10, 'f', 7);
-        ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(elem->M0, 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(elem->inc, 10, 'f', 7).arg(elem->w, 10, 'f', 7).arg(elem->Node, 10, 'f', 7);
+        if(elemI->M0>2.0*PI) elemI->M0 -= 2.0*PI;
+        if(elemI->Node>2.0*PI) elemI->Node -= 2.0*PI;
+        if(elemI->w>2.0*PI) elemI->w -= 2.0*PI;
+
+        ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(rad2grad(elemI->M0), 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(rad2grad(elemI->inc), 10, 'f', 7).arg(rad2grad(elemI->w), 10, 'f', 7).arg(rad2grad(elemI->Node), 10, 'f', 7);
+        ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(rad2grad(elem->M0), 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(rad2grad(elem->inc), 10, 'f', 7).arg(rad2grad(elem->w), 10, 'f', 7).arg(rad2grad(elem->Node), 10, 'f', 7);
+        //ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(elem->M0, 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(elem->inc, 10, 'f', 7).arg(elem->w, 10, 'f', 7).arg(elem->Node, 10, 'f', 7);
 
         //impObj->impOrb.set(&ocatI);
         elemI->set(ocatI.record);
