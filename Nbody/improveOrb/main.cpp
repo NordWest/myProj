@@ -239,7 +239,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
     {
         impObj = impObjList.at(p);
         sz = impObj->impList.size();
-
+/*
         for(i=0;i<sz;i++)
         {
             impSt = impObj->impList.at(i);
@@ -248,7 +248,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
             impSt->decO += mas2rad(z1*disp);
             impSt->raO = impSt->raO + mas2rad(z0*disp)/cos(impSt->decO);
         }
-
+*/
         ocRaMin = ocDeMin = 1000000;
         ocRaMax = ocDeMax = -1000000;
         for(i=0;i<sz;i++)
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         ostm << QString("==============================================================================\n");
         ostm << QString("elem_ini\t\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(rad2grad(elem->M0), 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(rad2grad(elem->inc), 10, 'f', 7).arg(rad2grad(elem->w), 10, 'f', 7).arg(rad2grad(elem->Node), 10, 'f', 7);
 
-
+/*
         t0 = impObj->iniOrb.elem->eJD;
         i=0;
 
@@ -480,25 +480,27 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         //detE00(impObj, opos, elem, elemI);
         //if(elem->ecc>0.1) detE0(impObj, opos, elem, elemI);
         //else detE1(impObj, opos, elem, elemI);
-        /*detEB(impObj, opos, elem, dElem);
-        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-*/
 /*
+        detEB(impObj, opos, elem, dElem);
+        deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
+
+*/
         detE00(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-*/
-        /*
-        detE0(impObj, opos, &elemC, dElem);
+/*
+
+        detE0(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-*/
-        /*
+
+
         detE1(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 
-/*
+
+
         detE2(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
-*/
+
         detE3(impObj, opos, elem, dElem);
         deStm << QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\n\n").arg(impObj->name, 16).arg(dElem.eJD, 15, 'f', 8).arg(dElem.M0, 10, 'f', 7).arg(dElem.q, 10, 'f', 7).arg(dElem.ecc, 10, 'f', 7).arg(dElem.inc, 10, 'f', 7).arg(dElem.w, 10, 'f', 7).arg(dElem.Node, 10, 'f', 7);
 
@@ -520,23 +522,23 @@ int main(int argc, char *argv[])    //improveOrb ocat imp
         elemI->M0 = elem->M0;
 */
 
-        elemI->eJD = elem->eJD - dElem.eJD;
+        elemI->eJD = elem->eJD + dElem.eJD;
 
-        elemI->M0 = elem->M0 - dElem.M0;
-        elemI->q = elem->q - dElem.q;
-        elemI->ecc = elem->ecc - dElem.ecc;
+        elemI->M0 = elem->M0 + dElem.M0;
+        elemI->q = elem->q + dElem.q;
+        elemI->ecc = elem->ecc + dElem.ecc;
 
-        elemI->Node = elem->Node - dElem.Node;
-        elemI->inc = elem->inc - dElem.inc;
-        elemI->w = elem->w - dElem.w;
+        elemI->Node = elem->Node + dElem.Node;
+        elemI->inc = elem->inc + dElem.inc;
+        elemI->w = elem->w + dElem.w;
 
-        if(elemI->M0<0.0) elemI->M0 += 2.0*PI;
-        if(elemI->Node<0.0) elemI->Node += 2.0*PI;
-        if(elemI->w<0.0) elemI->w += 2.0*PI;
+        if(elemI->M0<0.0) elemI->M0 += 2.0*PI*(floor(fabs(elemI->M0)/(2.0*PI))+1);
+        if(elemI->Node<0.0) elemI->Node += 2.0*PI*(floor(fabs(elemI->Node)/(2.0*PI))+1);
+        if(elemI->w<0.0) elemI->w += 2.0*PI*(floor(fabs(elemI->w)/(2.0*PI))+1);
 
-        if(elemI->M0>2.0*PI) elemI->M0 -= 2.0*PI;
-        if(elemI->Node>2.0*PI) elemI->Node -= 2.0*PI;
-        if(elemI->w>2.0*PI) elemI->w -= 2.0*PI;
+        if(elemI->M0>2.0*PI) elemI->M0 -= (2.0*PI)*floor(elemI->M0/(2.0*PI));
+        if(elemI->Node>2.0*PI) elemI->Node -= 2.0*PI*floor(elemI->Node/(2.0*PI));
+        if(elemI->w>2.0*PI) elemI->w -= 2.0*PI*floor(elemI->w/(2.0*PI));
 
         ostm << QString("elem_imp\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elemI->eJD, 15, 'f', 8).arg(rad2grad(elemI->M0), 10, 'f', 7).arg(elemI->q, 10, 'f', 7).arg(elemI->ecc, 10, 'f', 7).arg(rad2grad(elemI->inc), 10, 'f', 7).arg(rad2grad(elemI->w), 10, 'f', 7).arg(rad2grad(elemI->Node), 10, 'f', 7);
         ostm << QString("elem_ini\t: %1\t%2\t%3\t%4\t%5\t%6\t%7\n\n").arg(elem->eJD, 15, 'f', 8).arg(rad2grad(elem->M0), 10, 'f', 7).arg(elem->q, 10, 'f', 7).arg(elem->ecc, 10, 'f', 7).arg(rad2grad(elem->inc), 10, 'f', 7).arg(rad2grad(elem->w), 10, 'f', 7).arg(rad2grad(elem->Node), 10, 'f', 7);
@@ -770,7 +772,7 @@ void detEB(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
 
     //E2elem_pqs_low(Ec, &dElem, elem);
    //E2elem_low1(Ec, &dElem, elem);
-
+/*
    double summ, summPow;
    summPow = 0.0;
    for(i=0;i<sz*2;i++)
@@ -789,7 +791,7 @@ void detEB(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
        ostm << QString("Lc: %1 = %2\n").arg(biList.join(" + ")).arg(Lc[i]);
    }
    ostm << QString("summPow:\t%1\n").arg(summPow);
-
+*/
    double dp, dq, dr, da, a0;
    dp = Ec[1];
    dq = Ec[2];
@@ -853,10 +855,12 @@ void detE00(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     Lc = new double[2*sz];
 
 
+    double Eval;
     lowEcc = elem->ecc<0.1;
     aval = elem->q/(1.0-elem->ecc);
     nn = ka*pow(aval, -1.5);
     pval = aval*(1.0 - elem->ecc*elem->ecc);
+
 
     ostm << QString("impObj sz: %1\n").arg(sz);
     double kx[6], ky[6], kz[6];
@@ -875,13 +879,18 @@ void detE00(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         r = sqrt(impSt->state[0]*impSt->state[0] + impSt->state[1]*impSt->state[1] + impSt->state[2]*impSt->state[2]);
         ss = impSt->state[0]*impSt->state[3] + impSt->state[1]*impSt->state[4] + impSt->state[2]*impSt->state[5];
         po = sqrt(stateE[0]*stateE[0] + stateE[1]*stateE[1] + stateE[2]*stateE[2]);
+        dT = impSt->jdTDB - TDT2TDB(elem->eJD);
+
+
+        //eKepler(&Eval, nn*dT+elem->M0, elem->ecc);
+        //ostm << QString("proove vel: %1 ?= %2\n").arg(ss/nn).arg(aval*aval*elem->ecc*sin(Eval));
 
         H = (r + pval - 2.0*aval)/(elem->ecc*pval);
         K = ((r+pval)/pval)*(ss/(aval*aval*elem->ecc*nn));
         //H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
         //K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
-        dT = impSt->jdTDB - TDT2TDB(elem->eJD);
+
         //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
         //P??
 
@@ -952,35 +961,43 @@ void detE00(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         kz[4] = H*impSt->state[2]+K*impSt->state[5]/nn;
         kz[5] = impSt->state[5]/nn;
         //kEz[5] = -state[5]/nn;
+        //ostm << QString("dNode: %1\n").arg(kx[0]*impSt->state[0] + ky[0]*impSt->state[1] + kz[0]*impSt->state[2]);
+        //ostm << QString("dw: %1\n").arg(kx[1]*impSt->state[0] + ky[1]*impSt->state[1] + kz[1]*impSt->state[2]);
+        //ostm << QString("dinc: %1\n").arg(kx[2]*impSt->state[0] + ky[2]*impSt->state[1] + kz[2]*impSt->state[2]);
+
 //////////////////////////////////////  substitution
-        kEx[0] = kx[0];
-        kEx[1] = kx[1];
-        //kEx[0] = (kx[0] - kx[5])/elem->ecc;
-        //kEx[1] = (kx[1] - kx[0])/sin(elem->inc);
+        //kEx[0] = kx[0];
+        //kEx[1] = kx[1];
+        //e*dpi
+        kEx[0] = (kx[0] - kx[5])/elem->ecc;
+        //sini*dNode
+        kEx[1] = (kx[1] - kx[0])/sin(elem->inc);
         kEx[2] = kx[2];
         kEx[3] = kx[3];
         kEx[4] = kx[4];
+        //deta
         kEx[5] = kx[5];
 
-        kEy[0] = ky[0];
-        kEy[1] = ky[1];
-        //kEy[0] = (ky[0] - ky[5])/elem->ecc;
-        //kEy[1] = (ky[1] - ky[0])/sin(elem->inc);
+        //kEy[0] = ky[0];
+        //kEy[1] = ky[1];
+        kEy[0] = (ky[0] - ky[5])/elem->ecc;
+        kEy[1] = (ky[1] - ky[0])/sin(elem->inc);
         kEy[2] = ky[2];
         kEy[3] = ky[3];
         kEy[4] = ky[4];
         kEy[5] = ky[5];
 
-        kEz[0] = kz[0];
-        kEz[1] = kz[1];
-        //kEz[0] = (kz[0] - kz[5])/elem->ecc;
-        //kEz[1] = (kz[1] - kz[0])/sin(elem->inc);
+        //kEz[0] = kz[0];
+        //kEz[1] = kz[1];
+        kEz[0] = (kz[0] - kz[5])/elem->ecc;
+        kEz[1] = (kz[1] - kz[0])/sin(elem->inc);
         kEz[2] = kz[2];
         kEz[3] = kz[3];
         kEz[4] = kz[4];
         kEz[5] = kz[5];
 
     ///////////////////////////////////////
+
 
 
         //
@@ -1219,14 +1236,15 @@ void E2elem_low(double *E, orbElem *dElem, orbElem *elem)
     double a1, da1;
     dElem->ecc = E[4];
     dElem->inc = E[2];
-    dElem->Node = E[0]/sin(elem->inc);
-    dElem->w = E[1]/elem->ecc - dElem->Node;
+    dElem->Node = E[1]/sin(elem->inc);
+    dElem->w = E[0]/elem->ecc - dElem->Node;
 
     dElem->M0 = E[5] - dElem->w - dElem->Node;
     a1 = elem->q/(1.0-elem->ecc);
     da1 = E[3]*a1;
     qDebug() << QString("da1: %1 = %2\n").arg(a1).arg(da1);
-    dElem->q = da1*(1.0-elem->ecc);
+    //dElem->q = da1*(1.0-elem->ecc);
+    dElem->q = da1*(1.0-dElem->ecc);
 }
 
 void E2elem_low1(double *E, orbElem *dElem, orbElem *elem)
@@ -1240,7 +1258,8 @@ void E2elem_low1(double *E, orbElem *dElem, orbElem *elem)
     double a0 = elem->q/(1.0-elem->ecc);
     double da = E[3]*a0;
     double q1 = (a0+da)*(1.0-(elem->ecc+dElem->ecc));
-    dElem->q = q1 - elem->q;
+    //dElem->q = q1 - elem->q;
+    dElem->q = da*(1.0-dElem->ecc);
 }
 
 
@@ -1329,11 +1348,12 @@ void detKE2(double *kEx, double *kEy, double *kEz, double *state, double H, doub
     //[0,2]:tab47
     //[1]:tab48
     //[3-5]:tab44
-    double kx[6], ky[6], kz[6];
+
     double N[3];
     double P[3], Q[3], R[3];
     detPQR(P, Q, R, elem);
     detN(N, elem);
+
         kEx[0] = -state[2]*sin(EKV) - state[1]*cos(EKV);
         kEx[1] = -state[3]/nn + R[1]*state[2] - R[2]*state[1];
         kEx[2] = N[1]*state[2] - N[2]*state[1];
@@ -2082,7 +2102,7 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
     Lb = new double[sz];
     Lc = new double[2*sz];
 
-
+    double Eval;
     aval = elem->q/(1.0-elem->ecc);
     //nn = grad2rad(kaGRAD*pow(aval, -1.5));
     nn = ka/pow(aval, 1.5);
@@ -2106,13 +2126,17 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         //H = (r + pval - 2.0*aval)/(elem->ecc*pval);
         //K = ((r+pval)/pval)*(ss/(aval*aval*elem->ecc*nn))/nn;
         H = (r-aval*(1.0 + elem->ecc*elem->ecc))/(elem->ecc*aval*(1.0 - elem->ecc*elem->ecc));
-        //K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        K = (aval*ss/(ka*ka*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         //H = (1.0 + r/pval - 2.0/(1.0-elem->ecc*elem->ecc))/(elem->ecc);
         //K = pow(ka, -2.0)*aval*ss*(1.0+r/pval)/elem->ecc;
 
-        K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
+        //K = (ss/(aval*aval*elem->ecc))*(1.0 + r/(aval*(1.0 - elem->ecc*elem->ecc)));
         dT = impSt->jdTDB - TDT2TDB(elem->eJD);
-        //qDebug() << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
+        //ostm << QString("%1\t%2\t%3\n").arg(aval).arg(H).arg(K);
+        //ostm << QString("dT\t%1\n").arg(dT);
+
+        //eKepler(&Eval, nn*dT+elem->M0, elem->ecc);
+        //ostm << QString("proove vel: %1 ?= %2\n").arg(ss/nn).arg(aval*aval*elem->ecc*sin(Eval));
 
 /*        //proove??
         tgw0 = tan(elem_ekv->w);
@@ -2120,14 +2144,14 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
         //ostm << QString("%1 ?= %2\n").arg(elem_ekv->w).arg(tgw1);
         */
         //
-        k1 = -sin(impSt->raC)/po;
-        k2 = cos(impSt->raC)/po;
-        k3 = -sin(impSt->decC)*cos(impSt->raC)/po;
-        k4 = -sin(impSt->decC)*sin(impSt->raC)/po;
-        k5 = cos(impSt->decC)/po;
+        k1 = -sin(impSt->raC);//po;
+        k2 = cos(impSt->raC);//po;
+        k3 = -sin(impSt->decC)*cos(impSt->raC);//po;
+        k4 = -sin(impSt->decC)*sin(impSt->raC);//po;
+        k5 = cos(impSt->decC);//po;
 
-        detKE2(kEx, kEy, kEz, impSt->state, H, K, nn, dT, elem);
-/*
+        //detKE2(kEx, kEy, kEz, impSt->state, H, K, nn, dT, elem);
+
          detPQR(P, Q, R, elem);
          detN(N, elem);
 //  Node,inc,w - low ecc
@@ -2161,7 +2185,12 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
             kEz[3] = impSt->state[2] - 1.5*dT*impSt->state[5];
             kEz[4] = H*impSt->state[2]+K*impSt->state[5];
             kEz[5] = impSt->state[5]/nn;
+
+            //ostm << QString("dNode: %1\n").arg(kEx[0]*impSt->state[0] + kEy[0]*impSt->state[1] + kEz[0]*impSt->state[2]);
+            //ostm << QString("dw: %1\n").arg(kEx[1]*impSt->state[0] + kEy[1]*impSt->state[1] + kEz[1]*impSt->state[2]);
+            //ostm << QString("dinc: %1\n").arg(kEx[2]*impSt->state[0] + kEy[2]*impSt->state[1] + kEz[2]*impSt->state[2]);
             //kEz[5] = -impSt->state[5]/nn;
+            /*
 //////////////////////////////////////  substitution
             kEx1[0] = (kEx[1] - kEx[0])/sin(elem->inc);
             kEx1[1] = (kEx[0] - kEx[5])/elem->ecc;
@@ -2198,8 +2227,8 @@ void detE2(inproveObject *impObj, observ &opos, orbElem *elem, orbElem &dElem)
             //biList << QString("%1").arg(bi[i*6+j], 15, 'f', 10);
         }
 
-        La[i] = (impSt->raO - impSt->raC)*cos(impSt->decO);
-        Lb[i] = (impSt->decO - impSt->decC);
+        La[i] = po*(impSt->raO - impSt->raC)*cos(impSt->decO);
+        Lb[i] = po*(impSt->decO - impSt->decC);
         Lc[i*2] = La[i];
         Lc[i*2+1] = Lb[i];
 

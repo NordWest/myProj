@@ -413,6 +413,8 @@ int main(int argc, char *argv[])
     eparam->vout = esett->value("general/vout", 1000.0).toDouble();
     strncpy(&eparam->jkeys[0], esett->value("general/jkeys", "1111111111").toString().toAscii().data(), 10);
 
+    double dispR0 = sett->value("improveObj/dispR0", 1.0e-12).toDouble();
+    double dispV0 = sett->value("improveObj/dispV0", 1.0e-18).toDouble();
     double dispR = sett->value("improveObj/dispR", 1.0e-12).toDouble();
     double dispV = sett->value("improveObj/dispV", 1.0e-18).toDouble();
 
@@ -810,6 +812,21 @@ int main(int argc, char *argv[])
             detRecEkv(orbRec.elem, &X[0], &X[1], &X[2], jdTDT);
             detRecEkvVel(orbRec.elem, &V[0], &V[1], &V[2], jdTDT);
 
+            mCat.record->copyTo(orb_cat.record);
+            orb_cat.AddRec();
+////decrease
+
+
+            X[0] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR0;
+            X[1] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR0;
+            X[2] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispR0;
+            V[0] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV0;
+            V[1] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV0;
+            V[2] += (2.0*rand()/(1.0*RAND_MAX) - 1.0)*dispV0;
+
+            findOrb(orbRec.elem, X, V, jdTDT);
+////
+
 
             if(!center)
             {
@@ -821,7 +838,8 @@ int main(int argc, char *argv[])
                 V[2] += Vsun[2];
             }
 
-            mCat.record->copyTo(orb_cat.record);
+            orbRec.set(orb_cat.record);
+            orb_cat.record->number++;
             orb_cat.AddRec();
 
 
@@ -883,6 +901,10 @@ int main(int argc, char *argv[])
     ocStm.setDevice(&ocFile);
     ocFile.close();
 
+    if(isSaveOrb0)
+    {
+        orb_cat.SaveAs(QString("%1_ocat0.txt").arg(resFileName.section(".", 0, -2)).toAscii().data());
+    }
 
     if(isSaveImp)
     {
@@ -894,6 +916,7 @@ int main(int argc, char *argv[])
 
     if(isSaveOrb)
     {
+
         ocatFile.setFileName(QString("%1_ocat.txt").arg(resFileName.section(".", 0, -2)));
         ocatFile.open(QFile::Truncate | QFile::WriteOnly);
 //        impStm.setDevice(&ocatFile);
@@ -1132,7 +1155,7 @@ int main(int argc, char *argv[])
 
 
 ///////////////////det orb0
-
+/*
         if(nObj&&isSaveOrb0&&(fabs(dT)>100))
         {
             tdo = floor(tEnd) - vmul;
@@ -1157,7 +1180,7 @@ int main(int argc, char *argv[])
             tBeg = tdo;
             dT = tEnd - tBeg;
         }
-
+*/
         if(fabs(dT)>1e-8)solSys->rada27(XT, VT, 0, fabs(dT));
 
 
