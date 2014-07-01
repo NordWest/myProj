@@ -380,43 +380,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
- //   int status;
-/*
-    if(useEPM)
-    {
-        status = !InitTxt(epmDir.toAscii().data());
-        centr_num = 11+!CENTER;
-    }
-    else
-    {
-        status = nbody->init(jplFile.toAscii().data());
-        //status = nbody->init_jpl_bin(jplFile.toAscii().data());
-    }
-
-    if(status) return 1;
-*/
-    //nofzbody = pList.size();
-    //int iNum, jNum;
-    //nofzbody=0;
-    //nofjbody=0;
-/*    p=0;
-    mass = new double[iniList.size()-1];
-
-    for(i=0; i<iniList.size(); i++)
-    {
-        if(iniList.at(i)->identity==Advisor::collapsorFixed)continue;
-        /*{
-            if((QString().compare(QString(iniList.at(i)->name), "Sun", Qt::CaseInsensitive))|(QString().compare(QString(iniList.at(i)->name), "Sol", Qt::CaseInsensitive)))continue;
-        }/
-        pList << iniList.at(i);
-        mass[p++] = iniList.at(i)->mass;
-        //if(pList.at(i)->identity==Advisor::ordinary) pList << iniList.at(i);
-        //if(pList.at(i)->identity==Advisor::planetesimal) jList << pList.at(i);
-    }
-
-    nofzbody=pList.size();*/
-
     nbobjStruct* nb_rec;
 
     for(i=0; i<iniList.size(); i++)

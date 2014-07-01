@@ -3,7 +3,7 @@
 #include <math.h>
 #include "rada.h"
 #include <dele.h>
-#include <omp.h>
+//#include <omp.h>
 #include <cuda_runtime.h>
 
 //#define OMPLIB
@@ -45,7 +45,7 @@ extern "C" double norm3(double *v)
     return(sqrt(nm));
 }
 
-double Smul3(double *V1, double *V2)
+extern "C" double Smul3(double *V1, double *V2)
 {
     int i;
     double val;
