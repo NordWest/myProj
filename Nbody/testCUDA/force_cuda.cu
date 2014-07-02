@@ -72,7 +72,7 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
 
   cudaError_t err = cudaSuccess;
 
-  //printf("nofzbody: %d\n", nofzbody);
+  printf("nofzbody: %d\nNi: %d\n", nofzbody, Ni);
 
   // Allocate the device input vector A
   size_t size = Ni * sizeof(double);
@@ -115,7 +115,7 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
   }
 
   printf("Copy input data X from the host memory to the CUDA device\n");
-  err = cudaMemcpy(d_X, X, Ni, cudaMemcpyHostToDevice);
+  err = cudaMemcpy(d_X, X, size, cudaMemcpyHostToDevice);
 
   if (err != cudaSuccess)
   {
@@ -148,8 +148,8 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
   }
 
   int numBlocks = 1;
-  dim3 threadsPerBlock(Ni, Ni);
-  force_GN_kernel<<<numBlocks, threadsPerBlock>>>(d_X, d_V, d_F, Ni);
+//  dim3 threadsPerBlock(Ni, Ni);
+  force_GN_kernel<<<numBlocks, Ni>>>(d_X, d_V, d_F, Ni);
 
   //double *FS = new double[iNum];
 
