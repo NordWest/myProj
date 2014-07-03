@@ -34,6 +34,16 @@
 #define MAX(a,b) (a > b ? a : b)
 #endif
 
+#define EKV 0.409092804
+#define ka 0.017202098955
+#define CAU 173.144632685
+
+#include "rada.h"
+
+extern ever_params *eparam;
+extern int nofzbody;
+extern double *mass;
+
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
 
@@ -340,4 +350,143 @@ runSumm(void)
 
     printf("Done\n");
     return 0;
+}
+
+__global__ void test_force_GN_kernel(double X[], double V[], double F[], int numElements)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    int teloi=i/3;
+    if (i < numElements)
+    {
+
+        F[i] = X[i]*V[i];
+    }
+}
+
+extern "C" void test_force_GN_CU(double X[], double V[], double F[])
+{
+  int iNum = nofzbody;
+  int Ni = iNum*3;
+  int i;
+
+  cudaError_t err = cudaSuccess;
+
+  printf("nofzbody: %d\nNi: %d\n", nofzbody, Ni);
+
+  // Allocate the device input vector A
+  size_t size = Ni * sizeof(double);
+  double *d_X = NULL;
+  err = cudaMalloc((void **)&d_X, size);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to allocate device vector X (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  // Allocate the device input vector B
+  double *d_V = NULL;
+  err = cudaMalloc((void **)&d_V, size);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to allocate device vector V (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  // Allocate the device output vector C
+  double *d_F = NULL;
+  err = cudaMalloc((void **)&d_F, size);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to allocate device vector F (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  double *d_Mass = NULL;
+  err = cudaMalloc((void **)&d_Mass, size);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to allocate device vector Mass (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  printf("Copy input data X from the host memory to the CUDA device\n");
+  err = cudaMemcpy(d_X, X, size, cudaMemcpyHostToDevice);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to copy vector X from host to device (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  err = cudaMemcpy(d_V, V, size, cudaMemcpyHostToDevice);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to copy vector V from host to device (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  err = cudaMemcpy(d_F, F, size, cudaMemcpyHostToDevice);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to copy vector V from host to device (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  err = cudaMemcpy(d_Mass, mass, size, cudaMemcpyHostToDevice);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to copy vector V from host to device (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  int numBlocks = 1;
+//  dim3 threadsPerBlock(Ni, Ni);
+  test_force_GN_kernel<<<numBlocks, Ni>>>(d_X, d_V, d_F, Ni);
+
+  //double *FS = new double[iNum];
+
+  for(i=0;i<iNum;i++)
+  {
+      printf("F[%d]: %f ?= %f\n", i, d_F[i], X[i]*V[i]);
+
+  }
+
+  // Free device global memory
+  err = cudaFree(d_X);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to free device vector X (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+  err = cudaFree(d_V);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to free device vector V (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+  err = cudaFree(d_F);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to free device vector C (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  err = cudaFree(d_Mass);
+
+  if (err != cudaSuccess)
+  {
+      fprintf(stderr, "Failed to free device vector Mass (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
 }
