@@ -52,16 +52,43 @@ extern "C" double Smul3(double *V1, double *V2);
 
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
-__global__ void force_GN_kernel(double X[], double V[], double F[], int numElements)
+__global__ void force_GN_kernel(double X[], double V[], double F[], double mass[], int numElements)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int i, j, komp;
+    int teloi, teloj;
+    int iNum, jNum;
+    //double kaC = 0.017202098955;
+    //= blockDim.x * blockIdx.x + threadIdx.x;
+    teloi = threadIdx.x;
+    teloj = threadIdx.y;
+    komp = threadIdx.z;
 
-    int teloi=i/3;
-    if (i < numElements)
+    double Rij, Rj, Ri;
+    //int teloi=i/3;
+    iNum = teloi*3;
+    //int teloj=j/3;
+    jNum = teloj*3;
+    //int komp = i-iNum;
+
+    //printf("i:j:k= %d:%d:%d\n", teloi, teloj, komp);
+    //printf("i:j= %d:%d\n", iNum, jNum);
+    //printf("i:j= %e:%e\n", mass[teloi], mass[teloj]);
+    if (teloi != teloj)
     {
 
-        F[i] = X[i]*V[i];
+        Rij = sqrt(pow(X[iNum] - X[jNum], 2) + pow(X[iNum+1] - X[jNum+1], 2) + pow(X[iNum+2] - X[jNum+2], 2));
+        Rj = sqrt(pow(X[jNum], 2) + pow(X[jNum+1], 2) + pow(X[jNum+2], 2));
+        //printf("Rij[%d,%d]= %f\n", teloi, teloj, Rij);
+        //printf("Rj[%d]= %f\n", teloj, Rj);
+        F[iNum+komp] += ka*ka*mass[teloj]*((X[jNum+komp] - X[iNum+komp])/(pow(Rij,3)) - X[jNum+komp]/(pow(Rj, 3)));
     }
+    else
+    {
+        Ri = sqrt(pow(X[iNum], 2) + pow(X[iNum+1], 2) + pow(X[iNum+2], 2));
+        //printf("Rj[%d]= %f\n", teloi, Ri);
+        F[iNum+komp] += -ka*ka*((1.0 + mass[teloi])*X[iNum+komp])/(pow(Ri, 3));
+    }
+    //printf("F[%d]= %e\n", teloi, F[iNum+komp]);
 }
 
 extern "C" void force_GN_CU(double X[], double V[], double F[])
@@ -72,7 +99,9 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
 
   cudaError_t err = cudaSuccess;
 
-  printf("nofzbody: %d\nNi: %d\n", nofzbody, Ni);
+  for(i=0;i<Ni;i++) F[i] = 0.0;
+
+  //printf("nofzbody: %d\nNi: %d\n", nofzbody, Ni);
 
   // Allocate the device input vector A
   size_t size = Ni * sizeof(double);
@@ -106,7 +135,7 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
   }
 
   double *d_Mass = NULL;
-  err = cudaMalloc((void **)&d_Mass, size);
+  err = cudaMalloc((void **)&d_Mass, nofzbody * sizeof(double));
 
   if (err != cudaSuccess)
   {
@@ -114,7 +143,7 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
       exit(EXIT_FAILURE);
   }
 
-  printf("Copy input data X from the host memory to the CUDA device\n");
+  //printf("Copy input data X from the host memory to the CUDA device\n");
   err = cudaMemcpy(d_X, X, size, cudaMemcpyHostToDevice);
 
   if (err != cudaSuccess)
@@ -139,7 +168,7 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
       exit(EXIT_FAILURE);
   }
 
-  err = cudaMemcpy(d_Mass, mass, size, cudaMemcpyHostToDevice);
+  err = cudaMemcpy(d_Mass, mass, nofzbody * sizeof(double), cudaMemcpyHostToDevice);
 
   if (err != cudaSuccess)
   {
@@ -148,17 +177,18 @@ extern "C" void force_GN_CU(double X[], double V[], double F[])
   }
 
   int numBlocks = 1;
-//  dim3 threadsPerBlock(Ni, Ni);
-  force_GN_kernel<<<numBlocks, Ni>>>(d_X, d_V, d_F, Ni);
+  dim3 threadsPerBlock(nofzbody, nofzbody, 3);
+  force_GN_kernel<<<numBlocks, threadsPerBlock>>>(d_X, d_V, d_F, d_Mass, Ni);
 
+  err = cudaMemcpy(F, d_F, size, cudaMemcpyDeviceToHost);
   //double *FS = new double[iNum];
-
+/*
   for(i=0;i<iNum;i++)
   {
-      printf("F[%d]: %f ?= %f\n", i, d_F[i], X[i]*V[i]);
+      printf("F[%d]: %e\n", i, F[i]);
 
   }
-
+*/
   // Free device global memory
   err = cudaFree(d_X);
 

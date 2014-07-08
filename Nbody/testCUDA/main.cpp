@@ -69,6 +69,7 @@ QList <ParticleStruct*> pList;
 //QList <ParticleStruct*> jList;
 
 extern "C" void test_force_GN_CU(double X[], double V[], double F[]);
+extern "C" bool runSumm(void);
 
 void makeLog(double* X, double *V, double TF, double dt);
 
@@ -522,9 +523,10 @@ main(int argc, char **argv)
     QTime timeElapsed;// = QTime.currentTime();
     timeElapsed.start();
 
-    double *F = new double[nofzbody*3];
-    test_force_GN_CU(X, V, F);
-/*
+    //double *F = new double[N];
+    //runSumm();
+    //test_force_GN_CU(X, V, F);
+
     do
     {
         p=0;
@@ -550,7 +552,7 @@ main(int argc, char **argv)
                 qDebug() << QString("S: %1\t%2\t%3\n").arg(S[0]).arg(S[1]).arg(S[2]);
                 LF_int(&LF, X, V);
                 qDebug() << QString("LF: %1\n").arg(LF);
-/
+*/
 //                makeLog(X, V, TF, dt);
 
 
@@ -641,7 +643,7 @@ main(int argc, char **argv)
                         V[i] *= vmul;
                         V[i+1] *= vmul;
                         V[i+2] *= vmul;
-/
+*/
                     }
                     else// if(pList.at(teloi)->interactionPermission!=Advisor::interactNONE)
                     {
@@ -701,7 +703,7 @@ main(int argc, char **argv)
 
     mpcFile.close();
     mpcFileM.close();
-/
+*/
     if(useMoody)
     {
         resmFileBig.close();
@@ -710,7 +712,7 @@ main(int argc, char **argv)
     }
 
     cudaDeviceReset();
-*/
+
     return 0;//exit(bTestResult ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 

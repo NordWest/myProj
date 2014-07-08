@@ -354,7 +354,9 @@ runSumm(void)
 
 __global__ void test_force_GN_kernel(double X[], double V[], double F[], int numElements)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int i;
+    //i = blockDim.x * blockIdx.x + threadIdx.x;
+    i = threadIdx.x;
 
     int teloi=i/3;
     if (i < numElements)
@@ -376,6 +378,8 @@ extern "C" void test_force_GN_CU(double X[], double V[], double F[])
 
   // Allocate the device input vector A
   size_t size = Ni * sizeof(double);
+
+
   double *d_X = NULL;
   err = cudaMalloc((void **)&d_X, size);
 
@@ -447,17 +451,27 @@ extern "C" void test_force_GN_CU(double X[], double V[], double F[])
       exit(EXIT_FAILURE);
   }
 
+  printf("test_force_GN_kernel\n");
   int numBlocks = 1;
 //  dim3 threadsPerBlock(Ni, Ni);
-  test_force_GN_kernel<<<numBlocks, Ni>>>(d_X, d_V, d_F, Ni);
+  test_force_GN_kernel<<<1, Ni>>>(d_X, d_V, d_F, Ni);
 
   //double *FS = new double[iNum];
+  printf("Copy output data from the CUDA device to the host memory\n");
+  err = cudaMemcpy(F, d_F, size, cudaMemcpyDeviceToHost);
 
-  for(i=0;i<iNum;i++)
+  if (err != cudaSuccess)
   {
-      printf("F[%d]: %f ?= %f\n", i, d_F[i], X[i]*V[i]);
+      fprintf(stderr, "Failed to copy vector C from device to host (error code %s)!\n", cudaGetErrorString(err));
+      exit(EXIT_FAILURE);
+  }
+
+  for(i=0;i<Ni;i++)
+  {
+      printf("F[%d]: %f ?= %f\n", i, F[i], X[i]*V[i]);
 
   }
+
 
   // Free device global memory
   err = cudaFree(d_X);
@@ -489,4 +503,5 @@ extern "C" void test_force_GN_CU(double X[], double V[], double F[])
       fprintf(stderr, "Failed to free device vector Mass (error code %s)!\n", cudaGetErrorString(err));
       exit(EXIT_FAILURE);
   }
+
 }
