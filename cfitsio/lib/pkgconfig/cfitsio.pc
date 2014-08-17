@@ -1,0 +1,11 @@
+prefix=/home/nuts/Work/gitprojSF/cfitsio
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: cfitsio
+Description: FITS File Subroutine Library
+Version: 3.30
+Libs: -L${libdir} -lcfitsio 
+Libs.private: -lm
+Cflags: -I${includedir}
